@@ -384,6 +384,17 @@ describe('listing factory demo data', () => {
     expect(source).toContain('合作者演示版');
     expect(source).toContain('朋友试用版');
     expect(source).toContain('Variant 不是换颜色');
+    expect(source).toContain('Mobile Capability Strip');
+    expect(source).toContain('移动端介绍要讲清楚的六个能力');
+    expect(source).toContain('全网灵感管理');
+    expect(source).toContain('热门视频解析');
+    expect(source).toContain('批量混剪');
+    expect(source).toContain('矩阵宝 / PubPal');
+    expect(source).toContain('广告投放');
+    expect(source).toContain('企业数据安全');
+    expect(source).toContain('内部可用');
+    expect(source).toContain('外部门禁');
+    expect(source).toContain('避免把竞品级规模能力误写成当前已商用');
     expect(source).toContain('内部继续做');
     expect(source).toContain('外部接入后做');
     expect(source).toContain('现在不能宣称');

@@ -87,6 +87,45 @@ const FACTORY_READINESS_SLICES = [
   },
 ];
 
+const MOBILE_CAPABILITY_STRIPS = [
+  {
+    title: '全网灵感管理',
+    layer: 'Compose',
+    internal: '竞品账号、榜单、视频拆解、Hook Bank 和品牌学习已经能落到创意账本。',
+    external: '持续全网采集需要授权账号源、榜单源和多模态解析 provider。',
+  },
+  {
+    title: '热门视频解析',
+    layer: 'Compose / Cut',
+    internal: '可沉淀 hook、scene beat、proof point、CTA、风险边界和可混剪素材需求。',
+    external: '真实持续解析需要合法视频源、下载/存储权限和视频理解 provider。',
+  },
+  {
+    title: '批量混剪',
+    layer: 'Cut',
+    internal: '已能生成 15s / 30s / 45s 剪辑包、人工试跑 Runbook 和成片回灌链路。',
+    external: '自动批量出片需要剪辑/渲染 provider、素材授权、音频/字体授权和回调。',
+  },
+  {
+    title: '矩阵宝 / PubPal',
+    layer: 'Cast',
+    internal: '账号矩阵、发布槽位、dispatch、证据链接和手工回流门禁已经建好。',
+    external: '真实矩阵发布需要平台 OAuth、上传发布权限、频率限制和平台回执。',
+  },
+  {
+    title: '广告投放',
+    layer: 'Cast',
+    internal: 'campaign ledger、预算门槛、素材绑定、停止条件和表现回流字段已经就绪。',
+    external: '自动投放与优化需要广告账户授权、广告主 ID、测试预算和转化事件。',
+  },
+  {
+    title: '企业数据安全',
+    layer: 'Manage',
+    internal: 'RBAC、DLP、水印、留存、访问审计和客户 review 写回已经进入账本。',
+    external: '真实企业云资产需要对象存储、签名 URL、团队空间和下载/share enforcement。',
+  },
+];
+
 export default function FactoryPage() {
   return (
     <main>
@@ -149,6 +188,30 @@ export default function FactoryPage() {
                 </ul>
               </div>
             ))}
+          </div>
+
+          <div className="mt-6 rounded-md border border-white/10 bg-white/[0.045] p-4">
+            <div className="flex flex-col gap-2 md:flex-row md:items-end md:justify-between">
+              <div>
+                <div className="text-[11px] font-black uppercase tracking-[0.22em] text-white/45">Mobile Capability Strip</div>
+                <h2 className="mt-1 text-2xl font-black">移动端介绍要讲清楚的六个能力</h2>
+              </div>
+              <p className="max-w-xl text-[12px] leading-6 text-white/60">
+                这些是对外最容易被理解的入口：能展示内部闭环，但每张卡都必须带外部门禁，避免把竞品级规模能力误写成当前已商用。
+              </p>
+            </div>
+            <div className="mt-4 grid gap-3 md:grid-cols-2 xl:grid-cols-3">
+              {MOBILE_CAPABILITY_STRIPS.map(item => (
+                <article className="rounded-md border border-white/10 bg-slate-900/80 p-4" key={item.title}>
+                  <div className="flex items-start justify-between gap-3">
+                    <div className="text-[15px] font-black text-white">{item.title}</div>
+                    <span className="rounded-sm border border-amber-200/30 px-2 py-1 text-[10px] font-black uppercase text-amber-100">{item.layer}</span>
+                  </div>
+                  <p className="mt-3 text-[12px] leading-5 text-emerald-100/85">内部可用：{item.internal}</p>
+                  <p className="mt-2 text-[12px] leading-5 text-amber-100/85">外部门禁：{item.external}</p>
+                </article>
+              ))}
+            </div>
           </div>
 
           <div className="mt-6 grid gap-3 md:grid-cols-5">
