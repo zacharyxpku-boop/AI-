@@ -487,6 +487,67 @@ const COMPETITOR_REFERENCE_RADAR = [
   },
 ];
 
+const FINAL_PRODUCT_BLUEPRINT = [
+  {
+    layer: 'Compose',
+    target: '全网灵感管理、竞品账号追踪、热门视频解析、Hook Bank、品牌学习档案。',
+    internalMove: '继续加厚 creative monitoring、source sync、hook/pacing 结构、action queue 和下一轮生产约束。',
+    externalNeed: '公开榜单源、授权账号观察、视频解析 provider 或可审计的人工导入源。',
+    stopLine: '没有持续来源和解析证据前，只能说“洞察账本”，不能说“全网灵感平台”。',
+  },
+  {
+    layer: 'Create',
+    target: '从商品/Brief 到脚本、素材、生产 handoff、一键生成任务和客户可验收交付物。',
+    internalMove: '继续把资产库、脚本、provider request、生产结果、客户审核和 CRM handoff 串成同一条任务线。',
+    externalNeed: '图像/视频生成 provider、对象存储、正式域名和客户可访问交付链接。',
+    stopLine: '没有真实 provider 成功回调和可打开交付物前，不能说“自动生成已商用”。',
+  },
+  {
+    layer: 'Cut',
+    target: 'AI 视频分析、结构拆解、智能混剪、版本对比、批量成片和复盘回流。',
+    internalMove: '继续补视频任务队列、cut plan、素材切片字段、客户 review 和表现回流。',
+    externalNeed: '多模态视频分析、剪辑/渲染 provider、转码存储和失败重试队列。',
+    stopLine: '没有真实成片与多版本渲染证据前，只能说“工作流就绪”，不能说“智能混剪可用到筷子水平”。',
+  },
+  {
+    layer: 'Cast',
+    target: '多平台分发、PubPal/矩阵分发、广告投放、预算门禁、发布证据和 analytics sync。',
+    internalMove: '继续强化账号矩阵、发布槽位、dispatch handoff、campaign ledger、UTM 和表现导入。',
+    externalNeed: 'TikTok/Meta/Google/小红书等平台 OAuth、广告账户授权、自动发布权限和转化事件。',
+    stopLine: '没有平台授权和发布/投放回执前，不能展示已自动分发或已自动优化广告。',
+  },
+  {
+    layer: 'Manage',
+    target: '企业数据安全、权限/RBAC、审计、客户审核、CRM 交接、状态验收和规模数字保护。',
+    internalMove: '继续把 review token、写回回执、资产权限、DLP、水印、留存和 readiness 接到每条交付物。',
+    externalNeed: '企业云资产、签名 URL、团队空间、正式 CRM/合同/付款系统和审计材料。',
+    stopLine: '91M+ creative output、42M+ video distribution 只能作为竞品 benchmark，不能作为 Wenai 自有规模。',
+  },
+];
+
+const ALTERNATIVE_PLATFORM_REFERENCES = [
+  {
+    name: 'Hooksy / Hooked',
+    reference: '广告库、品牌追踪、脚本提取、hook patterns、产品图到短视频和 UGC 广告批量生成。',
+    wenaiDecision: '把 Compose 和 Cut 合并成“从胜出广告结构到可复用视频任务”的闭环，而不是只生成单条素材。',
+  },
+  {
+    name: 'Omneky',
+    reference: '跨平台 campaign launcher、creative testing、brand-safe generation、creative analytics 和优化建议。',
+    wenaiDecision: 'Cast 必须带 campaign ledger、素材标签、预算证据和表现回流，才能从内容工具变成增长系统。',
+  },
+  {
+    name: 'AdHawk / AI Media Buyer',
+    reference: '围绕广告账户持续优化：目标、预算、投放、异常、转化和收益都要进入自动决策。',
+    wenaiDecision: '广告投放先做门禁和审计，等账号授权后再开放自动调预算、暂停疲劳素材和放量建议。',
+  },
+  {
+    name: 'Hookshot',
+    reference: '受治理的 AI agents：先预演、再执行、全程留痕，失败或跳过也要可审计。',
+    wenaiDecision: 'Wenai 的 action queue 和 readiness 需要记录“做了/没做/为什么没做”，防止 agent 直接碰生产系统。',
+  },
+];
+
 const MANAGE_ACCEPTANCE_BOARD = [
   {
     stage: 'Readiness 验收',
@@ -689,6 +750,59 @@ export default function StatusPage() {
                 <div className="text-[11px] font-semibold text-text-primary">{item.name}</div>
                 <p className="mt-1 text-[10px] leading-relaxed text-text-secondary">{item.lesson}</p>
                 <p className="mt-2 text-[10px] leading-relaxed text-success">Wenai 迈进：{item.wenaiMove}</p>
+              </div>
+            ))}
+          </div>
+        </div>
+        <div className="mt-4 rounded-md border border-border-subtle bg-bg-root/50 p-3">
+          <div className="mb-2 flex flex-col gap-1 md:flex-row md:items-center md:justify-between">
+            <div className="text-[10px] font-mono uppercase tracking-wider text-text-tertiary">
+              最终产品形态蓝图
+            </div>
+            <div className="text-[10px] font-mono text-accent">
+              内部继续补厚；外部材料接齐后才开放平台级承诺
+            </div>
+          </div>
+          <div className="grid grid-cols-1 gap-2">
+            {FINAL_PRODUCT_BLUEPRINT.map(item => (
+              <div key={item.layer} className="rounded-md border border-border-subtle/70 bg-bg-surface/40 px-3 py-3">
+                <div className="flex flex-col gap-1 md:flex-row md:items-start md:justify-between">
+                  <div className="text-[12px] font-semibold text-text-primary">{item.layer}</div>
+                  <div className="text-[10px] leading-relaxed text-text-secondary md:max-w-[76%]">{item.target}</div>
+                </div>
+                <div className="mt-3 grid grid-cols-1 gap-2 md:grid-cols-3">
+                  <div className="rounded border border-success/20 bg-success/5 px-3 py-2">
+                    <div className="text-[10px] font-semibold text-success">Wenai 内部继续做</div>
+                    <p className="mt-1 text-[10px] leading-relaxed text-text-secondary">{item.internalMove}</p>
+                  </div>
+                  <div className="rounded border border-accent/20 bg-accent/5 px-3 py-2">
+                    <div className="text-[10px] font-semibold text-accent">需要你统一提供/授权</div>
+                    <p className="mt-1 text-[10px] leading-relaxed text-text-secondary">{item.externalNeed}</p>
+                  </div>
+                  <div className="rounded border border-error/20 bg-error/5 px-3 py-2">
+                    <div className="text-[10px] font-semibold text-error">当前停止线</div>
+                    <p className="mt-1 text-[10px] leading-relaxed text-text-secondary">{item.stopLine}</p>
+                  </div>
+                </div>
+              </div>
+            ))}
+          </div>
+        </div>
+        <div className="mt-4 rounded-md border border-border-subtle bg-bg-root/50 p-3">
+          <div className="mb-2 flex flex-col gap-1 md:flex-row md:items-center md:justify-between">
+            <div className="text-[10px] font-mono uppercase tracking-wider text-text-tertiary">
+              筷子之外参考
+            </div>
+            <div className="text-[10px] font-mono text-accent">
+              参考能力，不复制宣称；转成 Wenai 可验收路线
+            </div>
+          </div>
+          <div className="grid grid-cols-1 gap-2 md:grid-cols-2">
+            {ALTERNATIVE_PLATFORM_REFERENCES.map(item => (
+              <div key={item.name} className="rounded-md border border-border-subtle/70 bg-bg-surface/40 px-3 py-3">
+                <div className="text-[11px] font-semibold text-text-primary">{item.name}</div>
+                <p className="mt-1 text-[10px] leading-relaxed text-text-secondary">{item.reference}</p>
+                <p className="mt-2 text-[10px] leading-relaxed text-success">Wenai 决策：{item.wenaiDecision}</p>
               </div>
             ))}
           </div>
