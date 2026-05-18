@@ -29,6 +29,13 @@ describe('creative monitoring console page', () => {
     expect(html).toContain('Hook Bank');
     expect(html).toContain('UGC Script Spine');
     expect(html).toContain('Offer Test Matrix');
+    expect(html).toContain('Compose Intelligence Stack');
+    expect(html).toContain('全网灵感管理');
+    expect(html).toContain('热门视频解析');
+    expect(html).toContain('把灵感、视频、Hook 和投放假设串成一条生产约束链');
+    expect(html).toContain('不是只保存素材');
+    expect(html).toContain('内部可做');
+    expect(html).toContain('外部需要');
     expect(html).toContain('creative-launch');
   });
 
@@ -47,6 +54,10 @@ describe('creative monitoring console page', () => {
     expect(html).toContain('只导入公开可用或已授权观察');
     expect(html).toContain('只复用结构和验证逻辑');
     expect(html).toContain('没有广告账户和 analytics sync 前，只能生成投放方案');
+    expect(html).toContain('平台授权、榜单/视频数据源、合法抓取或官方 API');
+    expect(html).toContain('多模态视频解析 provider、素材授权、下载/存储权限');
+    expect(html).toContain('投放回流和真实转化数据，验证哪个 hook 真正胜出');
+    expect(html).toContain('广告账户授权、自动建计划、平台 analytics sync');
     expect(html).toContain('开头钩子');
     expect(html).toContain('空结果只记录缺口，不生成洞察');
     expect(html).toContain('当前继续走人工运营回灌，不假装已完成未授权自动抓取。');

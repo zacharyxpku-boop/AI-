@@ -119,6 +119,37 @@ const HOOKSHOT_STYLE_PLAYBOOK = [
   },
 ];
 
+const COMPOSE_INTELLIGENCE_STACK = [
+  {
+    stage: '全网灵感管理',
+    input: '竞品账号、公开榜单、授权视频链接、客户历史素材和运营手工观察',
+    output: '统一沉淀到 insight ledger，保留来源、证据、风险边界和可复用角度',
+    internal: '内部可做：手动导入、周期任务、证据字段、缺口记录、机会地图',
+    external: '外部需要：平台授权、榜单/视频数据源、合法抓取或官方 API',
+  },
+  {
+    stage: '热门视频解析',
+    input: '视频 URL、转写摘要、画面节奏、字幕、物体、评论区需求和互动指标',
+    output: '拆成 hook、scene beats、proof point、CTA、风险表达和可混剪素材需求',
+    internal: '内部可做：解析结果回灌、结构化字段、脚本约束和视频队列交接',
+    external: '外部需要：多模态视频解析 provider、素材授权、下载/存储权限',
+  },
+  {
+    stage: 'Hook Bank',
+    input: '前三秒钩子、反差句、痛点开场、结果承诺、价格锚点和信任背书',
+    output: '生成可 A/B 测的中文脚本开头，并写入品牌学习档案',
+    internal: '内部可做：结构复用、禁用表达、胜出模式沉淀、下一轮 Brief 约束',
+    external: '外部需要：投放回流和真实转化数据，验证哪个 hook 真正胜出',
+  },
+  {
+    stage: 'Offer Test Matrix',
+    input: '折扣、套装、赠品、稀缺性、达人背书、节日节点和平台活动',
+    output: '变成分发计划、广告假设、预算门槛、停止条件和复盘口径',
+    internal: '内部可做：广告 campaign ledger、dispatch gate、表现 CSV 回流',
+    external: '外部需要：广告账户授权、自动建计划、平台 analytics sync',
+  },
+];
+
 function typeLabel(type: CreativeMonitorType) {
   return TYPE_LABELS[type] || type;
 }
@@ -424,6 +455,31 @@ export function CreativeMonitoringConsoleClient({ initialProjectId = 'default-pr
                 <div className="mt-2 text-xs leading-5 text-white/65">输入信号：{item.signal}</div>
                 <div className="mt-2 text-xs leading-5 text-emerald-200">Wenai 输出：{item.output}</div>
                 <div className="mt-2 text-xs leading-5 text-amber-100">边界：{item.guardrail}</div>
+              </article>
+            ))}
+          </div>
+        </section>
+
+        <section className="border border-white/10 bg-white/[0.035] p-5">
+          <div className="flex flex-col gap-2 sm:flex-row sm:items-start sm:justify-between">
+            <div>
+              <p className="text-xs uppercase tracking-[0.22em] text-emerald-200">Compose Intelligence Stack</p>
+              <h2 className="mt-2 text-xl font-semibold">把灵感、视频、Hook 和投放假设串成一条生产约束链</h2>
+            </div>
+            <p className="max-w-md text-xs leading-5 text-white/55">
+              这层是 Wenai 的护城河入口：不是只保存素材，而是把每个外部信号转成可复用结构、品牌记忆和下一轮视频/分发动作。没有真实 provider 的部分继续标成外部门禁。
+            </p>
+          </div>
+          <div className="mt-4 grid gap-3 lg:grid-cols-4">
+            {COMPOSE_INTELLIGENCE_STACK.map(item => (
+              <article className="border border-white/10 bg-black/20 p-4" key={item.stage}>
+                <div className="text-sm font-semibold text-white">{item.stage}</div>
+                <div className="mt-3 space-y-2 text-xs leading-5">
+                  <p className="text-white/60"><span className="text-white/90">输入：</span>{item.input}</p>
+                  <p className="text-emerald-200"><span className="text-white/90">输出：</span>{item.output}</p>
+                  <p className="text-white/55"><span className="text-white/90">内部：</span>{item.internal}</p>
+                  <p className="text-amber-100"><span className="text-white/90">外部：</span>{item.external}</p>
+                </div>
               </article>
             ))}
           </div>
