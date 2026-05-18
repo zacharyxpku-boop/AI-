@@ -135,6 +135,27 @@ function operationClosureCards(operation: OneClickVideoOperationResult) {
   }];
 }
 
+const MIXCUT_OPERATION_BOARD = [
+  {
+    title: 'Hook Bank 入场',
+    input: '来自创意工厂的开头钩子、痛点句、证据点和可复用角度',
+    action: '生成 3 秒开场、字幕节奏、首屏镜头和平台差异化钩子',
+    gate: '没有授权参考视频时，只能复用结构，不能复制画面、原句或素材表达',
+  },
+  {
+    title: 'UGC Script Spine 成片',
+    input: '真人口播骨架、产品使用场景、前后对比和 CTA',
+    action: '拆成 15s / 30s / 45s 三档剪辑包，进入供应商或剪辑师交接',
+    gate: '需要视频 provider、产品素材 URL、生成授权和回调配置后，才能自动产出成片',
+  },
+  {
+    title: 'Offer Test Matrix 分发',
+    input: '折扣、套装、赠品、信任背书、平台活动和目标受众',
+    action: '写入分发计划、dispatch、广告假设、停止条件和表现回流字段',
+    gate: '没有平台 OAuth、广告账户和 analytics sync 前，只能做计划与手工回灌',
+  },
+];
+
 export function VideoProductionQueueClient({
   initialProjectId = 'default-project',
   initialQueue = null,
@@ -344,6 +365,28 @@ export function VideoProductionQueueClient({
             </div>
           </section>
         ) : null}
+
+        <section className="border border-emerald-300/20 bg-emerald-300/[0.055] p-5">
+          <div className="flex flex-col gap-2 sm:flex-row sm:items-start sm:justify-between">
+            <div>
+              <p className="text-xs uppercase tracking-[0.22em] text-emerald-200">Cut / One-click Video Board</p>
+              <h2 className="mt-2 text-xl font-semibold">从 Hook 结构库到智能混剪包</h2>
+            </div>
+            <div className="max-w-sm text-xs leading-5 text-emerald-100/80">
+              这层承接创意工厂，不把“创建任务”说成“自动成片”。只有 provider、素材授权、平台账号和回流都接上，才进入真实规模化视频工厂。
+            </div>
+          </div>
+          <div className="mt-4 grid gap-3 lg:grid-cols-3">
+            {MIXCUT_OPERATION_BOARD.map(item => (
+              <article className="border border-white/10 bg-black/20 p-4" key={item.title}>
+                <div className="text-sm font-semibold text-white">{item.title}</div>
+                <div className="mt-2 text-xs leading-5 text-white/65">输入：{item.input}</div>
+                <div className="mt-2 text-xs leading-5 text-emerald-200">动作：{item.action}</div>
+                <div className="mt-2 text-xs leading-5 text-amber-100">门禁：{item.gate}</div>
+              </article>
+            ))}
+          </div>
+        </section>
 
         <section className="grid gap-6 lg:grid-cols-[0.75fr_1.25fr]">
           <div className="space-y-5">

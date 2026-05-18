@@ -14,6 +14,10 @@ describe('video production queue page', () => {
 
     expect(html).toContain('视频生产队列');
     expect(html).toContain('智能混剪');
+    expect(html).toContain('从 Hook 结构库到智能混剪包');
+    expect(html).toContain('Hook Bank 入场');
+    expect(html).toContain('UGC Script Spine 成片');
+    expect(html).toContain('Offer Test Matrix 分发');
     expect(html).toContain('创建视频工作流');
     expect(html).toContain('创建任务并写入分发队列');
     expect(html).toContain('回灌成片并生成审核链接');
@@ -30,6 +34,8 @@ describe('video production queue page', () => {
     expect(html).toContain('服务时限');
     expect(html).toContain('正在加载');
     expect(html).toContain('不伪装自动生成');
+    expect(html).toContain('只有 provider、素材授权、平台账号和回流都接上');
+    expect(html).toContain('没有平台 OAuth、广告账户和 analytics sync 前，只能做计划与手工回灌');
     expect(html).toContain('成片 URL');
     expect(html).not.toContain('一键生成成片');
     expect(html).not.toContain('handoff_only');
