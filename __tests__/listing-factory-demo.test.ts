@@ -379,6 +379,16 @@ describe('listing factory demo data', () => {
     expect(source).toContain('增长工厂');
     expect(source).toContain('进入 Compose / Create / Cut / Cast / Manage 工作台');
     expect(source).toContain('内容工厂');
+    expect(source).toContain('UI Variant Workflow');
+    expect(source).toContain('工业运营版');
+    expect(source).toContain('合作者演示版');
+    expect(source).toContain('朋友试用版');
+    expect(source).toContain('Variant 不是换颜色');
+    expect(source).toContain('内部继续做');
+    expect(source).toContain('外部接入后做');
+    expect(source).toContain('现在不能宣称');
+    expect(source).toContain('91M+ 自有创意产出');
+    expect(source).toContain('42M+ 自有视频分发');
     expect(source).toContain('从 SKU 上新到创意、视频、分发、审核和回流的一张工作台');
     expect(source).toContain('Hookshot / Hookly');
     expect(source).toContain('Compose');
