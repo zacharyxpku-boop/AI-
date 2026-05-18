@@ -49,6 +49,37 @@ const EXTERNAL_SETUP_LANES = [
   },
 ];
 
+const CAST_OPERATING_BOARD = [
+  {
+    stage: '账号矩阵池',
+    goal: '把 TikTok Shop、Instagram、YouTube、Amazon、Shopify、Meta Ads 等账号纳入同一张账号健康账本。',
+    internal: 'Wenai 已有账号状态、授权状态、发布频率、风险状态、发布槽位和矩阵排班模型。',
+    external: '需要平台开发者应用、OAuth 回调白名单、测试账号、店铺/主页/广告主 ID。',
+    gate: '没有 oauth_ready 或 manual_ready 的账号，不能把任何 dispatch 标记为已发布。',
+  },
+  {
+    stage: 'PubPal 矩阵分发',
+    goal: '把同一条成片按账号池、平台规则、频率限制和内容去重策略排进发布队列。',
+    internal: 'Wenai 已有分发计划、dispatch、证据链接、失败重试、手工兜底和表现回流字段。',
+    external: '需要上传/发布权限、素材规格、平台审核规则、频率限制、沙盒发布权限。',
+    gate: '没有平台发布证据链接前，只能算 handoff，不能算自动发布或矩阵分发完成。',
+  },
+  {
+    stage: '广告投放',
+    goal: '把 Offer Test Matrix 变成真实 campaign：预算、素材、受众、停止条件、ROAS/转化回流。',
+    internal: 'Wenai 已有 campaign ledger、预算门槛、素材绑定、证据链接、回流门禁和风险检查。',
+    external: '需要广告账户、广告主 ID、创建权限、测试预算、sandbox 或可控测试 campaign。',
+    gate: '没有广告账户授权、预算和平台 campaign 证据，不能宣称自动投放或自动优化。',
+  },
+  {
+    stage: '表现自动同步',
+    goal: '把自然发布、广告投放、销售和互动指标同步回 Wenai，反哺 Compose / Cut 下一轮生产。',
+    internal: 'Wenai 已有 CSV/API 回流入口、字段映射、去重、归因窗口和品牌学习回写。',
+    external: '需要 analytics 权限、指标定义、同步频率、时区、归因规则和平台 API 配额。',
+    gate: '没有真实同步任务和回流证据，只能展示导入结果，不能展示平台自动优化结果。',
+  },
+];
+
 export default function KuaiziSettingsPage() {
   const [status, setStatus] = useState<KuaiziConnectionResult | null>(null);
   const [isTesting, setIsTesting] = useState(false);
@@ -116,6 +147,30 @@ export default function KuaiziSettingsPage() {
               发布前需要在服务端配置筷子科技应用密钥、连接环境和接口地址。当前状态不阻断 POC 演示，但不能承诺一键外部生产。
             </p>
           )}
+        </div>
+      </section>
+
+      <section className="mt-6 rounded-md border border-slate-200 bg-slate-950 p-6 text-white">
+        <div className="text-[12px] font-black tracking-wide text-amber-200">Cast Operating Board</div>
+        <h2 className="mt-2 text-2xl font-black">账号矩阵、PubPal 分发、广告投放和数据回流的统一门禁</h2>
+        <p className="mt-2 text-[13px] leading-6 text-white/65">
+          Cast 不是把内容“发出去”这么简单，而是把账号池、发布槽位、广告账户、证据链接和表现同步串成一个可审计闭环。内部账本已经能跑；外部 OAuth、发布权限、广告账户和 analytics sync 接齐后，才进入真实平台级执行。
+        </p>
+        <div className="mt-5 grid gap-3 md:grid-cols-2">
+          {CAST_OPERATING_BOARD.map(item => (
+            <article className="rounded-md border border-white/10 bg-white/[0.045] p-4" key={item.stage}>
+              <div className="flex flex-col gap-2 sm:flex-row sm:items-start sm:justify-between">
+                <div className="text-[15px] font-black">{item.stage}</div>
+                <div className="rounded-full border border-amber-200/30 px-3 py-1 text-[11px] font-black text-amber-100">provider-gated</div>
+              </div>
+              <div className="mt-3 space-y-2 text-[12px] leading-5">
+                <p className="text-white/65"><span className="font-black text-white">目标：</span>{item.goal}</p>
+                <p className="text-emerald-100"><span className="font-black text-white">内部：</span>{item.internal}</p>
+                <p className="text-amber-100"><span className="font-black text-white">外部：</span>{item.external}</p>
+                <p className="text-rose-100"><span className="font-black text-white">门禁：</span>{item.gate}</p>
+              </div>
+            </article>
+          ))}
         </div>
       </section>
 
