@@ -80,6 +80,63 @@ const CAST_OPERATING_BOARD = [
   },
 ];
 
+const PROVIDER_MATERIAL_PACKS = [
+  {
+    priority: 'P0',
+    pack: '视频生成 / 剪辑 provider 包',
+    why: '决定 Create 和 Cut 能不能从工作流骨架进入真实成片工厂。',
+    provideVia: '在部署平台配置服务端 secret；测试素材用沙盒项目或无敏感商品。',
+    materials: ['提交 endpoint', 'server token', 'webhook signing secret', 'sandbox task quota', '回调白名单', '成本上限'],
+    doNotSend: '不要把 provider token、cookie、后台登录态贴到聊天或浏览器 localStorage。',
+    acceptance: 'Wenai 能提交一条测试视频任务，收到签名回调，生成成片资产和客户审核链接。',
+  },
+  {
+    priority: 'P0',
+    pack: '平台 OAuth / 账号池授权包',
+    why: '决定 Cast 能不能从 manual handoff 进入真实矩阵账号运营。',
+    provideVia: '平台开发者后台创建 app，并把 Wenai 回调地址加入白名单。',
+    materials: ['client id', 'client secret', 'redirect URI', '测试账号授权', '店铺/主页/账号 ID', '发布频率限制'],
+    doNotSend: '不要提供个人主账号密码；只给可撤销 app 授权或测试账号授权。',
+    acceptance: '至少一个平台账号完成授权，账号状态进入 oauth_ready，并能被分发门禁读取。',
+  },
+  {
+    priority: 'P0',
+    pack: '广告账户 / Campaign 包',
+    why: '决定广告投放是否能从 campaign ledger 进入真实预算和素材实验。',
+    provideVia: '广告平台授权测试广告主，先用 sandbox 或小预算白名单 campaign。',
+    materials: ['广告主 ID', '广告账户 ID', '创建/读取权限', '测试预算', '转化事件', '停投规则'],
+    doNotSend: '不要开放无限预算或生产账户全权限；先用最小权限和预算上限。',
+    acceptance: 'Wenai 能读取或创建测试 campaign，并把 spend、impression、click、conversion 写回表现回流。',
+  },
+  {
+    priority: 'P1',
+    pack: 'Analytics sync / 回流包',
+    why: '决定 Compose 和 Cut 能不能靠真实表现数据复利，而不是靠人工判断。',
+    provideVia: '平台 analytics API 或定时导出任务，字段先做只读同步。',
+    materials: ['平台 account id', 'metric mapping', 'sync frequency', 'timezone', 'attribution window', 'API quota'],
+    doNotSend: '不要混用多个平台口径；每个平台要明确指标定义和归因窗口。',
+    acceptance: 'Wenai 能同步一段测试表现，去重后更新素材表现、品牌学习和下一轮创意建议。',
+  },
+  {
+    priority: 'P1',
+    pack: '企业云资产 / 权限包',
+    why: '决定 Manage 能不能从内部 RBAC 模型进入真实企业云盘和审计。',
+    provideVia: '对象存储或企业网盘项目授权，先给单独 bucket/project 和服务账号。',
+    materials: ['bucket/project', 'service account', 'signed URL policy', 'team roles', 'DLP/watermark rules', 'retention policy'],
+    doNotSend: '不要把生产客户全量云盘直接授权；先用独立空间和最小权限。',
+    acceptance: '同一资产对客户、运营、分发角色返回不同权限结果，并写入可追踪审计。',
+  },
+  {
+    priority: 'P1',
+    pack: '规模数字审计包',
+    why: '决定 91M+ / 42M+ 何时能从竞品 benchmark 变成 Wenai 自有规模指标。',
+    provideVia: '只接受可审计来源、日期范围、去重规则和平台回执，不接受口头估算。',
+    materials: ['creative output ledger', 'video distribution ledger', 'platform evidence URL', 'date range', 'dedupe rule', 'auditor note'],
+    doNotSend: '不要把竞品公开数字写成 Wenai 自有成绩；没有审计前继续显示 benchmark。',
+    acceptance: '规模数字能追溯到 Wenai 自有账本、平台回执和日期范围，页面才允许展示自有规模。',
+  },
+];
+
 export default function KuaiziSettingsPage() {
   const [status, setStatus] = useState<KuaiziConnectionResult | null>(null);
   const [isTesting, setIsTesting] = useState(false);
@@ -194,6 +251,46 @@ export default function KuaiziSettingsPage() {
                 <SetupColumn label="Wenai 可配置" value={lane.wenaiCanDo} />
                 <SetupColumn label="需要你提供" value={lane.youProvide} />
                 <SetupColumn label="验收口径" value={lane.acceptance} />
+              </div>
+            </article>
+          ))}
+        </div>
+      </section>
+
+      <section className="mt-6 rounded-md border border-slate-200 bg-white p-6">
+        <div className="text-[12px] font-black tracking-wide text-sky-700">外部材料包</div>
+        <h2 className="mt-2 text-2xl font-black text-slate-950">你给材料，我按验收口径接；没有材料就保持门禁</h2>
+        <p className="mt-2 text-[13px] leading-6 text-slate-600">
+          这张清单把“需要外部能力”拆成可执行交付物。P0 先打通真实生成、真实账号和真实广告；P1 再补自动回流、企业云资产和自有规模审计。任何 secret 都只进入服务端环境或部署平台，不进入仓库、不进入浏览器、不进入报告。
+        </p>
+        <div className="mt-5 grid gap-3">
+          {PROVIDER_MATERIAL_PACKS.map(pack => (
+            <article className="rounded-md border border-slate-200 bg-slate-50 p-4" key={pack.pack}>
+              <div className="flex flex-col gap-2 sm:flex-row sm:items-start sm:justify-between">
+                <div>
+                  <div className="text-[14px] font-black text-slate-950">{pack.pack}</div>
+                  <p className="mt-1 text-[12px] leading-5 text-slate-600">{pack.why}</p>
+                </div>
+                <div className={`w-fit rounded-full border px-3 py-1 text-[11px] font-black ${pack.priority === 'P0' ? 'border-rose-200 bg-rose-50 text-rose-700' : 'border-sky-200 bg-sky-50 text-sky-700'}`}>
+                  {pack.priority}
+                </div>
+              </div>
+              <div className="mt-3 grid gap-3 md:grid-cols-[0.9fr_1.1fr_1fr]">
+                <SetupColumn label="交付方式" value={pack.provideVia} />
+                <div>
+                  <div className="text-[11px] font-black text-slate-500">材料清单</div>
+                  <div className="mt-2 flex flex-wrap gap-2">
+                    {pack.materials.map(item => (
+                      <span className="rounded-full border border-slate-200 bg-white px-2 py-1 text-[11px] font-semibold text-slate-700" key={item}>
+                        {item}
+                      </span>
+                    ))}
+                  </div>
+                </div>
+                <SetupColumn label="验收证据" value={pack.acceptance} />
+              </div>
+              <div className="mt-3 rounded-md border border-amber-200 bg-amber-50 px-3 py-2 text-[12px] leading-5 text-amber-800">
+                安全边界：{pack.doNotSend}
               </div>
             </article>
           ))}
