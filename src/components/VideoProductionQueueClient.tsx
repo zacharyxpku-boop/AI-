@@ -135,6 +135,53 @@ function operationClosureCards(operation: OneClickVideoOperationResult) {
   }];
 }
 
+function manualTrialRunbook(item: VideoProductionQueue['items'][number]) {
+  const hasResult = item.resultAssetCount > 0;
+  const hasReview = item.clientReviewAssetCount > 0 || item.reviewLinks.length > 0;
+  const hasApproval = item.approvedDeliverableCount > 0;
+  const hasPerformance = item.measuredDispatchCount > 0;
+
+  return [
+    {
+      title: '导出剪辑交接包',
+      state: item.remixPlan.length > 0 ? '已就绪' : '待补剪辑计划',
+      detail: item.remixPlan.length > 0
+        ? '已有 Hook、镜头顺序、素材说明、平台适配和风险边界，可交给剪辑师或 provider。'
+        : '先补 Hook Bank、脚本骨架和平台时长规则，避免只给一句模糊需求。',
+    },
+    {
+      title: '人工/供应商执行',
+      state: item.mode === 'provider_ready' ? '可走 provider' : '人工交接',
+      detail: item.mode === 'provider_ready'
+        ? 'provider gate 已满足，可进入自动提交或供应商队列。'
+        : '外部 token 未接齐时，按交接包人工剪辑；不要宣称自动成片。',
+    },
+    {
+      title: '成片回灌',
+      state: hasResult ? '已回写' : '待回写',
+      detail: hasResult
+        ? '成片 URL 已进入生产结果，可继续客户审核或分发。'
+        : '剪辑完成后在本页写入成片 URL，系统会生成客户审核链接。',
+    },
+    {
+      title: '客户审核',
+      state: hasApproval ? '已批准' : hasReview ? '审核中' : '待创建',
+      detail: hasApproval
+        ? '客户批准已写回生产链路。'
+        : hasReview
+          ? '客户可通过 review 链接反馈或批准。'
+          : '成片回灌后必须创建 review 链接，不能只在聊天里确认。',
+    },
+    {
+      title: '分发与回流',
+      state: hasPerformance ? '已回流' : '待发布证据',
+      detail: hasPerformance
+        ? '表现数据已回到队列，可进入复盘和下一轮创意。'
+        : '发布或投放后补平台证据和表现数据；没有 OAuth 前保持手工回流。',
+    },
+  ];
+}
+
 const MIXCUT_OPERATION_BOARD = [
   {
     title: 'Hook Bank 入场',
@@ -582,6 +629,21 @@ export function VideoProductionQueueClient({
                       {item.resultUrls.map(url => <div className="truncate text-xs text-white/60" key={url}>结果：{url}</div>)}
                     </div>
                   ) : null}
+                  <div className="mt-3 border border-sky-300/20 bg-sky-950/20 p-3">
+                    <div className="flex flex-col gap-1 sm:flex-row sm:items-start sm:justify-between">
+                      <div className="text-xs font-semibold text-sky-100">人工成片试跑 Runbook</div>
+                      <div className="text-[11px] leading-5 text-sky-100/65">不等 provider，也能把 Clico 式交付链路跑完</div>
+                    </div>
+                    <div className="mt-3 grid gap-2 md:grid-cols-5">
+                      {manualTrialRunbook(item).map(step => (
+                        <div className="border border-sky-300/15 bg-black/20 px-3 py-2" key={step.title}>
+                          <div className="text-xs font-semibold text-white/85">{step.title}</div>
+                          <div className="mt-1 w-fit border border-sky-200/20 px-2 py-0.5 text-[11px] text-sky-100/70">{step.state}</div>
+                          <div className="mt-2 text-xs leading-5 text-white/55">{step.detail}</div>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
                   {item.reviewLinks.length ? (
                     <div className="mt-3 space-y-1">
                       {item.reviewLinks.map(link => (

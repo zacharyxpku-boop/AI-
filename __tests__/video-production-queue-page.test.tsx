@@ -196,6 +196,18 @@ describe('video production queue page', () => {
 
     expect(html).toContain('生产交接包');
     expect(html).toContain('智能混剪计划');
+    expect(html).toContain('人工成片试跑 Runbook');
+    expect(html).toContain('不等 provider，也能把 Clico 式交付链路跑完');
+    expect(html).toContain('导出剪辑交接包');
+    expect(html).toContain('人工/供应商执行');
+    expect(html).toContain('成片回灌');
+    expect(html).toContain('客户审核');
+    expect(html).toContain('分发与回流');
+    expect(html).toContain('已有 Hook、镜头顺序、素材说明、平台适配和风险边界');
+    expect(html).toContain('外部 token 未接齐时，按交接包人工剪辑；不要宣称自动成片');
+    expect(html).toContain('剪辑完成后在本页写入成片 URL，系统会生成客户审核链接');
+    expect(html).toContain('成片回灌后必须创建 review 链接，不能只在聊天里确认');
+    expect(html).toContain('没有 OAuth 前保持手工回流');
     expect(html).toContain('TikTok Shop proof_test 变体');
     expect(html).toContain('创意机会');
     expect(html).toContain('Do not copy reference footage.');
