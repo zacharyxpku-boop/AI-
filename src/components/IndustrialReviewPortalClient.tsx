@@ -324,6 +324,25 @@ function clientHandoffCards(
   ];
 }
 
+const ZERO_EXPLANATION_REVIEW_STEPS = [
+  {
+    title: '先打开交付物',
+    body: '能播放、能下载或能预览，才进入下一步；打不开就直接反馈，不要批准。',
+  },
+  {
+    title: '只看四件事',
+    body: '商品信息、画面/文案、版本是否正确、目标平台是否适配。',
+  },
+  {
+    title: '有问题写具体',
+    body: '写清楚位置、原因和希望怎么改，反馈会写回生产链路。',
+  },
+  {
+    title: '确认无误再批准',
+    body: '批准会锁定本链接，并进入分发、CRM 交接和表现回流。',
+  },
+];
+
 export function IndustrialReviewPortalClient({
   token,
   initialPayload = null,
@@ -466,6 +485,26 @@ export function IndustrialReviewPortalClient({
               </div>
             </div>
           ) : null}
+          <div className="border border-emerald-300/20 bg-emerald-950/20 px-4 py-3">
+            <div className="flex flex-col gap-1 sm:flex-row sm:items-center sm:justify-between">
+              <div>
+                <div className="text-xs font-semibold text-emerald-100/70">零解释验收流程</div>
+                <div className="mt-1 text-sm font-semibold text-emerald-50">不懂生产链路也能独立完成审核</div>
+              </div>
+              <div className="text-xs leading-5 text-emerald-100/70">
+                这页只让客户做两件事：反馈或批准；其他交接由系统和运营承接。
+              </div>
+            </div>
+            <div className="mt-3 grid gap-2 sm:grid-cols-4">
+              {ZERO_EXPLANATION_REVIEW_STEPS.map((item, index) => (
+                <div className="border border-emerald-300/15 bg-black/15 px-3 py-2" key={item.title}>
+                  <div className="text-[11px] font-semibold text-emerald-100/60">0{index + 1}</div>
+                  <div className="mt-1 text-xs font-semibold text-emerald-50">{item.title}</div>
+                  <div className="mt-1 text-xs leading-5 text-emerald-100/70">{item.body}</div>
+                </div>
+              ))}
+            </div>
+          </div>
           {clientDecision ? (
             <div className={`border px-4 py-3 ${decisionStateClass(clientDecision.primaryActionState)}`}>
               <div className="flex flex-col gap-2 sm:flex-row sm:items-start sm:justify-between">

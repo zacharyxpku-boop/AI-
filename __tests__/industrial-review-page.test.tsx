@@ -21,6 +21,8 @@ describe('industrial review page', () => {
     expect(html).toContain('提交反馈');
     expect(html).toContain('没有找到这条审核链接');
     expect(html).toContain('客户验收清单');
+    expect(html).toContain('零解释验收流程');
+    expect(html).toContain('不懂生产链路也能独立完成审核');
     expect(html).toContain('审核链接尚未加载');
     expect(html).toContain('下一步');
     expect(html).toContain('确认链接');
@@ -96,6 +98,11 @@ describe('industrial review page', () => {
     expect(html).toContain('如果看不懂或打不开时，请先提交问题反馈');
     expect(html).toContain('不要勉强批准');
     expect(html).toContain('客户当前应该做什么');
+    expect(html).toContain('这页只让客户做两件事：反馈或批准');
+    expect(html).toContain('先打开交付物');
+    expect(html).toContain('只看四件事');
+    expect(html).toContain('有问题写具体');
+    expect(html).toContain('确认无误再批准');
     expect(html).toContain('确认无误后批准');
     expect(html).toContain('可以批准');
     expect(html).toContain('运营下一步');
