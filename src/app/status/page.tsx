@@ -65,12 +65,41 @@ interface ScaleClaimGuard {
   requiredEvidence: string[];
 }
 
+interface ProductCapabilityLayer {
+  id: 'Compose' | 'Create' | 'Cut' | 'Cast' | 'Manage';
+  target: string;
+  currentStatus: ReadinessFeature['status'];
+  internalCapability: string;
+  externalGate: string;
+  stopLine: string;
+  evidence: string;
+}
+
+interface AlternativeCompetitorReference {
+  name: string;
+  pattern: string;
+  wenaiDecision: string;
+  boundary: string;
+}
+
+interface ProductUiVariantGuide {
+  id: 'partner' | 'operator' | 'friend_trial';
+  label: string;
+  audience: string;
+  firstScreen: string;
+  primaryAction: string;
+  stopLine: string;
+}
+
 interface ReadinessResponse {
   projectId?: string;
   report: {
     verdict: 'pass' | 'conditional' | 'fail';
     label: string;
     score: number;
+    productBlueprint?: ProductCapabilityLayer[];
+    alternativeReferences?: AlternativeCompetitorReference[];
+    uiVariants?: ProductUiVariantGuide[];
     features: ReadinessFeature[];
     workflows: ReadinessWorkflow[];
     issues: ReadinessIssue[];
@@ -429,7 +458,7 @@ function overallLabel(status: HealthResponse['overall']) {
   return '核心服务不可用，需要立即处理';
 }
 
-type StatusUiVariant = 'stable' | 'industrial' | 'partner';
+type StatusUiVariant = string;
 
 const STATUS_UI_VARIANTS: Array<{
   id: StatusUiVariant;
@@ -548,6 +577,51 @@ const ALTERNATIVE_PLATFORM_REFERENCES = [
   },
 ];
 
+type StatusProductBlueprintItem = {
+  layer: string;
+  target: string;
+  internalMove: string;
+  externalNeed: string;
+  stopLine: string;
+  evidence?: string;
+  status?: ReadinessFeature['status'];
+};
+
+export function buildStatusUiVariants(report?: ReadinessResponse['report']) {
+  if (!report?.uiVariants?.length) return STATUS_UI_VARIANTS;
+
+  return report.uiVariants.map(variant => ({
+    id: variant.id,
+    label: variant.label,
+    intent: `${variant.audience} ${variant.firstScreen}`,
+    proof: `${variant.primaryAction} 停止线：${variant.stopLine}`,
+  }));
+}
+
+export function buildStatusProductBlueprint(report?: ReadinessResponse['report']): StatusProductBlueprintItem[] {
+  if (!report?.productBlueprint?.length) return FINAL_PRODUCT_BLUEPRINT;
+
+  return report.productBlueprint.map(item => ({
+    layer: item.id,
+    target: item.target,
+    internalMove: item.internalCapability,
+    externalNeed: item.externalGate,
+    stopLine: item.stopLine,
+    evidence: item.evidence,
+    status: item.currentStatus,
+  }));
+}
+
+export function buildStatusAlternativeReferences(report?: ReadinessResponse['report']) {
+  if (!report?.alternativeReferences?.length) return ALTERNATIVE_PLATFORM_REFERENCES;
+
+  return report.alternativeReferences.map(item => ({
+    name: item.name,
+    reference: `${item.pattern} 边界：${item.boundary}`,
+    wenaiDecision: item.wenaiDecision,
+  }));
+}
+
 const MANAGE_ACCEPTANCE_BOARD = [
   {
     stage: 'Readiness 验收',
@@ -651,7 +725,10 @@ export default function StatusPage() {
   const topActions = actionQueue?.actions.slice(0, 4) || [];
   const assetPermissionAudits = assetPermissions?.accessAudits.slice(0, 4) || [];
   const kuaiziCapabilities = buildKuaiziCapabilityLadder(projectMaturity);
-  const activeUiVariant = STATUS_UI_VARIANTS.find(variant => variant.id === uiVariant) || STATUS_UI_VARIANTS[0];
+  const statusUiVariants = buildStatusUiVariants(maturity);
+  const finalProductBlueprint = buildStatusProductBlueprint(maturity);
+  const alternativePlatformReferences = buildStatusAlternativeReferences(maturity);
+  const activeUiVariant = statusUiVariants.find(variant => variant.id === uiVariant) || statusUiVariants[0];
   const readinessHref = projectId.trim()
     ? `/api/readiness?projectId=${encodeURIComponent(projectId.trim())}`
     : '/api/readiness';
@@ -702,7 +779,7 @@ export default function StatusPage() {
           </div>
         </div>
         <div className="grid grid-cols-1 gap-2 md:grid-cols-3">
-          {STATUS_UI_VARIANTS.map(variant => (
+          {statusUiVariants.map(variant => (
             <button
               key={variant.id}
               type="button"
@@ -764,10 +841,17 @@ export default function StatusPage() {
             </div>
           </div>
           <div className="grid grid-cols-1 gap-2">
-            {FINAL_PRODUCT_BLUEPRINT.map(item => (
+            {finalProductBlueprint.map(item => (
               <div key={item.layer} className="rounded-md border border-border-subtle/70 bg-bg-surface/40 px-3 py-3">
                 <div className="flex flex-col gap-1 md:flex-row md:items-start md:justify-between">
-                  <div className="text-[12px] font-semibold text-text-primary">{item.layer}</div>
+                  <div>
+                    <div className="text-[12px] font-semibold text-text-primary">{item.layer}</div>
+                    {item.status && (
+                      <div className="mt-1 text-[10px] font-mono text-accent">
+                        {FEATURE_STATUS_LABELS[item.status]}
+                      </div>
+                    )}
+                  </div>
                   <div className="text-[10px] leading-relaxed text-text-secondary md:max-w-[76%]">{item.target}</div>
                 </div>
                 <div className="mt-3 grid grid-cols-1 gap-2 md:grid-cols-3">
@@ -784,6 +868,9 @@ export default function StatusPage() {
                     <p className="mt-1 text-[10px] leading-relaxed text-text-secondary">{item.stopLine}</p>
                   </div>
                 </div>
+                {item.evidence && (
+                  <p className="mt-2 text-[10px] leading-relaxed text-text-tertiary">readiness evidence：{item.evidence}</p>
+                )}
               </div>
             ))}
           </div>
@@ -798,7 +885,7 @@ export default function StatusPage() {
             </div>
           </div>
           <div className="grid grid-cols-1 gap-2 md:grid-cols-2">
-            {ALTERNATIVE_PLATFORM_REFERENCES.map(item => (
+            {alternativePlatformReferences.map(item => (
               <div key={item.name} className="rounded-md border border-border-subtle/70 bg-bg-surface/40 px-3 py-3">
                 <div className="text-[11px] font-semibold text-text-primary">{item.name}</div>
                 <p className="mt-1 text-[10px] leading-relaxed text-text-secondary">{item.reference}</p>

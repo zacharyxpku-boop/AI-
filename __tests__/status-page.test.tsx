@@ -2,6 +2,9 @@ import { renderToStaticMarkup } from 'react-dom/server';
 import { describe, expect, it } from 'vitest';
 
 import StatusPage, {
+  buildStatusAlternativeReferences,
+  buildStatusProductBlueprint,
+  buildStatusUiVariants,
   formatAssetPermissionAuditEvent,
   formatExternalRequirementCategory,
   formatExternalRequirementOwner,
@@ -53,6 +56,62 @@ describe('status page', () => {
     expect(html).not.toContain('Refresh');
     expect(html).not.toContain('provider-gated');
     expect(html).not.toContain('STATUS ·');
+  });
+
+  it('maps structured readiness product variants into the status UI model', () => {
+    const report = {
+      verdict: 'conditional' as const,
+      label: '有条件通过',
+      score: 88,
+      productBlueprint: [{
+        id: 'Cut' as const,
+        target: 'AI 视频分析、智能混剪、一键视频。',
+        currentStatus: 'partial' as const,
+        internalCapability: '已有视频 workflow、任务队列、客户审核和表现回流字段。',
+        externalGate: '需要真实视频生成/剪辑 provider、素材授权和回调签名。',
+        stopLine: '没有 provider 完成记录前不能宣称一键视频真实可用。',
+        evidence: 'videoConfigured=0; completedProviderExecutions=0; measuredVideos=0',
+      }],
+      alternativeReferences: [{
+        name: 'Omneky',
+        pattern: '把创意生成、广告投放和表现回流连成 campaign learning loop。',
+        wenaiDecision: 'Cast/Manage 必须把 campaign ledger、预算、素材绑定、回流指标和下一轮规则放在同一条链路。',
+        boundary: '广告账户和转化事件未授权前，只能做手动导入。',
+      }],
+      uiVariants: [{
+        id: 'partner' as const,
+        label: '合作者/投资人版',
+        audience: '合作者、供应商、潜在客户和投资人。',
+        firstScreen: '先看全链路工作台和外部门禁。',
+        primaryAction: '进入 /status 查看 readiness。',
+        stopLine: '不展示未审计规模数字。',
+      }],
+      features: [],
+      workflows: [],
+      issues: [],
+      friendTrialRisks: [],
+      externalRequirements: [],
+      scaleClaimGuards: [],
+    };
+
+    expect(buildStatusUiVariants(report)).toEqual([expect.objectContaining({
+      id: 'partner',
+      label: '合作者/投资人版',
+      intent: expect.stringContaining('先看全链路工作台'),
+      proof: expect.stringContaining('不展示未审计规模数字'),
+    })]);
+    expect(buildStatusProductBlueprint(report)).toEqual([expect.objectContaining({
+      layer: 'Cut',
+      internalMove: expect.stringContaining('视频 workflow'),
+      externalNeed: expect.stringContaining('provider'),
+      status: 'partial',
+      evidence: expect.stringContaining('videoConfigured=0'),
+    })]);
+    expect(buildStatusAlternativeReferences(report)).toEqual([expect.objectContaining({
+      name: 'Omneky',
+      reference: expect.stringContaining('边界'),
+      wenaiDecision: expect.stringContaining('campaign ledger'),
+    })]);
   });
 
   it('formats project evidence as Chinese operator metrics instead of raw ledger keys', () => {
