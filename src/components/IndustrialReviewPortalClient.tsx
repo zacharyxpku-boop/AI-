@@ -394,6 +394,25 @@ const ZERO_EXPLANATION_REVIEW_STEPS = [
   },
 ];
 
+const CLIENT_REVIEW_OPERATION_CARDS = [
+  {
+    title: '客户只做判断',
+    body: '本页不要求客户理解 provider、ledger 或后台任务，只判断交付物能否用于下一步。',
+  },
+  {
+    title: '运营承接修改',
+    body: '客户反馈会进入生产记录，运营负责补链、返修、重发审核链接或推进批准后的分发。',
+  },
+  {
+    title: '批准才放行',
+    body: '没有客户批准前，交付物不会被当成已验收结果进入自动分发、投放或 CRM 交付完成。',
+  },
+  {
+    title: '证据留在系统',
+    body: '反馈、批准人、批准时间、链接状态和写回回执都会保留，方便复盘和下一轮生产。',
+  },
+];
+
 export function IndustrialReviewPortalClient({
   token,
   initialPayload = null,
@@ -633,6 +652,25 @@ export function IndustrialReviewPortalClient({
                     <span className="border border-cyan-200/20 px-2 py-0.5 text-[11px] text-cyan-100/70">{item.state}</span>
                   </div>
                   <div className="mt-2 text-xs leading-5 text-cyan-100/65">{item.detail}</div>
+                </div>
+              ))}
+            </div>
+          </div>
+          <div className="border border-fuchsia-300/20 bg-fuchsia-950/15 px-4 py-3">
+            <div className="flex flex-col gap-1 sm:flex-row sm:items-end sm:justify-between">
+              <div>
+                <div className="text-xs font-semibold text-fuchsia-100/65">客户验收作战卡</div>
+                <div className="mt-1 text-sm font-semibold text-fuchsia-50">把 Clico 式客户前台变成零解释交接</div>
+              </div>
+              <div className="text-xs leading-5 text-fuchsia-100/60">
+                客户只判断交付是否可用；运营负责链路、返修、分发和回流。
+              </div>
+            </div>
+            <div className="mt-3 grid gap-2 sm:grid-cols-4">
+              {CLIENT_REVIEW_OPERATION_CARDS.map(item => (
+                <div className="border border-fuchsia-300/15 bg-black/20 px-3 py-2" key={item.title}>
+                  <div className="text-xs font-semibold text-fuchsia-50">{item.title}</div>
+                  <div className="mt-2 text-xs leading-5 text-fuchsia-100/65">{item.body}</div>
                 </div>
               ))}
             </div>

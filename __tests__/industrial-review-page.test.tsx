@@ -117,6 +117,14 @@ describe('industrial review page', () => {
     expect(html).toContain('CRM 交接');
     expect(html).toContain('分发门禁');
     expect(html).toContain('表现回流');
+    expect(html).toContain('客户验收作战卡');
+    expect(html).toContain('Clico 式客户前台');
+    expect(html).toContain('客户只做判断');
+    expect(html).toContain('运营承接修改');
+    expect(html).toContain('批准才放行');
+    expect(html).toContain('证据留在系统');
+    expect(html).toContain('本页不要求客户理解 provider、ledger 或后台任务');
+    expect(html).toContain('客户只判断交付是否可用');
     expect(html).toContain('未批准前不进入自动分发');
     expect(html).toContain('你先查看');
     expect(html).toContain('有问题就反馈');
