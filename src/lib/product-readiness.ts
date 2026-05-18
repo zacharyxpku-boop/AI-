@@ -1,0 +1,939 @@
+import type { PlatformConnectorReadiness } from '@/lib/platform-connector-readiness';
+
+export type ReadinessVerdict = 'pass' | 'conditional' | 'fail';
+export type ReadinessRisk = 'high' | 'medium' | 'low';
+export type ReadinessStatus = 'implemented' | 'partial' | 'missing' | 'pseudo';
+export type CompetitorGap = 'none' | 'minor' | 'medium' | 'severe';
+
+export interface ProjectReadinessFacts {
+  orgId: string;
+  projectId: string;
+  assetCount: number;
+  reportAssetCount?: number;
+  approvedAssetCount?: number;
+  reusableAssetCount?: number;
+  blockedAssetCount?: number;
+  rightsIssueAssetCount?: number;
+  assetGovernanceIssueCount?: number;
+  deliverableAssetCount?: number;
+  clientReviewAssetCount?: number;
+  approvedDeliverableCount?: number;
+  revisionRequestedCount?: number;
+  deliveryIssueCount?: number;
+  planCount: number;
+  draftPlanCount?: number;
+  nextRoundAssetPlanCount?: number;
+  readyPlanCount: number;
+  dispatchCount: number;
+  executableDispatchCount: number;
+  publishedDispatchCount?: number;
+  publishedWithEvidenceCount?: number;
+  missingPublishEvidenceCount?: number;
+  overdueReviewDispatchCount?: number;
+  measuredDispatchCount: number;
+  performanceReturnCount: number;
+  scaleDecisionCount: number;
+  assetMatchAmbiguousCount?: number;
+  assetMatchUnmatchedCount?: number;
+  assetMatchIssueCount?: number;
+  creativeInsightCount?: number;
+  creativeCompetitorAccountCount?: number;
+  creativeTrendRankCount?: number;
+  creativeReusableAngleCount?: number;
+  creativeOpportunityCount?: number;
+  creativeAverageOpportunityConfidence?: number;
+  creativePatternClusterCount?: number;
+  creativeCrossSourcePatternCount?: number;
+  creativeMoatScore?: number;
+  creativeMissingLinks?: string[];
+  creativeMonitorCount?: number;
+  creativeActiveMonitorCount?: number;
+  creativeDueTaskCount?: number;
+  creativeImportedMonitorSignalCount?: number;
+  creativeHarvestRunCount?: number;
+  creativeHarvestedInsightCount?: number;
+  creativeCollectorAdapterStatus?: string;
+  creativeCollectorProviderReady?: boolean;
+  creativeSourceCount?: number;
+  creativeProviderReadySourceCount?: number;
+  creativeSourceSyncRunCount?: number;
+  creativeProviderSourceFreshCount?: number;
+  creativeProviderSourceFailureCount?: number;
+  creativeSourceSyncAccountObservationCount?: number;
+  creativeSourceSyncTrendRankObservationCount?: number;
+  creativeSourceSyncVideoTeardownObservationCount?: number;
+  creativeSourceSyncMultimodalParsedCount?: number;
+  creativeSourceSyncCoverageScore?: number;
+  creativeSourceObservationCount?: number;
+  creativeSourceRepeatObservationSourceCount?: number;
+  creativeSourceScaleScore?: number;
+  creativeSourceDepthScore?: number;
+  creativeReadySourceHealthCardCount?: number;
+  creativeAccountTrackingCoverageTargetCount?: number;
+  creativeTrendRankCoverageSignalCount?: number;
+  creativeVideoTeardownRepeatReady?: boolean;
+  creativeAccountTrackingSourceReady?: boolean;
+  creativeTrendRankSourceReady?: boolean;
+  creativeVideoTeardownSourceReady?: boolean;
+  creativeMonitoringMissingLinks?: string[];
+  channelAccountCount?: number;
+  channelConnectedAccountCount?: number;
+  channelHealthyAccountCount?: number;
+  channelAvailableSlotCount?: number;
+  channelAdCampaignCount?: number;
+  channelReadyAdCampaignCount?: number;
+  channelActiveAdCampaignCount?: number;
+  channelMeasuredAdCampaignCount?: number;
+  channelAdBudgetCents?: number;
+  channelAdSpendCents?: number;
+  channelAdEvidenceCount?: number;
+  channelAdMissingLinks?: string[];
+  channelMissingLinks?: string[];
+  assetPermissionRecordCount?: number;
+  governedAssetCount?: number;
+  assetPermissionAuditEventCount?: number;
+  assetPermissionAccessAuditEventCount?: number;
+  assetStorageObjectCount?: number;
+  assetMissingStorageObjectCount?: number;
+  assetSecurityPolicyCount?: number;
+  assetWatermarkRequiredCount?: number;
+  assetWatermarkAppliedCount?: number;
+  assetDlpPassedPolicyCount?: number;
+  assetDlpFailedPolicyCount?: number;
+  assetPublicShareBlockedCount?: number;
+  assetRetentionPolicyCount?: number;
+  activeAssetAccessGrantCount?: number;
+  expiredAssetAccessGrantCount?: number;
+  revokedAssetAccessGrantCount?: number;
+  expiredAssetPermissionCount?: number;
+  downloadableAssetAccessReadyCount?: number;
+  shareableAssetAccessReadyCount?: number;
+  assetPermissionMissingLinks?: string[];
+  videoProductionQueueItemCount?: number;
+  videoProviderExecutionCount?: number;
+  videoSubmittedProviderExecutionCount?: number;
+  videoCompletedProviderExecutionCount?: number;
+  videoFailedProviderExecutionCount?: number;
+  videoRetryableProviderExecutionCount?: number;
+  videoResultAssetCount?: number;
+  videoClientReviewCount?: number;
+  videoApprovedDeliverableCount?: number;
+  videoMeasuredCount?: number;
+  videoAverageLoopCompletionScore?: number;
+  brandLearningCreativeSignalCount?: number;
+  brandLearningPerformanceSignalCount?: number;
+  brandLearningApprovedDeliverableCount?: number;
+  brandLearningWinningAssetCount?: number;
+  brandLearningRuleCount?: number;
+  brandLearningMissingLinks?: string[];
+  missingLinks: string[];
+  nextActions: string[];
+}
+
+export interface ReadinessServiceInput {
+  aiConfigured: boolean;
+  storageConfigured: boolean;
+  kuaiziConfigured: boolean;
+  imageConfigured: boolean;
+  videoConfigured: boolean;
+  videoTeardownConfigured: boolean;
+  performanceImportAvailable?: boolean;
+  commerceChainAvailable?: boolean;
+  industrialChainAvailable?: boolean;
+  distributionExecutionAvailable?: boolean;
+  platformConnectors?: PlatformConnectorReadiness;
+  emailConfigured: boolean;
+  authConfigured: boolean;
+  project?: ProjectReadinessFacts;
+}
+
+export interface ReadinessFeature {
+  name: string;
+  status: ReadinessStatus;
+  evidence: string;
+  risk: ReadinessRisk;
+  fix: string;
+}
+
+export interface ReadinessWorkflowCheck {
+  name: string;
+  ok: boolean;
+  evidence: string;
+  fix?: string;
+}
+
+export interface ReadinessIssue {
+  priority: 'P0' | 'P1' | 'P2';
+  title: string;
+  evidence: string;
+  fix: string;
+}
+
+export interface CompetitorDimension {
+  name: string;
+  gap: CompetitorGap;
+  evidence: string;
+}
+
+export type ExternalRequirementStatus = 'configured' | 'missing' | 'evidence_required';
+export type ExternalRequirementCategory =
+  | 'video_provider'
+  | 'video_analysis'
+  | 'platform_oauth'
+  | 'ad_delivery'
+  | 'auto_publish'
+  | 'analytics_sync'
+  | 'asset_cloud'
+  | 'scale_claims';
+
+export interface ExternalIntegrationRequirement {
+  id: string;
+  category: ExternalRequirementCategory;
+  label: string;
+  status: ExternalRequirementStatus;
+  owner: 'user' | 'provider' | 'wenai';
+  evidence: string;
+  requiredInputs: string[];
+  acceptance: string;
+}
+
+export interface ScaleClaimGuard {
+  label: string;
+  requestedBenchmark: string;
+  canDisplay: boolean;
+  evidence: string;
+  requiredEvidence: string[];
+}
+
+export interface ProductReadinessReport {
+  verdict: ReadinessVerdict;
+  label: string;
+  score: number;
+  competitor: CompetitorDimension[];
+  features: ReadinessFeature[];
+  workflows: ReadinessWorkflowCheck[];
+  issues: ReadinessIssue[];
+  friendTrialRisks: ReadinessIssue[];
+  externalRequirements: ExternalIntegrationRequirement[];
+  scaleClaimGuards: ScaleClaimGuard[];
+  projectReadiness?: {
+    verdict: ReadinessVerdict;
+    score: number;
+    evidence: string[];
+    missingLinks: string[];
+    nextActions: string[];
+  };
+  recommendation: '保留' | '修复后保留' | '不建议当前状态发布';
+}
+
+function makeExternalRequirement(
+  id: string,
+  category: ExternalRequirementCategory,
+  label: string,
+  configured: boolean,
+  evidence: string,
+  requiredInputs: string[],
+  acceptance: string,
+  owner: ExternalIntegrationRequirement['owner'] = 'user',
+): ExternalIntegrationRequirement {
+  return {
+    id,
+    category,
+    label,
+    status: configured ? 'configured' : 'missing',
+    owner,
+    evidence,
+    requiredInputs,
+    acceptance,
+  };
+}
+
+function buildExternalRequirements(input: ReadinessServiceInput): ExternalIntegrationRequirement[] {
+  const connectors = input.platformConnectors;
+  return [
+    makeExternalRequirement(
+      'video-provider-submit-callback',
+      'video_provider',
+      'Real video generation/editing provider',
+      input.videoConfigured && Boolean(connectors?.videoWebhookSignatureConfigured),
+      `videoConfigured=${input.videoConfigured ? 1 : 0}; webhookSignature=${connectors?.videoWebhookSignatureConfigured ? 1 : 0}`,
+      ['provider submit endpoint', 'server-side provider token', 'webhook signing secret', 'sandbox task id', 'cost limit'],
+      'Submit one provider-ready workflow, receive a signed callback, ingest result URL, create client review link, and keep provider tokens out of responses.',
+    ),
+    makeExternalRequirement(
+      'multimodal-video-parser',
+      'video_analysis',
+      'AI video analysis / multimodal parser',
+      input.videoTeardownConfigured && Boolean(input.project?.creativeVideoTeardownSourceReady),
+      `videoTeardownConfigured=${input.videoTeardownConfigured ? 1 : 0}; projectVideoTeardownSourceReady=${input.project?.creativeVideoTeardownSourceReady ? 1 : 0}`,
+      ['parser endpoint or authorized teardown feed', 'server-side parser token', 'licensed sample URLs', 'scene beat schema'],
+      'Import account, rank, and video teardown observations; source health cards for all three source kinds are ready.',
+    ),
+    makeExternalRequirement(
+      'platform-oauth-account-pool',
+      'platform_oauth',
+      'Multi-platform OAuth and account pool',
+      Boolean(connectors?.oauthConfigured),
+      `oauthConfigured=${connectors?.oauthConfigured ? 1 : 0}`,
+      ['TikTok/Douyin OAuth app', 'XHS/Kuaishou/Meta app where applicable', 'redirect URLs', 'sandbox account grant'],
+      'Complete at least one OAuth grant per target platform and bind it to channel account ledger without storing secrets in browser state.',
+    ),
+    makeExternalRequirement(
+      'ad-account-authorization',
+      'ad_delivery',
+      'Ad account authorization',
+      Boolean(connectors?.adAccountConfigured),
+      `adAccountConfigured=${connectors?.adAccountConfigured ? 1 : 0}; readyAdCampaigns=${input.project?.channelReadyAdCampaignCount || 0}`,
+      ['advertiser id', 'ad account access token', 'campaign create permission', 'budget cap', 'test campaign id'],
+      'Create or validate one campaign with spend limits, attach evidence URL, and import measured spend/order/revenue.',
+    ),
+    makeExternalRequirement(
+      'platform-auto-publish',
+      'auto_publish',
+      'Auto-publish / matrix distribution',
+      Boolean(connectors?.autoPublishConfigured),
+      `autoPublishConfigured=${connectors?.autoPublishConfigured ? 1 : 0}; availableSlots=${input.project?.channelAvailableSlotCount || 0}`,
+      ['publish token', 'content upload endpoint permission', 'account rate limits', 'publish evidence URL'],
+      'Publish one governed asset through a provider adapter, capture platform URL, and preserve manual-ready fallback.',
+    ),
+    makeExternalRequirement(
+      'platform-analytics-sync',
+      'analytics_sync',
+      'Platform analytics sync',
+      Boolean(connectors?.analyticsSyncConfigured),
+      `analyticsSyncConfigured=${connectors?.analyticsSyncConfigured ? 1 : 0}; measuredDispatches=${input.project?.measuredDispatchCount || 0}`,
+      ['analytics API token', 'platform account id', 'metric mapping', 'scheduled sync job'],
+      'Sync impressions, clicks, spend, orders, revenue, and asset_ref for one published dispatch without manual CSV.',
+    ),
+    makeExternalRequirement(
+      'enterprise-asset-cloud',
+      'asset_cloud',
+      'Enterprise cloud asset storage and signed access',
+      Boolean(connectors?.enterpriseAssetPermissionsConfigured) && input.storageConfigured,
+      `enterpriseAssetPermissionsConfigured=${connectors?.enterpriseAssetPermissionsConfigured ? 1 : 0}; storageConfigured=${input.storageConfigured ? 1 : 0}; downloadableReady=${input.project?.downloadableAssetAccessReadyCount || 0}; shareableReady=${input.project?.shareableAssetAccessReadyCount || 0}`,
+      ['object storage bucket/project', 'signed URL service', 'DLP/watermark policy', 'retention policy', 'team role mapping'],
+      'Download/share/publish checks fail closed until RBAC, DLP, watermark, retention, and signed URL evidence pass.',
+    ),
+    {
+      id: 'audited-scale-ledger',
+      category: 'scale_claims',
+      label: 'Audited Wenai scale ledger for public numbers',
+      status: 'evidence_required',
+      owner: 'user',
+      evidence: '91M+ creative output and 42M+ video distribution are competitor benchmarks, not audited Wenai metrics.',
+      requiredInputs: ['audited generated creative count', 'audited published video count', 'platform/source breakdown', 'dedupe rule', 'date range'],
+      acceptance: 'Only display Wenai-owned scale numbers after the counters reconcile to production and platform ledgers.',
+    },
+  ];
+}
+
+function buildScaleClaimGuards(input: ReadinessServiceInput): ScaleClaimGuard[] {
+  return [{
+    label: 'Creative output scale',
+    requestedBenchmark: '91M+ creative output',
+    canDisplay: false,
+    evidence: `creativeInsights=${input.project?.creativeInsightCount || 0}; auditedWenaiCreativeOutput=missing`,
+    requiredEvidence: ['production output ledger', 'dedupe rule', 'audited date range', 'source/platform breakdown'],
+  }, {
+    label: 'Video distribution scale',
+    requestedBenchmark: '42M+ video distribution',
+    canDisplay: false,
+    evidence: `publishedDispatches=${input.project?.publishedDispatchCount || 0}; measuredDispatches=${input.project?.measuredDispatchCount || 0}; auditedWenaiVideoDistribution=missing`,
+    requiredEvidence: ['platform publish ledger', 'video id ledger', 'analytics sync evidence', 'audited date range'],
+  }];
+}
+
+function scoreFeature(feature: ReadinessFeature) {
+  if (feature.status === 'implemented') return 12;
+  if (feature.status === 'partial') return 7;
+  if (feature.status === 'pseudo') return 0;
+  return 2;
+}
+
+function makeFeature(
+  name: string,
+  status: ReadinessStatus,
+  evidence: string,
+  risk: ReadinessRisk,
+  fix: string,
+): ReadinessFeature {
+  return { name, status, evidence, risk, fix };
+}
+
+function evaluateProjectReadiness(project?: ProjectReadinessFacts): ProductReadinessReport['projectReadiness'] {
+  if (!project) return undefined;
+
+  const checks = [
+    project.assetCount > 0,
+    project.planCount > 0,
+    project.readyPlanCount > 0,
+    project.dispatchCount > 0,
+    project.executableDispatchCount > 0,
+    (project.missingPublishEvidenceCount || 0) === 0,
+    (project.overdueReviewDispatchCount || 0) === 0,
+    project.measuredDispatchCount > 0,
+    project.performanceReturnCount > 0,
+    (project.reportAssetCount || 0) > 0,
+    (project.assetGovernanceIssueCount || 0) === 0,
+    (project.deliveryIssueCount || 0) === 0,
+    project.scaleDecisionCount === 0 || (project.nextRoundAssetPlanCount || 0) >= project.scaleDecisionCount,
+    project.scaleDecisionCount === 0 || (project.assetMatchIssueCount || 0) === 0,
+    (project.creativeInsightCount || 0) > 0,
+    (project.creativeReusableAngleCount || 0) > 0,
+    (project.creativeOpportunityCount || 0) > 0,
+    (project.creativeAverageOpportunityConfidence || 0) > 0,
+    (project.creativePatternClusterCount || 0) > 0,
+    (project.creativeCrossSourcePatternCount || 0) > 0,
+    (project.creativeMoatScore || 0) >= 60,
+    (project.creativeCompetitorAccountCount || 0) > 0 || (project.creativeTrendRankCount || 0) > 0,
+    (project.creativeMonitorCount || 0) > 0,
+    (project.creativeActiveMonitorCount || 0) > 0,
+    (project.creativeDueTaskCount || 0) > 0 || (project.creativeImportedMonitorSignalCount || 0) > 0,
+    (project.creativeSourceCount || 0) >= 3,
+    (project.creativeProviderReadySourceCount || 0) >= 3,
+    (project.creativeSourceSyncCoverageScore || 0) >= 100,
+    (project.creativeSourceSyncAccountObservationCount || 0) > 0,
+    (project.creativeSourceSyncTrendRankObservationCount || 0) > 0,
+    (project.creativeSourceSyncVideoTeardownObservationCount || 0) > 0,
+    (project.creativeSourceSyncMultimodalParsedCount || 0) > 0,
+    (project.creativeSourceObservationCount || 0) >= 6,
+    (project.creativeSourceRepeatObservationSourceCount || 0) >= 3,
+    (project.creativeSourceScaleScore || 0) >= 100,
+    (project.creativeSourceDepthScore || 0) >= 90,
+    (project.creativeReadySourceHealthCardCount || 0) >= 3,
+    (project.creativeAccountTrackingCoverageTargetCount || 0) >= 3,
+    (project.creativeTrendRankCoverageSignalCount || 0) >= 3,
+    Boolean(project.creativeVideoTeardownRepeatReady),
+    Boolean(project.creativeAccountTrackingSourceReady),
+    Boolean(project.creativeTrendRankSourceReady),
+    Boolean(project.creativeVideoTeardownSourceReady),
+    (project.channelAccountCount || 0) > 0,
+    (project.channelConnectedAccountCount || 0) > 0,
+    (project.channelHealthyAccountCount || 0) > 0,
+    (project.channelAvailableSlotCount || 0) > 0,
+    (project.channelAdCampaignCount || 0) > 0,
+    (project.channelReadyAdCampaignCount || 0) > 0,
+    (project.channelAdBudgetCents || 0) > 0,
+    (project.channelAdEvidenceCount || 0) > 0,
+    (project.assetPermissionRecordCount || 0) > 0,
+    (project.governedAssetCount || 0) > 0,
+    (project.assetPermissionAuditEventCount || 0) > 0,
+    (project.assetPermissionAccessAuditEventCount || 0) > 0,
+    (project.assetStorageObjectCount || 0) > 0,
+    (project.assetMissingStorageObjectCount || 0) === 0,
+    (project.assetSecurityPolicyCount || 0) > 0,
+    (project.assetWatermarkRequiredCount || 0) === 0 || (project.assetWatermarkAppliedCount || 0) >= (project.assetWatermarkRequiredCount || 0),
+    (project.assetDlpPassedPolicyCount || 0) >= (project.assetSecurityPolicyCount || 0),
+    (project.assetDlpFailedPolicyCount || 0) === 0,
+    (project.assetPublicShareBlockedCount || 0) > 0,
+    (project.assetRetentionPolicyCount || 0) >= (project.assetSecurityPolicyCount || 0),
+    (project.activeAssetAccessGrantCount || 0) > 0,
+    (project.downloadableAssetAccessReadyCount || 0) > 0 || (project.shareableAssetAccessReadyCount || 0) > 0,
+    (project.expiredAssetPermissionCount || 0) === 0,
+    (project.videoProductionQueueItemCount || 0) > 0,
+    (project.videoProviderExecutionCount || 0) > 0,
+    (project.videoCompletedProviderExecutionCount || 0) > 0,
+    (project.videoFailedProviderExecutionCount || 0) === 0,
+    (project.videoResultAssetCount || 0) > 0,
+    (project.videoClientReviewCount || 0) > 0,
+    (project.videoApprovedDeliverableCount || 0) > 0,
+    (project.videoMeasuredCount || 0) > 0,
+    (project.videoAverageLoopCompletionScore || 0) > 0,
+    (project.brandLearningCreativeSignalCount || 0) > 0,
+    (project.brandLearningPerformanceSignalCount || 0) > 0,
+    (project.brandLearningApprovedDeliverableCount || 0) > 0,
+    (project.brandLearningWinningAssetCount || 0) > 0,
+    (project.brandLearningRuleCount || 0) > 0,
+  ];
+  const score = Math.round((checks.filter(Boolean).length / checks.length) * 100);
+  const creativeMissingLinks = project.creativeMissingLinks || [];
+  const creativeMonitoringMissingLinks = project.creativeMonitoringMissingLinks || [];
+  const channelMissingLinks = project.channelMissingLinks || [];
+  const channelAdMissingLinks = project.channelAdMissingLinks || [];
+  const assetPermissionMissingLinks = project.assetPermissionMissingLinks || [];
+  const brandLearningMissingLinks = project.brandLearningMissingLinks || [];
+  const verdict: ReadinessVerdict = project.missingLinks.length === 0 && creativeMissingLinks.length === 0 && creativeMonitoringMissingLinks.length === 0 && channelMissingLinks.length === 0 && channelAdMissingLinks.length === 0 && assetPermissionMissingLinks.length === 0 && brandLearningMissingLinks.length === 0 && project.performanceReturnCount > 0 && (project.reportAssetCount || 0) > 0
+    ? 'pass'
+    : score >= 72 && project.executableDispatchCount > 0
+      ? 'conditional'
+      : 'fail';
+
+  return {
+    verdict,
+    score,
+    evidence: [
+      `project=${project.projectId}`,
+      `assets=${project.assetCount}`,
+      `reportAssets=${project.reportAssetCount || 0}`,
+      `approvedAssets=${project.approvedAssetCount || 0}`,
+      `reusableAssets=${project.reusableAssetCount || 0}`,
+      `assetGovernanceIssues=${project.assetGovernanceIssueCount || 0}`,
+      `deliverableAssets=${project.deliverableAssetCount || 0}`,
+      `clientReviewAssets=${project.clientReviewAssetCount || 0}`,
+      `approvedDeliverables=${project.approvedDeliverableCount || 0}`,
+      `revisionRequested=${project.revisionRequestedCount || 0}`,
+      `deliveryIssues=${project.deliveryIssueCount || 0}`,
+      `blockedAssets=${project.blockedAssetCount || 0}`,
+      `rightsIssueAssets=${project.rightsIssueAssetCount || 0}`,
+      `plans=${project.planCount}`,
+      `draftPlans=${project.draftPlanCount || 0}`,
+      `nextRoundAssetPlans=${project.nextRoundAssetPlanCount || 0}`,
+      `readyPlans=${project.readyPlanCount}`,
+      `dispatches=${project.dispatchCount}`,
+      `publishedDispatches=${project.publishedDispatchCount || 0}`,
+      `publishedWithEvidence=${project.publishedWithEvidenceCount || 0}`,
+      `missingPublishEvidence=${project.missingPublishEvidenceCount || 0}`,
+      `overdueReviews=${project.overdueReviewDispatchCount || 0}`,
+      `measuredDispatches=${project.measuredDispatchCount}`,
+      `performanceReturns=${project.performanceReturnCount}`,
+      `scaleDecisions=${project.scaleDecisionCount}`,
+      `assetMatchIssues=${project.assetMatchIssueCount || 0}`,
+      `ambiguousAssetMatches=${project.assetMatchAmbiguousCount || 0}`,
+      `unmatchedAssets=${project.assetMatchUnmatchedCount || 0}`,
+      `creativeInsights=${project.creativeInsightCount || 0}`,
+      `creativeCompetitorAccounts=${project.creativeCompetitorAccountCount || 0}`,
+      `creativeTrendRanks=${project.creativeTrendRankCount || 0}`,
+      `creativeReusableAngles=${project.creativeReusableAngleCount || 0}`,
+      `creativeOpportunities=${project.creativeOpportunityCount || 0}`,
+      `creativeAverageConfidence=${project.creativeAverageOpportunityConfidence || 0}`,
+      `creativePatternClusters=${project.creativePatternClusterCount || 0}`,
+      `creativeCrossSourcePatterns=${project.creativeCrossSourcePatternCount || 0}`,
+      `creativeMoatScore=${project.creativeMoatScore || 0}`,
+      `creativeMonitors=${project.creativeMonitorCount || 0}`,
+      `creativeActiveMonitors=${project.creativeActiveMonitorCount || 0}`,
+      `creativeDueTasks=${project.creativeDueTaskCount || 0}`,
+      `creativeImportedMonitorSignals=${project.creativeImportedMonitorSignalCount || 0}`,
+      `creativeHarvestRuns=${project.creativeHarvestRunCount || 0}`,
+      `creativeHarvestedInsights=${project.creativeHarvestedInsightCount || 0}`,
+      `creativeCollectorAdapter=${project.creativeCollectorAdapterStatus || 'unknown'}`,
+      `creativeCollectorProviderReady=${project.creativeCollectorProviderReady ? 1 : 0}`,
+      `creativeSources=${project.creativeSourceCount || 0}`,
+      `creativeProviderReadySources=${project.creativeProviderReadySourceCount || 0}`,
+      `creativeSourceSyncRuns=${project.creativeSourceSyncRunCount || 0}`,
+      `creativeProviderSourceFresh=${project.creativeProviderSourceFreshCount || 0}`,
+      `creativeProviderSourceFailures=${project.creativeProviderSourceFailureCount || 0}`,
+      `creativeSourceSyncCoverageScore=${project.creativeSourceSyncCoverageScore || 0}`,
+      `creativeSourceSyncAccountObservations=${project.creativeSourceSyncAccountObservationCount || 0}`,
+      `creativeSourceSyncTrendRankObservations=${project.creativeSourceSyncTrendRankObservationCount || 0}`,
+      `creativeSourceSyncVideoTeardowns=${project.creativeSourceSyncVideoTeardownObservationCount || 0}`,
+      `creativeSourceSyncMultimodalParsed=${project.creativeSourceSyncMultimodalParsedCount || 0}`,
+      `creativeSourceObservations=${project.creativeSourceObservationCount || 0}`,
+      `creativeSourceRepeatSources=${project.creativeSourceRepeatObservationSourceCount || 0}`,
+      `creativeSourceScaleScore=${project.creativeSourceScaleScore || 0}`,
+      `creativeSourceDepthScore=${project.creativeSourceDepthScore || 0}`,
+      `creativeReadySourceHealthCards=${project.creativeReadySourceHealthCardCount || 0}`,
+      `creativeAccountCoverageTargets=${project.creativeAccountTrackingCoverageTargetCount || 0}`,
+      `creativeTrendRankCoverageSignals=${project.creativeTrendRankCoverageSignalCount || 0}`,
+      `creativeVideoTeardownRepeatReady=${project.creativeVideoTeardownRepeatReady ? 1 : 0}`,
+      `creativeAccountTrackingSourceReady=${project.creativeAccountTrackingSourceReady ? 1 : 0}`,
+      `creativeTrendRankSourceReady=${project.creativeTrendRankSourceReady ? 1 : 0}`,
+      `creativeVideoTeardownSourceReady=${project.creativeVideoTeardownSourceReady ? 1 : 0}`,
+      `channelAccounts=${project.channelAccountCount || 0}`,
+      `channelConnectedAccounts=${project.channelConnectedAccountCount || 0}`,
+      `channelHealthyAccounts=${project.channelHealthyAccountCount || 0}`,
+      `channelAvailableSlots=${project.channelAvailableSlotCount || 0}`,
+      `channelAdCampaigns=${project.channelAdCampaignCount || 0}`,
+      `channelReadyAdCampaigns=${project.channelReadyAdCampaignCount || 0}`,
+      `channelActiveAdCampaigns=${project.channelActiveAdCampaignCount || 0}`,
+      `channelMeasuredAdCampaigns=${project.channelMeasuredAdCampaignCount || 0}`,
+      `channelAdBudgetCents=${project.channelAdBudgetCents || 0}`,
+      `channelAdSpendCents=${project.channelAdSpendCents || 0}`,
+      `channelAdEvidence=${project.channelAdEvidenceCount || 0}`,
+      `assetPermissionRecords=${project.assetPermissionRecordCount || 0}`,
+      `governedAssets=${project.governedAssetCount || 0}`,
+      `assetPermissionAuditEvents=${project.assetPermissionAuditEventCount || 0}`,
+      `assetPermissionAccessAuditEvents=${project.assetPermissionAccessAuditEventCount || 0}`,
+      `assetStorageObjects=${project.assetStorageObjectCount || 0}`,
+      `assetMissingStorageObjects=${project.assetMissingStorageObjectCount || 0}`,
+      `assetSecurityPolicies=${project.assetSecurityPolicyCount || 0}`,
+      `assetWatermarkRequired=${project.assetWatermarkRequiredCount || 0}`,
+      `assetWatermarkApplied=${project.assetWatermarkAppliedCount || 0}`,
+      `assetDlpPassedPolicies=${project.assetDlpPassedPolicyCount || 0}`,
+      `assetDlpFailedPolicies=${project.assetDlpFailedPolicyCount || 0}`,
+      `assetPublicShareBlocked=${project.assetPublicShareBlockedCount || 0}`,
+      `assetRetentionPolicies=${project.assetRetentionPolicyCount || 0}`,
+      `activeAssetAccessGrants=${project.activeAssetAccessGrantCount || 0}`,
+      `expiredAssetAccessGrants=${project.expiredAssetAccessGrantCount || 0}`,
+      `revokedAssetAccessGrants=${project.revokedAssetAccessGrantCount || 0}`,
+      `expiredAssetPermissions=${project.expiredAssetPermissionCount || 0}`,
+      `downloadableAssetAccessReady=${project.downloadableAssetAccessReadyCount || 0}`,
+      `shareableAssetAccessReady=${project.shareableAssetAccessReadyCount || 0}`,
+      `videoQueueItems=${project.videoProductionQueueItemCount || 0}`,
+      `videoProviderExecutions=${project.videoProviderExecutionCount || 0}`,
+      `videoSubmittedProviderExecutions=${project.videoSubmittedProviderExecutionCount || 0}`,
+      `videoCompletedProviderExecutions=${project.videoCompletedProviderExecutionCount || 0}`,
+      `videoFailedProviderExecutions=${project.videoFailedProviderExecutionCount || 0}`,
+      `videoRetryableProviderExecutions=${project.videoRetryableProviderExecutionCount || 0}`,
+      `videoResultAssets=${project.videoResultAssetCount || 0}`,
+      `videoClientReviews=${project.videoClientReviewCount || 0}`,
+      `videoApprovedDeliverables=${project.videoApprovedDeliverableCount || 0}`,
+      `videoMeasured=${project.videoMeasuredCount || 0}`,
+      `videoAverageLoopScore=${project.videoAverageLoopCompletionScore || 0}`,
+      `brandLearningCreativeSignals=${project.brandLearningCreativeSignalCount || 0}`,
+      `brandLearningPerformanceSignals=${project.brandLearningPerformanceSignalCount || 0}`,
+      `brandLearningApprovedDeliverables=${project.brandLearningApprovedDeliverableCount || 0}`,
+      `brandLearningWinningAssets=${project.brandLearningWinningAssetCount || 0}`,
+      `brandLearningRules=${project.brandLearningRuleCount || 0}`,
+    ],
+    missingLinks: [...project.missingLinks, ...creativeMissingLinks, ...creativeMonitoringMissingLinks, ...channelMissingLinks, ...channelAdMissingLinks, ...assetPermissionMissingLinks, ...brandLearningMissingLinks],
+    nextActions: [
+      ...project.nextActions,
+      ...creativeMissingLinks.map(item => `Close creative gap: ${item}`),
+      ...creativeMonitoringMissingLinks.map(item => `Close creative monitoring gap: ${item}`),
+      ...channelMissingLinks.map(item => `Close channel gap: ${item}`),
+      ...channelAdMissingLinks.map(item => `Close ad campaign gap: ${item}`),
+      ...assetPermissionMissingLinks.map(item => `Close asset permission gap: ${item}`),
+      ...brandLearningMissingLinks.map(item => `Close brand learning gap: ${item}`),
+    ],
+  };
+}
+
+export function evaluateProductReadiness(input: ReadinessServiceInput): ProductReadinessReport {
+  const projectReadiness = evaluateProjectReadiness(input.project);
+  const platformConnectors = input.platformConnectors;
+  const platformAutomationReady = Boolean(platformConnectors?.platformAutomationReady);
+  const externalRequirements = buildExternalRequirements(input);
+  const scaleClaimGuards = buildScaleClaimGuards(input);
+  const platformConnectorEvidence = platformConnectors
+    ? `configured=${platformConnectors.configuredCapabilities.join(',') || 'none'}; missing=${platformConnectors.missingCapabilities.join(',') || 'none'}`
+    : 'platform connector ledger is missing from readiness input.';
+  const features: ReadinessFeature[] = [
+    makeFeature(
+      '10 SKU POC intake and standard-pack routing',
+      'implemented',
+      '/poc、/inquire、/api/sales/inquiry、/modules/standard-pack 已形成提交、标准包、报告、CRM 入口。',
+      'low',
+      '继续用 E2E 覆盖主链路。',
+    ),
+    makeFeature(
+      'CRM-lite commercial loop',
+      'implemented',
+      '询盘 API 支持 Redis 持久化，并在无 Redis 时内存降级；后台可维护状态、合同阶段、付款状态和外部 CRM 映射。',
+      'low',
+      '生产环境配置 Redis，避免进程重启丢失试用询盘。',
+    ),
+    makeFeature(
+      'Enterprise asset permissions ledger',
+      'implemented',
+      '/api/asset-permissions tracks asset owners, scopes, roles, actions, expiry, and audit trail so cloud-asset/RBAC readiness is executable before external storage is connected.',
+      'low',
+      'Bind these policies to the real asset cloud provider after bucket/project credentials are available.',
+    ),
+    makeFeature(
+      'Client review token portal',
+      'implemented',
+      '/api/industrial-chain/review-links plus /api/industrial-chain/review/[token] support no-login review links, feedback, revoke/expiry, approval audit, and delivery status writeback.',
+      'low',
+      'Add a customer-facing page on top of the API after the next UI pass; keep token expiry and revoke semantics covered by tests.',
+    ),
+    makeFeature(
+      'Brand learning profile',
+      'implemented',
+      '/api/brand-learning-profile merges competitor insight, performance returns, and client-approved deliverables into reusable hook, pacing, approved-pattern, avoid-pattern, and next distribution rules.',
+      'low',
+      'Materialize one brand learning profile after every measured campaign and approved delivery batch.',
+    ),
+    makeFeature(
+      'Creative monitoring watchlist',
+      'implemented',
+      '/api/creative-monitoring tracks competitor accounts, trend/rank targets, and video-keyword watchlists, emits due collection tasks, and imports monitored signals into the creative intelligence ledger.',
+      'low',
+      'Connect this watchlist to real platform scraping/OAuth later; until then, use due tasks for manual structured imports.',
+    ),
+    makeFeature(
+      'Creative intelligence ledger',
+      'implemented',
+      '/api/creative-intelligence can import competitor videos, account signals, trend/rank signals, hook structure, pacing, metrics, reusable angles, and convert them into benchmark/script/distribution assets.',
+      'low',
+      'Import at least one competitor-account signal and one trend-rank signal per project before claiming Kuaizi-like creative insight depth.',
+    ),
+    makeFeature(
+      'Channel account matrix ledger',
+      'implemented',
+      '/api/channel-accounts tracks platform handles, authorization state, account health, daily publish limits, scheduled load, and available publishing slots before distribution claims are accepted.',
+      'low',
+      'Connect this ledger to real OAuth/ad account APIs after provider credentials are available; keep manual_ready as the non-secret fallback.',
+    ),
+    makeFeature(
+      'Kuaizi production connector',
+      input.kuaiziConfigured ? 'implemented' : 'partial',
+      input.kuaiziConfigured
+        ? '/api/kuaizi/* 服务端代理已配置，可创建和轮询生产任务。'
+        : '/api/kuaizi/* 已存在，但服务端未配置 KUAIZI_API_KEY 时只能导出生产规格。',
+      input.kuaiziConfigured ? 'low' : 'medium',
+      '配置服务端 KUAIZI_API_KEY，并用真实沙盒任务验证一次 create/poll。',
+    ),
+    makeFeature(
+      'Image production',
+      input.imageConfigured ? 'implemented' : 'partial',
+      input.imageConfigured ? '/api/image-gen 可调用图像 provider。' : '/api/image-gen 未配置时返回明确降级，不伪造生产结果。',
+      input.imageConfigured ? 'low' : 'medium',
+      '配置图片 provider 或把导出规格中心做成主路径。',
+    ),
+    makeFeature(
+      'AI video production',
+      input.videoConfigured ? 'implemented' : 'partial',
+      input.videoConfigured ? '/api/video-gen 可调用视频 provider。' : '/api/video-gen 未配置时要求导出规格或提供可访问参考图。',
+      input.videoConfigured ? 'low' : 'medium',
+      '配置视频 provider；否则把视频生产标成“交接包”，避免朋友误以为可一键成片。',
+    ),
+    makeFeature(
+      'Creative insight / video teardown',
+      input.videoTeardownConfigured ? 'implemented' : 'partial',
+      input.videoTeardownConfigured ? '/api/video-teardown 可拆解参考视频。' : '/api/video-teardown 未配置时只能导出生产规格。',
+      input.videoTeardownConfigured ? 'low' : 'medium',
+      '配置视频理解 provider，或将页面首屏改成上传后生成人工拆解清单。',
+    ),
+    makeFeature(
+      'Industrial asset and distribution store',
+      input.industrialChainAvailable ? 'implemented' : 'partial',
+      input.industrialChainAvailable
+        ? '/api/industrial-chain 可沉淀 content assets、benchmark、production handoff pack、分发计划、UTM 和 ready 状态。'
+        : '缺统一资产库和分发计划存储。',
+      input.industrialChainAvailable ? 'low' : 'medium',
+      '补资产库/分发计划，避免每次生产和复盘都只停留在页面临时状态。',
+    ),
+    makeFeature(
+      'Full-chain commerce orchestration',
+      input.commerceChainAvailable ? 'implemented' : 'partial',
+      input.commerceChainAvailable
+        ? '/api/commerce-chain 可串联 intake、asset、production、distribution、performance、CRM 下一步。'
+        : '各模块存在，但缺少统一全链路编排报告。',
+      input.commerceChainAvailable ? 'low' : 'medium',
+      '把 POC、生产、分发计划、数据回流和 CRM action 汇总到同一报告。',
+    ),
+    makeFeature(
+      'Performance feedback import',
+      input.performanceImportAvailable ? 'implemented' : 'partial',
+      input.performanceImportAvailable
+        ? '/api/performance-import 可把平台 CSV 回流为 scale / iterate / pause 复盘决策。'
+        : '可人工记录复盘，但缺少统一 CSV 回流入口。',
+      input.performanceImportAvailable ? 'low' : 'medium',
+      '接入平台 CSV 或 UTM 回流，确保每条素材能追溯 SKU、asset、platform。',
+    ),
+    makeFeature(
+      'Distribution and ad authorization',
+      input.distributionExecutionAvailable ? 'partial' : 'missing',
+      input.distributionExecutionAvailable
+        ? '/api/industrial-chain/dispatch 支持从 distribution plan 生成手工交接包、UTM、发布证据、结果链接和 measured 状态；真实平台 OAuth 仍是 provider-gated。'
+        : '尚无广告/分发执行台账，只有分发计划。',
+      input.distributionExecutionAvailable ? 'medium' : 'high',
+      '继续补平台 OAuth 前，不伪造发布能力；先把 manual-ready、provider-gated、published、measured 的证据闭环跑实。',
+    ),
+    makeFeature(
+      'Platform connector automation ledger',
+      platformAutomationReady ? 'implemented' : 'partial',
+      platformConnectorEvidence,
+      platformAutomationReady ? 'low' : 'medium',
+      'Wire real platform OAuth, ad accounts, auto-publish, analytics sync, and enterprise asset RBAC env/config without exposing secret values.',
+    ),
+    makeFeature(
+      'Enterprise cloud asset management',
+      input.storageConfigured ? 'partial' : 'missing',
+      input.storageConfigured ? '有 Redis/分享存储，但不是筷子云盘级工程/文件/协作者体系。' : '无持久存储时仅内存降级。',
+      'medium',
+      '下一阶段补项目资产库、交付包版本、协作者权限。',
+    ),
+    makeFeature(
+      'Account and permission system',
+      input.authConfigured ? 'partial' : 'partial',
+      input.authConfigured ? 'JWT 账号体系可用，但不是企业级 RBAC。' : '无 JWT 时处于本地试用模式。',
+      'medium',
+      '朋友试用可接受；企业试用前补角色边界和审计记录。',
+    ),
+  ];
+
+  const workflows: ReadinessWorkflowCheck[] = [
+    {
+      name: 'Visitor -> POC -> report -> inquiry -> CRM',
+      ok: Boolean(input.commerceChainAvailable),
+      evidence: input.commerceChainAvailable
+        ? 'POC、标准包、报告、询盘、CRM-lite 和 /api/commerce-chain 已能汇总成端到端交付报告。'
+        : 'POC、标准包、报告、询盘、CRM-lite 都有真实路由/API，但缺少统一编排报告。',
+      fix: input.commerceChainAvailable ? undefined : '补全链路编排 API。',
+    },
+    {
+      name: 'Assets -> distribution plan -> measurable UTM',
+      ok: Boolean(input.industrialChainAvailable),
+      evidence: input.industrialChainAvailable
+        ? '/api/industrial-chain 已支持资产库、production handoff pack 入库、分发计划、UTM code 和 ready/published/measured 状态。'
+        : '资产和分发计划没有统一存储，难以形成筷子式内容生产台账。',
+      fix: input.industrialChainAvailable ? undefined : '补工业化资产库和分发计划 API。',
+    },
+    {
+      name: 'Brief -> production handoff -> Kuaizi task',
+      ok: true,
+      evidence: '生产规格包可导出；Kuaizi 服务端代理存在；无 key 时明确提示手动执行。',
+    },
+    {
+      name: 'Produced assets -> performance data -> next iteration',
+      ok: Boolean(input.performanceImportAvailable),
+      evidence: input.performanceImportAvailable
+        ? '/api/performance-import 已支持平台 CSV -> scale / iterate / pause 复盘决策。'
+        : 'Listing Factory 有表现记录与复盘结构，但真实平台数据回流仍依赖人工导入或 provider 配置。',
+      fix: input.performanceImportAvailable ? undefined : '补统一数据回流入口：CSV/广告平台导入 -> report -> CRM 下一步。',
+    },
+    {
+      name: 'Distribution -> ad account -> platform analytics',
+      ok: Boolean(input.distributionExecutionAvailable),
+      evidence: input.distributionExecutionAvailable
+        ? '/api/industrial-chain/dispatch 已能记录发布执行、手工交接包、证据 URL、结果 URL 和 measured 状态；平台 OAuth/广告账号授权仍需真实 provider 接入。'
+        : '尚无筷子级广告平台 OAuth、矩阵分发、账号追踪。',
+      fix: input.distributionExecutionAvailable
+        ? '下一阶段只在拿到真实授权后接 OAuth/广告账号；当前状态必须标注 manual/provider-gated。'
+        : '不要把 Wenai 讲成分发平台；先收敛到 POC 交付与生产规格。',
+    },
+  ];
+
+  workflows.push({
+    name: 'Platform OAuth -> ad account -> auto publish -> analytics sync',
+    ok: platformAutomationReady,
+    evidence: platformAutomationReady
+      ? `OAuth, ad account, auto-publish, analytics sync, and enterprise asset permissions are configured. ${platformConnectorEvidence}`
+      : `Manual dispatch ledger is available=${Boolean(input.distributionExecutionAvailable)}; platform automation is incomplete. ${platformConnectorEvidence}`,
+    fix: platformAutomationReady
+      ? undefined
+      : 'Complete platform connector config, then verify one OAuth grant, one ad account, one publish action, and one analytics sync.',
+  });
+
+  const competitor: CompetitorDimension[] = [
+    {
+      name: '产品完整度',
+      gap: input.kuaiziConfigured && input.imageConfigured && input.videoConfigured ? 'medium' : 'severe',
+      evidence: 'Wenai 覆盖 POC 交付与生产规格；筷子覆盖内容工业化全链路和大规模运营。',
+    },
+    {
+      name: '工作流闭环',
+      gap: 'medium',
+      evidence: 'Wenai 的 POC/CRM 闭环可跑；真实生产、分发、数据回流仍非一站式。',
+    },
+    {
+      name: '技术稳定性',
+      gap: 'minor',
+      evidence: '本地验证、降级、服务端代理和内存 fallback 已补齐；生产 provider 仍需真实验收。',
+    },
+    {
+      name: '用户体验成熟度',
+      gap: 'medium',
+      evidence: '核心路径清楚；部分 pipeline 仍有 alert 反馈和 provider-gated 能力。',
+    },
+  ];
+  competitor.push({
+    name: 'Platform automation depth',
+    gap: platformAutomationReady ? 'minor' : 'severe',
+    evidence: platformAutomationReady
+      ? 'The platform connector ledger reports OAuth, ad account, publish, analytics, and enterprise asset permissions ready.'
+      : `External platform automation is still gated: ${platformConnectorEvidence}.`,
+  });
+
+  const issues: ReadinessIssue[] = [];
+  if (!input.storageConfigured) {
+    issues.push({
+      priority: 'P1',
+      title: '无 Redis 时询盘只保留在内存',
+      evidence: '/api/sales/inquiry 已降级可用，但进程重启会丢。',
+      fix: '生产/朋友长期试用前配置 Redis。',
+    });
+  }
+  if (!input.kuaiziConfigured) {
+    issues.push({
+      priority: 'P1',
+      title: 'Kuaizi 外部生产未实连',
+      evidence: '/api/kuaizi/* 可用但缺服务端 key 时不能创建真实任务。',
+      fix: '配置 KUAIZI_API_KEY 并跑一次沙盒任务。',
+    });
+  }
+  if (!input.imageConfigured || !input.videoConfigured || !input.videoTeardownConfigured) {
+    issues.push({
+      priority: 'P1',
+      title: '创意生产 provider 未完全配置',
+      evidence: '图片、视频、视频拆解至少一项处于导出规格模式。',
+      fix: '把未配置能力在 UI 上明确标成“交接包”，或补 provider。',
+    });
+  }
+  if (!input.performanceImportAvailable) {
+    issues.push({
+      priority: 'P1',
+      title: '平台表现数据缺少统一回流入口',
+      evidence: '没有 CSV/UTM 回流时，复盘依赖人工描述，难以持续迭代素材。',
+      fix: '补平台 CSV 导入 -> report -> CRM 下一步。',
+    });
+  }
+  if (!input.commerceChainAvailable) {
+    issues.push({
+      priority: 'P1',
+      title: '全链路能力缺少统一编排入口',
+      evidence: '单点功能可用，但用户无法看到从 POC 到 CRM 的完整链路验收结果。',
+      fix: '补 /api/commerce-chain，把阶段状态、交付包和下一步动作统一输出。',
+    });
+  }
+  if (!input.industrialChainAvailable) {
+    issues.push({
+      priority: 'P1',
+      title: '缺少内容工业化资产库和分发计划台账',
+      evidence: '没有资产/benchmark/渠道计划存储时，无法持续接近筷子科技的生产管理厚度。',
+      fix: '补 /api/industrial-chain，沉淀资产、分发计划和 UTM 回流字段。',
+    });
+  }
+  if (input.project && projectReadiness?.verdict !== 'pass') {
+    issues.push({
+      priority: projectReadiness?.verdict === 'fail' ? 'P1' : 'P2',
+      title: '项目级内容工业化闭环尚未完全验收',
+      evidence: projectReadiness
+        ? `project=${input.project.projectId}; score=${projectReadiness.score}; missing=${projectReadiness.missingLinks.join(' | ') || 'none'}`
+        : `project=${input.project.projectId}; no project readiness evidence`,
+      fix: projectReadiness?.nextActions.join(' | ') || '补齐项目资产、分发执行和数据回流台账。',
+    });
+  }
+  if (!platformAutomationReady) {
+    issues.push({
+      priority: 'P1',
+      title: 'Kuaizi-level platform automation is not fully configured',
+      evidence: platformConnectorEvidence,
+      fix: 'Configure OAuth, ad account authorization, auto-publish, analytics sync, and enterprise asset permissions; verify with sandbox accounts before claiming parity.',
+    });
+  }
+  issues.push({
+    priority: 'P2',
+    title: '筷子级分发和账号追踪缺失',
+    evidence: input.distributionExecutionAvailable
+      ? '已有 dispatch 执行台账和证据回填，但没有多平台 OAuth、广告账号授权、榜单追踪。'
+      : '没有多平台 OAuth、矩阵发布计划、广告账号授权、榜单追踪。',
+    fix: input.distributionExecutionAvailable
+      ? '保留 provider-gated 标注，等真实账号授权后再接平台 adapter。'
+      : '作为后续阶段，不阻断 10 SKU POC 试用。',
+  });
+
+  const p0 = issues.filter(issue => issue.priority === 'P0');
+  const highRiskPseudo = features.some(feature => feature.status === 'pseudo' && feature.risk === 'high');
+  const baseScore = Math.min(100, features.reduce((sum, feature) => sum + scoreFeature(feature), 0));
+  const workflowPenalty = workflows.filter(item => !item.ok).length * 3;
+  const score = Math.max(0, baseScore - workflowPenalty);
+  const hasP1 = issues.some(issue => issue.priority === 'P1');
+  const hasP2 = issues.some(issue => issue.priority === 'P2');
+  const allWorkflowsOk = workflows.every(item => item.ok) && (!projectReadiness || projectReadiness.verdict !== 'fail');
+  const verdict: ReadinessVerdict = p0.length > 0 || highRiskPseudo
+    ? 'fail'
+    : score >= 94 && allWorkflowsOk && !hasP1 && !hasP2
+      ? 'pass'
+      : score >= 82 && workflows[0].ok
+        ? 'conditional'
+        : 'fail';
+
+  const friendTrialRisks = issues.filter(issue => issue.priority !== 'P2');
+
+  return {
+    verdict,
+    label: verdict === 'pass' ? '通过' : verdict === 'conditional' ? '有条件通过' : '不通过',
+    score,
+    competitor,
+    features,
+    workflows,
+    issues,
+    friendTrialRisks,
+    externalRequirements,
+    scaleClaimGuards,
+    projectReadiness,
+    recommendation: verdict === 'fail' ? '修复后保留' : '修复后保留',
+  };
+}

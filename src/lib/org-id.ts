@@ -38,6 +38,8 @@ export async function resolveOrgId(req: NextRequest): Promise<string> {
   // 2. middleware 注入 (内部信任)
   const tenantId = req.headers.get('x-tenant-id');
   if (tenantId) return tenantId;
+  const orgId = req.headers.get('x-org-id');
+  if (orgId) return orgId;
 
   // 3. 兜底
   const username = req.headers.get('x-username');
@@ -71,6 +73,8 @@ export async function resolveOrgContext(req: NextRequest): Promise<{ orgId: stri
 export function resolveOrgIdSync(req: NextRequest): string {
   const tenantId = req.headers.get('x-tenant-id');
   if (tenantId) return tenantId;
+  const orgId = req.headers.get('x-org-id');
+  if (orgId) return orgId;
   const username = req.headers.get('x-username');
   if (username) return username;
   const ip = getIp(req);

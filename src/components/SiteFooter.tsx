@@ -1,9 +1,3 @@
-/**
- * 全局 footer · 三栏链接
- *
- * 给商家发现 wenai 的所有公开层 · 也是 SEO 内链锚点
- */
-
 import Link from 'next/link';
 
 interface ColLink {
@@ -13,16 +7,18 @@ interface ColLink {
 }
 
 const COL_TOOLS: ColLink[] = [
-  { href: '/tools',                  label: '🧰 全部工具' },
-  { href: '/tools/hook-score',       label: 'Hook 跑前打分' },
-  { href: '/tools/aigc-compliance',  label: 'AIGC 合规速查' },
-  { href: '/me/inventory',           label: '库存监控' },
+  { href: '/tools', label: '全部工具' },
+  { href: '/tools/hook-score', label: 'Hook 跑前打分' },
+  { href: '/tools/aigc-compliance', label: 'AIGC 合规速查' },
+  { href: '/me/inventory', label: '库存监控' },
 ];
 
 const COL_PRODUCT: ColLink[] = [
+  { href: '/factory', label: '内容工厂' },
+  { href: '/factory/creative', label: '创意情报台' },
+  { href: '/factory/video', label: '视频生产队列' },
   { href: '/pipelines/new-listing', label: '新品上新流水线' },
   { href: '/pipelines/product-image', label: '主图工厂' },
-  { href: '/pipelines/video-teardown', label: '视频拆解' },
   { href: '/pipelines/data-insights', label: '数据洞察' },
   { href: '/me/skus', label: '我的 SKU 库' },
 ];
@@ -30,7 +26,6 @@ const COL_PRODUCT: ColLink[] = [
 const COL_RESOURCE: ColLink[] = [
   { href: '/changelog', label: '更新日志' },
   { href: '/roadmap', label: '路线图' },
-  { href: '/MOAT_MAP', label: 'MOAT 文档' },
   { href: '/status', label: '系统状态' },
   { href: '/pricing', label: '定价' },
   { href: '/inquire', label: '企业询盘' },
@@ -45,7 +40,7 @@ const COL_LEGAL: ColLink[] = [
 function LinkColumn({ title, items }: { title: string; items: ColLink[] }) {
   return (
     <div>
-      <div className="text-[10px] font-mono text-text-tertiary uppercase tracking-wider mb-2">
+      <div className="mb-2 text-[10px] font-mono uppercase tracking-wider text-text-tertiary">
         {title}
       </div>
       <ul className="space-y-1.5">
@@ -58,7 +53,7 @@ function LinkColumn({ title, items }: { title: string; items: ColLink[] }) {
                 rel="noopener noreferrer"
                 className="text-[12px] text-text-secondary hover:text-accent"
               >
-                {item.label} ↗
+                {item.label} →
               </a>
             ) : (
               <Link href={item.href} className="text-[12px] text-text-secondary hover:text-accent">
@@ -74,20 +69,20 @@ function LinkColumn({ title, items }: { title: string; items: ColLink[] }) {
 
 export function SiteFooter() {
   return (
-    <footer className="mt-12 mb-16 sm:mb-0 border-t border-border-subtle pt-6 pb-8">
-      <div className="max-w-[1100px] mx-auto px-4 lg:px-0">
-        <div className="grid grid-cols-2 md:grid-cols-4 gap-6 mb-6">
-          <LinkColumn title="🧰 免费工具" items={COL_TOOLS} />
-          <LinkColumn title="🚀 产品" items={COL_PRODUCT} />
-          <LinkColumn title="📚 资源" items={COL_RESOURCE} />
-          <LinkColumn title="📜 法律" items={COL_LEGAL} />
+    <footer className="mb-16 mt-12 border-t border-border-subtle pb-8 pt-6 sm:mb-0">
+      <div className="mx-auto max-w-[1100px] px-4 lg:px-0">
+        <div className="mb-6 grid grid-cols-2 gap-6 md:grid-cols-4">
+          <LinkColumn title="免费工具" items={COL_TOOLS} />
+          <LinkColumn title="产品能力" items={COL_PRODUCT} />
+          <LinkColumn title="资源" items={COL_RESOURCE} />
+          <LinkColumn title="法律" items={COL_LEGAL} />
         </div>
-        <div className="border-t border-border-subtle pt-4 flex flex-wrap items-center justify-between gap-2 text-[10px] font-mono text-text-tertiary">
+        <div className="flex flex-wrap items-center justify-between gap-2 border-t border-border-subtle pt-4 text-[10px] font-mono text-text-tertiary">
           <div>
-            wenai · 跨境电商 AI 工作台 · 商家把空白 SKU 跑成上架的完整流水线
+            Wenai · 跨境电商内容工业化系统 · 把空白 SKU 跑成可验收、可复盘、可交接的增长流水线
           </div>
           <div>
-            © {new Date().getFullYear()} · made with care
+            © {new Date().getFullYear()} · built for operator-grade delivery
           </div>
         </div>
       </div>

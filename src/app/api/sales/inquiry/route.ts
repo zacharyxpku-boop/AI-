@@ -85,6 +85,76 @@ if (process.env.UPSTASH_REDIS_REST_URL && process.env.UPSTASH_REDIS_REST_TOKEN) 
   });
 }
 
+const memoryInquiries = new Map<string, Record<string, string>>();
+const memoryInquiryIds: string[] = [];
+
+function saveMemoryInquiry(id: string, payload: Record<string, string>) {
+  memoryInquiries.set(id, payload);
+  const existing = memoryInquiryIds.indexOf(id);
+  if (existing >= 0) memoryInquiryIds.splice(existing, 1);
+  memoryInquiryIds.unshift(id);
+  memoryInquiryIds.splice(500);
+}
+
+function listMemoryInquiries(limit = 100) {
+  return memoryInquiryIds
+    .slice(0, limit)
+    .map(id => memoryInquiries.get(id))
+    .filter((item): item is Record<string, string> => Boolean(item))
+    .map(item => normalizeInquiryRow(item));
+}
+
+function patchMemoryInquiry(id: string, patch: Record<string, string>) {
+  const previous = memoryInquiries.get(id);
+  if (!previous) return null;
+  const next = { ...previous, ...patch };
+  memoryInquiries.set(id, next);
+  return next;
+}
+
+export async function patchInquiryHandoff(id: string, patchInput: Partial<Record<typeof CRM_PATCH_FIELDS[number], string>>) {
+  const previous = redis
+    ? await redis.hgetall<Record<string, unknown>>(`wenai:inquiry:${id}`)
+    : memoryInquiries.get(id);
+  if (!previous || Object.keys(previous).length === 0) {
+    return { ok: false as const, status: 404, error: '未找到该询盘' };
+  }
+
+  const updatedAt = new Date().toISOString();
+  const patch: Record<string, string> = { updatedAt };
+  const allowedFields: Array<typeof CRM_PATCH_FIELDS[number]> = [
+    'owner',
+    'nextAction',
+    'nextActionDue',
+    'reviewNotes',
+    'reviewDecision',
+    'reviewCompletedAt',
+    'contractNextStep',
+    'contractStage',
+    'quoteStatus',
+    'paymentStatus',
+    'dealProbability',
+    'closeDate',
+    'lifecycleStage',
+    'crmSyncStatus',
+    'crmSyncAt',
+    'crmSyncNote',
+    'tags',
+    'renewalPotential',
+    'priority',
+  ];
+  allowedFields.forEach(field => {
+    if (typeof patchInput[field] === 'string') patch[field] = patchInput[field].slice(0, 1200);
+  });
+
+  const opsEntry = buildOpsActivity({ previous, patch, at: updatedAt });
+  if (opsEntry) patch.activityLog = appendInquiryActivity(previous.activityLog, [opsEntry]);
+
+  if (redis) await redis.hset(`wenai:inquiry:${id}`, patch);
+  else patchMemoryInquiry(id, patch);
+  return { ok: true as const, updatedAt, patch };
+}
+
 const SCALE_ALLOWED = new Set(['<50', '50-200', '200-1000', '1000+']);
 const CATEGORY_ALLOWED = new Set(['home', 'auto', 'digital', 'tool', 'living', 'mixed', 'other']);
 const ASSETS_ALLOWED = new Set(['ready', 'partial', 'none']);
@@ -475,15 +545,18 @@ export async function POST(req: NextRequest) {
     status: 'new',
   };
 
+  let savedToRedis = false;
   if (redis) {
     try {
       await redis.hset(`wenai:inquiry:${id}`, payload);
       await redis.lpush('wenai:inquiries:list', id);
       await redis.ltrim('wenai:inquiries:list', 0, 499);
+      savedToRedis = true;
     } catch (error) {
       console.warn('[INQUIRY] Redis 写入失败', error);
     }
   }
+  if (!savedToRedis) saveMemoryInquiry(id, payload);
 
   return NextResponse.json({ ok: true, id, message: '已收到，wenai 会在 24 小时内主动联系你' });
 }
@@ -493,7 +566,15 @@ export async function GET(req: NextRequest) {
     return NextResponse.json({ error: '未授权' }, { status: 401 });
   }
   if (!redis) {
-    return NextResponse.json({ inquiries: [], notice: '当前为本地试用模式，询盘不会跨环境持久化。' });
+    const inquiries = listMemoryInquiries();
+    if (req.nextUrl.searchParams.get('format') === 'external-crm') {
+      return NextResponse.json({
+        records: inquiries.map(buildExternalCrmRecord),
+        mappingVersion: 'wenai-crm-v1',
+        note: '当前为本地试用模式，CRM 映射来自内存询盘；重启后需重新提交。',
+      });
+    }
+    return NextResponse.json({ inquiries, notice: '当前为本地试用模式，询盘仅保留在当前进程内存。' });
   }
   try {
     const ids = await redis.lrange('wenai:inquiries:list', 0, 99);
@@ -530,7 +611,6 @@ export async function GET(req: NextRequest) {
 
 export async function PATCH(req: NextRequest) {
   if (!authed(req)) return NextResponse.json({ error: '未授权' }, { status: 401 });
-  if (!redis) return NextResponse.json({ error: '询盘工作台暂未启用云端存储。' }, { status: 503 });
 
   const body = await req.json().catch(() => ({}));
   const id = str(body.id);
@@ -548,7 +628,9 @@ export async function PATCH(req: NextRequest) {
   if (validationError) return NextResponse.json({ error: validationError }, { status: 400 });
 
   try {
-    const previous = await redis.hgetall<Record<string, unknown>>(`wenai:inquiry:${id}`);
+    const previous = redis
+      ? await redis.hgetall<Record<string, unknown>>(`wenai:inquiry:${id}`)
+      : memoryInquiries.get(id);
     if (!previous || Object.keys(previous).length === 0) {
       return NextResponse.json({ error: '未找到该询盘' }, { status: 404 });
     }
@@ -617,7 +699,8 @@ export async function PATCH(req: NextRequest) {
       patch.activityLog = appendInquiryActivity(previous.activityLog, entries);
     }
 
-    await redis.hset(`wenai:inquiry:${id}`, patch);
+    if (redis) await redis.hset(`wenai:inquiry:${id}`, patch);
+    else patchMemoryInquiry(id, patch);
     return NextResponse.json({ ok: true, updatedAt });
   } catch (error) {
     return NextResponse.json({ error: error instanceof Error ? error.message : '更新失败' }, { status: 500 });
@@ -626,14 +709,15 @@ export async function PATCH(req: NextRequest) {
 
 export async function PUT(req: NextRequest) {
   if (!authed(req)) return NextResponse.json({ error: '未授权' }, { status: 401 });
-  if (!redis) return NextResponse.json({ error: '询盘工作台暂未启用云端存储。' }, { status: 503 });
 
   const body = await req.json().catch(() => ({}));
   const id = str(body.id);
   if (!id) return NextResponse.json({ error: 'id 必填' }, { status: 400 });
 
   try {
-    const raw = await redis.hgetall<Record<string, unknown>>(`wenai:inquiry:${id}`);
+    const raw = redis
+      ? await redis.hgetall<Record<string, unknown>>(`wenai:inquiry:${id}`)
+      : memoryInquiries.get(id);
     if (!raw || Object.keys(raw).length === 0) {
       return NextResponse.json({ error: '未找到该询盘' }, { status: 404 });
     }
@@ -649,7 +733,7 @@ export async function PUT(req: NextRequest) {
       ...(result.externalId ? { externalCrmId: result.externalId.slice(0, 120) } : {}),
       ...(result.externalUrl ? { externalCrmUrl: result.externalUrl.slice(0, 300) } : {}),
     };
-    await redis.hset(`wenai:inquiry:${id}`, {
+    const syncPatch = {
       ...patch,
       activityLog: appendInquiryActivity(normalized.activityLog, [
         buildOpsActivity({
@@ -658,7 +742,9 @@ export async function PUT(req: NextRequest) {
           at: syncedAt,
         }),
       ].filter((item): item is NonNullable<typeof item> => Boolean(item))),
-    });
+    };
+    if (redis) await redis.hset(`wenai:inquiry:${id}`, syncPatch);
+    else patchMemoryInquiry(id, syncPatch);
 
     return NextResponse.json({ ok: result.ok, sync: result, record });
   } catch (error) {

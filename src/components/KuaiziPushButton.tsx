@@ -3,8 +3,8 @@
 import { useEffect, useState } from 'react';
 import {
   createKuaiziProductionTask,
-  getKuaiziConfig,
   getKuaiziTaskStatus,
+  loadKuaiziConfig,
   type KuaiziBriefPayload,
   type KuaiziTaskStatus,
 } from '@/lib/kuaizi-api';
@@ -36,7 +36,15 @@ export default function KuaiziPushButton({ payload, visible, onCompleted }: Kuai
   const [isSubmitting, setIsSubmitting] = useState(false);
 
   useEffect(() => {
-    setConfigured(Boolean(getKuaiziConfig()));
+    let cancelled = false;
+    loadKuaiziConfig().then(config => {
+      if (!cancelled) setConfigured(Boolean(config));
+    }).catch(() => {
+      if (!cancelled) setConfigured(false);
+    });
+    return () => {
+      cancelled = true;
+    };
   }, []);
 
   useEffect(() => {
@@ -105,14 +113,14 @@ export default function KuaiziPushButton({ payload, visible, onCompleted }: Kuai
         type="button"
         onClick={push}
         disabled={isSubmitting || !configured}
-        title={configured ? '推送生产任务' : '请先前往设置页配置筷子科技 API'}
+        title={configured ? '推送生产任务' : '请先前往设置页配置筷子科技连接'}
         className="w-full rounded-md bg-slate-950 px-4 py-3 text-[13px] font-black text-white disabled:opacity-60 sm:w-auto"
       >
         {isSubmitting ? '正在推送...' : configured ? '一键推送到筷子科技生成素材' : '配置后推送生产任务'}
       </button>
-      {!configured && <p className="mt-2 text-[12px] font-bold text-slate-700">请先前往设置页配置筷子科技 API。</p>}
+      {!configured && <p className="mt-2 text-[12px] font-bold text-slate-700">请先前往设置页配置筷子科技连接。</p>}
       {message && <p className="mt-2 text-[12px] font-bold text-slate-700">{message}</p>}
-      {taskId && <p className="mt-1 text-[11px] text-slate-500">任务 ID：{taskId}</p>}
+      {taskId && <p className="mt-1 text-[11px] text-slate-500">任务编号：{taskId}</p>}
       {status === 'failed' && (
         <p className="mt-2 text-[12px] font-bold text-rose-700">备选动作：导出生产规格，交给剪辑师或外部生产工具手动执行。</p>
       )}

@@ -2,23 +2,21 @@
 
 import { useState } from 'react';
 
+import type { AssetPrincipalRole } from '@/lib/asset-permission-ledger';
+
 /**
- * 通用分享 hook · POST /api/share + URL 复制
+ * 通用分享 hook：POST /api/share + 复制公开 URL。
  *
- * 用法:
- *   const share = useShare();
- *   <button onClick={() => share.generate({ moduleId: 'ab-test', title: '...', content: md })}>
- *     {share.url ? '✓ 已生成' : '🔗 公开分享'}
- *   </button>
- *
- * 让 video-teardown / ab-test / data-insights 等模块共用同一套分享逻辑
- * 避免每个页面重复写 fetch + state, 也避免 UI 风格漂移
+ * 需要公开分享资产相关内容时，传入 projectId + assetIds + role，让后端按企业资产权限拦截。
  */
 export interface SharePayload {
   moduleId: string;
   title: string;
   content: string;
   source?: 'pipeline-01' | 'pipeline-02' | 'pipeline-03' | 'module';
+  projectId?: string;
+  assetIds?: string[];
+  role?: AssetPrincipalRole;
 }
 
 export function useShare() {
@@ -36,7 +34,7 @@ export function useShare() {
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ ...payload, source: payload.source || 'module' }),
       });
-      const data = await res.json();
+      const data = await res.json().catch(() => ({}));
       if (!res.ok) throw new Error(data.error || `HTTP ${res.status}`);
       setUrl(`${window.location.origin}${data.url}`);
     } catch (err) {

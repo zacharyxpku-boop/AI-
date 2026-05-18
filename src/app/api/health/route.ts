@@ -1,5 +1,6 @@
 import { NextResponse } from 'next/server';
 import { Redis } from '@upstash/redis';
+import { getKuaiziServerConfig } from '@/lib/kuaizi-server';
 
 /**
  * Public status endpoint.
@@ -98,14 +99,17 @@ function checkAuth(): Status {
 }
 
 function checkExternalProduction(): Status {
-  if (!hasValue(process.env.HAPPYHORSE_API_KEY)) {
+  const hasHappyHorse = hasValue(process.env.HAPPYHORSE_API_KEY);
+  const hasKuaizi = Boolean(getKuaiziServerConfig());
+  if (!hasHappyHorse && !hasKuaizi) {
     return {
       name: 'External production connector',
       status: 'degraded',
       note: '外部生产连接暂未启用，当前仅导出生产规格。',
     };
   }
-  return { name: 'External production connector', status: 'operational', note: '外部生产连接已启用。' };
+  const providers = [hasHappyHorse ? 'video provider' : '', hasKuaizi ? 'Kuaizi proxy' : ''].filter(Boolean).join(' / ');
+  return { name: 'External production connector', status: 'operational', note: `外部生产连接已启用：${providers}。` };
 }
 
 function checkVideoTeardown(): Status {

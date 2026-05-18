@@ -1,19 +1,18 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { Redis } from '@upstash/redis';
-import { checkRateLimit } from '@/lib/ratelimit';
-import { verifyToken, getCookieName } from '@/lib/auth';
-import { getShare, setMemoryShare, type ShareData } from '@/lib/share-readonly';
 
-/**
- * 结果分享 · 朋友跑完 Pipeline 点分享 → 得到公开 /share/<id>
- *
- * 存储:
- *   Redis hash key wenai:share:<id> = {moduleId, title, content, createdAt, source}
- *   TTL 7 天自动过期（避免 Redis 越堆越大）
- *
- * 不走 Redis 的降级（无 UPSTASH）:
- *   使用内存 Map,serverless cold start 会丢,但 share 功能本身是 P2 不致命
- */
+import {
+  assetPermissionDenyMessage,
+  evaluateAssetObjectAccess,
+  evaluateAssetPermissionBatchAccess,
+  recordAssetPermissionAccessAudit,
+  verifyAssetAccessGrant,
+  type AssetPrincipalRole,
+} from '@/lib/asset-permission-ledger';
+import { getCookieName, verifyToken } from '@/lib/auth';
+import { resolveOrgId } from '@/lib/org-id';
+import { checkRateLimit } from '@/lib/ratelimit';
+import { getShare, setMemoryShare, type ShareData } from '@/lib/share-readonly';
 
 interface SharePayload {
   id?: string;
@@ -21,6 +20,10 @@ interface SharePayload {
   title: string;
   content: string;
   source?: 'pipeline-01' | 'pipeline-02' | 'pipeline-03' | 'poc-report' | 'module';
+  projectId?: string;
+  assetIds?: string[];
+  grantTokens?: Record<string, string>;
+  role?: AssetPrincipalRole;
 }
 
 let redis: Redis | null = null;
@@ -31,16 +34,16 @@ if (process.env.UPSTASH_REDIS_REST_URL && process.env.UPSTASH_REDIS_REST_TOKEN) 
   });
 }
 
-const TTL_SECONDS = 7 * 24 * 60 * 60; // 7 days
+const TTL_SECONDS = 7 * 24 * 60 * 60;
 
 function genId(): string {
-  // Base36 时间戳 + 6 字节 random = 读得懂 + 防猜
   const ts = Date.now().toString(36);
   const rand = Math.random().toString(36).slice(2, 8);
   return `${ts}${rand}`;
 }
 
 export async function POST(request: NextRequest) {
+  const orgId = await resolveOrgId(request);
   let body: SharePayload;
   try {
     body = await request.json();
@@ -51,10 +54,100 @@ export async function POST(request: NextRequest) {
     return NextResponse.json({ error: '内容过短' }, { status: 400 });
   }
   if (body.content.length > 30000) {
-    return NextResponse.json({ error: '内容过长 (>30K · 约 10000 中文字)' }, { status: 413 });
+    return NextResponse.json({ error: '内容过长，不能超过 30000 字符' }, { status: 413 });
   }
 
-  // Per-user rate limit · 防滥用 30 次/天
+  const assetIds = Array.isArray(body.assetIds)
+    ? body.assetIds.map(item => String(item).trim()).filter(Boolean).slice(0, 50)
+    : [];
+  if (assetIds.length > 0) {
+    const access = await evaluateAssetPermissionBatchAccess(orgId, {
+      projectId: body.projectId,
+      assetIds,
+      action: 'share',
+      role: body.role || 'crm',
+    });
+    await Promise.all(access.results.map(item => recordAssetPermissionAccessAudit(orgId, {
+      projectId: body.projectId,
+      assetId: item.assetId,
+      action: 'share',
+      role: access.role,
+      actor: access.role || 'crm',
+      operation: 'public_share_create',
+      allowed: item.allowed,
+      reason: item.reason,
+      record: item.record,
+    })));
+    if (!access.allowed) {
+      return NextResponse.json({
+        error: 'asset_share_permission_denied',
+        message: assetPermissionDenyMessage('share'),
+        access,
+      }, { status: 403, headers: { 'Cache-Control': 'no-store' } });
+    }
+    const objectResults = await Promise.all(assetIds.map(async assetId => ({
+      assetId,
+      ...await evaluateAssetObjectAccess(orgId, {
+        projectId: body.projectId,
+        assetId,
+        action: 'share',
+      }),
+    })));
+    const objectDenied = objectResults.filter(item => !item.allowed);
+    await Promise.all(objectResults.map(item => recordAssetPermissionAccessAudit(orgId, {
+      projectId: body.projectId,
+      assetId: item.assetId,
+      action: 'share',
+      role: access.role,
+      actor: access.role || 'crm',
+      operation: 'public_share_object_gate',
+      allowed: item.allowed,
+      reason: item.reason,
+      record: access.results.find(result => result.assetId === item.assetId)?.record,
+    })));
+    if (objectDenied.length > 0) {
+      return NextResponse.json({
+        error: 'asset_share_object_unavailable',
+        message: 'Asset share permission passed, but one or more enterprise asset objects are unavailable.',
+        deniedAssetIds: objectDenied.map(item => item.assetId),
+        objectResults,
+      }, { status: 409, headers: { 'Cache-Control': 'no-store' } });
+    }
+    const grantTokens = body.grantTokens && typeof body.grantTokens === 'object' ? body.grantTokens : {};
+    const grantResults = await Promise.all(assetIds
+      .map(async assetId => ({
+        assetId,
+        ...await verifyAssetAccessGrant(orgId, {
+          projectId: body.projectId,
+          assetId,
+          action: 'share',
+          role: access.role,
+          token: typeof grantTokens[assetId] === 'string' ? grantTokens[assetId].trim() : undefined,
+          consume: true,
+        }),
+      })));
+    await Promise.all(grantResults.map(item => recordAssetPermissionAccessAudit(orgId, {
+      projectId: body.projectId,
+      assetId: item.assetId,
+      action: 'share',
+      role: access.role,
+      actor: access.role || 'crm',
+      operation: 'public_share_access_grant',
+      allowed: item.allowed,
+      reason: item.reason,
+      record: access.results.find(result => result.assetId === item.assetId)?.record,
+    })));
+    const grantDenied = grantResults.filter(item => !item.allowed);
+    if (grantDenied.length > 0) {
+      return NextResponse.json({
+        error: 'asset_share_grant_denied',
+        message: '资产分享权限已通过，但公开分享必须为每个企业资产携带有效的临时分享授权。',
+        deniedAssetIds: grantDenied.map(item => item.assetId),
+        grantResults,
+      }, { status: 403, headers: { 'Cache-Control': 'no-store' } });
+    }
+  }
+
   let rateKey = 'anon';
   try {
     const token = request.cookies.get(getCookieName())?.value;
@@ -66,8 +159,8 @@ export async function POST(request: NextRequest) {
   const limit = await checkRateLimit('share', rateKey);
   if (!limit.allowed) {
     return NextResponse.json(
-      { error: `分享链接每日 30 次上限已达 · ${new Date(limit.resetAt).toLocaleString('zh-CN')} 重置` },
-      { status: 429 }
+      { error: `分享链接每日 30 次上限已达，${new Date(limit.resetAt).toLocaleString('zh-CN')} 重置` },
+      { status: 429 },
     );
   }
 
@@ -84,8 +177,8 @@ export async function POST(request: NextRequest) {
     try {
       await redis.hset(`wenai:share:${id}`, { ...payload });
       await redis.expire(`wenai:share:${id}`, TTL_SECONDS);
-    } catch (e) {
-      console.warn('[share] redis fail, fallback memory', e);
+    } catch (error) {
+      console.warn('[share] redis fail, fallback memory', error);
       setMemoryShare(id, payload, TTL_SECONDS);
     }
   } else {
@@ -106,8 +199,8 @@ export async function GET(request: NextRequest) {
       if (data && Object.keys(data).length > 0) {
         return NextResponse.json({ ok: true, data });
       }
-    } catch (e) {
-      console.warn('[share] redis read fail', e);
+    } catch (error) {
+      console.warn('[share] redis read fail', error);
     }
   }
 

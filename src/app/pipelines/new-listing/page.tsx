@@ -67,6 +67,7 @@ function NewListingPipelineInner() {
   const [batchRows, setBatchRows] = useState<BatchRow[]>([]);
   const [batchProgress, setBatchProgress] = useState({ current: 0, total: 0 });
   const [batchRunning, setBatchRunning] = useState(false);
+  const [actionNotice, setActionNotice] = useState<{ type: 'success' | 'warning' | 'error'; text: string } | null>(null);
   const batchAbortRef = useRef<boolean>(false);
 
   const [states, setStates] = useState<Record<StepId, StepState>>({
@@ -200,6 +201,7 @@ function NewListingPipelineInner() {
   };
 
   const handleStart = async () => {
+    setActionNotice(null);
     // 先预占上新额度，不够不启动
     try {
       const check = await fetch('/api/ratelimit/check', {
@@ -209,7 +211,10 @@ function NewListingPipelineInner() {
       });
       if (!check.ok) {
         const data = await check.json().catch(() => ({}));
-        alert(`上新额度已达上限\n${data.resetAtText ? '将于 ' + data.resetAtText + ' 重置' : ''}\n准备跑真实 SKU 请提交 10 SKU 试跑需求`);
+        setActionNotice({
+          type: 'warning',
+          text: `上新额度已达上限。${data.resetAtText ? '将于 ' + data.resetAtText + ' 重置。' : ''} 准备跑真实 SKU 请提交 10 SKU 试跑需求。`,
+        });
         return;
       }
     } catch {
@@ -320,9 +325,9 @@ ${states['ip-compliance'].result || '(空)'}
         } catch { /* fallback to clipboard */ }
       }
       await nav.clipboard.writeText(fullUrl);
-      alert('链接已复制到剪贴板\n' + fullUrl + '\n\n7 天有效,可直接发给老板');
+      setActionNotice({ type: 'success', text: `分享链接已复制：${fullUrl}。7 天有效，可直接发给老板。` });
     } catch (err) {
-      alert('分享失败: ' + (err instanceof Error ? err.message : 'unknown'));
+      setActionNotice({ type: 'error', text: `分享失败：${err instanceof Error ? err.message : 'unknown'}` });
     } finally {
       setSharing(false);
     }
@@ -372,7 +377,7 @@ ${states['ip-compliance'].result || '(空)'}
       });
       if (!check.ok) {
         const d = await check.json().catch(() => ({}));
-        alert(`配额不足无法重试\n${d.resetAtText || ''}`);
+        setActionNotice({ type: 'warning', text: `配额不足，暂时无法重试。${d.resetAtText || ''}` });
         return;
       }
     } catch {}
@@ -421,9 +426,16 @@ ${states['ip-compliance'].result || '(空)'}
   };
 
   const handleBatchStart = async () => {
-    if (!category) return alert('先选品类');
+    setActionNotice(null);
+    if (!category) {
+      setActionNotice({ type: 'warning', text: '先选择品类。' });
+      return;
+    }
     const parsed = parseBatchInput(batchInput);
-    if (parsed.length === 0) return alert('请粘贴至少 1 条 SKU（多条用三连字符 --- 分隔）');
+    if (parsed.length === 0) {
+      setActionNotice({ type: 'warning', text: '请粘贴至少 1 条 SKU，多条用三连字符 --- 分隔。' });
+      return;
+    }
 
     batchAbortRef.current = false;
     setBatchRunning(true);
@@ -451,7 +463,10 @@ ${states['ip-compliance'].result || '(空)'}
         });
         if (!check.ok) {
           const data = await check.json().catch(() => ({}));
-          alert(`第 ${i + 1} 条 SKU 前触发额度上限\n已完成 ${i} 条\n${data.resetAtText ? '将于 ' + data.resetAtText + ' 重置' : ''}\n准备跑真实批次请提交 10 SKU 试跑需求`);
+          setActionNotice({
+            type: 'warning',
+            text: `第 ${i + 1} 条 SKU 前触发额度上限，已完成 ${i} 条。${data.resetAtText ? '将于 ' + data.resetAtText + ' 重置。' : ''} 准备跑真实批次请提交 10 SKU 试跑需求。`,
+          });
           break;
         }
       } catch {}
@@ -642,6 +657,18 @@ ${states['ip-compliance'].result || '(空)'}
           >
             知道了
           </button>
+        </div>
+      )}
+
+      {actionNotice && (
+        <div className={`mb-4 p-3 border rounded text-[11px] ${
+          actionNotice.type === 'success'
+            ? 'border-success/40 bg-success/5 text-success'
+            : actionNotice.type === 'warning'
+              ? 'border-accent/40 bg-accent/5 text-accent'
+              : 'border-error/40 bg-error/5 text-error'
+        }`}>
+          {actionNotice.text}
         </div>
       )}
 

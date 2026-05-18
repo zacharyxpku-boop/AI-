@@ -115,6 +115,18 @@ function createShareId() {
     : `share-${Date.now().toString(36)}-${Math.random().toString(36).slice(2, 8)}`;
 }
 
+function getShareableAssetIds(run: ListingFactoryRun) {
+  return (run.assets || [])
+    .map(asset => asset.id)
+    .filter((assetId): assetId is string => Boolean(assetId))
+    .slice(0, 50);
+}
+
+async function readShareError(response: Response) {
+  const body = await response.json().catch(() => ({}));
+  return typeof body?.error === 'string' ? body.error : `HTTP ${response.status}`;
+}
+
 function useLocalListingFactorySnapshot() {
   const [, setVersion] = useState(0);
   const snapshot = loadLatestListingFactorySnapshot();
@@ -2193,16 +2205,29 @@ function ContentDecisionOsPanel({ run, onChanged }: { run: ListingFactoryRun; on
         templateSnapshot: encodeURIComponent(JSON.stringify({ productName: run.project.productName, platforms: run.project.targetPlatforms, goal: run.project.contentGoal }).slice(0, 600)),
       });
       const url = `${window.location.origin}/report/${shareId}?${params.toString()}`;
+      const assetIds = getShareableAssetIds(run);
       const response = await withTimeout(fetch('/api/share', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ id: shareId, moduleId: 'content-decision-os', source: 'module', title: `${run.project.productName} 脱敏决策报告`, content: report }),
+        body: JSON.stringify({
+          id: shareId,
+          moduleId: 'content-decision-os',
+          source: 'module',
+          title: `${run.project.productName} 脱敏决策报告`,
+          content: report,
+          projectId: run.project.id,
+          assetIds,
+          role: 'crm',
+        }),
       }));
-      if (!response.ok) throw new Error('share failed');
+      if (!response.ok) throw new Error(await readShareError(response));
       setShareUrl(url);
       setShareMessage('报告已复制到剪贴板 / 已下载。分享链接已生成，可直接发送给团队或客户。');
-    } catch {
-      setShareMessage('报告已复制到剪贴板 / 已下载。分享链接生成失败，请重试。');
+    } catch (error) {
+      const message = error instanceof Error ? error.message : '';
+      setShareMessage(message === 'asset_share_permission_denied'
+        ? '报告已复制到剪贴板 / 已下载。公开分享被资产权限拦截，请先在资产权限中授权 share。'
+        : '报告已复制到剪贴板 / 已下载。分享链接生成失败，请重试。');
     }
   };
   const attachKuaiziAssets = (assetUrls: string[]) => {

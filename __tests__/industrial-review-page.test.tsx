@@ -1,0 +1,285 @@
+import { describe, expect, it } from 'vitest';
+import { renderToStaticMarkup } from 'react-dom/server';
+import { readFileSync } from 'node:fs';
+import { join } from 'node:path';
+import IndustrialReviewTokenPage from '@/app/review/[token]/page';
+import { IndustrialReviewPortalClient } from '@/components/IndustrialReviewPortalClient';
+import { addContentAsset } from '@/lib/industrial-chain-store';
+import { createIndustrialReviewLink, revokeIndustrialReviewLink } from '@/lib/industrial-review-portal';
+import { listAssetPermissionAccessAudits } from '@/lib/asset-permission-ledger';
+
+describe('industrial review page', () => {
+  it('renders a no-login client review portal shell for a token', async () => {
+    const page = await IndustrialReviewTokenPage({
+      params: Promise.resolve({ token: 'wrv_test_token' }),
+    });
+    const html = renderToStaticMarkup(page);
+    expect(html).toContain('Wenai 客户审核');
+    expect(html).toContain('交付审核');
+    expect(html).toContain('批准并写回状态');
+    expect(html).toContain('批准后本链接会锁定');
+    expect(html).toContain('提交反馈');
+    expect(html).toContain('没有找到这条审核链接');
+    expect(html).toContain('客户验收清单');
+    expect(html).toContain('审核链接尚未加载');
+    expect(html).toContain('下一步');
+    expect(html).toContain('确认链接');
+    expect(html).toContain('等待交付物');
+    expect(html).toContain('联系运营');
+  });
+
+  it('keeps the review client focused on feedback and approval actions', () => {
+    const html = renderToStaticMarkup(<IndustrialReviewPortalClient
+      token="wrv_static_token"
+      initialPayload={{
+        review: {
+          token: 'wrv_static_token',
+          projectId: 'review-project',
+          assetId: 'asset-without-url',
+          assetTitle: '待补齐链接的交付物',
+          expiresAt: new Date(Date.now() + 86400_000).toISOString(),
+          status: 'active',
+          feedbackCount: 0,
+        },
+        feedback: [],
+      }}
+    />);
+    expect(html).toContain('交付审核');
+    expect(html).toContain('交付物预览');
+    expect(html).toContain('批准交付');
+    expect(html).toContain('有问题就提交修改意见');
+    expect(html).toContain('我已检查交付物');
+    expect(html).toContain('暂未附加预览链接');
+    expect(html).toContain('交付物链接缺失，先不要批准');
+    expect(html).toContain('暂不能批准');
+    expect(html).toContain('不要批准，直到运营补齐');
+    expect(html).toContain('待补齐');
+    expect(html).toContain('先看交付物');
+    expect(html).toContain('提交问题');
+    expect(html).toContain('确认后批准');
+    expect(html).toContain('补齐交付物前，批准按钮会保持不可用');
+    expect(html).not.toContain('API key');
+  });
+
+  it('renders client-readable review guidance from server-provided status fields', () => {
+    const html = renderToStaticMarkup(<IndustrialReviewPortalClient
+      token="wrv_guidance_token"
+      initialPayload={{
+        review: {
+          token: 'wrv_guidance_token',
+          projectId: 'guidance-project',
+          assetId: 'guidance-asset',
+          assetTitle: '客户可读审核指引',
+          deliverableUrl: 'https://cdn.example.test/guidance.mp4',
+          expiresAt: new Date(Date.now() + 86400_000).toISOString(),
+          status: 'active',
+          statusLabel: '待客户验收',
+          clientHeadline: '请先预览交付物，再选择反馈或批准',
+          clientRisk: '批准会写回生产链路，并作为后续分发依据。',
+          supportAction: '如果看不懂或打不开时，请先提交问题反馈，不要勉强批准。',
+          nextAction: '请先预览交付物，再选择反馈或批准',
+          clientDecision: {
+            primaryActionLabel: '确认无误后批准',
+            primaryActionState: 'approve',
+            operatorNextStep: '批准后进入分发、CRM 交接和表现回流。',
+            evidenceToCheck: ['画面内容', '商品信息', '平台适配'],
+          },
+          canSubmitFeedback: true,
+          canApprove: true,
+          feedbackCount: 0,
+        },
+        feedback: [],
+      }}
+    />);
+    expect(html).toContain('请先预览交付物，再选择反馈或批准');
+    expect(html).toContain('批准会写回生产链路');
+    expect(html).toContain('如果看不懂或打不开时，请先提交问题反馈');
+    expect(html).toContain('不要勉强批准');
+    expect(html).toContain('客户当前应该做什么');
+    expect(html).toContain('确认无误后批准');
+    expect(html).toContain('可以批准');
+    expect(html).toContain('运营下一步');
+    expect(html).toContain('批准前核对证据');
+    expect(html).toContain('画面内容');
+    expect(html).toContain('商品信息');
+    expect(html).toContain('平台适配');
+    expect(html).toContain('客户交接闭环');
+    expect(html).toContain('你先查看');
+    expect(html).toContain('有问题就反馈');
+    expect(html).toContain('没问题再批准');
+    expect(html).toContain('后续可追踪');
+    expect(html).not.toContain('primaryActionState');
+  });
+
+  it('renders friend-safe escalation instructions from the server view', () => {
+    const html = renderToStaticMarkup(<IndustrialReviewPortalClient
+      token="wrv_friend_safe"
+      initialPayload={{
+        review: {
+          token: 'wrv_friend_safe',
+          projectId: 'friend-safe-project',
+          assetId: 'friend-safe-asset',
+          assetTitle: '朋友可独立审核的成片',
+          expiresAt: new Date(Date.now() + 86400_000).toISOString(),
+          status: 'active',
+          feedbackCount: 0,
+          clientChecklist: [
+            { label: '交付物可查看', state: 'warn', detail: '当前没有交付物链接，不能完成验收。' },
+            { label: '审核链接可写入', state: 'ok', detail: '可以提交反馈；满足条件时也可以批准。' },
+          ],
+          clientDecision: {
+            primaryActionLabel: '先提交问题反馈',
+            primaryActionState: 'feedback',
+            disabledReason: '交付物链接缺失，不能批准。',
+            operatorNextStep: '补齐预览或下载链接，并重新通知客户验收。',
+            evidenceToCheck: ['交付物链接', '预览可打开', '版本说明'],
+          },
+          escalationMessage: '发给运营：审核码 wrv_friend_safe 缺少可打开的交付物链接，请补齐预览或下载链接后再让我验收。',
+        },
+        feedback: [],
+      }}
+    />);
+    expect(html).toContain('朋友试用不会卡住的处理卡');
+    expect(html).toContain('卡住时直接发给运营');
+    expect(html).toContain('交付物可查看');
+    expect(html).toContain('当前没有交付物链接，不能完成验收。');
+    expect(html).toContain('客户当前应该做什么');
+    expect(html).toContain('先提交问题反馈');
+    expect(html).toContain('先反馈');
+    expect(html).toContain('不能继续的原因：交付物链接缺失，不能批准。');
+    expect(html).toContain('补齐预览或下载链接，并重新通知客户验收。');
+    expect(html).toContain('审核码 wrv_friend_safe 缺少可打开的交付物链接');
+    expect(html).toContain('你先反馈');
+    expect(html).toContain('系统会拦截');
+    expect(html).toContain('数据不丢');
+  });
+
+  it('renders media preview and read-only approved state from a real review token', async () => {
+    const orgId = `review-page-${Date.now()}`;
+    const asset = await addContentAsset(orgId, {
+      projectId: 'review-page-project',
+      type: 'video',
+      title: '已批准上线视频',
+      url: 'https://cdn.example.test/launch.mp4',
+      source: 'kuaizi-production-result',
+      tags: ['production-result'],
+      evidence: 'Ready for client approval.',
+    });
+    const link = await createIndustrialReviewLink(orgId, { assetId: asset.id });
+    const approvedAt = new Date().toISOString();
+
+    const html = renderToStaticMarkup(<IndustrialReviewPortalClient
+      token={link!.token}
+      initialPayload={{
+        review: {
+          token: link!.token,
+          projectId: link!.projectId,
+          assetId: link!.assetId,
+          assetTitle: link!.assetTitle,
+          deliverableUrl: link!.deliverableUrl,
+          expiresAt: link!.expiresAt,
+          status: 'approved',
+          feedbackCount: 0,
+          approvedAt,
+          approvalName: 'Buyer Ops',
+        },
+        feedback: [],
+      }}
+    />);
+    expect(html).toContain('已批准上线视频');
+    expect(html).toContain('该交付物已经批准');
+    expect(html).toContain('已完成验收');
+    expect(html).toContain('生产链路会进入分发');
+    expect(html).toContain('交付物已批准，下一步由运营进入分发');
+    expect(html).toContain('已满足');
+    expect(html).toContain('Buyer Ops');
+    expect(html).toContain('https://cdn.example.test/launch.mp4');
+    expect(html).toContain('已批准');
+    expect(html).toContain('只读留档');
+    expect(html).toContain('不再接受新的修改意见');
+    expect(html).toContain('你已完成');
+    expect(html).toContain('系统已写回');
+    expect(html).toContain('数据留档');
+  });
+
+  it('audits server-rendered review page views through asset permission checks', async () => {
+    const orgId = `review-page-audit-${Date.now()}`;
+    const projectId = 'review-page-audit-project';
+    const asset = await addContentAsset(orgId, {
+      projectId,
+      type: 'video',
+      title: '需要客户查看的成片',
+      url: 'https://cdn.example.test/audit-video.mp4',
+      source: 'kuaizi-production-result',
+      tags: ['production-result'],
+      evidence: 'Ready for server-rendered review.',
+    });
+    const link = await createIndustrialReviewLink(orgId, { assetId: asset.id });
+
+    const page = await IndustrialReviewTokenPage({
+      params: Promise.resolve({ token: link!.token }),
+    });
+    const html = renderToStaticMarkup(page);
+
+    expect(html).toContain('需要客户查看的成片');
+    await expect(listAssetPermissionAccessAudits(orgId, projectId)).resolves.toEqual(
+      expect.arrayContaining([
+        expect.objectContaining({
+          assetId: asset.id,
+          action: 'view',
+          operation: 'client_review_page_render',
+          allowed: true,
+        }),
+      ]),
+    );
+  });
+
+  it('does not server-render expired or revoked review payloads', async () => {
+    const orgId = `review-page-locked-${Date.now()}`;
+    const asset = await addContentAsset(orgId, {
+      projectId: 'review-page-locked-project',
+      type: 'video',
+      title: '不应继续展示的成片',
+      url: 'https://cdn.example.test/locked-video.mp4',
+      source: 'kuaizi-production-result',
+      tags: ['production-result'],
+      evidence: 'Should not render after lock.',
+    });
+    const expired = await createIndustrialReviewLink(orgId, {
+      assetId: asset.id,
+      expiresAt: new Date(Date.now() - 1000).toISOString(),
+    });
+    const revokable = await createIndustrialReviewLink(orgId, { assetId: asset.id });
+    await revokeIndustrialReviewLink(orgId, revokable!.token);
+
+    const expiredPage = await IndustrialReviewTokenPage({
+      params: Promise.resolve({ token: expired!.token }),
+    });
+    const expiredHtml = renderToStaticMarkup(expiredPage);
+    expect(expiredHtml).toContain('该审核链接已经过期');
+    expect(expiredHtml).toContain('链接已过期');
+    expect(expiredHtml).toContain('重新发起审核');
+    expect(expiredHtml).not.toContain('不应继续展示的成片');
+    expect(expiredHtml).not.toContain('https://cdn.example.test/locked-video.mp4');
+
+    const revokedPage = await IndustrialReviewTokenPage({
+      params: Promise.resolve({ token: revokable!.token }),
+    });
+    const revokedHtml = renderToStaticMarkup(revokedPage);
+    expect(revokedHtml).toContain('该审核链接已经撤销');
+    expect(revokedHtml).toContain('链接已撤销');
+    expect(revokedHtml).toContain('等待新链接');
+    expect(revokedHtml).not.toContain('不应继续展示的成片');
+    expect(revokedHtml).not.toContain('https://cdn.example.test/locked-video.mp4');
+  });
+
+  it('keeps locked review payloads readable after client-side API errors', () => {
+    const source = readFileSync(join(process.cwd(), 'src/components/IndustrialReviewPortalClient.tsx'), 'utf8');
+
+    expect(source).toContain("if (error === 'expired') return map.review_expired;");
+    expect(source).toContain("if (error === 'revoked') return map.review_revoked;");
+    expect(source).toContain('function reviewPayloadFromResponse');
+    expect(source).toContain('setPayload(reviewPayloadFromResponse(data));');
+    expect(source).toContain('if (nextPayload) setPayload(nextPayload);');
+  });
+});

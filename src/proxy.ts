@@ -24,6 +24,7 @@ const PUBLIC_PAGE_PREFIXES = [
   '/pricing',
   '/poc',
   '/share',
+  '/review',
   '/invite',
   '/dashboard',
   '/factory',
@@ -34,11 +35,16 @@ const PUBLIC_PAGE_PREFIXES = [
   '/about',
 ];
 
+const PUBLIC_API_PREFIXES = [
+  '/api/industrial-chain/review/',
+];
+
 export async function proxy(request: NextRequest) {
   const { pathname } = request.nextUrl;
 
   if (
     PUBLIC_EXACT_PATHS.has(pathname) ||
+    PUBLIC_API_PREFIXES.some(prefix => pathname.startsWith(prefix)) ||
     pathname.startsWith('/_next') ||
     pathname.startsWith('/favicon')
   ) {

@@ -55,7 +55,7 @@ export default function MarketingFooter() {
             {COPY.footer.socials.map((s) => (
               <a
                 key={s.label}
-                href="#"
+                href="/inquire?from=footer-social"
                 aria-label={s.label}
                 title={s.label}
                 className="w-9 h-9 rounded-full bg-bg-surface border border-border-subtle flex items-center justify-center text-[12px] font-semibold text-text-secondary hover:border-accent hover:text-accent transition-colors"

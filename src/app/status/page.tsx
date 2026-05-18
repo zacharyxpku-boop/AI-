@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect, useState } from 'react';
+import { useCallback, useEffect, useState } from 'react';
 
 interface ServiceStatus {
   name: string;
@@ -16,130 +16,894 @@ interface HealthResponse {
   uptime: number | null;
 }
 
+interface ReadinessIssue {
+  priority: 'P0' | 'P1' | 'P2';
+  title: string;
+  evidence: string;
+  fix: string;
+}
+
+interface ReadinessFeature {
+  name: string;
+  status: 'implemented' | 'partial' | 'missing' | 'pseudo';
+  evidence: string;
+  risk: 'high' | 'medium' | 'low';
+  fix: string;
+}
+
+interface ReadinessWorkflow {
+  name: string;
+  ok: boolean;
+  evidence: string;
+  fix?: string;
+}
+
+interface ExternalIntegrationRequirement {
+  id: string;
+  category:
+    | 'video_provider'
+    | 'video_analysis'
+    | 'platform_oauth'
+    | 'ad_delivery'
+    | 'auto_publish'
+    | 'analytics_sync'
+    | 'asset_cloud'
+    | 'scale_claims';
+  label: string;
+  status: 'configured' | 'missing' | 'evidence_required';
+  owner: 'user' | 'provider' | 'wenai';
+  evidence: string;
+  requiredInputs: string[];
+  acceptance: string;
+}
+
+interface ScaleClaimGuard {
+  label: string;
+  requestedBenchmark: string;
+  canDisplay: boolean;
+  evidence: string;
+  requiredEvidence: string[];
+}
+
+interface ReadinessResponse {
+  projectId?: string;
+  report: {
+    verdict: 'pass' | 'conditional' | 'fail';
+    label: string;
+    score: number;
+    features: ReadinessFeature[];
+    workflows: ReadinessWorkflow[];
+    issues: ReadinessIssue[];
+    friendTrialRisks: ReadinessIssue[];
+    externalRequirements: ExternalIntegrationRequirement[];
+    scaleClaimGuards: ScaleClaimGuard[];
+    projectReadiness?: {
+      verdict: 'pass' | 'conditional' | 'fail';
+      score: number;
+      evidence: string[];
+      missingLinks: string[];
+      nextActions: string[];
+    };
+  };
+}
+
+interface IndustrialActionItem {
+  id: string;
+  priority: 'P0' | 'P1' | 'P2';
+  owner: string;
+  title: string;
+  evidence: string;
+  endpoint: string;
+  method: 'GET' | 'POST' | 'PATCH';
+  acceptance: string;
+}
+
+interface ActionQueueResponse {
+  projectId: string;
+  actionCount: number;
+  actions: IndustrialActionItem[];
+}
+
+interface AssetPermissionAccessAudit {
+  id: string;
+  assetId: string;
+  action: 'view' | 'download' | 'share' | 'approve' | 'publish';
+  role?: string;
+  actor: string;
+  operation: string;
+  allowed: boolean;
+  reason: string;
+  createdAt: string;
+}
+
+interface AssetPermissionResponse {
+  projectId: string;
+  accessAudits: AssetPermissionAccessAudit[];
+}
+
 const STATUS_META = {
   operational: { label: '正常', color: 'text-success', bg: 'bg-success/10', border: 'border-success/30', dot: 'bg-success' },
   degraded: { label: '降级', color: 'text-accent', bg: 'bg-accent/10', border: 'border-accent/30', dot: 'bg-accent' },
-  down: { label: '宕机', color: 'text-error', bg: 'bg-error/10', border: 'border-error/30', dot: 'bg-error' },
+  down: { label: '中断', color: 'text-error', bg: 'bg-error/10', border: 'border-error/30', dot: 'bg-error' },
 };
+
+const FEATURE_STATUS_LABELS: Record<ReadinessFeature['status'], string> = {
+  implemented: '已实现',
+  partial: '部分实现',
+  missing: '未实现',
+  pseudo: '伪功能风险',
+};
+
+const FEATURE_NAME_LABELS: Record<string, string> = {
+  '10 SKU POC intake and standard-pack routing': '10 SKU 线索与标准包',
+  'CRM-lite commercial loop': 'CRM 商务闭环',
+  'Enterprise asset permissions ledger': '企业资产权限台账',
+  'Client review token portal': '客户免登录审核门户',
+  'Brand learning profile': '品牌学习档案',
+  'Creative monitoring watchlist': '创意监控清单',
+  'Creative intelligence ledger': '创意洞察台账',
+  'Channel account matrix ledger': '矩阵账号台账',
+  'Kuaizi production connector': '筷子生产连接器',
+  'Image production': '图片生产',
+  'AI video production': 'AI 视频生产',
+  'Creative insight / video teardown': '视频拆解与创意洞察',
+  'Industrial asset and distribution store': '资产库与分发计划',
+  'Full-chain commerce orchestration': '全链路商业编排',
+  'Performance feedback import': '表现回流导入',
+  'Distribution and ad authorization': '分发与广告授权',
+  'Platform connector automation ledger': '平台自动化连接台账',
+  'Enterprise cloud asset management': '企业云资产管理',
+  'Account and permission system': '账号与权限体系',
+};
+
+export function formatReadinessFeatureName(name: string) {
+  return FEATURE_NAME_LABELS[name] || name;
+}
+
+const VERDICT_LABELS: Record<'pass' | 'conditional' | 'fail', string> = {
+  pass: '通过',
+  conditional: '有条件通过',
+  fail: '不通过',
+};
+
+const EXTERNAL_REQUIREMENT_STATUS_LABELS: Record<ExternalIntegrationRequirement['status'], string> = {
+  configured: '已接入',
+  missing: '等待外部接入',
+  evidence_required: '需要审计证据',
+};
+
+const EXTERNAL_REQUIREMENT_OWNER_LABELS: Record<ExternalIntegrationRequirement['owner'], string> = {
+  user: '你统一提供',
+  provider: '服务商提供',
+  wenai: 'Wenai 内部完成',
+};
+
+const EXTERNAL_REQUIREMENT_CATEGORY_LABELS: Record<ExternalIntegrationRequirement['category'], string> = {
+  video_provider: '视频生成/剪辑',
+  video_analysis: 'AI 视频分析',
+  platform_oauth: '多平台 OAuth',
+  ad_delivery: '广告投放',
+  auto_publish: '自动发布/矩阵分发',
+  analytics_sync: '平台数据同步',
+  asset_cloud: '企业云资产',
+  scale_claims: '规模化数字',
+};
+
+export function formatExternalRequirementStatus(status: ExternalIntegrationRequirement['status']) {
+  return EXTERNAL_REQUIREMENT_STATUS_LABELS[status];
+}
+
+export function formatExternalRequirementOwner(owner: ExternalIntegrationRequirement['owner']) {
+  return EXTERNAL_REQUIREMENT_OWNER_LABELS[owner];
+}
+
+export function formatExternalRequirementCategory(category: ExternalIntegrationRequirement['category']) {
+  return EXTERNAL_REQUIREMENT_CATEGORY_LABELS[category];
+}
+
+const PROJECT_EVIDENCE_LABELS: Record<string, string> = {
+  assets: '资产总数',
+  reportAssets: '报告资产',
+  approvedAssets: '已批准资产',
+  reusableAssets: '可复用资产',
+  assetGovernanceIssues: '资产治理问题',
+  deliverableAssets: '交付资产',
+  clientReviewAssets: '客户审核中',
+  approvedDeliverables: '已批准交付',
+  revisionRequested: '请求修改',
+  deliveryIssues: '交付问题',
+  blockedAssets: '阻塞资产',
+  rightsIssueAssets: '版权风险资产',
+  plans: '分发计划',
+  draftPlans: '草稿计划',
+  nextRoundAssetPlans: '下轮资产计划',
+  readyPlans: '就绪计划',
+  dispatches: '执行记录',
+  publishedDispatches: '已发布记录',
+  publishedWithEvidence: '发布证据',
+  missingPublishEvidence: '缺发布证据',
+  overdueReviews: '逾期审核',
+  measuredDispatches: '已回流执行',
+  performanceReturns: '表现回流',
+  scaleDecisions: '放量决策',
+  assetMatchIssues: '资产匹配问题',
+  ambiguousAssetMatches: '模糊匹配',
+  unmatchedAssets: '未匹配资产',
+  creativeInsights: '创意洞察',
+  creativeCompetitorAccounts: '竞品账号',
+  creativeTrendRanks: '趋势榜单',
+  creativeReusableAngles: '可复用角度',
+  creativeOpportunities: '创意机会',
+  creativeAverageConfidence: '机会平均置信度',
+  creativePatternClusters: '创意打法簇',
+  creativeCrossSourcePatterns: '跨来源打法',
+  creativeMoatScore: '创意护城河分',
+  creativeMonitors: '创意监控',
+  creativeActiveMonitors: '活跃监控',
+  creativeDueTasks: '待采集任务',
+  creativeImportedMonitorSignals: '导入信号',
+  creativeHarvestRuns: '采集运行',
+  creativeHarvestedInsights: '采集洞察',
+  creativeSourceSyncRuns: '采集源同步',
+  creativeProviderSourceFresh: '新鲜采集源',
+  creativeProviderSourceFailures: '采集源失败',
+  creativeSourceSyncCoverageScore: '采集覆盖分',
+  creativeSourceSyncAccountObservations: '账号观察',
+  creativeSourceSyncTrendRankObservations: '榜单观察',
+  creativeSourceSyncVideoTeardowns: '视频拆解观察',
+  creativeSourceSyncMultimodalParsed: '多模态解析',
+  creativeSourceObservations: '累计源观察',
+  creativeSourceRepeatSources: '重复回流源',
+  creativeSourceScaleScore: '源规模分',
+  creativeReadySourceHealthCards: '健康源卡片',
+  creativeAccountTrackingSourceReady: '账号源就绪',
+  creativeTrendRankSourceReady: '榜单源就绪',
+  creativeVideoTeardownSourceReady: '视频源就绪',
+  channelAccounts: '矩阵账号',
+  channelConnectedAccounts: '已授权账号',
+  channelHealthyAccounts: '健康账号',
+  channelAvailableSlots: '可排期档位',
+  channelAdCampaigns: '广告活动',
+  channelReadyAdCampaigns: '就绪广告',
+  channelActiveAdCampaigns: '投放中广告',
+  channelMeasuredAdCampaigns: '已回流广告',
+  channelAdBudgetCents: '广告预算分',
+  channelAdSpendCents: '广告花费分',
+  channelAdEvidence: '广告证据',
+  assetPermissionRecords: '资产权限策略',
+  governedAssets: '受控资产',
+  assetPermissionAuditEvents: '权限审计',
+  assetPermissionAccessAuditEvents: '访问审计',
+  assetSecurityPolicies: '资产安全策略',
+  assetWatermarkRequired: '要求水印',
+  assetWatermarkApplied: '已加水印',
+  assetDlpPassedPolicies: 'DLP 通过',
+  assetDlpFailedPolicies: 'DLP 失败',
+  assetPublicShareBlocked: '公开分享拦截',
+  assetRetentionPolicies: '留存策略',
+  downloadableAssetAccessReady: '可下载资产',
+  shareableAssetAccessReady: '可分享资产',
+  expiredAssetPermissions: '过期权限',
+  videoQueueItems: '视频任务',
+  videoProviderExecutions: '视频执行',
+  videoCompletedProviderExecutions: '视频完成执行',
+  videoFailedProviderExecutions: '视频失败执行',
+  videoRetryableProviderExecutions: '可重试视频执行',
+  videoResultAssets: '视频成片',
+  videoClientReviews: '视频审核',
+  videoApprovedDeliverables: '视频批准',
+  videoMeasured: '视频回流',
+  videoAverageLoopScore: '视频闭环分',
+  brandLearningCreativeSignals: '品牌创意信号',
+  brandLearningPerformanceSignals: '品牌表现信号',
+  brandLearningApprovedDeliverables: '品牌批准交付',
+  brandLearningWinningAssets: '胜出资产',
+  brandLearningRules: '品牌学习规则',
+};
+
+export interface ProjectEvidenceMetric {
+  key: string;
+  label: string;
+  value: string;
+}
+
+function formatEvidenceValue(key: string, rawValue: string) {
+  const numericValue = Number(rawValue);
+  if (Number.isFinite(numericValue) && (key.includes('Confidence') || key.includes('Score'))) {
+    if (numericValue > 0 && numericValue <= 1) return `${Math.round(numericValue * 100)}%`;
+    return Number.isInteger(numericValue) ? `${numericValue}` : numericValue.toFixed(1);
+  }
+  return rawValue || '0';
+}
+
+export function formatProjectEvidenceMetric(item: string): ProjectEvidenceMetric {
+  const separatorIndex = item.indexOf('=');
+  if (separatorIndex < 0) {
+    return { key: 'unknown', label: '补充证据', value: item };
+  }
+
+  const key = item.slice(0, separatorIndex);
+  const rawValue = item.slice(separatorIndex + 1);
+  return {
+    key,
+    label: PROJECT_EVIDENCE_LABELS[key] || '补充证据',
+    value: formatEvidenceValue(key, rawValue),
+  };
+}
+
+function projectEvidenceMap(projectMaturity?: ReadinessResponse['report']['projectReadiness']) {
+  const map: Record<string, number> = {};
+  for (const item of projectMaturity?.evidence || []) {
+    const separatorIndex = item.indexOf('=');
+    if (separatorIndex < 0) continue;
+    const key = item.slice(0, separatorIndex);
+    const value = Number(item.slice(separatorIndex + 1));
+    map[key] = Number.isFinite(value) ? value : 0;
+  }
+  return map;
+}
+
+function buildKuaiziCapabilityLadder(projectMaturity?: ReadinessResponse['report']['projectReadiness']) {
+  const evidence = projectEvidenceMap(projectMaturity);
+  return [
+    {
+      name: 'Compose 灵感管理',
+      ok:
+        (evidence.creativeMonitors || 0) > 0 &&
+        (evidence.creativePatternClusters || 0) > 0 &&
+        (evidence.creativeSourceSyncCoverageScore || 0) >= 100 &&
+        (evidence.creativeSourceScaleScore || 0) >= 100 &&
+        (evidence.creativeReadySourceHealthCards || 0) >= 3,
+      evidence: `监控 ${evidence.creativeMonitors || 0} 个 / 打法簇 ${evidence.creativePatternClusters || 0} 个 / 跨来源 ${evidence.creativeCrossSourcePatterns || 0} 个 / 覆盖 ${evidence.creativeSourceSyncCoverageScore || 0} / 健康源 ${evidence.creativeReadySourceHealthCards || 0}`,
+      gap: '继续接入真实榜单源、账号追踪源和全网灵感采集。',
+    },
+    {
+      name: 'Create 一键视频',
+      ok: (evidence.videoQueueItems || 0) > 0 && (evidence.videoCompletedProviderExecutions || 0) > 0,
+      evidence: `视频任务 ${evidence.videoQueueItems || 0} 个 / Provider 完成 ${evidence.videoCompletedProviderExecutions || 0} 个`,
+      gap: '继续接入真实视频生成 provider、批量生成 UI 和失败重试。',
+    },
+    {
+      name: 'Cut 智能混剪',
+      ok: (evidence.creativeVideoTeardownSourceReady || 0) > 0 && (evidence.videoResultAssets || 0) > 0,
+      evidence: `视频拆解源 ${evidence.creativeVideoTeardownSourceReady ? '已就绪' : '未就绪'} / 成片 ${evidence.videoResultAssets || 0} 个`,
+      gap: '继续补多模态解析、素材切片、批量混剪和版本对比。',
+    },
+    {
+      name: 'Cast 多平台分发',
+      ok: (evidence.channelAvailableSlots || 0) > 0 && (evidence.publishedWithEvidence || 0) > 0 && (evidence.channelReadyAdCampaigns || 0) > 0,
+      evidence: `矩阵账号 ${evidence.channelAccounts || 0} 个 / 可排期 ${evidence.channelAvailableSlots || 0} 档 / 发布证据 ${evidence.publishedWithEvidence || 0} / 广告活动 ${evidence.channelAdCampaigns || 0}`,
+      gap: '继续接入 OAuth、自动发布、广告账户和平台数据同步。',
+    },
+    {
+      name: 'Manage 企业管理',
+      ok:
+        (evidence.assetPermissionRecords || 0) > 0 &&
+        (evidence.assetPermissionAccessAuditEvents || 0) > 0 &&
+        (evidence.assetSecurityPolicies || 0) > 0 &&
+        (evidence.assetDlpPassedPolicies || 0) >= (evidence.assetSecurityPolicies || 0) &&
+        (evidence.assetWatermarkApplied || 0) >= (evidence.assetWatermarkRequired || 0) &&
+        (evidence.assetRetentionPolicies || 0) >= (evidence.assetSecurityPolicies || 0),
+      evidence: `权限策略 ${evidence.assetPermissionRecords || 0} 条 / 安全策略 ${evidence.assetSecurityPolicies || 0} 条 / DLP 通过 ${evidence.assetDlpPassedPolicies || 0} 条 / 访问审计 ${evidence.assetPermissionAccessAuditEvents || 0} 条`,
+      gap: '继续补对象存储、真实下载流、分享链接 enforcement、DLP 和团队空间。',
+    },
+  ];
+}
+
+const ASSET_ACTION_LABELS: Record<AssetPermissionAccessAudit['action'], string> = {
+  view: '查看',
+  download: '下载',
+  share: '分享',
+  approve: '批准',
+  publish: '发布',
+};
+
+const ASSET_AUDIT_REASON_LABELS: Record<string, string> = {
+  allowed: '已授权',
+  missing_permission_record: '缺少权限策略',
+  permission_expired: '权限已过期',
+  action_not_allowed: '动作未授权',
+  role_not_allowed: '角色未授权',
+};
+
+const ASSET_OPERATION_LABELS: Record<string, string> = {
+  api_asset_access_check: '权限校验接口',
+  industrial_asset_route: '资产读取',
+  public_share_create: '公开分享',
+  distribution_dispatch_publish: '分发发布',
+};
+
+export function formatAssetPermissionAuditEvent(event: AssetPermissionAccessAudit) {
+  return {
+    actionLabel: ASSET_ACTION_LABELS[event.action] || event.action,
+    operationLabel: ASSET_OPERATION_LABELS[event.operation] || event.operation,
+    resultLabel: event.allowed ? '允许' : '拒绝',
+    reasonLabel: ASSET_AUDIT_REASON_LABELS[event.reason] || event.reason,
+    actorLabel: event.actor || event.role || '系统',
+  };
+}
+
+function overallLabel(status: HealthResponse['overall']) {
+  if (status === 'operational') return '所有核心服务正常运行';
+  if (status === 'degraded') return '部分能力降级，仍可继续排查';
+  return '核心服务不可用，需要立即处理';
+}
 
 export default function StatusPage() {
   const [health, setHealth] = useState<HealthResponse | null>(null);
+  const [readiness, setReadiness] = useState<ReadinessResponse | null>(null);
+  const [actionQueue, setActionQueue] = useState<ActionQueueResponse | null>(null);
+  const [assetPermissions, setAssetPermissions] = useState<AssetPermissionResponse | null>(null);
+  const [projectId, setProjectId] = useState('default-project');
   const [loading, setLoading] = useState(true);
   const [lastFetch, setLastFetch] = useState<Date | null>(null);
 
-  const fetchHealth = async () => {
+  const fetchHealth = useCallback(async () => {
     try {
-      const res = await fetch('/api/health', { cache: 'no-store' });
-      const data = await res.json();
-      setHealth(data);
+      const trimmedProjectId = projectId.trim();
+      const readinessPath = trimmedProjectId
+        ? `/api/readiness?projectId=${encodeURIComponent(trimmedProjectId)}`
+        : '/api/readiness';
+      const actionQueuePath = trimmedProjectId
+        ? `/api/industrial-chain/action-queue?projectId=${encodeURIComponent(trimmedProjectId)}`
+        : '/api/industrial-chain/action-queue';
+      const assetPermissionPath = trimmedProjectId
+        ? `/api/asset-permissions?projectId=${encodeURIComponent(trimmedProjectId)}`
+        : '/api/asset-permissions';
+      const [healthRes, readinessRes, actionQueueRes, assetPermissionRes] = await Promise.all([
+        fetch('/api/health', { cache: 'no-store' }),
+        fetch(readinessPath, { cache: 'no-store' }),
+        fetch(actionQueuePath, { cache: 'no-store' }),
+        fetch(assetPermissionPath, { cache: 'no-store' }),
+      ]);
+      setHealth(await healthRes.json());
+      setReadiness(await readinessRes.json());
+      setActionQueue(await actionQueueRes.json());
+      setAssetPermissions(await assetPermissionRes.json());
       setLastFetch(new Date());
     } catch {
       setHealth({ overall: 'down', services: [], timestamp: new Date().toISOString(), uptime: null });
+      setReadiness(null);
+      setActionQueue(null);
+      setAssetPermissions(null);
     } finally {
       setLoading(false);
     }
-  };
+  }, [projectId]);
 
   useEffect(() => {
     fetchHealth();
-    const t = setInterval(fetchHealth, 30000); // 每 30s 自动刷新
-    return () => clearInterval(t);
-  }, []);
+    const timer = setInterval(fetchHealth, 30000);
+    return () => clearInterval(timer);
+  }, [fetchHealth]);
 
   const overall = health?.overall || 'down';
   const meta = STATUS_META[overall];
+  const maturity = readiness?.report;
+  const readinessMeta = maturity?.verdict === 'pass'
+    ? STATUS_META.operational
+    : maturity?.verdict === 'conditional'
+      ? STATUS_META.degraded
+      : STATUS_META.down;
+  const projectMaturity = maturity?.projectReadiness;
+  const platformConnectorFeature = maturity?.features.find(feature => feature.name === 'Platform connector automation ledger');
+  const platformConnectorWorkflow = maturity?.workflows.find(workflow => workflow.name.includes('Platform OAuth'));
+  const externalRequirements = maturity?.externalRequirements || [];
+  const scaleClaimGuards = maturity?.scaleClaimGuards || [];
+  const topActions = actionQueue?.actions.slice(0, 4) || [];
+  const assetPermissionAudits = assetPermissions?.accessAudits.slice(0, 4) || [];
+  const kuaiziCapabilities = buildKuaiziCapabilityLadder(projectMaturity);
+  const readinessHref = projectId.trim()
+    ? `/api/readiness?projectId=${encodeURIComponent(projectId.trim())}`
+    : '/api/readiness';
 
   return (
-    <div className="max-w-[900px] mx-auto py-10 px-6">
-      {/* Header */}
+    <div className="mx-auto max-w-[900px] px-6 py-10">
       <div className="mb-8 text-center">
-        <div className="text-[10px] font-mono text-accent uppercase tracking-[0.2em] mb-3">
-          STATUS · 实时
+        <div className="mb-3 text-[10px] font-mono uppercase tracking-[0.2em] text-accent">
+          系统状态 · 实时
         </div>
-        <h1 className="text-2xl lg:text-3xl font-bold text-text-primary mb-4 font-[family-name:var(--font-outfit)]">
-          系统状态
+        <h1 className="mb-4 font-[family-name:var(--font-outfit)] text-2xl font-bold text-text-primary lg:text-3xl">
+          全链路验收台
         </h1>
 
         {loading ? (
-          <div className="text-text-tertiary font-mono text-[12px]">加载中...</div>
+          <div className="text-[12px] font-mono text-text-tertiary">正在加载状态...</div>
         ) : (
-          <div className={`inline-flex items-center gap-3 px-5 py-3 border rounded-md ${meta.border} ${meta.bg}`}>
+          <div className={`inline-flex items-center gap-3 rounded-md border px-5 py-3 ${meta.border} ${meta.bg}`}>
             <div className="relative flex items-center justify-center">
-              <div className={`w-2 h-2 rounded-full ${meta.dot} animate-pulse-dot`} />
-              <div className={`absolute w-4 h-4 rounded-full ${meta.dot} opacity-20 animate-ping`} />
+              <div className={`h-2 w-2 animate-pulse-dot rounded-full ${meta.dot}`} />
+              <div className={`absolute h-4 w-4 animate-ping rounded-full ${meta.dot} opacity-20`} />
             </div>
             <span className={`text-[14px] font-semibold ${meta.color}`}>
-              {overall === 'operational' ? '所有系统正常运行'
-                : overall === 'degraded' ? '部分服务降级'
-                : '核心服务宕机'}
+              {overallLabel(overall)}
             </span>
           </div>
         )}
 
         {lastFetch && (
-          <div className="text-[10px] font-mono text-text-tertiary mt-3">
+          <div className="mt-3 text-[10px] font-mono text-text-tertiary">
             最近检查 {lastFetch.toLocaleTimeString('zh-CN')} · 每 30 秒自动刷新
           </div>
         )}
       </div>
 
-      {/* SLA 承诺 */}
-      <div className="mb-6 p-5 border border-border-subtle rounded-md bg-bg-surface/50">
-        <div className="text-[10px] font-mono text-text-tertiary uppercase tracking-wider mb-3">
-          SLA 承诺
+      <div className="mb-6 flex flex-col gap-3 rounded-md border border-border-subtle bg-bg-surface/50 p-4 md:flex-row md:items-end">
+        <label className="flex-1">
+          <span className="mb-2 block text-[10px] font-mono uppercase tracking-wider text-text-tertiary">
+            项目闭环证据
+          </span>
+          <input
+            value={projectId}
+            onChange={event => setProjectId(event.target.value)}
+            className="w-full rounded-md border border-border-subtle bg-bg-root px-3 py-2 text-[12px] font-mono text-text-primary outline-none focus:border-accent/60"
+            placeholder="default-project"
+          />
+        </label>
+        <button
+          type="button"
+          onClick={fetchHealth}
+          className="rounded-md border border-border-subtle px-4 py-2 text-[11px] font-mono text-text-secondary hover:border-accent/50 hover:text-accent"
+        >
+          刷新
+        </button>
+      </div>
+
+      <div className="mb-6 rounded-md border border-border-subtle bg-bg-surface/50 p-5">
+        <div className="mb-3 text-[10px] font-mono uppercase tracking-wider text-text-tertiary">
+          服务承诺边界
         </div>
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+        <div className="grid grid-cols-1 gap-4 md:grid-cols-3">
           <div>
-            <div className="text-[13px] font-semibold text-text-primary mb-1">Free · 内测</div>
-            <p className="text-[11px] text-text-secondary leading-relaxed">
-              按 &ldquo;现状&rdquo; 提供，不保证可用性。AI 第三方波动时会返回明确错误。
+            <div className="mb-1 text-[13px] font-semibold text-text-primary">免费内测</div>
+            <p className="text-[11px] leading-relaxed text-text-secondary">
+              按现状提供，不承诺稳定 SLA；第三方 AI 或平台接口波动时，必须返回明确错误和下一步。
             </p>
           </div>
           <div>
-            <div className="text-[13px] font-semibold text-text-primary mb-1">试跑接入</div>
-            <p className="text-[11px] text-text-secondary leading-relaxed">
-              演示环境 best effort，正式额度和响应窗口以接入订单为准。
+            <div className="mb-1 text-[13px] font-semibold text-text-primary">试跑接入</div>
+            <p className="text-[11px] leading-relaxed text-text-secondary">
+              演示环境按尽力保障处理；正式额度、响应窗口、导出频率以接入订单为准。
             </p>
           </div>
           <div>
-            <div className="text-[13px] font-semibold text-text-primary mb-1">企业接入</div>
-            <p className="text-[11px] text-text-secondary leading-relaxed">
-              SLA、赔偿、响应等级和例外情况按双方合同约定。
+            <div className="mb-1 text-[13px] font-semibold text-text-primary">企业接入</div>
+            <p className="text-[11px] leading-relaxed text-text-secondary">
+              SLA、赔付、权限审计、响应等级和例外情况，以双方合同和平台授权状态为准。
             </p>
           </div>
         </div>
       </div>
 
-      {/* Services */}
-      {health && health.services.length > 0 && (
-        <div className="space-y-2 mb-6">
-          <div className="text-[10px] font-mono text-text-tertiary uppercase tracking-wider mb-2">
-            依赖服务 · 共 {health.services.length}
+      <div className="mb-6 rounded-md border border-border-subtle bg-bg-surface/50 p-5">
+        <div className="mb-2 flex flex-col gap-1 md:flex-row md:items-center md:justify-between">
+          <div className="text-[10px] font-mono uppercase tracking-wider text-text-tertiary">
+            筷子式五段能力 · Compose / Create / Cut / Cast / Manage
           </div>
-          {health.services.map(s => {
-            const m = STATUS_META[s.status];
+          <div className="text-[10px] font-mono text-accent">
+            不展示伪规模：91M+ 创意产出、42M+ 视频分发属于竞品对标，不计入 Wenai 自有成绩
+          </div>
+        </div>
+        <div className="grid grid-cols-1 gap-2 md:grid-cols-5">
+          {kuaiziCapabilities.map(capability => (
+            <div key={capability.name} className={`rounded-md border px-3 py-3 ${
+              capability.ok ? 'border-success/30 bg-success/10' : 'border-accent/30 bg-bg-root/40'
+            }`}>
+              <div className={`mb-1 text-[11px] font-semibold ${capability.ok ? 'text-success' : 'text-accent'}`}>
+                {capability.ok ? '已成闭环' : '继续补齐'}
+              </div>
+              <div className="text-[12px] font-semibold text-text-primary">{capability.name}</div>
+              <p className="mt-1 text-[10px] leading-relaxed text-text-secondary">{capability.evidence}</p>
+              <p className="mt-2 text-[10px] leading-relaxed text-text-tertiary">{capability.gap}</p>
+            </div>
+          ))}
+        </div>
+      </div>
+
+      {maturity && (
+        <div className={`mb-6 rounded-md border p-5 ${readinessMeta.border} ${readinessMeta.bg}`}>
+          <div className="flex flex-col gap-3 md:flex-row md:items-start md:justify-between">
+            <div>
+              <div className="mb-2 text-[10px] font-mono uppercase tracking-wider text-text-tertiary">
+                产品成熟度 · 对标筷子科技
+              </div>
+              <div className="text-[16px] font-semibold text-text-primary">
+                {maturity.label} · {maturity.score}/100
+              </div>
+              <p className="mt-1 text-[11px] leading-relaxed text-text-secondary">
+                这里不是单纯的服务存活检查，而是面向真实试用的产品验收：核心链路、伪功能、生产交接、数据回流、客户审核和竞品差距必须同时可见。
+              </p>
+            </div>
+            <a
+              href={readinessHref}
+              className="inline-flex items-center justify-center rounded-md border border-border-subtle px-3 py-2 text-[10px] font-mono text-text-secondary hover:border-accent/40 hover:text-accent"
+            >
+              查看接口数据
+            </a>
+          </div>
+
+          <div className="mt-4 grid grid-cols-1 gap-3 md:grid-cols-3">
+            {maturity.features.slice(0, 6).map(feature => (
+              <div key={feature.name} className="rounded-md border border-border-subtle bg-bg-root/40 p-3">
+                <div className="mb-1 flex items-center justify-between gap-2">
+                  <span className="truncate text-[11px] font-semibold text-text-primary">{formatReadinessFeatureName(feature.name)}</span>
+                  <span className={`shrink-0 text-[9px] font-mono ${
+                    feature.status === 'implemented' ? 'text-success' : feature.status === 'partial' ? 'text-accent' : 'text-error'
+                  }`}>
+                    {FEATURE_STATUS_LABELS[feature.status]}
+                  </span>
+                </div>
+                <p className="line-clamp-2 text-[10px] leading-relaxed text-text-tertiary">{feature.evidence}</p>
+              </div>
+            ))}
+          </div>
+
+          {platformConnectorFeature && (
+            <div className="mt-4 rounded-md border border-border-subtle bg-bg-root/50 p-3">
+              <div className="mb-2 flex flex-col gap-1 md:flex-row md:items-center md:justify-between">
+                <div className="text-[10px] font-mono uppercase tracking-wider text-text-tertiary">
+                  平台连接门禁
+                </div>
+                <div className={`text-[10px] font-mono font-semibold ${
+                  platformConnectorWorkflow?.ok ? 'text-success' : 'text-accent'
+                }`}>
+                  {platformConnectorWorkflow?.ok ? '自动化就绪' : '等待外部平台授权'}
+                </div>
+              </div>
+              <div className="text-[11px] font-semibold text-text-primary">
+                {FEATURE_STATUS_LABELS[platformConnectorFeature.status]} · OAuth / 广告账户 / 自动发布 / 数据同步 / 资产权限
+              </div>
+              <p className="mt-1 text-[10px] leading-relaxed text-text-secondary">
+                {platformConnectorFeature.evidence}
+              </p>
+              {platformConnectorWorkflow?.fix && (
+                <p className="mt-2 text-[10px] leading-relaxed text-accent">
+                  {platformConnectorWorkflow.fix}
+                </p>
+              )}
+            </div>
+          )}
+
+          {externalRequirements.length > 0 && (
+            <div className="mt-4 rounded-md border border-border-subtle bg-bg-root/50 p-3">
+              <div className="mb-2 flex flex-col gap-1 md:flex-row md:items-center md:justify-between">
+                <div className="text-[10px] font-mono uppercase tracking-wider text-text-tertiary">
+                  外部接入清单 · 只列真实平台级缺口
+                </div>
+                <div className="text-[10px] font-mono text-accent">
+                  未接入前不宣称筷子等价执行
+                </div>
+              </div>
+              <div className="grid grid-cols-1 gap-2 md:grid-cols-2">
+                {externalRequirements.map(requirement => (
+                  <div key={requirement.id} className={`rounded-md border px-3 py-3 ${
+                    requirement.status === 'configured'
+                      ? 'border-success/30 bg-success/10'
+                      : requirement.status === 'evidence_required'
+                        ? 'border-accent/30 bg-bg-surface/40'
+                        : 'border-error/30 bg-bg-surface/40'
+                  }`}>
+                    <div className="mb-1 flex flex-col gap-1 md:flex-row md:items-center md:justify-between">
+                      <div className="text-[11px] font-semibold text-text-primary">{requirement.label}</div>
+                      <div className={`text-[9px] font-mono ${
+                        requirement.status === 'configured' ? 'text-success' : requirement.status === 'evidence_required' ? 'text-accent' : 'text-error'
+                      }`}>
+                        {formatExternalRequirementStatus(requirement.status)}
+                      </div>
+                    </div>
+                    <div className="text-[10px] leading-relaxed text-text-tertiary">
+                      {formatExternalRequirementCategory(requirement.category)} · {formatExternalRequirementOwner(requirement.owner)}
+                    </div>
+                    <p className="mt-1 text-[10px] leading-relaxed text-text-secondary">{requirement.evidence}</p>
+                    <div className="mt-2 text-[10px] leading-relaxed text-text-secondary">
+                      需要：{requirement.requiredInputs.slice(0, 3).join(' / ')}
+                      {requirement.requiredInputs.length > 3 ? ' / ...' : ''}
+                    </div>
+                    <div className="mt-1 text-[10px] leading-relaxed text-success">
+                      验收：{requirement.acceptance}
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </div>
+          )}
+
+          {scaleClaimGuards.length > 0 && (
+            <div className="mt-4 rounded-md border border-accent/30 bg-bg-root/50 p-3">
+              <div className="mb-2 flex flex-col gap-1 md:flex-row md:items-center md:justify-between">
+                <div className="text-[10px] font-mono uppercase tracking-wider text-text-tertiary">
+                  规模化数字展示保护
+                </div>
+                <div className="text-[10px] font-mono text-accent">
+                  91M+ / 42M+ 只能作为竞品对标，不能作为 Wenai 自有指标
+                </div>
+              </div>
+              <div className="grid grid-cols-1 gap-2 md:grid-cols-2">
+                {scaleClaimGuards.map(guard => (
+                  <div key={guard.requestedBenchmark} className="rounded-md border border-border-subtle bg-bg-surface/40 px-3 py-3">
+                    <div className="mb-1 flex flex-col gap-1 md:flex-row md:items-center md:justify-between">
+                      <div className="text-[11px] font-semibold text-text-primary">{guard.requestedBenchmark}</div>
+                      <div className={`text-[9px] font-mono ${guard.canDisplay ? 'text-success' : 'text-error'}`}>
+                        {guard.canDisplay ? '允许展示' : '禁止作为 Wenai 指标展示'}
+                      </div>
+                    </div>
+                    <p className="text-[10px] leading-relaxed text-text-secondary">{guard.evidence}</p>
+                    <div className="mt-2 text-[10px] leading-relaxed text-text-tertiary">
+                      缺少：{guard.requiredEvidence.join(' / ')}
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </div>
+          )}
+
+          <div className="mt-4 rounded-md border border-border-subtle bg-bg-root/50 p-3">
+            <div className="mb-2 flex flex-col gap-1 md:flex-row md:items-center md:justify-between">
+              <div className="text-[10px] font-mono uppercase tracking-wider text-text-tertiary">
+                筷子式五段能力 · Compose / Create / Cut / Cast / Manage
+              </div>
+              <div className="text-[10px] font-mono text-accent">
+                不展示伪规模：91M+ 创意产出、42M+ 视频分发属于竞品对标，不计入 Wenai 自有成绩
+              </div>
+            </div>
+            <div className="grid grid-cols-1 gap-2 md:grid-cols-5">
+              {kuaiziCapabilities.map(capability => (
+                <div key={capability.name} className={`rounded-md border px-3 py-3 ${
+                  capability.ok ? 'border-success/30 bg-success/10' : 'border-accent/30 bg-bg-surface/50'
+                }`}>
+                  <div className={`mb-1 text-[11px] font-semibold ${capability.ok ? 'text-success' : 'text-accent'}`}>
+                    {capability.ok ? '已成闭环' : '继续补齐'}
+                  </div>
+                  <div className="text-[12px] font-semibold text-text-primary">{capability.name}</div>
+                  <p className="mt-1 text-[10px] leading-relaxed text-text-secondary">{capability.evidence}</p>
+                  <p className="mt-2 text-[10px] leading-relaxed text-text-tertiary">{capability.gap}</p>
+                </div>
+              ))}
+            </div>
+          </div>
+
+          {maturity.friendTrialRisks.length > 0 && (
+            <div className="mt-4 space-y-2">
+              <div className="text-[10px] font-mono uppercase tracking-wider text-text-tertiary">朋友试用风险</div>
+              {maturity.friendTrialRisks.slice(0, 3).map(issue => (
+                <div key={issue.title} className="rounded-md border border-accent/30 bg-bg-root/40 px-3 py-2">
+                  <div className="text-[11px] font-semibold text-accent">{issue.priority} · {issue.title}</div>
+                  <div className="mt-0.5 text-[10px] leading-relaxed text-text-secondary">{issue.fix}</div>
+                </div>
+              ))}
+            </div>
+          )}
+
+          {projectMaturity && (
+            <div className="mt-4 rounded-md border border-border-subtle bg-bg-root/40 p-3">
+              <div className="mb-2 flex flex-col gap-1 md:flex-row md:items-center md:justify-between">
+                <div className="text-[10px] font-mono uppercase tracking-wider text-text-tertiary">
+                  项目闭环成熟度 · {readiness?.projectId || projectId || 'default-project'}
+                </div>
+                <div className={`text-[11px] font-mono font-semibold ${
+                  projectMaturity.verdict === 'pass' ? 'text-success' : projectMaturity.verdict === 'conditional' ? 'text-accent' : 'text-error'
+                }`}>
+                  {VERDICT_LABELS[projectMaturity.verdict]} · {projectMaturity.score}/100
+                </div>
+              </div>
+              <div className="grid grid-cols-2 gap-2 md:grid-cols-4">
+                {projectMaturity.evidence.slice(1).map(item => {
+                  const metric = formatProjectEvidenceMetric(item);
+                  return (
+                  <div key={item} className="rounded-md border border-border-subtle/70 bg-bg-surface/40 px-2 py-2">
+                    <div className="truncate text-[9px] leading-tight text-text-tertiary">{metric.label}</div>
+                    <div className="mt-1 text-[13px] font-semibold tabular-nums text-text-primary">{metric.value}</div>
+                  </div>
+                  );
+                })}
+              </div>
+              {projectMaturity.missingLinks.length > 0 ? (
+                <div className="mt-3 space-y-1">
+                  {projectMaturity.missingLinks.slice(0, 4).map(item => (
+                    <div key={item} className="text-[10px] leading-relaxed text-accent">差距：{item}</div>
+                  ))}
+                </div>
+              ) : (
+                <div className="mt-3 text-[10px] leading-relaxed text-success">
+                  项目账本已具备资产、计划、分发、表现回流和下一轮迭代证据。
+                </div>
+              )}
+              {assetPermissionAudits.length > 0 && (
+                <div className="mt-4 border-t border-border-subtle/60 pt-3">
+                  <div className="mb-2 text-[10px] font-mono uppercase tracking-wider text-text-tertiary">
+                    资产权限访问审计
+                  </div>
+                  <div className="space-y-2">
+                    {assetPermissionAudits.map(event => {
+                      const audit = formatAssetPermissionAuditEvent(event);
+                      return (
+                        <div key={event.id} className="rounded-md border border-border-subtle/70 bg-bg-surface/40 px-3 py-2">
+                          <div className="flex flex-col gap-1 md:flex-row md:items-center md:justify-between">
+                            <div className="text-[11px] font-semibold text-text-primary">
+                              {audit.operationLabel} · {audit.actionLabel} · {event.assetId}
+                            </div>
+                            <div className={`text-[10px] font-semibold ${event.allowed ? 'text-success' : 'text-accent'}`}>
+                              {audit.resultLabel}
+                            </div>
+                          </div>
+                          <div className="mt-1 text-[10px] leading-relaxed text-text-secondary">
+                            操作人：{audit.actorLabel} · 原因：{audit.reasonLabel}
+                          </div>
+                        </div>
+                      );
+                    })}
+                  </div>
+                </div>
+              )}
+              {topActions.length > 0 && (
+                <div className="mt-4 border-t border-border-subtle/60 pt-3">
+                  <div className="mb-2 flex items-center justify-between gap-2">
+                    <div className="text-[10px] font-mono uppercase tracking-wider text-text-tertiary">
+                      可执行修复队列
+                    </div>
+                    <a
+                      href={`/api/industrial-chain/action-queue?projectId=${encodeURIComponent(projectId.trim() || 'default-project')}`}
+                      className="text-[10px] font-mono text-text-tertiary hover:text-accent"
+                    >
+                      接口数据
+                    </a>
+                  </div>
+                  <div className="space-y-2">
+                    {topActions.map(action => (
+                      <div key={action.id} className="rounded-md border border-border-subtle/70 bg-bg-surface/40 px-3 py-2">
+                        <div className="flex flex-col gap-1 md:flex-row md:items-center md:justify-between">
+                          <div className="text-[11px] font-semibold text-text-primary">
+                            {action.priority} · {action.title}
+                          </div>
+                          <div className="text-[9px] font-mono text-text-tertiary">
+                            {action.method} {action.endpoint}
+                          </div>
+                        </div>
+                        <div className="mt-1 text-[10px] leading-relaxed text-text-secondary">
+                          负责人：{action.owner} · {action.evidence}
+                        </div>
+                        <div className="mt-1 text-[10px] leading-relaxed text-success">
+                          验收：{action.acceptance}
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              )}
+            </div>
+          )}
+        </div>
+      )}
+
+      {health && health.services.length > 0 && (
+        <div className="mb-6 space-y-2">
+          <div className="mb-2 text-[10px] font-mono uppercase tracking-wider text-text-tertiary">
+            依赖服务 · 共 {health.services.length} 项
+          </div>
+          {health.services.map(service => {
+            const serviceMeta = STATUS_META[service.status];
             return (
               <div
-                key={s.name}
-                className={`flex items-center gap-3 px-4 py-3 border rounded-md ${m.border} ${m.bg}`}
+                key={service.name}
+                className={`flex items-center gap-3 rounded-md border px-4 py-3 ${serviceMeta.border} ${serviceMeta.bg}`}
               >
-                <div className={`w-1.5 h-1.5 rounded-full ${m.dot} flex-shrink-0`} />
-                <div className="flex-1 min-w-0">
-                  <div className="text-[13px] font-semibold text-text-primary">{s.name}</div>
-                  {s.note && (
-                    <div className="text-[10px] font-mono text-text-tertiary mt-0.5 truncate">
-                      {s.note}
+                <div className={`h-1.5 w-1.5 flex-shrink-0 rounded-full ${serviceMeta.dot}`} />
+                <div className="min-w-0 flex-1">
+                  <div className="text-[13px] font-semibold text-text-primary">{service.name}</div>
+                  {service.note && (
+                    <div className="mt-0.5 truncate text-[10px] font-mono text-text-tertiary">
+                      {service.note}
                     </div>
                   )}
                 </div>
-                <div className="flex items-center gap-3 flex-shrink-0">
-                  {typeof s.latencyMs === 'number' && (
-                    <span className="text-[10px] font-mono text-text-tertiary tabular-nums">
-                      {s.latencyMs}ms
+                <div className="flex flex-shrink-0 items-center gap-3">
+                  {typeof service.latencyMs === 'number' && (
+                    <span className="text-[10px] font-mono tabular-nums text-text-tertiary">
+                      {service.latencyMs}ms
                     </span>
                   )}
-                  <span className={`text-[11px] font-mono font-semibold ${m.color}`}>
-                    {m.label}
+                  <span className={`text-[11px] font-mono font-semibold ${serviceMeta.color}`}>
+                    {serviceMeta.label}
                   </span>
                 </div>
               </div>
@@ -148,14 +912,13 @@ export default function StatusPage() {
         </div>
       )}
 
-      {/* Footer */}
-      <div className="text-center pt-6 border-t border-border-subtle/50">
+      <div className="border-t border-border-subtle/50 pt-6 text-center">
         <p className="text-[10px] font-mono text-text-tertiary">
-          发现问题？邮件 <span className="text-accent">zachary.x.pku@gmail.com</span> · 48h 内响应
+          发现问题请联系 <span className="text-accent">zachary.x.pku@gmail.com</span> · 48 小时内响应
         </p>
         {health?.uptime && (
-          <p className="text-[9px] font-mono text-text-tertiary/70 mt-2">
-            current serverless instance uptime {Math.floor(health.uptime / 60)}m
+          <p className="mt-2 text-[9px] font-mono text-text-tertiary/70">
+            当前服务实例已运行 {Math.floor(health.uptime / 60)} 分钟
           </p>
         )}
       </div>

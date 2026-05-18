@@ -90,6 +90,7 @@ function InfluencerOutboundInner() {
   const [running, setRunning] = useState(false);
   const [progress, setProgress] = useState({ current: 0, total: 0 });
   const [handoff, setHandoff] = useState('');
+  const [actionNotice, setActionNotice] = useState<{ type: 'success' | 'warning' | 'error'; text: string } | null>(null);
   const abortRef = useRef(false);
 
   // 从 Pipeline 01 带 SKU 跳过来,或 ?demo=1 直接开跑
@@ -272,7 +273,11 @@ ${inf.email ? `- 邮箱：${inf.email}` : ''}
 
   const handleStart = async () => {
     const parsed = parseInfluencerInput(rawInput);
-    if (parsed.length === 0) return alert('至少贴 1 条达人（每行一条，字段用 | 分隔）');
+    setActionNotice(null);
+    if (parsed.length === 0) {
+      setActionNotice({ type: 'warning', text: '至少粘贴 1 条达人，每行一条，字段用 | 分隔。' });
+      return;
+    }
 
     abortRef.current = false;
     setRows(parsed);
@@ -292,7 +297,10 @@ ${inf.email ? `- 邮箱：${inf.email}` : ''}
         });
         if (!check.ok) {
           const data = await check.json().catch(() => ({}));
-          alert(`第 ${i + 1} 位达人前触发配额上限\n已完成 ${i} 条\n${data.resetAtText ? '将于 ' + data.resetAtText + ' 重置' : ''}\n准备跑真实批次请提交 10 SKU POC 需求`);
+          setActionNotice({
+            type: 'warning',
+            text: `第 ${i + 1} 位达人前触发配额上限，已完成 ${i} 条。${data.resetAtText ? '将于 ' + data.resetAtText + ' 重置。' : ''} 准备跑真实批次请提交 10 SKU POC 需求。`,
+          });
           break;
         }
       } catch {}
@@ -321,7 +329,7 @@ ${inf.email ? `- 邮箱：${inf.email}` : ''}
       });
       if (!check.ok) {
         const d = await check.json().catch(() => ({}));
-        alert(`配额不足无法重试\n${d.resetAtText || ''}`);
+        setActionNotice({ type: 'warning', text: `配额不足，暂时无法重试。${d.resetAtText || ''}` });
         return;
       }
     } catch {}
@@ -413,9 +421,9 @@ ${r.body || ''}
         try { await nav.share({ title: 'wenai · 达人冷启邮件批量产出', url: fullUrl }); return; } catch {}
       }
       await nav.clipboard.writeText(fullUrl);
-      alert('链接已复制到剪贴板\n' + fullUrl + '\n\n7 天有效,可发给主管看成果');
+      setActionNotice({ type: 'success', text: `分享链接已复制：${fullUrl}。7 天有效，可发给主管看成果。` });
     } catch (err) {
-      alert('分享失败: ' + (err instanceof Error ? err.message : 'unknown'));
+      setActionNotice({ type: 'error', text: `分享失败：${err instanceof Error ? err.message : 'unknown'}` });
     } finally {
       setSharing(false);
     }
@@ -672,6 +680,18 @@ PantryPerfection | YouTube | 85K | 家居生活 vlog | contact@pantryperfection.
           </button>
         </div>
       </div>
+
+      {actionNotice && (
+        <div className={`mb-4 p-3 border rounded text-[11px] ${
+          actionNotice.type === 'success'
+            ? 'border-success/40 bg-success/5 text-success'
+            : actionNotice.type === 'warning'
+              ? 'border-accent/40 bg-accent/5 text-accent'
+              : 'border-error/40 bg-error/5 text-error'
+        }`}>
+          {actionNotice.text}
+        </div>
+      )}
 
       {/* 结果表 */}
       {rows.length > 0 && (

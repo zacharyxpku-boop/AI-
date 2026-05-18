@@ -118,6 +118,7 @@ function ProductImagePipelineInner() {
   const [images, setImages] = useState<GenImage[]>([]);
   const [error, setError] = useState('');
   const [previewNotice, setPreviewNotice] = useState('');
+  const [actionNotice, setActionNotice] = useState<{ type: 'success' | 'warning' | 'error'; text: string } | null>(null);
 
   const scenePresets = category ? getScenePresets(category) : [];
 
@@ -151,7 +152,7 @@ function ProductImagePipelineInner() {
         });
       }
     } catch (err) {
-      alert('重试失败: ' + (err instanceof Error ? err.message : 'unknown'));
+      setActionNotice({ type: 'error', text: `重试失败：${err instanceof Error ? err.message : 'unknown'}` });
     } finally {
       setRetrying(prev => { const n = new Set(prev); n.delete(type); return n; });
     }
@@ -163,9 +164,19 @@ function ProductImagePipelineInner() {
   );
 
   const handleGenerate = async () => {
-    if (!category) return alert('选品类');
-    if (sku.trim().length < 10) return alert('贴商品信息（至少 10 字）');
-    if (selectedOutputs.size === 0) return alert('至少选 1 种输出图');
+    setActionNotice(null);
+    if (!category) {
+      setActionNotice({ type: 'warning', text: '先选择品类。' });
+      return;
+    }
+    if (sku.trim().length < 10) {
+      setActionNotice({ type: 'warning', text: '请粘贴至少 10 字商品信息。' });
+      return;
+    }
+    if (selectedOutputs.size === 0) {
+      setActionNotice({ type: 'warning', text: '至少选择 1 种输出图。' });
+      return;
+    }
 
     // Pipeline 级配额预占
     try {
@@ -176,7 +187,10 @@ function ProductImagePipelineInner() {
       });
       if (!check.ok) {
         const d = await check.json().catch(() => ({}));
-        alert(`Pipeline 配额已达上限\n${d.resetAtText || ''}\n准备跑真实 SKU 请提交 10 SKU POC 需求`);
+        setActionNotice({
+          type: 'warning',
+          text: `Pipeline 配额已达上限。${d.resetAtText || ''} 准备跑真实 SKU 请提交 10 SKU POC 需求。`,
+        });
         return;
       }
     } catch {}
@@ -277,7 +291,7 @@ ${successful.map((f, i) => `### ${i + 1}. ${f.meta.label} (${f.name})
       a.click();
       URL.revokeObjectURL(url);
     } catch (err) {
-      alert('打包失败: ' + (err instanceof Error ? err.message : 'unknown'));
+      setActionNotice({ type: 'error', text: `打包失败：${err instanceof Error ? err.message : 'unknown'}` });
     } finally {
       setZipping(false);
     }
@@ -320,9 +334,9 @@ ${images.map((img, i) => `### ${i + 1}. ${img.label}
         try { await nav.share({ title: 'wenai · AI 电商主图产出', url: fullUrl }); return; } catch {}
       }
       await nav.clipboard.writeText(fullUrl);
-      alert('链接已复制到剪贴板\n' + fullUrl + '\n\n7 天有效 · 含所有图片 + prompt');
+      setActionNotice({ type: 'success', text: `分享链接已复制：${fullUrl}。7 天有效，含所有图片和 prompt。` });
     } catch (err) {
-      alert('分享失败: ' + (err instanceof Error ? err.message : 'unknown'));
+      setActionNotice({ type: 'error', text: `分享失败：${err instanceof Error ? err.message : 'unknown'}` });
     } finally {
       setSharing(false);
     }
@@ -598,6 +612,17 @@ ${images.map((img, i) => `### ${i + 1}. ${img.label}
       {previewNotice && images.length > 0 && (
         <div className="mb-4 p-2.5 border border-border-subtle rounded text-[10px] font-mono text-text-tertiary bg-bg-surface/50">
           ⓘ {previewNotice}
+        </div>
+      )}
+      {actionNotice && (
+        <div className={`mb-4 p-3 border rounded text-[11px] ${
+          actionNotice.type === 'success'
+            ? 'border-success/40 bg-success/5 text-success'
+            : actionNotice.type === 'warning'
+              ? 'border-accent/40 bg-accent/5 text-accent'
+              : 'border-error/40 bg-error/5 text-error'
+        }`}>
+          {actionNotice.text}
         </div>
       )}
       {error && (
