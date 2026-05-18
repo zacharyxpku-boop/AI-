@@ -24,6 +24,16 @@ describe('status page', () => {
     expect(html).toContain('Hookshot / Hookly 类');
     expect(html).toContain('电商增长作战系统');
     expect(html).toContain('不展示伪规模');
+    expect(html).toContain('Manage Acceptance Board');
+    expect(html).toContain('交付前验收台');
+    expect(html).toContain('Readiness 验收');
+    expect(html).toContain('CRM / 生产交接');
+    expect(html).toContain('客户审核闭环');
+    expect(html).toContain('资产权限 / 审计');
+    expect(html).toContain('表现回流 / 复盘');
+    expect(html).toContain('谁负责、证据在哪里、客户是否能审核');
+    expect(html).toContain('每个 P0/P1 修复项都有 owner、endpoint、method、acceptance');
+    expect(html).toContain('接对象存储、签名 URL、团队空间和真实下载/share enforcement');
     expect(html).toContain('服务承诺边界');
     expect(html).toContain('正在加载状态');
     expect(html).not.toContain('Project readiness evidence');

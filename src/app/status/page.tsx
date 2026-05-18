@@ -487,6 +487,44 @@ const COMPETITOR_REFERENCE_RADAR = [
   },
 ];
 
+const MANAGE_ACCEPTANCE_BOARD = [
+  {
+    stage: 'Readiness 验收',
+    owner: '产品负责人',
+    proof: '汇总服务健康、产品成熟度、五段能力、外部门禁和规模数字保护，不把单点功能当成可发布。',
+    pass: '核心链路、伪功能、外部材料缺口和朋友试用风险都能在同一页看到。',
+    next: '继续把每轮新增能力接入 readiness evidence，而不是只做页面展示。',
+  },
+  {
+    stage: 'CRM / 生产交接',
+    owner: '客户经理',
+    proof: 'CRM-lite、production handoff、action queue 和商业下一步已经进入同一条运营队列。',
+    pass: '每个 P0/P1 修复项都有 owner、endpoint、method、acceptance，能交给运营或工程执行。',
+    next: '外部 CRM 正式接入后，把合同阶段、付款状态、客户字段同步回 Wenai。',
+  },
+  {
+    stage: '客户审核闭环',
+    owner: '交付负责人',
+    proof: '客户 review token、反馈、批准、过期/撤销和交付状态写回已经有 API 与页面。',
+    pass: '非技术客户能打开链接、看成片或交付包、写反馈、批准或要求返修。',
+    next: '补正式域名、客户权限策略、下载/水印策略，让朋友试用不需要解释。',
+  },
+  {
+    stage: '资产权限 / 审计',
+    owner: '运营管理员',
+    proof: '资产 owner、scope、role、action、expiry、DLP、水印、留存和访问审计已进入账本。',
+    pass: '下载、分享、发布、批准都必须经过权限检查；失败要有原因，不允许静默放行。',
+    next: '接对象存储、签名 URL、团队空间和真实下载/share enforcement。',
+  },
+  {
+    stage: '表现回流 / 复盘',
+    owner: '增长负责人',
+    proof: '表现导入、dispatch evidence、campaign ledger、品牌学习档案和下一轮建议已经互相引用。',
+    pass: '每个已发布或已交付资产都能追溯到表现数据、胜出结构和下一轮生产约束。',
+    next: '接平台 analytics sync 后，替代手动 CSV 导入并形成自动复盘。',
+  },
+];
+
 export default function StatusPage() {
   const [health, setHealth] = useState<HealthResponse | null>(null);
   const [readiness, setReadiness] = useState<ReadinessResponse | null>(null);
@@ -676,6 +714,32 @@ export default function StatusPage() {
         >
           刷新
         </button>
+      </div>
+
+      <div className="mb-6 rounded-md border border-border-subtle bg-bg-surface/50 p-5">
+        <div className="mb-2 flex flex-col gap-1 md:flex-row md:items-center md:justify-between">
+          <div className="text-[10px] font-mono uppercase tracking-wider text-text-tertiary">
+            Manage Acceptance Board
+          </div>
+          <div className="text-[10px] font-mono text-accent">
+            readiness / CRM handoff / 客户审核 / 资产权限 / 审计 / 表现回流
+          </div>
+        </div>
+        <h2 className="text-[15px] font-semibold text-text-primary">交付前验收台：把“能演示”推进到“可交给朋友试用”</h2>
+        <p className="mt-2 text-[11px] leading-relaxed text-text-secondary">
+          Manage 层不是后台杂项，而是商业化可信度。每个交付物必须能回答：谁负责、证据在哪里、客户是否能审核、资产是否受控、表现是否回流、外部材料缺什么。
+        </p>
+        <div className="mt-4 grid grid-cols-1 gap-2 md:grid-cols-5">
+          {MANAGE_ACCEPTANCE_BOARD.map(item => (
+            <div key={item.stage} className="rounded-md border border-border-subtle/70 bg-bg-root/40 px-3 py-3">
+              <div className="text-[12px] font-semibold text-text-primary">{item.stage}</div>
+              <div className="mt-1 text-[10px] font-mono text-accent">{item.owner}</div>
+              <p className="mt-2 text-[10px] leading-relaxed text-text-secondary">{item.proof}</p>
+              <p className="mt-2 text-[10px] leading-relaxed text-success">验收：{item.pass}</p>
+              <p className="mt-2 text-[10px] leading-relaxed text-text-tertiary">下一步：{item.next}</p>
+            </div>
+          ))}
+        </div>
       </div>
 
       <div className="mb-6 rounded-md border border-border-subtle bg-bg-surface/50 p-5">
