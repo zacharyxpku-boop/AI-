@@ -98,6 +98,27 @@ const EVIDENCE_SCHEMA_LABELS: Record<string, string> = {
   publishedAt: '发布时间',
 };
 
+const HOOKSHOT_STYLE_PLAYBOOK = [
+  {
+    title: 'Hook Bank',
+    signal: '前三秒钩子、反差句、痛点开场、价格锚点和结果承诺',
+    output: '沉淀为可复用 hook 模板，进入下一轮脚本和 A/B 分发计划',
+    guardrail: '只复用结构和验证逻辑，不复制竞品原句、画面或素材表达',
+  },
+  {
+    title: 'UGC Script Spine',
+    signal: '真人口播、使用前后、场景演示、证据点和行动号召',
+    output: '生成 15s / 30s / 45s 三档脚本骨架，交给视频工厂继续成片',
+    guardrail: '需要品牌授权素材、产品实拍或生成素材许可后才能进入真实成片',
+  },
+  {
+    title: 'Offer Test Matrix',
+    signal: '折扣、套装、赠品、信任背书、稀缺性和平台活动节点',
+    output: '把创意机会转成投放假设：受众、平台、预算、指标和停止条件',
+    guardrail: '没有广告账户和 analytics sync 前，只能生成投放方案，不能宣称自动优化',
+  },
+];
+
 function typeLabel(type: CreativeMonitorType) {
   return TYPE_LABELS[type] || type;
 }
@@ -385,6 +406,28 @@ export function CreativeMonitoringConsoleClient({ initialProjectId = 'default-pr
             把筷子科技式的爆款拆解、账号追踪、榜单监控先做成可运行的内部账本。当前不伪装未授权自动抓取：运营人员只导入公开可用或已授权观察，系统负责沉淀开头钩子、节奏、证据点、可复用角度和周期采集缺口。
           </p>
         </header>
+
+        <section className="border border-amber-300/20 bg-amber-300/[0.06] p-5">
+          <div className="flex flex-col gap-2 sm:flex-row sm:items-start sm:justify-between">
+            <div>
+              <p className="text-xs uppercase tracking-[0.22em] text-amber-200">Hookshot / Hookly 参考层</p>
+              <h2 className="mt-2 text-xl font-semibold">从单条灵感升级为可复用广告结构库</h2>
+            </div>
+            <div className="max-w-sm text-xs leading-5 text-amber-100/80">
+              终局不是“看见一个爆款就仿一个”，而是把 hook、UGC 脚本骨架和 offer 测试矩阵持续沉淀，反哺视频生产和投放回流。
+            </div>
+          </div>
+          <div className="mt-4 grid gap-3 lg:grid-cols-3">
+            {HOOKSHOT_STYLE_PLAYBOOK.map(item => (
+              <article className="border border-white/10 bg-black/20 p-4" key={item.title}>
+                <div className="text-sm font-semibold text-white">{item.title}</div>
+                <div className="mt-2 text-xs leading-5 text-white/65">输入信号：{item.signal}</div>
+                <div className="mt-2 text-xs leading-5 text-emerald-200">Wenai 输出：{item.output}</div>
+                <div className="mt-2 text-xs leading-5 text-amber-100">边界：{item.guardrail}</div>
+              </article>
+            ))}
+          </div>
+        </section>
 
         <div className="grid gap-3 sm:grid-cols-6">
           <Metric label="监控项" value={snapshot?.monitorCount ?? '-'} />

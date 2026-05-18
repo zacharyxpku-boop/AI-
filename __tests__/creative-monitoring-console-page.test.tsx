@@ -24,6 +24,11 @@ describe('creative monitoring console page', () => {
     expect(html).toContain('护城河分');
     expect(html).toContain('生成脚本与分发计划');
     expect(html).toContain('采集器接入状态');
+    expect(html).toContain('Hookshot / Hookly 参考层');
+    expect(html).toContain('可复用广告结构库');
+    expect(html).toContain('Hook Bank');
+    expect(html).toContain('UGC Script Spine');
+    expect(html).toContain('Offer Test Matrix');
     expect(html).toContain('creative-launch');
   });
 
@@ -40,6 +45,8 @@ describe('creative monitoring console page', () => {
     expect(html).toContain('系统才会把它升级成可复用打法');
     expect(html).toContain('先导入竞品账号、榜单或视频拆解信号');
     expect(html).toContain('只导入公开可用或已授权观察');
+    expect(html).toContain('只复用结构和验证逻辑');
+    expect(html).toContain('没有广告账户和 analytics sync 前，只能生成投放方案');
     expect(html).toContain('开头钩子');
     expect(html).toContain('空结果只记录缺口，不生成洞察');
     expect(html).toContain('当前继续走人工运营回灌，不假装已完成未授权自动抓取。');
