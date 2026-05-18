@@ -372,6 +372,15 @@ describe('listing factory demo data', () => {
     expect(source).toContain('正式生产方案');
     expect(source).toContain('类目灵感');
     expect(source).toContain('内容工厂控制台');
+    expect(source).toContain('Wenai 电商增长作战台');
+    expect(source).toContain('从 SKU 上新到创意、视频、分发、审核和回流的一张工作台');
+    expect(source).toContain('Hookshot / Hookly');
+    expect(source).toContain('Compose');
+    expect(source).toContain('Create');
+    expect(source).toContain('Cut');
+    expect(source).toContain('Cast');
+    expect(source).toContain('Manage');
+    expect(source).toContain('不宣称平台级规模执行');
     expect(source).toContain('Brief 资产库');
     expect(source).toContain('类目洞察库');
     expect(source).toContain('商务推进后台');
