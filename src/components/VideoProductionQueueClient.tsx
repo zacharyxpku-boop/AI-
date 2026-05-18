@@ -156,6 +156,44 @@ const MIXCUT_OPERATION_BOARD = [
   },
 ];
 
+const CUT_PRODUCTION_LINE = [
+  {
+    stage: 'AI 视频分析',
+    input: '授权视频 URL、转写摘要、画面节奏、字幕、物体、评论区需求和互动指标',
+    output: '拆出 hook、scene beats、proof point、CTA、风险表达和可混剪素材需求',
+    internal: '内部可做：结构化字段、解析结果回灌、脚本约束、视频任务交接',
+    external: '外部需要：多模态视频解析 provider、合法视频源、下载/存储权限',
+  },
+  {
+    stage: '智能混剪',
+    input: 'Hook Bank、UGC Script Spine、产品素材、参考节奏和平台时长规则',
+    output: '生成 15s / 30s / 45s 版本的镜头顺序、字幕节奏、素材清单和风险边界',
+    internal: '内部可做：混剪计划、镜头清单、变体策略、供应商交接包',
+    external: '外部需要：真实剪辑引擎、素材授权、音频/字体授权和成片回调',
+  },
+  {
+    stage: '一键视频',
+    input: '商品 brief、素材 URL、参考视频、授权确认、平台列表和分发目标',
+    output: '创建生产 handoff、分发计划、dispatch、客户 review 链路和表现回流字段',
+    internal: '内部可做：一键编排、队列状态、门禁判断、审计证据',
+    external: '外部需要：视频生成 provider token、任务回调、失败重试和成本额度',
+  },
+  {
+    stage: '客户审核',
+    input: '成片 URL、交付包、review token、客户反馈和批准/返修结论',
+    output: '把批准状态写回生产链路，进入分发或返修，不让结果停在聊天里',
+    internal: '内部可做：review 门户、反馈、批准、过期/撤销、审计日志',
+    external: '外部需要：正式域名、客户权限策略、素材下载/水印策略',
+  },
+  {
+    stage: '分发回流',
+    input: '平台账号、发布证据、广告假设、投放数据、自然流量和销售指标',
+    output: '回写表现 CSV/API 数据，沉淀胜出结构并反哺下一轮 Compose 和 Cut',
+    internal: '内部可做：dispatch gate、campaign ledger、表现导入、复盘字段',
+    external: '外部需要：平台 OAuth、广告账户授权、自动发布和 analytics sync',
+  },
+];
+
 export function VideoProductionQueueClient({
   initialProjectId = 'default-project',
   initialQueue = null,
@@ -383,6 +421,31 @@ export function VideoProductionQueueClient({
                 <div className="mt-2 text-xs leading-5 text-white/65">输入：{item.input}</div>
                 <div className="mt-2 text-xs leading-5 text-emerald-200">动作：{item.action}</div>
                 <div className="mt-2 text-xs leading-5 text-amber-100">门禁：{item.gate}</div>
+              </article>
+            ))}
+          </div>
+        </section>
+
+        <section className="border border-white/10 bg-white/[0.035] p-5">
+          <div className="flex flex-col gap-2 sm:flex-row sm:items-start sm:justify-between">
+            <div>
+              <p className="text-xs uppercase tracking-[0.22em] text-sky-200">Cut Production Line</p>
+              <h2 className="mt-2 text-xl font-semibold">从视频解析到分发回流的一条成片生产线</h2>
+            </div>
+            <p className="max-w-md text-xs leading-5 text-white/55">
+              这层承接 Clico 的视频任务体验，也对齐筷子式批量混剪和一键视频。Wenai 先把任务、证据、审核、返修和回流做成可验收闭环；外部 provider 接入前，不把计划页包装成真实自动成片。
+            </p>
+          </div>
+          <div className="mt-4 grid gap-3 xl:grid-cols-5">
+            {CUT_PRODUCTION_LINE.map(item => (
+              <article className="border border-white/10 bg-black/20 p-4" key={item.stage}>
+                <div className="text-sm font-semibold text-white">{item.stage}</div>
+                <div className="mt-3 space-y-2 text-xs leading-5">
+                  <p className="text-white/60"><span className="text-white/90">输入：</span>{item.input}</p>
+                  <p className="text-sky-200"><span className="text-white/90">输出：</span>{item.output}</p>
+                  <p className="text-white/55"><span className="text-white/90">内部：</span>{item.internal}</p>
+                  <p className="text-amber-100"><span className="text-white/90">外部：</span>{item.external}</p>
+                </div>
               </article>
             ))}
           </div>

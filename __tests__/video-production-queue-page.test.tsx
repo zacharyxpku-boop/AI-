@@ -18,6 +18,12 @@ describe('video production queue page', () => {
     expect(html).toContain('Hook Bank 入场');
     expect(html).toContain('UGC Script Spine 成片');
     expect(html).toContain('Offer Test Matrix 分发');
+    expect(html).toContain('Cut Production Line');
+    expect(html).toContain('AI 视频分析');
+    expect(html).toContain('一键视频');
+    expect(html).toContain('客户审核');
+    expect(html).toContain('分发回流');
+    expect(html).toContain('从视频解析到分发回流的一条成片生产线');
     expect(html).toContain('创建视频工作流');
     expect(html).toContain('创建任务并写入分发队列');
     expect(html).toContain('回灌成片并生成审核链接');
@@ -36,6 +42,11 @@ describe('video production queue page', () => {
     expect(html).toContain('不伪装自动生成');
     expect(html).toContain('只有 provider、素材授权、平台账号和回流都接上');
     expect(html).toContain('没有平台 OAuth、广告账户和 analytics sync 前，只能做计划与手工回灌');
+    expect(html).toContain('多模态视频解析 provider、合法视频源、下载/存储权限');
+    expect(html).toContain('真实剪辑引擎、素材授权、音频/字体授权和成片回调');
+    expect(html).toContain('视频生成 provider token、任务回调、失败重试和成本额度');
+    expect(html).toContain('正式域名、客户权限策略、素材下载/水印策略');
+    expect(html).toContain('平台 OAuth、广告账户授权、自动发布和 analytics sync');
     expect(html).toContain('成片 URL');
     expect(html).not.toContain('一键生成成片');
     expect(html).not.toContain('handoff_only');
