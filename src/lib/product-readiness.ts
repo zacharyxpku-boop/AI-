@@ -205,10 +205,41 @@ export interface ScaleClaimGuard {
   requiredEvidence: string[];
 }
 
+export type ProductCapabilityLayerId = 'Compose' | 'Create' | 'Cut' | 'Cast' | 'Manage';
+
+export interface ProductCapabilityLayer {
+  id: ProductCapabilityLayerId;
+  target: string;
+  currentStatus: ReadinessStatus;
+  internalCapability: string;
+  externalGate: string;
+  stopLine: string;
+  evidence: string;
+}
+
+export interface AlternativeCompetitorReference {
+  name: string;
+  pattern: string;
+  wenaiDecision: string;
+  boundary: string;
+}
+
+export interface ProductUiVariantGuide {
+  id: 'partner' | 'operator' | 'friend_trial';
+  label: string;
+  audience: string;
+  firstScreen: string;
+  primaryAction: string;
+  stopLine: string;
+}
+
 export interface ProductReadinessReport {
   verdict: ReadinessVerdict;
   label: string;
   score: number;
+  productBlueprint: ProductCapabilityLayer[];
+  alternativeReferences: AlternativeCompetitorReference[];
+  uiVariants: ProductUiVariantGuide[];
   competitor: CompetitorDimension[];
   features: ReadinessFeature[];
   workflows: ReadinessWorkflowCheck[];
@@ -341,6 +372,134 @@ function buildScaleClaimGuards(input: ReadinessServiceInput): ScaleClaimGuard[] 
     evidence: `publishedDispatches=${input.project?.publishedDispatchCount || 0}; measuredDispatches=${input.project?.measuredDispatchCount || 0}; auditedWenaiVideoDistribution=missing`,
     requiredEvidence: ['platform publish ledger', 'video id ledger', 'analytics sync evidence', 'audited date range'],
   }];
+}
+
+function buildProductBlueprint(input: ReadinessServiceInput, platformAutomationReady: boolean): ProductCapabilityLayer[] {
+  const project = input.project;
+  const composeDepthReady = Boolean(
+    project?.creativeAccountTrackingSourceReady &&
+    project?.creativeTrendRankSourceReady &&
+    project?.creativeVideoTeardownSourceReady &&
+    (project.creativeSourceDepthScore || 0) >= 90,
+  );
+  const videoLoopReady = Boolean(
+    input.videoConfigured &&
+    project?.videoCompletedProviderExecutionCount &&
+    project.videoResultAssetCount &&
+    project.videoClientReviewCount &&
+    project.videoMeasuredCount,
+  );
+  const assetCloudReady = Boolean(
+    input.storageConfigured &&
+    input.platformConnectors?.enterpriseAssetPermissionsConfigured &&
+    project?.downloadableAssetAccessReadyCount,
+  );
+
+  return [
+    {
+      id: 'Compose',
+      target: '全网灵感管理、竞品账号追踪、热门视频解析、Hook Bank、品牌学习档案。',
+      currentStatus: composeDepthReady ? 'implemented' : 'partial',
+      internalCapability: '已有创意洞察 ledger、监控 watchlist、来源健康卡、品牌学习和 action queue，可以把手动/半自动导入沉淀成下一轮脚本与分发动作。',
+      externalGate: '需要授权账号源、榜单源、持续采集任务和多模态视频解析 provider，才能从“洞察账本”升级为“全网灵感平台”。',
+      stopLine: '没有持续来源和解析证据前，不能宣称全网自动监控或筷子级 Narra 视频解析。',
+      evidence: `creativeInsights=${project?.creativeInsightCount || 0}; sourceDepth=${project?.creativeSourceDepthScore || 0}; videoTeardownReady=${project?.creativeVideoTeardownSourceReady ? 1 : 0}`,
+    },
+    {
+      id: 'Create',
+      target: 'SKU brief、图文素材、生产 handoff、客户交付包、资产权限和审计。',
+      currentStatus: input.industrialChainAvailable ? 'implemented' : 'partial',
+      internalCapability: '资产库、production handoff、客户交付、review 写回和 RBAC 账本已经可跑，适合先做商业化 POC 生产管理。',
+      externalGate: '需要真实图片/视频 provider、对象存储、签名 URL 和团队空间后，才能承接规模化云资产生产。',
+      stopLine: 'provider 未接齐时只展示生产规格和交接包，不把导出规格说成自动生成结果。',
+      evidence: `industrialChain=${input.industrialChainAvailable ? 1 : 0}; storage=${input.storageConfigured ? 1 : 0}; governedAssets=${project?.governedAssetCount || 0}`,
+    },
+    {
+      id: 'Cut',
+      target: 'AI 视频分析、智能混剪、一键视频、人工/供应商试跑、成片回灌和客户审核。',
+      currentStatus: videoLoopReady ? 'implemented' : 'partial',
+      internalCapability: '已有视频 workflow、队列、provider gate、人工试跑 runbook、成片回灌、review token 和表现回流字段。',
+      externalGate: '需要真实视频生成/剪辑 provider、素材授权、回调签名和成本上限，才能把队列变成稳定商用视频工厂。',
+      stopLine: '没有 provider 完成记录和客户审核回写前，不能宣称一键视频或批量自动混剪真实可用。',
+      evidence: `videoConfigured=${input.videoConfigured ? 1 : 0}; completedProviderExecutions=${project?.videoCompletedProviderExecutionCount || 0}; measuredVideos=${project?.videoMeasuredCount || 0}`,
+    },
+    {
+      id: 'Cast',
+      target: '多平台分发、PubPal/矩阵分发、广告投放、发布证据、平台数据同步和复盘决策。',
+      currentStatus: platformAutomationReady ? 'implemented' : 'partial',
+      internalCapability: '已有分发计划、dispatch、账号矩阵、广告 campaign ledger、预算/证据门禁和表现回流。',
+      externalGate: '需要平台 OAuth、广告账户授权、自动发布权限、analytics sync 和平台回执，才能进入真实矩阵投放。',
+      stopLine: '外部授权未完成前，只能说 manual/provider-gated dispatch，不能说自动发布、自动投放或自动优化。',
+      evidence: `platformAutomationReady=${platformAutomationReady ? 1 : 0}; channelAccounts=${project?.channelAccountCount || 0}; readyAdCampaigns=${project?.channelReadyAdCampaignCount || 0}`,
+    },
+    {
+      id: 'Manage',
+      target: 'readiness、CRM handoff、客户 review、资产权限/RBAC/audit、表现回流和规模数字审计。',
+      currentStatus: assetCloudReady ? 'implemented' : 'partial',
+      internalCapability: '已有 readiness API、CRM/生产交接、review 写回、资产权限、DLP/watermark、审计和品牌学习闭环。',
+      externalGate: '需要真实企业云资产、签名访问、团队权限、留存策略和审计后的规模计数，才能支撑企业级交付。',
+      stopLine: '91M+ creative output、42M+ video distribution 只能作为竞品 benchmark；没有 Wenai 自有审计台账前不能对外展示为自身数据。',
+      evidence: `assetCloudReady=${assetCloudReady ? 1 : 0}; accessAudits=${project?.assetPermissionAccessAuditEventCount || 0}; performanceReturns=${project?.performanceReturnCount || 0}`,
+    },
+  ];
+}
+
+function buildAlternativeReferences(): AlternativeCompetitorReference[] {
+  return [
+    {
+      name: 'Hookshot / Hookly',
+      pattern: '把爆款 hook、UGC 结构和行动队列做成可复用的创意生产系统。',
+      wenaiDecision: 'Compose 不是只存竞品链接，而是把 hook、节奏、证明点、风险边界转成下一轮脚本、视频任务和分发实验。',
+      boundary: '只学习结构和运营机制，不复制受保护表达、素材和账号内容。',
+    },
+    {
+      name: 'Hooksy / Hooked',
+      pattern: '用广告结构拆解和变体生成缩短从洞察到素材的时间。',
+      wenaiDecision: '把胜出广告结构沉淀到品牌学习档案，并驱动 Create/Cut 的变体矩阵。',
+      boundary: '必须保留 Wenai-owned variant 和合规审核，不把参考视频直接改写成近似副本。',
+    },
+    {
+      name: 'Omneky',
+      pattern: '把创意生成、广告投放和表现回流连成 campaign learning loop。',
+      wenaiDecision: 'Cast/Manage 必须把 campaign ledger、预算、素材绑定、回流指标和下一轮规则放在同一条链路。',
+      boundary: '广告账户和转化事件未授权前，只能做手动导入与 provider-gated 编排。',
+    },
+    {
+      name: 'AdHawk / AI Media Buyer',
+      pattern: '把投放操作变成可审计的动作建议、预算门禁和异常处理。',
+      wenaiDecision: 'Wenai 的 action queue 需要记录做了什么、没做什么、为什么没做，避免 agent 直接碰生产系统。',
+      boundary: '没有广告主授权、预算上限和回滚策略前，不做真实自动投放。',
+    },
+  ];
+}
+
+function buildUiVariants(): ProductUiVariantGuide[] {
+  return [
+    {
+      id: 'partner',
+      label: '合作者/投资人版',
+      audience: '合作者、供应商、潜在客户和投资人。',
+      firstScreen: '先看 Wenai 是 Compose/Create/Cut/Cast/Manage 的全链路内容工业化工作台，再看哪些已经内部可跑、哪些等待外部接入。',
+      primaryAction: '进入 /status 查看 readiness 与外部材料包，再打开 /factory/video 或 /review/[token] 证明生产与客户审核闭环。',
+      stopLine: '不展示未审计规模数字，不把 provider-gated 能力说成已自动化。',
+    },
+    {
+      id: 'operator',
+      label: '运营工作台版',
+      audience: '内容运营、投放、客户经理和生产负责人。',
+      firstScreen: '先显示项目、待处理动作、阻塞门禁、素材/视频/分发/回流状态。',
+      primaryAction: '从创意洞察进入视频任务，再把可发布素材推到分发计划和表现回流。',
+      stopLine: '不让运营绕过 RBAC、DLP、客户审核、发布证据和预算门禁。',
+    },
+    {
+      id: 'friend_trial',
+      label: '朋友试用版',
+      audience: '第一次使用、没有技术背景的真实用户。',
+      firstScreen: '只保留项目入口、样例链路、客户审核和下一步，不暴露 provider、ledger、env 等工程概念。',
+      primaryAction: '按“看洞察 -> 生成 brief -> 查看视频任务 -> 客户审核 -> 看回流”完成一次零解释试跑。',
+      stopLine: '任何需要解释环境变量、后端任务或平台授权的步骤，都不能算朋友可独立完成。',
+    },
+  ];
 }
 
 function scoreFeature(feature: ReadinessFeature) {
@@ -594,6 +753,9 @@ export function evaluateProductReadiness(input: ReadinessServiceInput): ProductR
   const platformAutomationReady = Boolean(platformConnectors?.platformAutomationReady);
   const externalRequirements = buildExternalRequirements(input);
   const scaleClaimGuards = buildScaleClaimGuards(input);
+  const productBlueprint = buildProductBlueprint(input, platformAutomationReady);
+  const alternativeReferences = buildAlternativeReferences();
+  const uiVariants = buildUiVariants();
   const platformConnectorEvidence = platformConnectors
     ? `configured=${platformConnectors.configuredCapabilities.join(',') || 'none'}; missing=${platformConnectors.missingCapabilities.join(',') || 'none'}`
     : 'platform connector ledger is missing from readiness input.';
@@ -926,6 +1088,9 @@ export function evaluateProductReadiness(input: ReadinessServiceInput): ProductR
     verdict,
     label: verdict === 'pass' ? '通过' : verdict === 'conditional' ? '有条件通过' : '不通过',
     score,
+    productBlueprint,
+    alternativeReferences,
+    uiVariants,
     competitor,
     features,
     workflows,

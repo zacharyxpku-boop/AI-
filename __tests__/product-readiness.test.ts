@@ -251,6 +251,63 @@ describe('product readiness against Kuaizi benchmark', () => {
     expect(JSON.stringify(report)).not.toContain('client-secret');
   });
 
+  it('publishes the final product blueprint, competitor references, and UI variant guides as structured readiness data', () => {
+    const report = evaluateProductReadiness({
+      aiConfigured: true,
+      storageConfigured: true,
+      kuaiziConfigured: true,
+      imageConfigured: true,
+      videoConfigured: false,
+      videoTeardownConfigured: false,
+      performanceImportAvailable: true,
+      commerceChainAvailable: true,
+      industrialChainAvailable: true,
+      distributionExecutionAvailable: true,
+      platformConnectors: buildPlatformConnectorReadiness({
+        TIKTOK_OAUTH_CLIENT_ID: 'client-id',
+        TIKTOK_OAUTH_CLIENT_SECRET: 'client-secret',
+      }),
+      emailConfigured: true,
+      authConfigured: true,
+      project: {
+        orgId: 'variant-org',
+        projectId: 'variant-project',
+        assetCount: 1,
+        governedAssetCount: 1,
+        planCount: 1,
+        readyPlanCount: 1,
+        dispatchCount: 1,
+        executableDispatchCount: 1,
+        measuredDispatchCount: 0,
+        performanceReturnCount: 0,
+        scaleDecisionCount: 0,
+        creativeInsightCount: 2,
+        creativeSourceDepthScore: 40,
+        channelAccountCount: 1,
+        channelReadyAdCampaignCount: 0,
+        assetPermissionAccessAuditEventCount: 1,
+        missingLinks: ['No measured dispatch yet'],
+        nextActions: ['Import performance return'],
+      },
+    });
+
+    expect(report.productBlueprint.map(layer => layer.id)).toEqual(['Compose', 'Create', 'Cut', 'Cast', 'Manage']);
+    expect(report.productBlueprint.find(layer => layer.id === 'Cut')).toMatchObject({
+      currentStatus: 'partial',
+    });
+    expect(report.productBlueprint.find(layer => layer.id === 'Manage')?.stopLine).toContain('91M+ creative output');
+    expect(report.alternativeReferences.map(reference => reference.name)).toEqual(expect.arrayContaining([
+      'Hookshot / Hookly',
+      'Hooksy / Hooked',
+      'Omneky',
+      'AdHawk / AI Media Buyer',
+    ]));
+    expect(report.alternativeReferences.find(reference => reference.name === 'Omneky')?.wenaiDecision).toContain('campaign ledger');
+    expect(report.uiVariants.map(variant => variant.id)).toEqual(['partner', 'operator', 'friend_trial']);
+    expect(report.uiVariants.find(variant => variant.id === 'friend_trial')?.stopLine).toContain('环境变量');
+    expect(JSON.stringify(report)).not.toContain('client-secret');
+  });
+
   it('serves the product maturity report through /api/readiness', async () => {
     vi.stubEnv('AI_API_KEY', '');
     vi.stubEnv('KUAIZI_API_KEY', 'kz_live_secret_should_not_leak');
@@ -276,6 +333,17 @@ describe('product readiness against Kuaizi benchmark', () => {
     expect(body.report.scaleClaimGuards).toEqual(expect.arrayContaining([
       expect.objectContaining({ requestedBenchmark: '91M+ creative output', canDisplay: false }),
       expect.objectContaining({ requestedBenchmark: '42M+ video distribution', canDisplay: false }),
+    ]));
+    expect(body.report.productBlueprint.map((item: { id: string }) => item.id)).toEqual(['Compose', 'Create', 'Cut', 'Cast', 'Manage']);
+    expect(body.report.alternativeReferences.map((item: { name: string }) => item.name)).toEqual(expect.arrayContaining([
+      'Hookshot / Hookly',
+      'Omneky',
+      'AdHawk / AI Media Buyer',
+    ]));
+    expect(body.report.uiVariants.map((item: { id: string }) => item.id)).toEqual(expect.arrayContaining([
+      'partner',
+      'operator',
+      'friend_trial',
     ]));
     expect(JSON.stringify(body)).not.toContain('kz_live_secret_should_not_leak');
     expect(JSON.stringify(body)).not.toContain('oauth_secret_should_not_leak');
