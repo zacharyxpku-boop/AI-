@@ -1,5 +1,7 @@
 import { renderToStaticMarkup } from 'react-dom/server';
 import { describe, expect, it } from 'vitest';
+import { readFileSync } from 'node:fs';
+import { join } from 'node:path';
 
 import SettingsPage from '@/app/settings/page';
 import KuaiziSettingsPage from '@/app/settings/kuaizi/page';
@@ -61,5 +63,23 @@ describe('settings pages', () => {
     expect(html).not.toContain('绛');
     expect(html).not.toContain('杩');
     expect(html).not.toContain('API Key');
+  });
+
+  it('keeps the partner-facing external integration material handoff explicit', () => {
+    const doc = readFileSync(join(process.cwd(), 'docs/EXTERNAL_INTEGRATION_MATERIALS.md'), 'utf8');
+
+    expect(doc).toContain('Video Generation / Editing Provider Pack');
+    expect(doc).toContain('Platform OAuth / Account Pool Pack');
+    expect(doc).toContain('Ad Account / Campaign Pack');
+    expect(doc).toContain('Analytics Sync / Performance Return Pack');
+    expect(doc).toContain('Enterprise Asset Cloud / Permission Pack');
+    expect(doc).toContain('Audited Scale Ledger Pack');
+    expect(doc).toContain('91M+ creative output and 42M+ video distribution numbers are competitor benchmarks');
+    expect(doc).toContain('No platform OAuth: keep distribution as manual/provider-gated dispatch.');
+    expect(doc).toContain('No ad account authorization: do not claim automatic ad delivery or optimization.');
+    expect(doc).toContain('No video provider callback: do not claim one-click finished video or batch smart remixing.');
+    expect(doc).toContain('No audited scale ledger: do not display Wenai-owned 91M+ / 42M+ scale claims.');
+    expect(doc).not.toContain('KUAIZI_API_KEY');
+    expect(doc).not.toContain('API Key');
   });
 });
