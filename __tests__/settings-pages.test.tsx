@@ -26,6 +26,14 @@ describe('settings pages', () => {
     expect(html).toContain('服务端托管');
     expect(html).toContain('不在浏览器保存');
     expect(html).toContain('不能承诺一键外部生产');
+    expect(html).toContain('外部环境接入作战台');
+    expect(html).toContain('能配的我接，必须授权的你统一给');
+    expect(html).toContain('视频生成 / 剪辑供应商');
+    expect(html).toContain('多平台 OAuth / 账号池');
+    expect(html).toContain('自动发布 / PubPal 矩阵分发');
+    expect(html).toContain('广告投放');
+    expect(html).toContain('自有规模审计');
+    expect(html).toContain('91M+ / 42M+ 只能显示为竞品 benchmark');
     expect(html).not.toContain('KUAIZI_API_KEY');
     expect(html).not.toContain('绛');
     expect(html).not.toContain('杩');
