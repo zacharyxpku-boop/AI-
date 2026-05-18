@@ -18,6 +18,11 @@ describe('status page', () => {
     expect(html).toContain('项目闭环证据');
     expect(html).toContain('筷子式五段能力');
     expect(html).toContain('Compose / Create / Cut / Cast / Manage');
+    expect(html).toContain('UI Variant 工作流');
+    expect(html).toContain('工业化对标版');
+    expect(html).toContain('竞品参考雷达');
+    expect(html).toContain('Hookshot / Hookly 类');
+    expect(html).toContain('电商增长作战系统');
     expect(html).toContain('不展示伪规模');
     expect(html).toContain('服务承诺边界');
     expect(html).toContain('正在加载状态');

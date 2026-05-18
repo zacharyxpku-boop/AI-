@@ -429,6 +429,64 @@ function overallLabel(status: HealthResponse['overall']) {
   return '核心服务不可用，需要立即处理';
 }
 
+type StatusUiVariant = 'stable' | 'industrial' | 'partner';
+
+const STATUS_UI_VARIANTS: Array<{
+  id: StatusUiVariant;
+  label: string;
+  intent: string;
+  proof: string;
+}> = [
+  {
+    id: 'stable',
+    label: '稳定验收版',
+    intent: '保留当前服务状态、成熟度、外部门禁和审计证据，作为每轮改 UI 后的对照组。',
+    proof: '看状态、看接口、看缺口，不做营销包装。',
+  },
+  {
+    id: 'industrial',
+    label: '工业化对标版',
+    intent: '面向筷子科技对标，把 Compose / Create / Cut / Cast / Manage 的链路、门禁和外部材料放到首屏。',
+    proof: '合作者 30 秒内能看懂 Wenai 已经有哪些工业化能力，以及为什么还不能宣称等价筷子。',
+  },
+  {
+    id: 'partner',
+    label: '合作者演示版',
+    intent: '减少技术词，把“能演示什么、要补什么、下一步谁提供材料”讲清楚。',
+    proof: '非技术合作者能自己判断是否值得继续接 provider、平台授权和客户试跑。',
+  },
+];
+
+const STATUS_VARIANT_ROADMAP = [
+  { step: '1', page: '/status', job: '先做验收台 variant：稳定版做对照，工业化版展示全链路和外部门禁。' },
+  { step: '2', page: '/factory/creative', job: '再做创意洞察 variant：突出竞品账号、榜单、视频拆解、品牌学习和 action queue。' },
+  { step: '3', page: '/factory/video', job: '再做视频工厂 variant：区分内部一键视频队列和真实外部生成门禁后的成片。' },
+  { step: '4', page: '/settings/kuaizi', job: '最后做接入清单 variant：把 OAuth、广告账户、自动发布、云资产材料变成可执行 checklist。' },
+];
+
+const COMPETITOR_REFERENCE_RADAR = [
+  {
+    name: '筷子科技',
+    lesson: '全链路内容工业化：灵感、素材、合成、分发、矩阵、数据、资产和权限必须在一个运营系统里闭环。',
+    wenaiMove: 'Wenai 继续做 Compose / Create / Cut / Cast / Manage 的主骨架，不展示未审计规模。',
+  },
+  {
+    name: 'Hookshot / Hookly 类',
+    lesson: '电商广告不只生成素材，关键是 hook、脚本结构、AI UGC、保存灵感和一键复用。',
+    wenaiMove: '把创意洞察层加厚为 hook bank、结构偏好、胜出脚本和下一轮生产约束。',
+  },
+  {
+    name: 'Macro 类',
+    lesson: '创意团队需要 campaign canvas：计划、生成、审稿、发布在同一张工作台里流转。',
+    wenaiMove: '把 factory 页面从功能入口升级为项目作战台，减少跳页和断点。',
+  },
+  {
+    name: 'AdHawk / Omneky 类',
+    lesson: '真正商业化靠投放和回流：广告账户、动态 URL、素材标签、预算、ROAS 和自动优化。',
+    wenaiMove: 'Cast 不停在分发计划，必须接广告账户和 analytics sync 后才能宣称平台级执行。',
+  },
+];
+
 export default function StatusPage() {
   const [health, setHealth] = useState<HealthResponse | null>(null);
   const [readiness, setReadiness] = useState<ReadinessResponse | null>(null);
@@ -437,6 +495,7 @@ export default function StatusPage() {
   const [projectId, setProjectId] = useState('default-project');
   const [loading, setLoading] = useState(true);
   const [lastFetch, setLastFetch] = useState<Date | null>(null);
+  const [uiVariant, setUiVariant] = useState<StatusUiVariant>('industrial');
 
   const fetchHealth = useCallback(async () => {
     try {
@@ -493,6 +552,7 @@ export default function StatusPage() {
   const topActions = actionQueue?.actions.slice(0, 4) || [];
   const assetPermissionAudits = assetPermissions?.accessAudits.slice(0, 4) || [];
   const kuaiziCapabilities = buildKuaiziCapabilityLadder(projectMaturity);
+  const activeUiVariant = STATUS_UI_VARIANTS.find(variant => variant.id === uiVariant) || STATUS_UI_VARIANTS[0];
   const readinessHref = projectId.trim()
     ? `/api/readiness?projectId=${encodeURIComponent(projectId.trim())}`
     : '/api/readiness';
@@ -526,6 +586,75 @@ export default function StatusPage() {
             最近检查 {lastFetch.toLocaleTimeString('zh-CN')} · 每 30 秒自动刷新
           </div>
         )}
+      </div>
+
+      <div className="mb-6 rounded-md border border-border-subtle bg-bg-surface/50 p-5">
+        <div className="mb-3 flex flex-col gap-2 md:flex-row md:items-start md:justify-between">
+          <div>
+            <div className="text-[10px] font-mono uppercase tracking-wider text-text-tertiary">
+              UI Variant 工作流
+            </div>
+            <div className="mt-1 text-[15px] font-semibold text-text-primary">
+              先比较定位，再改页面；先验收台，再创意、视频和接入清单
+            </div>
+          </div>
+          <div className="text-[10px] leading-relaxed text-accent md:max-w-[260px]">
+            目标不是换皮，而是让合作者看懂真实能力、外部门禁和下一步材料。
+          </div>
+        </div>
+        <div className="grid grid-cols-1 gap-2 md:grid-cols-3">
+          {STATUS_UI_VARIANTS.map(variant => (
+            <button
+              key={variant.id}
+              type="button"
+              onClick={() => setUiVariant(variant.id)}
+              className={`rounded-md border px-3 py-3 text-left transition ${
+                uiVariant === variant.id
+                  ? 'border-accent/50 bg-accent/10 text-text-primary'
+                  : 'border-border-subtle bg-bg-root/40 text-text-secondary hover:border-accent/40'
+              }`}
+            >
+              <div className="text-[12px] font-semibold">{variant.label}</div>
+              <div className="mt-1 text-[10px] leading-relaxed">{variant.intent}</div>
+            </button>
+          ))}
+        </div>
+        <div className="mt-4 rounded-md border border-border-subtle bg-bg-root/50 p-3">
+          <div className="text-[11px] font-semibold text-text-primary">
+            当前选择：{activeUiVariant.label}
+          </div>
+          <p className="mt-1 text-[10px] leading-relaxed text-text-secondary">
+            {activeUiVariant.proof}
+          </p>
+          <div className="mt-3 grid grid-cols-1 gap-2 md:grid-cols-4">
+            {STATUS_VARIANT_ROADMAP.map(item => (
+              <div key={item.page} className="rounded-md border border-border-subtle/70 bg-bg-surface/40 px-3 py-3">
+                <div className="text-[10px] font-mono text-accent">Step {item.step}</div>
+                <div className="mt-1 text-[11px] font-semibold text-text-primary">{item.page}</div>
+                <p className="mt-1 text-[10px] leading-relaxed text-text-tertiary">{item.job}</p>
+              </div>
+            ))}
+          </div>
+        </div>
+        <div className="mt-4 rounded-md border border-border-subtle bg-bg-root/50 p-3">
+          <div className="mb-2 flex flex-col gap-1 md:flex-row md:items-center md:justify-between">
+            <div className="text-[10px] font-mono uppercase tracking-wider text-text-tertiary">
+              竞品参考雷达
+            </div>
+            <div className="text-[10px] font-mono text-accent">
+              终局不是单点生成，而是电商增长作战系统
+            </div>
+          </div>
+          <div className="grid grid-cols-1 gap-2 md:grid-cols-2">
+            {COMPETITOR_REFERENCE_RADAR.map(item => (
+              <div key={item.name} className="rounded-md border border-border-subtle/70 bg-bg-surface/40 px-3 py-3">
+                <div className="text-[11px] font-semibold text-text-primary">{item.name}</div>
+                <p className="mt-1 text-[10px] leading-relaxed text-text-secondary">{item.lesson}</p>
+                <p className="mt-2 text-[10px] leading-relaxed text-success">Wenai 迈进：{item.wenaiMove}</p>
+              </div>
+            ))}
+          </div>
+        </div>
       </div>
 
       <div className="mb-6 flex flex-col gap-3 rounded-md border border-border-subtle bg-bg-surface/50 p-4 md:flex-row md:items-end">
