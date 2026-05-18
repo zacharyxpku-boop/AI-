@@ -2,6 +2,12 @@ import { readFileSync } from 'node:fs';
 import { join } from 'node:path';
 import { describe, expect, it } from 'vitest';
 import {
+  buildFactoryMobileCapabilities,
+  buildFactoryOperatingLayers,
+  buildFactoryReadinessSlices,
+  buildFactoryUiVariants,
+} from '@/lib/factory-readiness-view';
+import {
   LISTING_FACTORY_ACTIVITY_FEED,
   LISTING_FACTORY_ADMIN_INQUIRIES,
   LISTING_FACTORY_ADMIN_REVIEW_LINKS,
@@ -42,8 +48,44 @@ import {
   buildListingFactoryReportHref,
   getPrimaryFactoryBrief,
 } from '@/lib/listing-factory-demo';
+import { evaluateProductReadiness } from '@/lib/product-readiness';
 
 describe('listing factory demo data', () => {
+  it('derives the factory first screen from product readiness data', () => {
+    const report = evaluateProductReadiness({
+      aiConfigured: true,
+      storageConfigured: false,
+      kuaiziConfigured: true,
+      imageConfigured: true,
+      videoConfigured: false,
+      videoTeardownConfigured: false,
+      performanceImportAvailable: true,
+      commerceChainAvailable: true,
+      industrialChainAvailable: true,
+      distributionExecutionAvailable: true,
+      emailConfigured: true,
+      authConfigured: true,
+    });
+
+    expect(buildFactoryUiVariants(report).map(variant => variant.id)).toEqual(['partner', 'operator', 'friend_trial']);
+    expect(buildFactoryUiVariants(report)[0]).toMatchObject({
+      label: '合作者/投资人版',
+      stopLine: expect.stringContaining('未审计规模数字'),
+    });
+    expect(buildFactoryOperatingLayers(report).map(layer => layer.name)).toEqual(['Compose', 'Create', 'Cut', 'Cast', 'Manage']);
+    expect(buildFactoryOperatingLayers(report).find(layer => layer.name === 'Cast')?.state).toContain('不能说自动发布');
+    expect(buildFactoryReadinessSlices(report).find(slice => slice.title === '外部接入后做')?.items.join('\n')).toContain('Multi-platform OAuth');
+    expect(buildFactoryReadinessSlices(report).find(slice => slice.title === '现在不能宣称')?.items.join('\n')).toContain('91M+ creative output');
+    expect(buildFactoryMobileCapabilities(report).map(item => item.title)).toEqual([
+      '全网灵感管理',
+      '热门视频解析',
+      '批量混剪',
+      '矩阵宝 / PubPal',
+      '广告投放',
+      '企业数据安全',
+    ]);
+  });
+
   it('models the public listing factory loop from SKU rules to commercial handoff', () => {
     expect(LISTING_FACTORY_OVERVIEW.skuCount).toBeGreaterThanOrEqual(8);
     expect(LISTING_FACTORY_OVERVIEW.categoryRuleCount).toBeGreaterThanOrEqual(4);
@@ -365,6 +407,8 @@ describe('listing factory demo data', () => {
       'src/components/Layout/Sidebar.tsx',
       'src/components/marketing/ListingFactorySections.tsx',
       'src/lib/listing-factory-demo.ts',
+      'src/lib/product-readiness.ts',
+      'src/lib/factory-readiness-view.ts',
       'docs/listing-factory-demo-script.md',
     ].map(file => readFileSync(join(root, file), 'utf8'));
     const source = files.join('\n');
@@ -380,8 +424,8 @@ describe('listing factory demo data', () => {
     expect(source).toContain('进入 Compose / Create / Cut / Cast / Manage 工作台');
     expect(source).toContain('内容工厂');
     expect(source).toContain('UI Variant Workflow');
-    expect(source).toContain('工业运营版');
-    expect(source).toContain('合作者演示版');
+    expect(source).toContain('运营工作台版');
+    expect(source).toContain('合作者/投资人版');
     expect(source).toContain('朋友试用版');
     expect(source).toContain('Variant 不是换颜色');
     expect(source).toContain('Mobile Capability Strip');
@@ -398,8 +442,8 @@ describe('listing factory demo data', () => {
     expect(source).toContain('内部继续做');
     expect(source).toContain('外部接入后做');
     expect(source).toContain('现在不能宣称');
-    expect(source).toContain('91M+ 自有创意产出');
-    expect(source).toContain('42M+ 自有视频分发');
+    expect(source).toContain('91M+ creative output');
+    expect(source).toContain('42M+ video distribution');
     expect(source).toContain('从 SKU 上新到创意、视频、分发、审核和回流的一张工作台');
     expect(source).toContain('Hookshot / Hookly');
     expect(source).toContain('Compose');

@@ -6,33 +6,11 @@ import { getCreativeIntelligenceSnapshot } from '@/lib/creative-intelligence';
 import { getCreativeMonitoringSnapshot } from '@/lib/creative-monitoring';
 import { getIndustrializationSnapshot } from '@/lib/industrial-chain-store';
 import { getIndustrialVideoProductionQueue } from '@/lib/industrial-video-workflow';
-import { getKuaiziServerConfig } from '@/lib/kuaizi-server';
 import { resolveOrgId } from '@/lib/org-id';
-import { buildPlatformConnectorReadiness } from '@/lib/platform-connector-readiness';
 import { evaluateProductReadiness } from '@/lib/product-readiness';
+import { buildReadinessInput } from '@/lib/readiness-input';
 
-function hasValue(value: string | undefined) {
-  return Boolean(value && value.trim().length > 0);
-}
-
-export function buildReadinessInput(env: NodeJS.ProcessEnv = process.env) {
-  const aiConfigured = hasValue(env.AI_API_KEY);
-  return {
-    aiConfigured,
-    storageConfigured: hasValue(env.UPSTASH_REDIS_REST_URL) && hasValue(env.UPSTASH_REDIS_REST_TOKEN),
-    kuaiziConfigured: Boolean(getKuaiziServerConfig(env)),
-    imageConfigured: aiConfigured && env.WANX_DISABLED !== '1',
-    videoConfigured: hasValue(env.HAPPYHORSE_API_KEY) || aiConfigured,
-    videoTeardownConfigured: hasValue(env.GEMINI_API_KEY),
-    performanceImportAvailable: true,
-    commerceChainAvailable: true,
-    industrialChainAvailable: true,
-    distributionExecutionAvailable: true,
-    platformConnectors: buildPlatformConnectorReadiness(env),
-    emailConfigured: hasValue(env.RESEND_API_KEY) || hasValue(env.SENDGRID_API_KEY),
-    authConfigured: hasValue(env.JWT_SECRET),
-  };
-}
+export { buildReadinessInput };
 
 export async function GET(request: NextRequest) {
   const projectId = request.nextUrl.searchParams.get('projectId')?.trim();

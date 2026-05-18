@@ -1,132 +1,27 @@
 import type { Metadata } from 'next';
 import Link from 'next/link';
 import { ListingFactoryConsole } from '@/components/marketing/ListingFactorySections';
+import {
+  buildFactoryMobileCapabilities,
+  buildFactoryOperatingLayers,
+  buildFactoryReadinessSlices,
+  buildFactoryUiVariants,
+} from '@/lib/factory-readiness-view';
+import { evaluateProductReadiness } from '@/lib/product-readiness';
+import { buildReadinessInput } from '@/lib/readiness-input';
 
 export const metadata: Metadata = {
   title: '内容工厂控制台 | Wenai Listing Factory',
   description: '集中查看 SKU 上新进度、品牌禁区、批量 Brief、内容任务和客户交付状态。',
 };
 
-const FACTORY_OPERATING_LAYERS = [
-  {
-    name: 'Compose',
-    title: '创意情报',
-    body: '竞品账号、榜单趋势、视频拆解、Hook Bank、UGC 脚本骨架和品牌学习复利。',
-    href: '/factory/creative',
-    state: '内部账本已就绪，真实持续采集仍需授权源和解析 provider。',
-  },
-  {
-    name: 'Create',
-    title: '资产生产',
-    body: 'SKU brief、脚本、素材、生产 handoff、客户交付包和资产权限审计。',
-    href: '/factory',
-    state: '可跑内部生产交接；真实云资产 enforcement 需要对象存储和签名链接。',
-  },
-  {
-    name: 'Cut',
-    title: '视频混剪',
-    body: '一键视频队列、智能混剪计划、供应商门禁、成片回灌和客户审核。',
-    href: '/factory/video',
-    state: '工作流可用；自动成片需要视频生成/剪辑 provider、授权素材和回调。',
-  },
-  {
-    name: 'Cast',
-    title: '分发投放',
-    body: '分发计划、矩阵账号、dispatch、广告假设、证据链接和表现回流。',
-    href: '/settings/kuaizi',
-    state: '账本和门禁已建；自动发布、广告投放、平台同步需要 OAuth 和广告账户。',
-  },
-  {
-    name: 'Manage',
-    title: '管理验收',
-    body: 'readiness、外部材料清单、客户 review、CRM 交接、RBAC 和审计。',
-    href: '/status',
-    state: '可做合作者评审；等外部材料接齐后再进入真实平台级验收。',
-  },
-];
-
-const FACTORY_UI_VARIANTS = [
-  {
-    id: 'industrial',
-    label: '工业运营版',
-    audience: '给内容运营、投放、客户经理和生产负责人',
-    focus: '把 Compose / Create / Cut / Cast / Manage 放成一张作战台，先看每段是否有负责人、证据、下一步和阻断项。',
-    firstAction: '从创意洞察进入 Hook Bank，再把胜出结构推进视频队列和分发计划。',
-    stopLine: '没有 OAuth、广告账户、视频 provider 和平台回流前，只展示门禁，不展示平台级自动执行。',
-  },
-  {
-    id: 'partner',
-    label: '合作者演示版',
-    audience: '给合作方、投资人、外部供应商和客户老板',
-    focus: '少讲技术，多讲已经能演示的闭环、需要对方提供的材料、以及接上外部能力后能扩大的部分。',
-    firstAction: '先看 readiness 和外部接入清单，再打开客户 review 链路证明非技术用户能验收。',
-    stopLine: '91M+ creative output、42M+ video distribution 只作为竞品规模参照，不能写成 Wenai 自有数据。',
-  },
-  {
-    id: 'stable',
-    label: '朋友试用版',
-    audience: '给第一次使用、没有技术背景的朋友',
-    focus: '只保留项目、工厂、审核、报告和下一步，不把 API、provider、ledger 术语放在主路径上。',
-    firstAction: '打开一个样例项目，按“看洞察 -> 生成 Brief -> 看视频任务 -> 审核交付”完成一次零解释试跑。',
-    stopLine: '任何需要解释环境变量、后台任务或平台授权的步骤，都不能算朋友可独立完成。',
-  },
-];
-
-const FACTORY_READINESS_SLICES = [
-  {
-    title: '内部继续做',
-    items: ['variant 入口层', '客户 review 可视化', '视频队列 UI', '品牌学习档案', '资产权限 enforcement', '创意洞察手动/半自动导入'],
-  },
-  {
-    title: '外部接入后做',
-    items: ['真实 OAuth', '广告账户授权', '自动发布', '视频生成/剪辑 provider', '平台数据自动同步', '对象存储与签名 URL'],
-  },
-  {
-    title: '现在不能宣称',
-    items: ['筷子等价', '自动投放优化', '平台级矩阵发布', '91M+ 自有创意产出', '42M+ 自有视频分发', '无人工介入的全自动视频工厂'],
-  },
-];
-
-const MOBILE_CAPABILITY_STRIPS = [
-  {
-    title: '全网灵感管理',
-    layer: 'Compose',
-    internal: '竞品账号、榜单、视频拆解、Hook Bank 和品牌学习已经能落到创意账本。',
-    external: '持续全网采集需要授权账号源、榜单源和多模态解析 provider。',
-  },
-  {
-    title: '热门视频解析',
-    layer: 'Compose / Cut',
-    internal: '可沉淀 hook、scene beat、proof point、CTA、风险边界和可混剪素材需求。',
-    external: '真实持续解析需要合法视频源、下载/存储权限和视频理解 provider。',
-  },
-  {
-    title: '批量混剪',
-    layer: 'Cut',
-    internal: '已能生成 15s / 30s / 45s 剪辑包、人工试跑 Runbook 和成片回灌链路。',
-    external: '自动批量出片需要剪辑/渲染 provider、素材授权、音频/字体授权和回调。',
-  },
-  {
-    title: '矩阵宝 / PubPal',
-    layer: 'Cast',
-    internal: '账号矩阵、发布槽位、dispatch、证据链接和手工回流门禁已经建好。',
-    external: '真实矩阵发布需要平台 OAuth、上传发布权限、频率限制和平台回执。',
-  },
-  {
-    title: '广告投放',
-    layer: 'Cast',
-    internal: 'campaign ledger、预算门槛、素材绑定、停止条件和表现回流字段已经就绪。',
-    external: '自动投放与优化需要广告账户授权、广告主 ID、测试预算和转化事件。',
-  },
-  {
-    title: '企业数据安全',
-    layer: 'Manage',
-    internal: 'RBAC、DLP、水印、留存、访问审计和客户 review 写回已经进入账本。',
-    external: '真实企业云资产需要对象存储、签名 URL、团队空间和下载/share enforcement。',
-  },
-];
-
 export default function FactoryPage() {
+  const readinessReport = evaluateProductReadiness(buildReadinessInput());
+  const factoryOperatingLayers = buildFactoryOperatingLayers(readinessReport);
+  const factoryUiVariants = buildFactoryUiVariants(readinessReport);
+  const factoryReadinessSlices = buildFactoryReadinessSlices(readinessReport);
+  const mobileCapabilityStrips = buildFactoryMobileCapabilities(readinessReport);
+
   return (
     <main>
       <section className="border-b border-slate-200 bg-slate-950 px-6 py-8 text-white">
@@ -157,7 +52,7 @@ export default function FactoryPage() {
               </p>
             </div>
             <div className="mt-4 grid gap-3 lg:grid-cols-3">
-              {FACTORY_UI_VARIANTS.map(variant => (
+              {factoryUiVariants.map(variant => (
                 <div key={variant.id} className="rounded-md border border-white/10 bg-white/[0.045] p-4">
                   <div className="flex items-center justify-between gap-3">
                     <div className="text-[15px] font-black text-white">{variant.label}</div>
@@ -175,7 +70,7 @@ export default function FactoryPage() {
           </div>
 
           <div className="mt-6 grid gap-3 md:grid-cols-3">
-            {FACTORY_READINESS_SLICES.map(slice => (
+            {factoryReadinessSlices.map(slice => (
               <div key={slice.title} className="rounded-md border border-white/10 bg-slate-900/80 p-4">
                 <div className="text-[13px] font-black text-amber-100">{slice.title}</div>
                 <ul className="mt-3 space-y-2 text-[12px] leading-5 text-white/65">
@@ -201,7 +96,7 @@ export default function FactoryPage() {
               </p>
             </div>
             <div className="mt-4 grid gap-3 md:grid-cols-2 xl:grid-cols-3">
-              {MOBILE_CAPABILITY_STRIPS.map(item => (
+              {mobileCapabilityStrips.map(item => (
                 <article className="rounded-md border border-white/10 bg-slate-900/80 p-4" key={item.title}>
                   <div className="flex items-start justify-between gap-3">
                     <div className="text-[15px] font-black text-white">{item.title}</div>
@@ -215,7 +110,7 @@ export default function FactoryPage() {
           </div>
 
           <div className="mt-6 grid gap-3 md:grid-cols-5">
-            {FACTORY_OPERATING_LAYERS.map(layer => (
+            {factoryOperatingLayers.map(layer => (
               <Link
                 className="rounded-md border border-white/10 bg-white/[0.045] p-4 transition hover:border-amber-300/40 hover:bg-white/[0.07]"
                 href={layer.href}

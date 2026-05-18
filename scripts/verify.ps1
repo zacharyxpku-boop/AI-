@@ -46,7 +46,9 @@ Invoke-Step "ESLint" {
     src/lib/kuaizi-server.ts `
     src/lib/kuaizi-api.ts `
     src/lib/platform-connector-readiness.ts `
+    src/lib/readiness-input.ts `
     src/lib/product-readiness.ts `
+    src/lib/factory-readiness-view.ts `
     src/lib/performance-import.ts `
     src/lib/commerce-chain.ts `
     src/lib/channel-account-ledger.ts `
