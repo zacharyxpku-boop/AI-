@@ -111,6 +111,13 @@ describe('industrial review page', () => {
     expect(html).toContain('商品信息');
     expect(html).toContain('平台适配');
     expect(html).toContain('客户交接闭环');
+    expect(html).toContain('系统写回回执');
+    expect(html).toContain('客户每一步都会落到可追踪的运营链路');
+    expect(html).toContain('生产记录');
+    expect(html).toContain('CRM 交接');
+    expect(html).toContain('分发门禁');
+    expect(html).toContain('表现回流');
+    expect(html).toContain('未批准前不进入自动分发');
     expect(html).toContain('你先查看');
     expect(html).toContain('有问题就反馈');
     expect(html).toContain('没问题再批准');
@@ -199,6 +206,8 @@ describe('industrial review page', () => {
     expect(html).toContain('生产链路会进入分发');
     expect(html).toContain('交付物已批准，下一步由运营进入分发');
     expect(html).toContain('已满足');
+    expect(html).toContain('已放行');
+    expect(html).toContain('上线后的平台指标会回到复盘和品牌学习档案');
     expect(html).toContain('Buyer Ops');
     expect(html).toContain('https://cdn.example.test/launch.mp4');
     expect(html).toContain('已批准');

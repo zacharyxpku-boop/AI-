@@ -324,6 +324,57 @@ function clientHandoffCards(
   ];
 }
 
+function systemWritebackReceipts(
+  review: ReviewPayload['review'] | undefined,
+  hasDeliverable: boolean,
+  feedbackCount: number,
+) {
+  const status = review?.status;
+  const approved = status === 'approved';
+  const locked = status === 'expired' || status === 'revoked';
+  const missingDeliverable = status === 'active' && !hasDeliverable;
+  const hasFeedback = feedbackCount > 0;
+
+  return [
+    {
+      label: '生产记录',
+      state: approved || hasFeedback || missingDeliverable ? '已写入' : locked ? '已保护' : '待动作',
+      detail: approved
+        ? '批准人、批准时间和审核结果已经锁定到交付记录。'
+        : hasFeedback
+          ? '客户反馈已成为生产修订依据。'
+          : missingDeliverable
+            ? '缺交付物问题会进入生产补齐队列。'
+            : locked
+              ? '旧链接不会继续写入生产，避免错审旧版本。'
+              : '客户提交反馈或批准后才会写入。',
+    },
+    {
+      label: 'CRM 交接',
+      state: approved ? '可交接' : locked ? '暂停' : '待验收',
+      detail: approved
+        ? '可把客户批准、交付物和下一步动作交给运营/销售跟进。'
+        : locked
+          ? '需要新审核链接后再继续客户交接。'
+          : '验收完成前不应宣称已交付。',
+    },
+    {
+      label: '分发门禁',
+      state: approved ? '已放行' : '未放行',
+      detail: approved
+        ? '内容可进入分发计划、矩阵发布或投放准备。'
+        : '未批准前不进入自动分发，避免错误素材上线。',
+    },
+    {
+      label: '表现回流',
+      state: approved ? '待回流' : '未开始',
+      detail: approved
+        ? '上线后的平台指标会回到复盘和品牌学习档案。'
+        : '只有批准并发布后才会产生表现数据。',
+    },
+  ];
+}
+
 const ZERO_EXPLANATION_REVIEW_STEPS = [
   {
     title: '先打开交付物',
@@ -376,6 +427,7 @@ export function IndustrialReviewPortalClient({
   const decision = reviewDecisionSummary(review, Boolean(deliverableUrl), payload?.feedback.length || 0);
   const path = decisionPath(review?.status, Boolean(deliverableUrl), payload?.feedback.length || 0);
   const handoffCards = clientHandoffCards(review, Boolean(deliverableUrl), payload?.feedback.length || 0);
+  const writebackReceipts = systemWritebackReceipts(review, Boolean(deliverableUrl), payload?.feedback.length || 0);
   const decisionClass = decision.tone === 'ok'
     ? 'border-emerald-400/40 bg-emerald-950/35 text-emerald-100'
     : decision.tone === 'danger'
@@ -559,6 +611,28 @@ export function IndustrialReviewPortalClient({
                 <div className="border border-white/10 bg-black/20 px-3 py-2" key={item.title}>
                   <div className="text-xs font-semibold text-white/80">{item.title}</div>
                   <div className="mt-1 text-xs leading-5 text-white/55">{item.body}</div>
+                </div>
+              ))}
+            </div>
+          </div>
+          <div className="border border-cyan-300/20 bg-cyan-950/15 px-4 py-3">
+            <div className="flex flex-col gap-1 sm:flex-row sm:items-end sm:justify-between">
+              <div>
+                <div className="text-xs font-semibold text-cyan-100/65">系统写回回执</div>
+                <div className="mt-1 text-sm font-semibold text-cyan-50">客户每一步都会落到可追踪的运营链路</div>
+              </div>
+              <div className="text-xs leading-5 text-cyan-100/60">
+                让客户知道反馈、批准和卡住状态分别流向哪里。
+              </div>
+            </div>
+            <div className="mt-3 grid gap-2 sm:grid-cols-4">
+              {writebackReceipts.map(item => (
+                <div className="border border-cyan-300/15 bg-black/20 px-3 py-2" key={item.label}>
+                  <div className="flex items-center justify-between gap-2">
+                    <div className="text-xs font-semibold text-cyan-50">{item.label}</div>
+                    <span className="border border-cyan-200/20 px-2 py-0.5 text-[11px] text-cyan-100/70">{item.state}</span>
+                  </div>
+                  <div className="mt-2 text-xs leading-5 text-cyan-100/65">{item.detail}</div>
                 </div>
               ))}
             </div>
