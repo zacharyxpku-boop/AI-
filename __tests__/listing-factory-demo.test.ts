@@ -360,6 +360,9 @@ describe('listing factory demo data', () => {
       'src/app/pricing/page.tsx',
       'src/app/cases/page.tsx',
       'src/app/admin/inquiries/page.tsx',
+      'src/components/MobileToolsBar.tsx',
+      'src/components/CommandPalette.tsx',
+      'src/components/Layout/Sidebar.tsx',
       'src/components/marketing/ListingFactorySections.tsx',
       'src/lib/listing-factory-demo.ts',
       'docs/listing-factory-demo-script.md',
@@ -373,6 +376,9 @@ describe('listing factory demo data', () => {
     expect(source).toContain('类目灵感');
     expect(source).toContain('内容工厂控制台');
     expect(source).toContain('Wenai 电商增长作战台');
+    expect(source).toContain('增长工厂');
+    expect(source).toContain('进入 Compose / Create / Cut / Cast / Manage 工作台');
+    expect(source).toContain('内容工厂');
     expect(source).toContain('从 SKU 上新到创意、视频、分发、审核和回流的一张工作台');
     expect(source).toContain('Hookshot / Hookly');
     expect(source).toContain('Compose');

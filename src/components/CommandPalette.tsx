@@ -36,7 +36,7 @@ interface Item {
 
 const CORE_ACTIONS: Item[] = [
   { id: 'dashboard', type: 'core', label: '实验项目', hint: '创建项目或从行业模板开始', href: '/dashboard' },
-  { id: 'factory', type: 'core', label: '导入 CSV', hint: '上传 TikTok、Amazon、Shopify、Meta 或 Google 数据', href: '/factory' },
+  { id: 'factory', type: 'core', label: '增长工厂', hint: '进入 Compose / Create / Cut / Cast / Manage 工作台，继续导入表现数据或生产 Brief', href: '/factory' },
   { id: 'report', type: 'core', label: '报告模板', hint: '查看脱敏报告和复制模板链路', href: '/poc/report' },
   { id: 'pricing', type: 'core', label: '定价', hint: '查看 Free、Starter、Growth 权益', href: '/pricing' },
   { id: 'kuaizi', type: 'settings', label: '生产工具设置', hint: '配置外部生产工具后推送 Brief', href: '/settings/kuaizi' },
@@ -144,14 +144,14 @@ export function CommandPalette() {
             value={q}
             onChange={e => { setQ(e.target.value); setActiveIdx(0); }}
             onKeyDown={onKey}
-            placeholder="搜索核心动作：导入 CSV / 报告 / 定价 / 生产工具设置"
+            placeholder="搜索核心动作：增长工厂 / 报告 / 定价 / 生产工具设置"
             className="w-full bg-transparent text-[14px] text-text-primary placeholder-text-tertiary outline-none font-mono"
           />
         </div>
         <div className="max-h-[400px] overflow-y-auto">
           {filtered.length === 0 ? (
             <div className="p-8 text-center text-[12px] font-mono text-text-tertiary">
-              没有匹配项 · 试试“导入”“报告”“定价”或“生产工具”
+              没有匹配项 · 试试“工厂”“报告”“定价”或“生产工具”
             </div>
           ) : (
             filtered.map((it, i) => (

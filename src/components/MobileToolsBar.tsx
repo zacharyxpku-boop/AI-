@@ -11,7 +11,7 @@ import Link from 'next/link';
 
 const ITEMS = [
   { href: '/dashboard', icon: 'W', label: '项目' },
-  { href: '/factory', icon: 'CSV', label: '导入' },
+  { href: '/factory', icon: '工', label: '工厂' },
   { href: '/pricing', icon: '$', label: '定价' },
 ];
 

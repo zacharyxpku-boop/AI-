@@ -156,7 +156,7 @@ export default function Sidebar({ modules, categories, clientName, userRole }: S
         <div className="space-y-1">
           {[
             { href: '/dashboard', label: '实验项目', badge: '01', tone: '开始' },
-            { href: '/factory', label: '导入 CSV', badge: '02', tone: '数据' },
+            { href: '/factory', label: '增长工厂', badge: '02', tone: '闭环' },
             { href: '/poc/report', label: '报告模板', badge: '03', tone: '分享' },
             { href: '/pricing', label: '订阅方案', badge: '04', tone: '权益' },
             { href: '/settings/kuaizi', label: '生产工具设置', badge: '05', tone: '可选' },
@@ -184,7 +184,7 @@ export default function Sidebar({ modules, categories, clientName, userRole }: S
       {/* Module navigation · admin-only legacy access */}
       <nav className="flex-1 overflow-y-auto mt-3 px-3.5 pb-4">
         <div className="rounded-md border border-border-subtle bg-bg-root/40 p-3 text-[11px] leading-5 text-text-secondary">
-          当前版本聚焦项目、导入、决策、报告和模板复用。更多辅助工具由管理员统一配置后开放。
+          当前版本聚焦项目、增长工厂、决策、报告和模板复用。更多辅助工具由管理员统一配置后开放。
         </div>
         {userRole === 'admin' && categories.map(cat => {
           const catModules = modules.filter(m => m.category === cat.id);
@@ -306,7 +306,7 @@ export default function Sidebar({ modules, categories, clientName, userRole }: S
           className="mt-2 flex items-center gap-2.5 px-3 py-2.5 rounded-md text-[12px] transition-all duration-200 text-text-secondary hover:text-text-primary hover:bg-bg-hover border border-transparent hover:border-border-subtle"
         >
           <span className="w-4 flex-shrink-0 opacity-70"><IconUpload /></span>
-          <span className="font-[family-name:var(--font-outfit)] font-semibold">导入 CSV</span>
+          <span className="font-[family-name:var(--font-outfit)] font-semibold">内容工厂</span>
         </Link>
         {/* Role badge */}
         {userRole && (
