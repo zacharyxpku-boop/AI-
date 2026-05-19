@@ -72,7 +72,7 @@ export function buildFactoryOperatingLayers(report: Pick<ProductReadinessReport,
       : layer.id === 'Cut'
         ? '/factory/video'
         : layer.id === 'Cast'
-          ? '/settings/kuaizi'
+          ? '/factory/cast'
           : layer.id === 'Manage'
             ? '/status'
             : '/factory',
