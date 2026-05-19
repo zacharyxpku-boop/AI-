@@ -413,14 +413,49 @@ const CLIENT_REVIEW_OPERATION_CARDS = [
   },
 ];
 
+type ReviewUiVariant = 'partner' | 'operator' | 'friend_trial';
+
+function normalizeReviewUiVariant(value?: string): ReviewUiVariant {
+  if (value === 'operator' || value === 'friend_trial' || value === 'partner') return value;
+  return 'friend_trial';
+}
+
+const REVIEW_UI_VARIANTS: Array<{
+  id: ReviewUiVariant;
+  label: string;
+  intent: string;
+  proof: string;
+}> = [
+  {
+    id: 'friend_trial',
+    label: '朋友试用版',
+    intent: '只保留客户需要判断的事：能否打开、是否正确、有问题就反馈、没问题再批准。',
+    proof: '非技术客户不需要理解 provider、ledger、CRM 或分发系统，也能独立完成验收。',
+  },
+  {
+    id: 'operator',
+    label: '运营工作台版',
+    intent: '突出反馈、批准、锁定状态、写回回执和卡住时的运营接力动作。',
+    proof: '每次客户动作都要进入生产记录、CRM 交接、分发门禁或复盘回流。',
+  },
+  {
+    id: 'partner',
+    label: '合作者/投资人版',
+    intent: '展示 Wenai 已吸收 Clico 的免登录客户审核、反馈、批准、撤销/过期和审计闭环。',
+    proof: '这不是静态交付页，而是 Manage 链路里的客户验收前台。',
+  },
+];
+
 export function IndustrialReviewPortalClient({
   token,
   initialPayload = null,
   initialError = '',
+  initialVariant,
 }: {
   token: string;
   initialPayload?: ReviewPayload | null;
   initialError?: string;
+  initialVariant?: string;
 }) {
   const [payload, setPayload] = useState<ReviewPayload | null>(initialPayload);
   const [error, setError] = useState(initialError);
@@ -431,6 +466,7 @@ export function IndustrialReviewPortalClient({
   const [approvalConfirmed, setApprovalConfirmed] = useState(false);
   const [submitting, setSubmitting] = useState(false);
   const [notice, setNotice] = useState('');
+  const [uiVariant, setUiVariant] = useState<ReviewUiVariant>(normalizeReviewUiVariant(initialVariant));
 
   const review = payload?.review;
   const deliverableUrl = review?.deliverableUrl || '';
@@ -447,6 +483,7 @@ export function IndustrialReviewPortalClient({
   const path = decisionPath(review?.status, Boolean(deliverableUrl), payload?.feedback.length || 0);
   const handoffCards = clientHandoffCards(review, Boolean(deliverableUrl), payload?.feedback.length || 0);
   const writebackReceipts = systemWritebackReceipts(review, Boolean(deliverableUrl), payload?.feedback.length || 0);
+  const activeVariant = REVIEW_UI_VARIANTS.find(variant => variant.id === uiVariant) || REVIEW_UI_VARIANTS[0];
   const decisionClass = decision.tone === 'ok'
     ? 'border-emerald-400/40 bg-emerald-950/35 text-emerald-100'
     : decision.tone === 'danger'
@@ -535,6 +572,44 @@ export function IndustrialReviewPortalClient({
           <p className="max-w-3xl text-sm leading-6 text-white/65">
             你可以在这里查看交付物、留下明确修改意见，或批准进入分发与 CRM 交接。链接批准、过期或撤销后，本页面会变为只读。
           </p>
+          <div className="border border-white/10 bg-white/[0.03] px-4 py-3">
+            <div className="flex flex-col gap-1 sm:flex-row sm:items-end sm:justify-between">
+              <div>
+                <div className="text-xs font-semibold text-white/50">Review Variant</div>
+                <div className="mt-1 text-sm font-semibold text-white">同一条客户审核链路，按对象切换验收重点</div>
+              </div>
+              <div className="text-xs leading-5 text-white/50">
+                和 /factory、/status 共用 partner / operator / friend_trial 视角。
+              </div>
+            </div>
+            <div className="mt-3 grid gap-2 md:grid-cols-3">
+              {REVIEW_UI_VARIANTS.map(variant => (
+                <a
+                  aria-current={uiVariant === variant.id ? 'page' : undefined}
+                  className={`border px-3 py-2 text-left transition ${
+                    uiVariant === variant.id
+                      ? 'border-amber-300/45 bg-amber-300/10 text-amber-50'
+                      : 'border-white/10 bg-black/15 text-white/60 hover:border-amber-300/30 hover:text-white'
+                  }`}
+                  href={`/review/${encodeURIComponent(token)}?variant=${variant.id}`}
+                  key={variant.id}
+                  onClick={(event) => {
+                    event.preventDefault();
+                    setUiVariant(variant.id);
+                    const url = new URL(window.location.href);
+                    url.searchParams.set('variant', variant.id);
+                    window.history.replaceState(null, '', `${url.pathname}${url.search}${url.hash}`);
+                  }}
+                >
+                  <div className="text-xs font-semibold">{variant.label}</div>
+                  <div className="mt-1 text-[11px] leading-5 opacity-75">{variant.intent}</div>
+                </a>
+              ))}
+            </div>
+            <div className="mt-3 border border-white/10 bg-black/20 px-3 py-2 text-xs leading-5 text-white/60">
+              当前选择：<span className="font-semibold text-white">{activeVariant.label}</span>。{activeVariant.proof}
+            </div>
+          </div>
           {lockedReason ? <div className={`border px-4 py-3 text-sm ${statusClass(review!.status)}`}>{lockedReason}</div> : null}
           <div className={`border px-4 py-3 ${decisionClass}`}>
             <div className="text-sm font-semibold">{decision.title}</div>

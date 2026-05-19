@@ -30,6 +30,43 @@ describe('industrial review page', () => {
     expect(html).toContain('联系运营');
   });
 
+  it('renders the unified review variant switcher', () => {
+    const html = renderToStaticMarkup(<IndustrialReviewPortalClient
+      token="wrv_variant_token"
+      initialVariant="operator"
+      initialPayload={{
+        review: {
+          token: 'wrv_variant_token',
+          projectId: 'variant-project',
+          assetId: 'variant-asset',
+          assetTitle: '运营需要接力的客户审核',
+          deliverableUrl: 'https://cdn.example.test/variant.mp4',
+          expiresAt: new Date(Date.now() + 86400_000).toISOString(),
+          status: 'active',
+          feedbackCount: 1,
+        },
+        feedback: [{
+          id: 'fb-variant',
+          authorName: 'Buyer',
+          type: 'change',
+          body: '请替换开头字幕。',
+          createdAt: new Date().toISOString(),
+        }],
+      }}
+    />);
+
+    expect(html).toContain('Review Variant');
+    expect(html).toContain('朋友试用版');
+    expect(html).toContain('运营工作台版');
+    expect(html).toContain('合作者/投资人版');
+    expect(html).toContain('当前选择：<span class="font-semibold text-white">运营工作台版</span>');
+    expect(html).toContain('/review/wrv_variant_token?variant=friend_trial');
+    expect(html).toContain('/review/wrv_variant_token?variant=operator');
+    expect(html).toContain('/review/wrv_variant_token?variant=partner');
+    expect(html).toContain('每次客户动作都要进入生产记录、CRM 交接、分发门禁或复盘回流');
+    expect(html).not.toContain('provider token');
+  });
+
   it('keeps the review client focused on feedback and approval actions', () => {
     const html = renderToStaticMarkup(<IndustrialReviewPortalClient
       token="wrv_static_token"
