@@ -2,7 +2,7 @@ import { renderToStaticMarkup } from 'react-dom/server';
 import { describe, expect, it } from 'vitest';
 
 import CastFactoryPage from '@/app/factory/cast/page';
-import { CastDistributionConsoleClient, buildCastManageOperatingChecks, buildCastVariantPlaybook } from '@/components/CastDistributionConsoleClient';
+import { CastDistributionConsoleClient, buildAdDeliveryGuardrails, buildCastManageOperatingChecks, buildCastVariantPlaybook } from '@/components/CastDistributionConsoleClient';
 import type { ChannelAccountSnapshot } from '@/lib/channel-account-ledger';
 
 function snapshot(overrides: Partial<ChannelAccountSnapshot> = {}): ChannelAccountSnapshot {
@@ -46,6 +46,10 @@ describe('cast distribution console page', () => {
     expect(html).toContain('Cast Action Playbook');
     expect(html).toContain('Cast 运营动作剧本');
     expect(html).toContain('Smartly式 Cast/Manage 一体化验收板');
+    expect(html).toContain('Ad Delivery Guardrails');
+    expect(html).toContain('广告投放止损与放量门禁');
+    expect(html).toContain('预算 cap');
+    expect(html).toContain('不宣称自动优化');
     expect(html).toContain('Matrix Seed');
     expect(html).toContain('账号矩阵');
     expect(html).toContain('广告 campaign ledger');
@@ -173,6 +177,65 @@ describe('cast distribution console page', () => {
         stage: '下一轮 Action Queue',
         ready: true,
       }),
+    ]));
+  });
+
+  it('builds ad delivery guardrails for budget caps, pause rules, scale rules, and rollback reasons', () => {
+    const blocked = snapshot({
+      adCampaignCount: 1,
+      readyAdCampaignCount: 1,
+      activeAdCampaignCount: 1,
+      adBudgetCents: 10000,
+      adSpendCents: 12000,
+      adEvidenceCount: 0,
+      measuredAdCampaignCount: 0,
+      adMissingLinks: ['Ad campaign missing platform evidence URL', 'Ad campaign spend exceeds budget'],
+    });
+
+    expect(buildAdDeliveryGuardrails(blocked)).toEqual(expect.arrayContaining([
+      expect.objectContaining({
+        rule: '预算上限',
+        ready: false,
+        stopLine: expect.stringContaining('必须暂停或回滚'),
+      }),
+      expect.objectContaining({
+        rule: '暂停规则',
+        ready: true,
+        operatorAction: expect.stringContaining('立即标记暂停'),
+      }),
+      expect.objectContaining({
+        rule: '平台证据',
+        ready: false,
+        operatorAction: expect.stringContaining('没有证据时只能说 campaign hypothesis'),
+      }),
+      expect.objectContaining({
+        rule: '放量规则',
+        ready: false,
+        stopLine: expect.stringContaining('不把方向性数据当作自动放量依据'),
+      }),
+      expect.objectContaining({
+        rule: '回滚原因',
+        ready: false,
+        evidence: expect.stringContaining('Ad campaign missing platform evidence URL'),
+      }),
+    ]));
+
+    const ready = snapshot({
+      adCampaignCount: 1,
+      readyAdCampaignCount: 1,
+      activeAdCampaignCount: 1,
+      measuredAdCampaignCount: 1,
+      adBudgetCents: 50000,
+      adSpendCents: 12000,
+      adEvidenceCount: 1,
+      adMissingLinks: [],
+    });
+
+    expect(buildAdDeliveryGuardrails(ready)).toEqual(expect.arrayContaining([
+      expect.objectContaining({ rule: '预算上限', ready: true }),
+      expect.objectContaining({ rule: '平台证据', ready: true }),
+      expect.objectContaining({ rule: '放量规则', ready: true }),
+      expect.objectContaining({ rule: '回滚原因', ready: true }),
     ]));
   });
 });

@@ -26,6 +26,8 @@ describe('current product status report', () => {
     expect(doc).toContain('Cut 商用品质验收板');
     expect(doc).toContain('download/share/publish/approve fail-closed enforcement');
     expect(doc).toContain('资产访问门禁矩阵');
+    expect(doc).toContain('广告投放止损与放量门禁');
+    expect(doc).toContain('Ad Delivery Guardrails');
     expect(doc).toContain('品牌学习不能只是报告');
     expect(doc).toContain('内部还能继续解决');
     expect(doc).toContain('必须外部提供');

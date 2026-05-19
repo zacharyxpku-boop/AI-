@@ -21,6 +21,14 @@ export type CastManageOperatingCheck = {
   next: string;
 };
 
+export type AdDeliveryGuardrail = {
+  rule: string;
+  ready: boolean;
+  evidence: string;
+  operatorAction: string;
+  stopLine: string;
+};
+
 const CAST_VARIANTS: Record<FactoryUiVariantId, {
   label: string;
   audience: string;
@@ -133,6 +141,74 @@ export function buildCastManageOperatingChecks(snapshot: ChannelAccountSnapshot 
   ];
 }
 
+export function buildAdDeliveryGuardrails(snapshot: ChannelAccountSnapshot | null): AdDeliveryGuardrail[] {
+  const campaignCount = snapshot?.adCampaignCount || 0;
+  const activeCampaignCount = snapshot?.activeAdCampaignCount || 0;
+  const measuredCount = snapshot?.measuredAdCampaignCount || 0;
+  const budgetCents = snapshot?.adBudgetCents || 0;
+  const spendCents = snapshot?.adSpendCents || 0;
+  const evidenceCount = snapshot?.adEvidenceCount || 0;
+  const missing = snapshot?.adMissingLinks || [];
+  const overBudget = budgetCents > 0 && spendCents > budgetCents;
+  const spendRatio = budgetCents > 0 ? spendCents / budgetCents : 0;
+
+  return [
+    {
+      rule: '预算上限',
+      ready: budgetCents > 0 && !overBudget,
+      evidence: `budget ${money(budgetCents)} / spend ${money(spendCents)}`,
+      operatorAction: budgetCents > 0
+        ? '预算已进入内部门禁；继续等待真实广告账户授权后再执行自动预算同步。'
+        : '先写入测试预算上限；没有预算 cap 时，任何广告投放都只能停在计划状态。',
+      stopLine: overBudget
+        ? '花费已经超过预算，必须暂停或回滚，不能继续放量。'
+        : '没有广告账户和预算回执前，不把预算门禁包装成自动投放。',
+    },
+    {
+      rule: '暂停规则',
+      ready: campaignCount > 0 && (overBudget || missing.length > 0 || spendRatio >= 0.8),
+      evidence: `campaigns ${campaignCount} / gaps ${missing.length} / spend ${(spendRatio * 100).toFixed(0)}%`,
+      operatorAction: overBudget
+        ? '立即标记暂停，补回滚原因和平台证据 URL。'
+        : missing.length > 0
+          ? `先处理广告阻断：${missing[0]}。`
+          : spendRatio >= 0.8
+            ? '预算消耗接近上限，先暂停等待表现回流，不做自动加预算。'
+            : '保持监控；未触发预算或证据风险时不需要暂停。',
+      stopLine: '没有暂停/回滚规则前，不允许自动优化或自动加预算。',
+    },
+    {
+      rule: '平台证据',
+      ready: evidenceCount > 0,
+      evidence: `evidence URL ${evidenceCount} / active campaigns ${activeCampaignCount}`,
+      operatorAction: evidenceCount > 0
+        ? '把平台 campaign URL、广告账户截图或回执绑定到 campaign ledger。'
+        : '补平台证据 URL；没有证据时只能说 campaign hypothesis，不能说真实投放。',
+      stopLine: '没有平台回执或广告账户证据前，不宣称自动投放已执行。',
+    },
+    {
+      rule: '放量规则',
+      ready: measuredCount > 0 && !overBudget,
+      evidence: `measured campaigns ${measuredCount} / spend ${money(spendCents)}`,
+      operatorAction: measuredCount > 0
+        ? '只有 measured campaign 才能进入下一轮预算建议、素材复用和品牌学习。'
+        : '先导入 impressions、clicks、orders、revenue；没有表现回流时不做放量建议。',
+      stopLine: '没有转化或收入回流前，不把方向性数据当作自动放量依据。',
+    },
+    {
+      rule: '回滚原因',
+      ready: missing.length === 0 && !overBudget && campaignCount > 0,
+      evidence: missing.length ? missing.join(' / ') : campaignCount > 0 ? 'no hard ad blockers' : 'missing campaign ledger',
+      operatorAction: missing.length
+        ? '把阻断项写成回滚原因，进入下一轮 action queue。'
+        : campaignCount > 0
+          ? '当前广告账本没有硬阻断；下一步只允许进入真实广告账户授权验收。'
+          : '先建立 campaign ledger；没有账本就没有可回滚对象。',
+      stopLine: '任何自动投放失败都必须保留原因、证据、预算状态和下一步 owner。',
+    },
+  ];
+}
+
 export function buildCastVariantPlaybook(
   snapshot: ChannelAccountSnapshot | null,
   variant: FactoryUiVariantId,
@@ -221,6 +297,7 @@ export function CastDistributionConsoleClient({
   const selectedVariant = CAST_VARIANTS[selectedVariantId];
   const playbook = buildCastVariantPlaybook(snapshot, selectedVariantId);
   const operatingChecks = buildCastManageOperatingChecks(snapshot);
+  const adGuardrails = buildAdDeliveryGuardrails(snapshot);
   const nextActions = snapshot?.nextActions || [];
   const gaps = [...(snapshot?.missingLinks || []), ...(snapshot?.adMissingLinks || [])];
 
@@ -331,6 +408,36 @@ export function CastDistributionConsoleClient({
                 <h3 className="mt-2 text-sm font-semibold text-white">{item.stage}</h3>
                 <p className="mt-2 text-xs leading-5 text-white/60">{item.evidence}</p>
                 <p className="mt-2 text-xs leading-5 text-white/45">{item.next}</p>
+              </div>
+            ))}
+          </div>
+        </section>
+
+        <section className="rounded-[8px] border border-lime-200/15 bg-lime-950/15 p-5">
+          <div className="flex flex-col gap-2 lg:flex-row lg:items-end lg:justify-between">
+            <div>
+              <p className="text-xs uppercase tracking-[0.22em] text-lime-200">Ad Delivery Guardrails</p>
+              <h2 className="mt-2 text-xl font-semibold">广告投放止损与放量门禁</h2>
+              <p className="mt-2 text-sm leading-6 text-white/55">
+                这层参考 Omneky、AdHawk、Smartly.io、Marpipe 的投放运营方式：预算 cap、暂停规则、平台证据、表现回流和回滚原因必须同屏可见；没有广告账户授权前只做人工门禁，不宣称自动优化。
+              </p>
+            </div>
+            <div className="text-sm font-semibold text-lime-100">
+              {adGuardrails.filter(item => item.ready).length}/{adGuardrails.length} ad gates ready
+            </div>
+          </div>
+          <div className="mt-4 grid gap-3 lg:grid-cols-5">
+            {adGuardrails.map(item => (
+              <div key={item.rule} className={`rounded-[8px] border p-4 ${
+                item.ready ? 'border-lime-200/25 bg-lime-300/10' : 'border-amber-200/20 bg-amber-300/10'
+              }`}>
+                <div className={`text-xs font-semibold ${item.ready ? 'text-lime-100' : 'text-amber-100'}`}>
+                  {item.ready ? '门禁有证据' : '继续补门禁'}
+                </div>
+                <h3 className="mt-2 text-sm font-semibold text-white">{item.rule}</h3>
+                <p className="mt-2 text-xs leading-5 text-white/60">{item.evidence}</p>
+                <p className="mt-2 text-xs leading-5 text-lime-100/70">{item.operatorAction}</p>
+                <p className="mt-2 text-xs leading-5 text-white/45">{item.stopLine}</p>
               </div>
             ))}
           </div>
