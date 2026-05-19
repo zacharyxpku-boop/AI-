@@ -250,6 +250,56 @@ function friendTrialReadiness(queue: VideoProductionQueue | null, variant: Facto
   };
 }
 
+function commercialCutReadiness(queue: VideoProductionQueue | null) {
+  const providerCompleted = (queue?.completedProviderExecutionCount || 0) > 0;
+  const hasResult = (queue?.resultAssetCount || 0) > 0;
+  const hasReview = (queue?.clientReviewCount || 0) > 0;
+  const hasApproval = (queue?.approvedDeliverableCount || 0) > 0;
+  const hasPerformance = (queue?.measuredCount || 0) > 0;
+  const providerFailures = (queue?.failedProviderExecutionCount || 0) + (queue?.retryableProviderExecutionCount || 0);
+  const gates = [
+    {
+      label: '真实视频 provider 回调',
+      ok: providerCompleted,
+      detail: providerCompleted
+        ? `已有 ${queue?.completedProviderExecutionCount || 0} 条完成回调。`
+        : '还没有完成的 provider execution；只能算人工交接或本地队列。',
+    },
+    {
+      label: '可打开成片资产',
+      ok: hasResult,
+      detail: hasResult ? `已有 ${queue?.resultAssetCount || 0} 个成片结果。` : '还没有真实成片 URL 写回。',
+    },
+    {
+      label: '客户审核入口',
+      ok: hasReview,
+      detail: hasReview ? `已有 ${queue?.clientReviewCount || 0} 个审核入口。` : '还没有 review 链接。',
+    },
+    {
+      label: '客户批准',
+      ok: hasApproval,
+      detail: hasApproval ? `已有 ${queue?.approvedDeliverableCount || 0} 个批准结果。` : '还没有客户批准或返修结论。',
+    },
+    {
+      label: '发布/表现回流',
+      ok: hasPerformance,
+      detail: hasPerformance ? `已有 ${queue?.measuredCount || 0} 条表现回流。` : '还没有发布证据或表现数据。',
+    },
+  ];
+  const passed = gates.filter(gate => gate.ok).length;
+  return {
+    verdict: passed === gates.length ? '可进入商用 Cut 验收' : '仍是 provider-gated POC',
+    score: `${passed}/${gates.length}`,
+    gates,
+    risk: providerFailures > 0
+      ? `存在 ${providerFailures} 条 provider 失败或待重试记录，商用前必须处理。`
+      : '暂无 provider 失败记录；主要风险仍是外部授权与真实回流证据。',
+    stopLine: passed === gates.length
+      ? '可以进入小规模商用验收，但仍需按平台 OAuth、广告账户和资产权限继续扩展。'
+      : '没有 provider 完成回调、成片、客户批准和表现回流前，不能宣称筷子级稳定视频工厂。',
+  };
+}
+
 const MIXCUT_OPERATION_BOARD = [
   {
     title: 'Hook Bank 入场',
@@ -441,6 +491,7 @@ export function VideoProductionQueueClient({
     : '0/0';
   const selectedVariant = VIDEO_FACTORY_UI_VARIANTS[selectedVariantId];
   const trialReadiness = friendTrialReadiness(queue, selectedVariantId);
+  const cutReadiness = commercialCutReadiness(queue);
 
   async function ingestProductionResult(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
@@ -582,6 +633,47 @@ export function VideoProductionQueueClient({
               <div className="text-xs font-semibold text-white/80">停止线</div>
               <p className="mt-2 text-xs leading-5 text-amber-100">{trialReadiness.stopLine}</p>
               <p className="mt-2 text-xs leading-5 text-cyan-100">内部下一步：{trialReadiness.nextAction}</p>
+            </div>
+          </div>
+        </section>
+
+        <section className="border border-violet-300/20 bg-violet-950/20 p-5">
+          <div className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
+            <div>
+              <p className="text-xs uppercase tracking-[0.22em] text-violet-200">Commercial Cut Readiness</p>
+              <h2 className="mt-2 text-xl font-semibold">商用 Cut 放行门禁</h2>
+              <p className="mt-2 max-w-3xl text-sm leading-6 text-white/60">
+                这层只判断视频工厂是否已经能进入真实商用验收：provider 完成回调、成片资产、客户审核、客户批准、发布或表现回流必须全部有证据。
+              </p>
+            </div>
+            <div className="flex w-fit flex-col items-start gap-2 border border-white/10 bg-black/25 px-3 py-2 text-xs">
+              <span className={cutReadiness.verdict === '可进入商用 Cut 验收' ? 'text-emerald-100' : 'text-amber-100'}>
+                {cutReadiness.verdict}
+              </span>
+              <span className="text-white/55">score {cutReadiness.score}</span>
+            </div>
+          </div>
+          <div className="mt-4 grid gap-3 md:grid-cols-5">
+            {cutReadiness.gates.map(gate => (
+              <div
+                className={`border p-3 ${gate.ok ? 'border-emerald-300/25 bg-emerald-950/20' : 'border-white/10 bg-black/20'}`}
+                key={gate.label}
+              >
+                <div className={gate.ok ? 'text-xs font-semibold text-emerald-100' : 'text-xs font-semibold text-white/80'}>
+                  {gate.label}
+                </div>
+                <p className="mt-2 text-xs leading-5 text-white/55">{gate.detail}</p>
+              </div>
+            ))}
+          </div>
+          <div className="mt-4 grid gap-3 md:grid-cols-2">
+            <div className="border border-amber-300/20 bg-black/20 p-3">
+              <div className="text-xs font-semibold text-amber-100">商用风险</div>
+              <p className="mt-2 text-xs leading-5 text-amber-100/80">{cutReadiness.risk}</p>
+            </div>
+            <div className="border border-rose-300/20 bg-black/20 p-3">
+              <div className="text-xs font-semibold text-rose-100">停止线</div>
+              <p className="mt-2 text-xs leading-5 text-rose-100/80">{cutReadiness.stopLine}</p>
             </div>
           </div>
         </section>

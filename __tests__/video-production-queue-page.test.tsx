@@ -15,6 +15,12 @@ describe('video production queue page', () => {
     expect(html).toContain('视频生产队列');
     expect(html).toContain('Video Factory Variant');
     expect(html).toContain('Friend Trial Readiness');
+    expect(html).toContain('Commercial Cut Readiness');
+    expect(html).toContain('商用 Cut 放行门禁');
+    expect(html).toContain('仍是 provider-gated POC');
+    expect(html).toContain('score 0/5');
+    expect(html).toContain('真实视频 provider 回调');
+    expect(html).toContain('没有 provider 完成回调、成片、客户批准和表现回流前，不能宣称筷子级稳定视频工厂');
     expect(html).toContain('朋友试用放行判断');
     expect(html).toContain('非技术用户能不能从视频任务进入客户审核');
     expect(html).toContain('运营视角');
