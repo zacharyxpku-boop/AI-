@@ -2,6 +2,7 @@
 
 import { useState, type FormEvent } from 'react';
 
+import { FactoryVariantConsole } from '@/components/FactoryVariantConsole';
 import type { ChannelAccountSnapshot } from '@/lib/channel-account-ledger';
 import type { FactoryUiVariantId } from '@/lib/factory-readiness-view';
 
@@ -46,8 +47,6 @@ const CAST_VARIANTS: Record<FactoryUiVariantId, {
     stopLine: '没有真实发布证据和表现回流时，只能试用流程，不能试用自动分发效果。',
   },
 };
-
-const CAST_VARIANT_ORDER: FactoryUiVariantId[] = ['partner', 'operator', 'friend_trial'];
 
 function money(cents: number) {
   return `¥${(cents / 100).toFixed(2)}`;
@@ -220,47 +219,26 @@ export function CastDistributionConsoleClient({
               <p className="mt-3 text-sm leading-6 text-emerald-50/70">{selectedVariant.headline}</p>
               <p className="mt-2 text-sm leading-6 text-white/55">{selectedVariant.body}</p>
             </div>
-            <div className="flex flex-wrap gap-2">
-              {CAST_VARIANT_ORDER.map(variant => (
-                <a
-                  key={variant}
-                  href={`/factory/cast?projectId=${encodeURIComponent(projectId)}&variant=${variant}`}
-                  className={`rounded-[6px] border px-3 py-2 text-sm transition ${variant === selectedVariantId
-                    ? 'border-emerald-300 bg-emerald-300 text-[#07110f]'
-                    : 'border-white/15 bg-white/[0.03] text-white/70 hover:border-emerald-200/50 hover:text-white'
-                  }`}
-                >
-                  {CAST_VARIANTS[variant].label}
-                </a>
-              ))}
-            </div>
           </div>
         </section>
 
-        <section className="grid gap-4 lg:grid-cols-[1.05fr_0.95fr]">
-          <div className="rounded-[8px] border border-white/10 bg-white/[0.04] p-5">
-            <p className="text-xs uppercase tracking-[0.22em] text-emerald-200">Cast Action Playbook</p>
-            <h2 className="mt-2 text-xl font-semibold">{playbook.title}</h2>
-            <p className="mt-3 text-sm leading-6 text-white/70">{playbook.primaryAction}</p>
-            <div className="mt-4 grid gap-3 sm:grid-cols-3">
-              {playbook.cards.map(card => (
-                <div key={card} className="rounded-[6px] border border-white/10 bg-black/20 p-3 text-sm text-white/75">
-                  {card}
-                </div>
-              ))}
-            </div>
-            <div className="mt-4 grid gap-3 sm:grid-cols-2">
-              <div className="rounded-[6px] border border-cyan-200/20 bg-cyan-200/[0.06] p-3">
-                <div className="text-xs font-semibold text-cyan-100">Proof to check</div>
-                <p className="mt-1 text-sm leading-6 text-cyan-50/75">{playbook.proofToCheck}</p>
-              </div>
-              <div className="rounded-[6px] border border-amber-200/25 bg-amber-200/[0.07] p-3">
-                <div className="text-xs font-semibold text-amber-100">Boundary</div>
-                <p className="mt-1 text-sm leading-6 text-amber-50/75">{playbook.handoffBoundary}</p>
-              </div>
-            </div>
-          </div>
+        <FactoryVariantConsole
+          accent="emerald"
+          basePath="/factory/cast"
+          evidenceCards={playbook.cards}
+          eyebrow="Cast Action Playbook"
+          firstScreen={selectedVariant.body}
+          nextAction={selectedVariant.firstAction}
+          primaryAction={playbook.primaryAction}
+          projectId={projectId}
+          proofFocus={playbook.proofToCheck}
+          selectedVariantId={selectedVariantId}
+          stopLine={playbook.handoffBoundary}
+          title={playbook.title}
+          variants={CAST_VARIANTS}
+        />
 
+        <section className="grid gap-4">
           <form onSubmit={seedMatrix} className="rounded-[8px] border border-white/10 bg-white/[0.04] p-5">
             <p className="text-xs uppercase tracking-[0.22em] text-emerald-200">Matrix Seed</p>
             <h2 className="mt-2 text-xl font-semibold">补一个可验证账号矩阵</h2>
