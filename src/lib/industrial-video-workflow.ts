@@ -65,6 +65,18 @@ export interface VideoRemixVariant {
   riskBoundary: string;
 }
 
+export interface VideoProductionTemplate {
+  id: 'batch_ugc' | 'street_interview' | 'animated_ad' | 'editing_orchestration' | 'slideshow_reels';
+  label: string;
+  sourceReference: string;
+  executionKind: 'video_batch' | 'video_brief' | 'editing_plan';
+  useWhen: string[];
+  requiredInputs: string[];
+  deliverables: string[];
+  qualityChecks: string[];
+  providerBoundary: string;
+}
+
 export interface IndustrialVideoWorkflowPack {
   mode: VideoWorkflowMode;
   providerGate: {
@@ -86,6 +98,7 @@ export interface IndustrialVideoWorkflowPack {
     mustPass: boolean;
     checks: string[];
   }>;
+  productionTemplates: VideoProductionTemplate[];
   remixPlan: VideoRemixVariant[];
   assetManifest: Array<{
     id: string;
@@ -404,6 +417,105 @@ function buildRemixPlan(input: {
   return (variants.length ? variants : [fallback]).slice(0, 5);
 }
 
+function buildProductionTemplates(input: {
+  productName: string;
+  category: string;
+  platforms: string[];
+}): VideoProductionTemplate[] {
+  const platformList = input.platforms.join(', ');
+  return [{
+    id: 'batch_ugc',
+    label: 'Batch UGC Video Pack',
+    sourceReference: 'Clico batch-ugc-video skill',
+    executionKind: 'video_batch',
+    useWhen: [
+      `Need multiple hook tests for ${input.productName}.`,
+      'Need every variant tied to one test variable.',
+      'Need a manifest that can move into review and distribution.',
+    ],
+    requiredInputs: ['product asset pack', 'approved claims', 'reference URLs', 'target audience', 'test variable'],
+    deliverables: ['variant matrix', 'script pack', 'shot plan', 'batch manifest', 'review criteria'],
+    qualityChecks: [
+      'Each variant changes only one core variable.',
+      'Every asset can be traced back to owned or licensed sources.',
+      'Review token can be created for each produced result.',
+    ],
+    providerBoundary: 'Can create the batch plan internally; final rendered videos still require provider/editor execution and callback evidence.',
+  }, {
+    id: 'street_interview',
+    label: 'Street Interview Video Builder',
+    sourceReference: 'Clico street-interview-video skill',
+    executionKind: 'video_brief',
+    useWhen: [
+      `Need a conversational ${input.category} story instead of a stiff ad.`,
+      'Need interviewer/respondent/caption structure.',
+      'Need natural objection handling before CTA.',
+    ],
+    requiredInputs: ['interviewer persona', 'respondent persona', 'product proof', 'objection list', 'platform tone'],
+    deliverables: ['Q&A script', 'caption plan', 'camera direction', 'correction notes'],
+    qualityChecks: [
+      'Questions sound like a real street interview.',
+      'Product proof appears before the CTA.',
+      'No false testimonial or copied creator identity.',
+    ],
+    providerBoundary: 'Can generate the script and shot request internally; human talent/avatar consent and provider execution are external gates.',
+  }, {
+    id: 'animated_ad',
+    label: 'Animated AI Ads Builder',
+    sourceReference: 'Clico animated-ai-ads skill',
+    executionKind: 'video_brief',
+    useWhen: [
+      'Need a mascot, package, or visual world to become an ad.',
+      'Need style lock before generation.',
+      `Need segmented requests for ${platformList}.`,
+    ],
+    requiredInputs: ['brand kit', 'style references', 'product packshot', 'scene list', 'voiceover tone'],
+    deliverables: ['style frame prompt', 'storyboard', 'voiceover script', 'segmented generation request'],
+    qualityChecks: [
+      'Style stays consistent across segments.',
+      'Product shape and packaging remain accurate.',
+      'Each generation segment has a clear rejection rule.',
+    ],
+    providerBoundary: 'Can prepare the animated request internally; actual animation generation, voice, and rendering require provider materials.',
+  }, {
+    id: 'editing_orchestration',
+    label: 'Video Editing Orchestration',
+    sourceReference: 'Clico video-editing-orchestration skill',
+    executionKind: 'editing_plan',
+    useWhen: [
+      'Already have rough footage or generated clips.',
+      'Need pacing, crop, B-roll, PiP, and caption rules.',
+      'Need an editor-ready plan without starting new generation.',
+    ],
+    requiredInputs: ['rough cut URL', 'segment timestamps', 'target duration', 'caption style', 'platform ratio'],
+    deliverables: ['edit decision plan', 'caption plan', 'B-roll insertion list', 'acceptance checklist'],
+    qualityChecks: [
+      'Every cut has a timestamp or segment rule.',
+      'Caption and crop rules are platform-specific.',
+      'Final export can be reviewed before dispatch.',
+    ],
+    providerBoundary: 'Can create the EDL-style handoff internally; actual editing/rendering still needs editor or processing provider.',
+  }, {
+    id: 'slideshow_reels',
+    label: 'Slideshow / Reels Batch',
+    sourceReference: 'Clico slideshow-reels-batch skill',
+    executionKind: 'video_batch',
+    useWhen: [
+      'Need fast creative tests without full video production.',
+      'Need image briefs and contact-sheet review.',
+      'Need lightweight variants for short-form platforms.',
+    ],
+    requiredInputs: ['image asset pack', 'slide count', 'headline options', 'offer', 'platform destination'],
+    deliverables: ['slide sequence', 'image brief list', 'contact-sheet plan', 'platform caption set'],
+    qualityChecks: [
+      'Each slide has one visual idea.',
+      'Text remains legible on mobile.',
+      'Sequence can be approved before export.',
+    ],
+    providerBoundary: 'Can plan slideshow variants internally; final images/video export require image/render provider or manual production.',
+  }];
+}
+
 function hoursBetween(from: string, to = new Date()) {
   const time = Date.parse(from);
   if (!Number.isFinite(time)) return 0;
@@ -636,6 +748,7 @@ function buildPack(input: IndustrialVideoWorkflowInput, creativeSnapshot?: Creat
   const references = cleanList(input.references, ['manual reference import required'], 20);
   const productAssets = cleanList(input.productAssets, ['product image pack required'], 20);
   const qualityTier = input.qualityTier || 'standard';
+  const productionTemplates = buildProductionTemplates({ productName, category, platforms });
   const referenceReady = references.some(item => item !== 'manual reference import required');
   const productAssetsReady = productAssets.some(item => item !== 'product image pack required');
   const mode: VideoWorkflowMode = input.providerConfigured && input.legalConsent && referenceReady && productAssetsReady
@@ -656,6 +769,7 @@ function buildPack(input: IndustrialVideoWorkflowInput, creativeSnapshot?: Creat
     { id: 'reference-intelligence', title: 'Reference intelligence', exitCriterion: '3-5 references are reduced to hook, pacing, proof, scene, and CTA patterns without copying protected expression.' },
     { id: 'script-transfer', title: 'Script transfer', exitCriterion: 'Each script changes one test variable and replaces all product facts, persona, claims, and scenes.' },
     { id: 'storyboard', title: 'Storyboard and asset manifest', exitCriterion: 'Every 2-3 seconds has a shot, overlay, product role, and required source asset.' },
+    { id: 'template-ladder', title: 'Template ladder', exitCriterion: 'Batch UGC, street interview, animated ad, editing orchestration, and slideshow variants are all represented as structured templates.' },
     { id: 'provider-request', title: 'Provider request package', exitCriterion: 'Video generation or editor handoff contains prompt, duration, ratio, quality tier, source assets, and rejection rules.' },
     { id: 'qa-and-distribution', title: 'QA and distribution bridge', exitCriterion: 'The accepted variant has platform dimensions, UTM, return metric, evidence URL requirement, and performance import plan.' },
   ];
@@ -713,6 +827,20 @@ function buildPack(input: IndustrialVideoWorkflowInput, creativeSnapshot?: Creat
     { title: 'Script Pack', type: 'script', content: scriptPack },
     { title: 'Storyboard', type: 'storyboard', content: storyboard },
     {
+      title: 'Production Template Matrix',
+      type: 'checklist',
+      content: productionTemplates.map(template => [
+        `### ${template.label}`,
+        `Source: ${template.sourceReference}`,
+        `Kind: ${template.executionKind}`,
+        `Use when: ${template.useWhen.join(' | ')}`,
+        `Inputs: ${template.requiredInputs.join(' | ')}`,
+        `Deliverables: ${template.deliverables.join(' | ')}`,
+        `Quality: ${template.qualityChecks.join(' | ')}`,
+        `Boundary: ${template.providerBoundary}`,
+      ].join('\n')).join('\n\n'),
+    },
+    {
       title: 'Smart Remix Plan',
       type: 'checklist',
       content: remixPlan.map(item => [
@@ -766,6 +894,18 @@ function buildPack(input: IndustrialVideoWorkflowInput, creativeSnapshot?: Creat
     '### Smart Remix Plan',
     ...remixPlan.flatMap(item => [`#### ${item.label}`, ...item.cutPlan.map(step => `- ${step}`)]),
     '',
+    '### Production Template Matrix',
+    ...productionTemplates.flatMap(template => [
+      `#### ${template.label}`,
+      `- Source: ${template.sourceReference}`,
+      `- Kind: ${template.executionKind}`,
+      `- Use when: ${template.useWhen.join(' | ')}`,
+      `- Inputs: ${template.requiredInputs.join(' | ')}`,
+      `- Deliverables: ${template.deliverables.join(' | ')}`,
+      `- Quality: ${template.qualityChecks.join(' | ')}`,
+      `- Boundary: ${template.providerBoundary}`,
+    ]),
+    '',
     '### Asset Manifest',
     ...assetManifest.map(item => `- ${item.required ? 'Required' : 'Optional'} ${item.id}: ${item.acceptance}`),
     '',
@@ -773,7 +913,7 @@ function buildPack(input: IndustrialVideoWorkflowInput, creativeSnapshot?: Creat
     ...reviewGates.flatMap(gate => [`#### ${gate.id}`, ...gate.checks.map(check => `- ${check}`)]),
   ].filter(Boolean).join('\n');
 
-  return { mode, providerGate, stages, artifacts, reviewGates, remixPlan, assetManifest, markdown };
+  return { mode, providerGate, stages, artifacts, reviewGates, productionTemplates, remixPlan, assetManifest, markdown };
 }
 
 export async function createIndustrialVideoWorkflow(
@@ -794,6 +934,8 @@ export async function createIndustrialVideoWorkflow(
       `Mode: ${pack.mode}`,
       `Stages: ${pack.stages.length}`,
       `Artifacts: ${pack.artifacts.length}`,
+      `Production templates: ${pack.productionTemplates.length}`,
+      ...pack.productionTemplates.slice(0, 5).map(item => `Template: ${item.label} / ${item.executionKind}`),
       `Remix variants: ${pack.remixPlan.length}`,
       ...pack.remixPlan.slice(0, 3).map(item => `Remix: ${item.label} / ${item.source}`),
       `Provider gate: ${pack.providerGate.blocker || 'ready'}`,

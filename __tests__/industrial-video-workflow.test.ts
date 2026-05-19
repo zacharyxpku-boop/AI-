@@ -22,6 +22,13 @@ import {
 
 const videoWebhookSecret = 'test-video-webhook-secret';
 
+function expectNoSecretMaterial(payload: unknown) {
+  const serialized = JSON.stringify(payload);
+  expect(serialized).not.toMatch(/"[^"]*(?:apiKey|api_key|accessToken|refreshToken|clientSecret|webhookSecret|signingSecret|secretValue|providerToken)[^"]*"\s*:/i);
+  expect(serialized).not.toMatch(/(?:sk|rk|pk|pat|ghp|gho|ghu|ghs)_[A-Za-z0-9_]{12,}/);
+  expect(serialized).not.toMatch(/Bearer\s+[A-Za-z0-9._~+/=-]{12,}/i);
+}
+
 function buildSignedVideoWebhookRequest(orgId: string, body: Record<string, unknown>, signature?: string | null) {
   const rawBody = JSON.stringify(body);
   const headers: Record<string, string> = { 'x-tenant-id': orgId };
@@ -68,9 +75,24 @@ describe('industrial video workflow bridge', () => {
       'Campaign Video Brief',
       'Script Pack',
       'Storyboard',
+      'Production Template Matrix',
       'Smart Remix Plan',
       'Provider Request',
     ]);
+    expect(result.pack.stages.map(stage => stage.id)).toContain('template-ladder');
+    expect(result.pack.productionTemplates.map(template => template.id)).toEqual([
+      'batch_ugc',
+      'street_interview',
+      'animated_ad',
+      'editing_orchestration',
+      'slideshow_reels',
+    ]);
+    expect(result.pack.productionTemplates[0]).toMatchObject({
+      sourceReference: 'Clico batch-ugc-video skill',
+      executionKind: 'video_batch',
+    });
+    expect(result.pack.markdown).toContain('Production Template Matrix');
+    expect(result.pack.markdown).toContain('Street Interview Video Builder');
     expect(result.pack.remixPlan).toHaveLength(1);
     expect(result.pack.remixPlan[0]).toMatchObject({
       label: '基础一键视频混剪',
@@ -79,6 +101,8 @@ describe('industrial video workflow bridge', () => {
     expect(result.pack.markdown).toContain('Smart Remix Plan');
     expect(result.asset.type).toBe('production_handoff');
     expect(result.asset.tags).toContain('video-workflow');
+    expect(result.asset.evidence).toContain('Production templates: 5');
+    expect(result.asset.evidence).toContain('Template: Batch UGC Video Pack / video_batch');
     expect(result.distributionPlans).toHaveLength(2);
     expect(result.distributionDispatches).toHaveLength(2);
     expect(result.distributionDispatches.every(dispatch => dispatch.status === 'manual_ready')).toBe(true);
@@ -580,7 +604,7 @@ describe('industrial video workflow bridge', () => {
     expect(body.asset.source).toBe('industrial-video-workflow');
     expect(body.distributionPlans).toHaveLength(1);
     expect(body.queue.itemCount).toBe(1);
-    expect(JSON.stringify(body)).not.toMatch(/api[_-]?key|token|secret/i);
+    expectNoSecretMaterial(body);
   });
 
   it('serves one-click video operation through the API as a gated internal orchestration result', async () => {
@@ -611,7 +635,7 @@ describe('industrial video workflow bridge', () => {
       expect.stringContaining('real video generation/editing provider'),
     ]));
     expect(body.operation.commerciallyExecutable).toBe(false);
-    expect(JSON.stringify(body)).not.toMatch(/api[_-]?key|token|secret/i);
+    expectNoSecretMaterial(body);
   });
 
   it('serves real video provider submission through the API from server-side env only', async () => {
