@@ -6,6 +6,7 @@ import {
   CreativeMonitoringConsoleClient,
   buildCreativeComposeActionPlaybook,
   buildCreativeFactoryVariantPlaybook,
+  buildCreativeIntelligenceChecks,
 } from '@/components/CreativeMonitoringConsoleClient';
 
 describe('creative monitoring console page', () => {
@@ -34,6 +35,10 @@ describe('creative monitoring console page', () => {
     expect(html).toContain('UGC Script Spine');
     expect(html).toContain('Offer Test Matrix');
     expect(html).toContain('Compose Intelligence Stack');
+    expect(html).toContain('VidMob / Superads 参考层');
+    expect(html).toContain('AI 视频分析、创意疲劳和跨平台 performance signal 一起看');
+    expect(html).toContain('Creative analytics / fatigue 观察');
+    expect(html).toContain('跨平台优化输入');
     expect(html).toContain('Compose Action Playbook');
     expect(html).toContain('Compose Variant Console');
     expect(html).toContain('/factory/creative?projectId=creative-launch&amp;variant=partner');
@@ -168,6 +173,70 @@ describe('creative monitoring console page', () => {
       handoffBoundary: expect.stringContaining('不生成伪洞察'),
     }));
   });
+
+  it('builds VidMob and Superads style creative intelligence checks', () => {
+    const checks = buildCreativeIntelligenceChecks({
+      orgId: 'test-org',
+      projectId: 'creative-intelligence-project',
+      monitorCount: 3,
+      activeMonitorCount: 3,
+      competitorAccountMonitorCount: 1,
+      trendRankMonitorCount: 1,
+      videoKeywordMonitorCount: 1,
+      dueTaskCount: 0,
+      importedInsightCount: 3,
+      harvestRunCount: 1,
+      harvestedInsightCount: 3,
+      collectorTargetCount: 3,
+      collectorProviderReady: true,
+      collectorAdapterStatus: 'provider_ready',
+      sourceCount: 3,
+      providerReadySourceCount: 2,
+      sourceSyncRunCount: 1,
+      providerSourceFreshCount: 1,
+      providerSourceFailureCount: 0,
+      sourceSyncAccountObservationCount: 1,
+      sourceSyncTrendRankObservationCount: 1,
+      sourceSyncVideoTeardownObservationCount: 1,
+      sourceSyncMultimodalParsedCount: 1,
+      sourceSyncCoverageScore: 100,
+      creativeSourceObservationCount: 3,
+      creativeSourceRepeatObservationSourceCount: 2,
+      creativeSourceScaleScore: 80,
+      creativeSourceDepthScore: 72,
+      creativeReadySourceHealthCardCount: 3,
+      accountTrackingCoverageTargetCount: 2,
+      trendRankCoverageSignalCount: 1,
+      videoTeardownRepeatReady: true,
+      accountTrackingSourceReady: true,
+      trendRankSourceReady: true,
+      videoTeardownSourceReady: true,
+      multimodalTeardownReady: true,
+      missingLinks: [],
+      nextActions: [],
+    }, {
+      insightCount: 3,
+      competitorAccountCount: 1,
+      trendRankCount: 1,
+      teardownCount: 1,
+      opportunityCount: 2,
+      averageConfidenceScore: 78,
+      opportunityMap: [],
+      patternClusterCount: 1,
+      crossSourcePatternCount: 1,
+      creativeMoatScore: 72,
+      patternClusters: [],
+      missingLinks: [],
+    });
+
+    expect(checks).toEqual(expect.arrayContaining([
+      expect.objectContaining({ stage: 'AI 视频分析 / 多模态解析', ready: true }),
+      expect.objectContaining({ stage: 'Creative analytics / fatigue 观察', ready: true }),
+      expect.objectContaining({ stage: '品牌安全模板化生产', ready: true }),
+      expect.objectContaining({ stage: '跨平台优化输入', ready: true }),
+    ]));
+  });
+
   it('builds distinct creative variant playbooks for partner, operator, and friend trial views', () => {
     expect(buildCreativeFactoryVariantPlaybook(undefined, undefined, 'partner')).toEqual(expect.objectContaining({
       label: '合作者视角',

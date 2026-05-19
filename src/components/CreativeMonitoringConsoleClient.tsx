@@ -190,6 +190,13 @@ const CREATIVE_FACTORY_VARIANTS: Record<FactoryUiVariantId, {
   },
 };
 
+export type CreativeIntelligenceCheck = {
+  stage: string;
+  ready: boolean;
+  evidence: string;
+  next: string;
+};
+
 export function buildCreativeFactoryVariantPlaybook(
   snapshot: CreativeMonitoringSnapshot | undefined,
   creative: CreativeSnapshot | undefined,
@@ -216,6 +223,57 @@ export function buildCreativeFactoryVariantPlaybook(
       `采集覆盖 ${sourceCoverage} / ${sourceCoverage >= 100 ? '可进入生产复用' : '还需要补来源覆盖'}`,
     ],
   };
+}
+
+export function buildCreativeIntelligenceChecks(
+  snapshot: CreativeMonitoringSnapshot | undefined,
+  creative: CreativeSnapshot | undefined,
+): CreativeIntelligenceCheck[] {
+  const insightCount = creative?.insightCount || 0;
+  const opportunityCount = creative?.opportunityCount || 0;
+  const patternClusterCount = creative?.patternClusterCount || 0;
+  const crossSourcePatternCount = creative?.crossSourcePatternCount || 0;
+  const moatScore = creative?.creativeMoatScore || 0;
+  const sourceCoverageScore = snapshot?.sourceSyncCoverageScore || 0;
+  const sourceDepthScore = snapshot?.creativeSourceDepthScore || 0;
+  const multimodalParsedCount = snapshot?.sourceSyncMultimodalParsedCount || 0;
+  const readyHealthCards = snapshot?.creativeReadySourceHealthCardCount || 0;
+  const providerReadySources = snapshot?.providerReadySourceCount || 0;
+
+  return [
+    {
+      stage: 'AI 视频分析 / 多模态解析',
+      ready: multimodalParsedCount > 0 && sourceCoverageScore >= 100,
+      evidence: `多模态解析 ${multimodalParsedCount} 条 / 覆盖 ${sourceCoverageScore} / 健康卡 ${readyHealthCards}`,
+      next: multimodalParsedCount > 0
+        ? '把解析结果继续写入 hook、节奏、证据点、可复用角度和风险边界。'
+        : '先补视频 URL、转写摘要和多模态 provider；没有解析就不能宣称 AI 视频分析已商用。',
+    },
+    {
+      stage: 'Creative analytics / fatigue 观察',
+      ready: insightCount > 0 && patternClusterCount > 0 && crossSourcePatternCount > 0,
+      evidence: `洞察 ${insightCount} / 模式簇 ${patternClusterCount} / 跨来源模式 ${crossSourcePatternCount}`,
+      next: crossSourcePatternCount > 0
+        ? '把跨来源模式继续反哺脚本、分发和表现回流，识别疲劳后再换 hook。'
+        : '先补跨来源模式和机会地图；没有平台表现就只能做结构假设，不能自动判断 fatigue。',
+    },
+    {
+      stage: '品牌安全模板化生产',
+      ready: opportunityCount > 0 && sourceDepthScore >= 70,
+      evidence: `机会 ${opportunityCount} / 深度 ${sourceDepthScore} / 护城河分 ${moatScore}`,
+      next: opportunityCount > 0
+        ? '把机会地图写进品牌模板、脚本骨架和视频任务，再进入 Create/Cut。'
+        : '继续补竞品账号、榜单趋势和视频拆解，不要让灵感停在收藏夹。',
+    },
+    {
+      stage: '跨平台优化输入',
+      ready: providerReadySources > 0,
+      evidence: `provider-ready 来源 ${providerReadySources} 条 / 观察 ${readyHealthCards} 张`,
+      next: providerReadySources > 0
+        ? '把可用来源纳入周期采集和分发实验。'
+        : '先补授权来源和采集器状态；没有数据源接入就不能宣称跨平台优化。',
+    },
+  ];
 }
 
 function typeLabel(type: CreativeMonitorType) {
@@ -562,6 +620,7 @@ export function CreativeMonitoringConsoleClient({
   const collectorPlan = data?.collectorRunPlan;
   const composePlaybook = buildCreativeComposeActionPlaybook(snapshot, creative, collectorPlan);
   const variantPlaybook = buildCreativeFactoryVariantPlaybook(snapshot, creative, selectedVariantId);
+  const intelligenceChecks = buildCreativeIntelligenceChecks(snapshot, creative);
 
   return (
     <main className="min-h-screen bg-[#101315] text-[#f8f2e8]">
@@ -632,6 +691,28 @@ export function CreativeMonitoringConsoleClient({
                   <p className="text-white/55"><span className="text-white/90">内部：</span>{item.internal}</p>
                   <p className="text-amber-100"><span className="text-white/90">外部：</span>{item.external}</p>
                 </div>
+              </article>
+            ))}
+          </div>
+        </section>
+
+        <section className="border border-amber-300/20 bg-amber-300/[0.06] p-5">
+          <div className="flex flex-col gap-2 sm:flex-row sm:items-start sm:justify-between">
+            <div>
+              <p className="text-xs uppercase tracking-[0.22em] text-amber-200">VidMob / Superads 参考层</p>
+              <h2 className="mt-2 text-xl font-semibold">AI 视频分析、创意疲劳和跨平台 performance signal 一起看</h2>
+            </div>
+            <div className="max-w-sm text-xs leading-5 text-amber-100/80">
+              这层把多模态解析、创意分析和疲劳观察收成一块：没有平台数据和解析 provider 时，只能做结构复盘，不能宣称自动优化。
+            </div>
+          </div>
+          <div className="mt-4 grid gap-3 lg:grid-cols-4">
+            {intelligenceChecks.map(item => (
+              <article className="border border-white/10 bg-black/20 p-4" key={item.stage}>
+                <div className={`text-sm font-semibold ${item.ready ? 'text-emerald-200' : 'text-amber-100'}`}>{item.stage}</div>
+                <div className="mt-2 text-xs leading-5 text-white/65">{item.evidence}</div>
+                <div className="mt-2 text-xs leading-5 text-emerald-200">Wenai 输出：{item.next}</div>
+                <div className="mt-2 text-xs leading-5 text-amber-100">状态：{item.ready ? '已具备内部证据' : '继续补内部/外部门禁'}</div>
               </article>
             ))}
           </div>
