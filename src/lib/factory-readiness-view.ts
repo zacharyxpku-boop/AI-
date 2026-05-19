@@ -7,15 +7,44 @@ type FactoryCapability = {
   external: string;
 };
 
-export function buildFactoryUiVariants(report: Pick<ProductReadinessReport, 'uiVariants'>) {
+export type FactoryUiVariantId = 'partner' | 'operator' | 'friend_trial';
+
+export const FACTORY_UI_VARIANT_IDS: FactoryUiVariantId[] = ['partner', 'operator', 'friend_trial'];
+
+export type FactoryUiVariant = {
+  id: FactoryUiVariantId;
+  label: string;
+  audience: string;
+  focus: string;
+  firstAction: string;
+  stopLine: string;
+};
+
+export function normalizeFactoryUiVariantId(value?: string): FactoryUiVariantId {
+  if (value === 'operator' || value === 'friend_trial' || value === 'partner') return value;
+  return 'partner';
+}
+
+export function buildFactoryUiVariants(report: Pick<ProductReadinessReport, 'uiVariants'>): FactoryUiVariant[] {
   return report.uiVariants.map(variant => ({
-    id: variant.id,
+    id: normalizeFactoryUiVariantId(variant.id),
     label: variant.label,
     audience: variant.audience,
     focus: variant.firstScreen,
     firstAction: variant.primaryAction,
     stopLine: variant.stopLine,
   }));
+}
+
+export function orderFactoryUiVariants(
+  variants: FactoryUiVariant[],
+  selectedVariantId: FactoryUiVariantId,
+): FactoryUiVariant[] {
+  return [...variants].sort((left, right) => {
+    if (left.id === selectedVariantId) return -1;
+    if (right.id === selectedVariantId) return 1;
+    return FACTORY_UI_VARIANT_IDS.indexOf(left.id) - FACTORY_UI_VARIANT_IDS.indexOf(right.id);
+  });
 }
 
 function statusLabel(status: ReadinessStatus) {

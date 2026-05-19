@@ -6,6 +6,8 @@ import {
   buildFactoryOperatingLayers,
   buildFactoryReadinessSlices,
   buildFactoryUiVariants,
+  normalizeFactoryUiVariantId,
+  orderFactoryUiVariants,
 } from '@/lib/factory-readiness-view';
 import {
   LISTING_FACTORY_ACTIVITY_FEED,
@@ -68,6 +70,13 @@ describe('listing factory demo data', () => {
     });
 
     expect(buildFactoryUiVariants(report).map(variant => variant.id)).toEqual(['partner', 'operator', 'friend_trial']);
+    expect(normalizeFactoryUiVariantId('operator')).toBe('operator');
+    expect(normalizeFactoryUiVariantId('unknown')).toBe('partner');
+    expect(orderFactoryUiVariants(buildFactoryUiVariants(report), 'operator').map(variant => variant.id)).toEqual([
+      'operator',
+      'partner',
+      'friend_trial',
+    ]);
     expect(buildFactoryUiVariants(report)[0]).toMatchObject({
       label: '合作者/投资人版',
       stopLine: expect.stringContaining('未审计规模数字'),
@@ -424,6 +433,8 @@ describe('listing factory demo data', () => {
     expect(source).toContain('进入 Compose / Create / Cut / Cast / Manage 工作台');
     expect(source).toContain('内容工厂');
     expect(source).toContain('UI Variant Workflow');
+    expect(source).toContain('Active Variant');
+    expect(source).toContain('/factory?variant=');
     expect(source).toContain('运营工作台版');
     expect(source).toContain('合作者/投资人版');
     expect(source).toContain('朋友试用版');

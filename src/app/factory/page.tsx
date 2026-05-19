@@ -6,6 +6,8 @@ import {
   buildFactoryOperatingLayers,
   buildFactoryReadinessSlices,
   buildFactoryUiVariants,
+  normalizeFactoryUiVariantId,
+  orderFactoryUiVariants,
 } from '@/lib/factory-readiness-view';
 import { evaluateProductReadiness } from '@/lib/product-readiness';
 import { buildReadinessInput } from '@/lib/readiness-input';
@@ -15,10 +17,17 @@ export const metadata: Metadata = {
   description: '集中查看 SKU 上新进度、品牌禁区、批量 Brief、内容任务和客户交付状态。',
 };
 
-export default function FactoryPage() {
+export default async function FactoryPage({
+  searchParams,
+}: {
+  searchParams?: Promise<{ variant?: string }>;
+}) {
+  const params = searchParams ? await searchParams : {};
+  const selectedVariantId = normalizeFactoryUiVariantId(params.variant);
   const readinessReport = evaluateProductReadiness(buildReadinessInput());
   const factoryOperatingLayers = buildFactoryOperatingLayers(readinessReport);
-  const factoryUiVariants = buildFactoryUiVariants(readinessReport);
+  const factoryUiVariants = orderFactoryUiVariants(buildFactoryUiVariants(readinessReport), selectedVariantId);
+  const selectedVariant = factoryUiVariants[0];
   const factoryReadinessSlices = buildFactoryReadinessSlices(readinessReport);
   const mobileCapabilityStrips = buildFactoryMobileCapabilities(readinessReport);
 
@@ -53,7 +62,16 @@ export default function FactoryPage() {
             </div>
             <div className="mt-4 grid gap-3 lg:grid-cols-3">
               {factoryUiVariants.map(variant => (
-                <div key={variant.id} className="rounded-md border border-white/10 bg-white/[0.045] p-4">
+                <Link
+                  aria-current={variant.id === selectedVariantId ? 'page' : undefined}
+                  href={`/factory?variant=${variant.id}`}
+                  key={variant.id}
+                  className={`rounded-md border p-4 transition hover:border-amber-300/40 hover:bg-white/[0.07] ${
+                    variant.id === selectedVariantId
+                      ? 'border-amber-300/55 bg-amber-300/10 shadow-[0_0_0_1px_rgba(252,211,77,0.18)]'
+                      : 'border-white/10 bg-white/[0.045]'
+                  }`}
+                >
                   <div className="flex items-center justify-between gap-3">
                     <div className="text-[15px] font-black text-white">{variant.label}</div>
                     <div className="rounded-sm border border-amber-200/30 px-2 py-1 text-[10px] font-black uppercase text-amber-100">{variant.id}</div>
@@ -64,8 +82,19 @@ export default function FactoryPage() {
                     <p><span className="font-black text-white">第一动作：</span>{variant.firstAction}</p>
                     <p><span className="font-black text-rose-100">停止线：</span>{variant.stopLine}</p>
                   </div>
-                </div>
+                </Link>
               ))}
+            </div>
+            <div className="mt-4 rounded-md border border-amber-300/30 bg-slate-900/70 p-4">
+              <div className="text-[11px] font-black uppercase tracking-[0.22em] text-amber-200">Active Variant</div>
+              <div className="mt-2 grid gap-3 md:grid-cols-[0.8fr_1fr_1fr]">
+                <div>
+                  <div className="text-xl font-black text-white">{selectedVariant.label}</div>
+                  <p className="mt-2 text-[12px] leading-5 text-white/65">{selectedVariant.audience}</p>
+                </div>
+                <p className="text-[12px] leading-6 text-white/75">{selectedVariant.focus}</p>
+                <p className="text-[12px] leading-6 text-amber-100/85">{selectedVariant.firstAction}</p>
+              </div>
             </div>
           </div>
 
