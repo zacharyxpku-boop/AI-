@@ -47,6 +47,24 @@ const SECTIONS = [
   },
 ];
 
+const BLUEPRINT_LINKS = [
+  {
+    href: '/status',
+    title: '终局蓝图',
+    body: '查看 Compose / Create / Cut / Cast / Manage 的当前进度、竞品差距和外部门禁。',
+  },
+  {
+    href: '/settings/kuaizi',
+    title: '外部材料',
+    body: '查看视频 provider、平台 OAuth、广告账户、回流、云资产和规模审计的材料包。',
+  },
+  {
+    href: '/factory/video',
+    title: '视频工厂',
+    body: '查看 AI 视频分析、智能混剪、一键视频、Clico 模板矩阵和 provider 沙盒边界。',
+  },
+];
+
 export default function DocsPage() {
   return (
     <div className="mx-auto max-w-[1000px] px-6 py-10">
@@ -70,6 +88,22 @@ export default function DocsPage() {
           ))}
         </div>
       </div>
+
+      <section className="mb-10 rounded-md border border-amber-200 bg-amber-50 p-5">
+        <div className="text-[10px] font-mono uppercase tracking-[0.18em] text-amber-700">Final Blueprint</div>
+        <h2 className="mt-2 text-[18px] font-black text-slate-950">终局产品形态与外部接入边界</h2>
+        <p className="mt-2 text-[12px] leading-6 text-slate-700">
+          合作者先看 <span className="font-semibold">docs/FINAL_PRODUCT_BLUEPRINT.md</span>，再进入下面三个入口确认当前能力、外部材料和视频生产边界。没有 provider callback、平台 OAuth、广告账户授权、analytics sync、企业云资产和规模审计前，不宣称筷子科技等价。
+        </p>
+        <div className="mt-4 grid grid-cols-1 gap-3 md:grid-cols-3">
+          {BLUEPRINT_LINKS.map((item) => (
+            <Link key={item.href} href={item.href} className="rounded-md border border-amber-200 bg-white p-4 text-left hover:border-amber-400">
+              <div className="text-[13px] font-black text-slate-950">{item.title}</div>
+              <p className="mt-2 text-[12px] leading-5 text-slate-600">{item.body}</p>
+            </Link>
+          ))}
+        </div>
+      </section>
 
       <div className="space-y-10">
         {SECTIONS.map((section) => (

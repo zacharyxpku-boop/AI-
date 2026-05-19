@@ -5,6 +5,7 @@ import { join } from 'node:path';
 
 import SettingsPage from '@/app/settings/page';
 import KuaiziSettingsPage from '@/app/settings/kuaizi/page';
+import DocsPage from '@/app/docs/page';
 
 describe('settings pages', () => {
   it('renders client configuration in clear Chinese', () => {
@@ -18,6 +19,20 @@ describe('settings pages', () => {
     expect(html).not.toContain('淇');
     expect(html).not.toContain('ON');
     expect(html).not.toContain('OFF');
+  });
+
+  it('surfaces the final product blueprint and external gates from the docs hub', () => {
+    const html = renderToStaticMarkup(<DocsPage />);
+
+    expect(html).toContain('终局产品形态与外部接入边界');
+    expect(html).toContain('docs/FINAL_PRODUCT_BLUEPRINT.md');
+    expect(html).toContain('Compose / Create / Cut / Cast / Manage');
+    expect(html).toContain('没有 provider callback、平台 OAuth、广告账户授权、analytics sync、企业云资产和规模审计前');
+    expect(html).toContain('不宣称筷子科技等价');
+    expect(html).toContain('/status');
+    expect(html).toContain('/settings/kuaizi');
+    expect(html).toContain('/factory/video');
+    expect(html).toContain('Clico 模板矩阵');
   });
 
   it('renders Kuaizi connection settings without browser-side credential promises', () => {
