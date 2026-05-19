@@ -9,13 +9,14 @@ import { getIndustrialVideoProductionQueue } from '@/lib/industrial-video-workfl
 import { resolveOrgId } from '@/lib/org-id';
 import { evaluateProductReadiness } from '@/lib/product-readiness';
 import { buildReadinessInput } from '@/lib/readiness-input';
+import { getScaleClaimSnapshot, scaleClaimSnapshotFacts } from '@/lib/scale-claim-ledger';
 
 export { buildReadinessInput };
 
 export async function GET(request: NextRequest) {
   const projectId = request.nextUrl.searchParams.get('projectId')?.trim();
   const orgId = await resolveOrgId(request);
-  const [projectSnapshot, creativeSnapshot, creativeMonitoringSnapshot, channelSnapshot, permissionSnapshot, videoQueue, brandLearningProfile] = projectId
+  const [projectSnapshot, creativeSnapshot, creativeMonitoringSnapshot, channelSnapshot, permissionSnapshot, videoQueue, brandLearningProfile, scaleClaimSnapshot] = projectId
     ? await Promise.all([
       getIndustrializationSnapshot(orgId, projectId),
       getCreativeIntelligenceSnapshot(orgId, projectId),
@@ -24,8 +25,9 @@ export async function GET(request: NextRequest) {
       getAssetPermissionSnapshot(orgId, projectId),
       getIndustrialVideoProductionQueue(orgId, projectId),
       getBrandLearningProfile(orgId, projectId),
+      getScaleClaimSnapshot(orgId, projectId),
     ])
-    : [undefined, undefined, undefined, undefined, undefined, undefined, undefined];
+    : [undefined, undefined, undefined, undefined, undefined, undefined, undefined, undefined];
   const enrichedProjectSnapshot = projectSnapshot
     ? {
       ...projectSnapshot,
@@ -119,6 +121,7 @@ export async function GET(request: NextRequest) {
       brandLearningWinningAssetCount: brandLearningProfile?.winningAssetRefs.length || 0,
       brandLearningRuleCount: (brandLearningProfile?.nextCreativeRules.length || 0) + (brandLearningProfile?.nextDistributionRules.length || 0),
       brandLearningMissingLinks: brandLearningProfile?.missingLinks || [],
+      ...(scaleClaimSnapshot ? scaleClaimSnapshotFacts(scaleClaimSnapshot) : {}),
     }
     : undefined;
 
@@ -132,6 +135,7 @@ export async function GET(request: NextRequest) {
     assetPermissions: permissionSnapshot,
     videoProductionQueue: videoQueue,
     brandLearning: brandLearningProfile,
+    scaleClaims: scaleClaimSnapshot,
     report: evaluateProductReadiness({
       ...buildReadinessInput(),
       project: enrichedProjectSnapshot,

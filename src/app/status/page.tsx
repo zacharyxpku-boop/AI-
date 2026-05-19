@@ -331,6 +331,13 @@ const PROJECT_EVIDENCE_LABELS: Record<string, string> = {
   brandLearningApprovedDeliverables: '品牌批准交付',
   brandLearningWinningAssets: '胜出资产',
   brandLearningRules: '品牌学习规则',
+  auditedWenaiCreativeOutput: '审计创意产出',
+  auditedWenaiVideoDistribution: '审计视频分发',
+  auditedScalePlatformBreakdown: '审计平台拆分',
+  auditedScaleEvidenceUrls: '审计证据链接',
+  auditedScaleDedupeReady: '去重规则就绪',
+  auditedScaleDateRangeReady: '日期范围就绪',
+  auditedScaleAuditorNoteReady: '审计确认就绪',
 };
 
 export interface ProjectEvidenceMetric {

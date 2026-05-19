@@ -787,6 +787,13 @@ function evaluateProjectReadiness(project?: ProjectReadinessFacts): ProductReadi
       `brandLearningApprovedDeliverables=${project.brandLearningApprovedDeliverableCount || 0}`,
       `brandLearningWinningAssets=${project.brandLearningWinningAssetCount || 0}`,
       `brandLearningRules=${project.brandLearningRuleCount || 0}`,
+      `auditedWenaiCreativeOutput=${project.auditedCreativeOutputCount || 0}`,
+      `auditedWenaiVideoDistribution=${project.auditedVideoDistributionCount || 0}`,
+      `auditedScalePlatformBreakdown=${project.auditedScalePlatformBreakdownCount || 0}`,
+      `auditedScaleEvidenceUrls=${project.auditedScaleEvidenceUrlCount || 0}`,
+      `auditedScaleDedupeReady=${project.auditedScaleHasDedupeRule ? 1 : 0}`,
+      `auditedScaleDateRangeReady=${project.auditedScaleHasDateRange ? 1 : 0}`,
+      `auditedScaleAuditorNoteReady=${project.auditedScaleHasAuditorNote ? 1 : 0}`,
     ],
     missingLinks: [...project.missingLinks, ...creativeMissingLinks, ...creativeMonitoringMissingLinks, ...channelMissingLinks, ...channelAdMissingLinks, ...assetPermissionMissingLinks, ...brandLearningMissingLinks],
     nextActions: [

@@ -265,6 +265,26 @@ describe('status page', () => {
       label: '视频闭环分',
       value: '86%',
     });
+    expect(formatProjectEvidenceMetric('auditedWenaiCreativeOutput=91000000')).toEqual({
+      key: 'auditedWenaiCreativeOutput',
+      label: '审计创意产出',
+      value: '91000000',
+    });
+    expect(formatProjectEvidenceMetric('auditedWenaiVideoDistribution=42000000')).toEqual({
+      key: 'auditedWenaiVideoDistribution',
+      label: '审计视频分发',
+      value: '42000000',
+    });
+    expect(formatProjectEvidenceMetric('auditedScaleEvidenceUrls=2')).toEqual({
+      key: 'auditedScaleEvidenceUrls',
+      label: '审计证据链接',
+      value: '2',
+    });
+    expect(formatProjectEvidenceMetric('auditedScaleAuditorNoteReady=1')).toEqual({
+      key: 'auditedScaleAuditorNoteReady',
+      label: '审计确认就绪',
+      value: '1',
+    });
   });
 
   it('formats readiness feature names as Chinese product capabilities', () => {

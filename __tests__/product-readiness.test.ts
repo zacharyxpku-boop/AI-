@@ -18,6 +18,7 @@ import {
 import { evaluatePerformanceImport, parsePerformanceCsv } from '@/lib/performance-import';
 import { buildPlatformConnectorReadiness } from '@/lib/platform-connector-readiness';
 import { evaluateProductReadiness } from '@/lib/product-readiness';
+import { upsertScaleClaimRecord } from '@/lib/scale-claim-ledger';
 
 afterEach(() => {
   vi.unstubAllEnvs();
@@ -770,6 +771,28 @@ sku-1,${video.id},TikTok,10000,300,120,12,560`));
       reason: 'allowed',
       record: permission,
     });
+    await upsertScaleClaimRecord(orgId, {
+      projectId,
+      metric: 'creative_output',
+      count: 91_000_000,
+      platform: 'TikTok Shop',
+      source: 'audited-ledger',
+      dateRange: '2026-01-01 to 2026-03-31',
+      dedupeRule: 'asset_id + platform_post_id + date_range',
+      evidenceUrl: 'https://audit.example.test/wenai/creative-output',
+      auditorNote: 'Customer confirmed deduped Wenai creative output ledger.',
+    });
+    await upsertScaleClaimRecord(orgId, {
+      projectId,
+      metric: 'video_distribution',
+      count: 42_000_000,
+      platform: 'TikTok Shop',
+      source: 'audited-ledger',
+      dateRange: '2026-01-01 to 2026-03-31',
+      dedupeRule: 'dispatch_id + platform_post_id + date_range',
+      evidenceUrl: 'https://audit.example.test/wenai/video-distribution',
+      auditorNote: 'Customer confirmed deduped Wenai video distribution ledger.',
+    });
 
     const response = await GET(new NextRequest(`http://localhost/api/readiness?projectId=${projectId}`, {
       headers: { 'x-tenant-id': orgId },
@@ -838,6 +861,20 @@ sku-1,${video.id},TikTok,10000,300,120,12,560`));
     expect(evidenceNumber('assetDlpFailedPolicies=')).toBe(0);
     expect(evidenceNumber('assetPublicShareBlocked=')).toBeGreaterThanOrEqual(2);
     expect(evidenceNumber('assetRetentionPolicies=')).toBeGreaterThanOrEqual(2);
+    expect(body.scaleClaims).toMatchObject({
+      projectId,
+      creativeOutputCount: 91_000_000,
+      videoDistributionCount: 42_000_000,
+      canDisplayCreativeBenchmark: true,
+      canDisplayVideoBenchmark: true,
+    });
+    expect(body.report.projectReadiness.evidence).toContain('auditedWenaiCreativeOutput=91000000');
+    expect(body.report.projectReadiness.evidence).toContain('auditedWenaiVideoDistribution=42000000');
+    expect(body.report.projectReadiness.evidence).toContain('auditedScaleDedupeReady=1');
+    expect(body.report.scaleClaimGuards).toEqual(expect.arrayContaining([
+      expect.objectContaining({ requestedBenchmark: '91M+ creative output', canDisplay: true }),
+      expect.objectContaining({ requestedBenchmark: '42M+ video distribution', canDisplay: true }),
+    ]));
     expect(evidenceNumber('activeAssetAccessGrants=')).toBeGreaterThanOrEqual(2);
     expect(body.report.projectReadiness.evidence).toContain('videoQueueItems=1');
     expect(body.report.projectReadiness.evidence).toContain('videoProviderExecutions=1');
