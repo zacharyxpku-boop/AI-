@@ -27,6 +27,15 @@ describe('current product status report', () => {
     expect(doc).toContain('Review Commercial Acceptance Board');
     expect(doc).toContain('预览、反馈、批准、异常保护、下游交接');
     expect(doc).toContain('Cut Operating Checks');
+    expect(doc).toContain('Provider Sandbox Contract');
+    expect(doc).toContain('submit adapter');
+    expect(doc).toContain('callback signature');
+    expect(doc).toContain('failure recovery');
+    expect(doc).toContain('result ingestion');
+    expect(doc).toContain('client review');
+    expect(doc).toContain('87%');
+    expect(doc).toContain('90%');
+    expect(doc).toContain('53%');
     expect(doc).toContain('Cut 商用品质验收板');
     expect(doc).toContain('download/share/publish/approve fail-closed enforcement');
     expect(doc).toContain('资产访问门禁矩阵');

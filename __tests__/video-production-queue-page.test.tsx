@@ -2,7 +2,13 @@ import { renderToStaticMarkup } from 'react-dom/server';
 import { describe, expect, it } from 'vitest';
 
 import VideoFactoryPage from '@/app/factory/video/page';
-import { VideoProductionQueueClient, buildCutOperatingChecks, buildVideoFactoryVariantPlaybook, buildVideoProductionPassport } from '@/components/VideoProductionQueueClient';
+import {
+  VideoProductionQueueClient,
+  buildCutOperatingChecks,
+  buildVideoFactoryVariantPlaybook,
+  buildVideoProviderSandboxChecks,
+  buildVideoProductionPassport,
+} from '@/components/VideoProductionQueueClient';
 import type { OneClickVideoOperationResult, VideoProductionQueue } from '@/lib/industrial-video-workflow';
 
 describe('video production queue page', () => {
@@ -18,6 +24,13 @@ describe('video production queue page', () => {
     expect(html).toContain('运营执行路径');
     expect(html).toContain('Friend Trial Readiness');
     expect(html).toContain('Commercial Cut Readiness');
+    expect(html).toContain('Provider Sandbox Contract');
+    expect(html).toContain('视频 provider 沙盒接入合约');
+    expect(html).toContain('提交适配器门禁');
+    expect(html).toContain('回调验签门禁');
+    expect(html).toContain('失败恢复门禁');
+    expect(html).toContain('成片入库门禁');
+    expect(html).toContain('客户验收门禁');
     expect(html).toContain('Cut Operating Checks');
     expect(html).toContain('商用 Cut 放行门禁');
     expect(html).toContain('视频工厂商用品质验收板');
@@ -159,6 +172,44 @@ describe('video production queue page', () => {
         status: 'blocked',
         externalGate: expect.stringContaining('平台 OAuth'),
       }),
+    ]));
+  });
+
+  it('builds video provider sandbox checks for submit callback recovery result and review gates', () => {
+    const readyQueue: VideoProductionQueue = {
+      orgId: 'test-org',
+      projectId: 'provider-sandbox-project',
+      itemCount: 1,
+      providerReadyCount: 1,
+      handoffOnlyCount: 0,
+      blockedCount: 0,
+      measuredCount: 1,
+      providerExecutionCount: 2,
+      submittedProviderExecutionCount: 1,
+      completedProviderExecutionCount: 1,
+      failedProviderExecutionCount: 0,
+      retryableProviderExecutionCount: 0,
+      resultAssetCount: 1,
+      clientReviewCount: 1,
+      approvedDeliverableCount: 1,
+      revisionRequestedCount: 0,
+      averageLoopCompletionScore: 90,
+      items: [],
+    };
+
+    expect(buildVideoProviderSandboxChecks(readyQueue)).toEqual(expect.arrayContaining([
+      expect.objectContaining({ gate: '提交适配器门禁', ready: true }),
+      expect.objectContaining({ gate: '回调验签门禁', ready: true }),
+      expect.objectContaining({ gate: '失败恢复门禁', ready: true }),
+      expect.objectContaining({ gate: '成片入库门禁', ready: true }),
+      expect.objectContaining({ gate: '客户验收门禁', ready: true }),
+    ]));
+
+    expect(buildVideoProviderSandboxChecks(null)).toEqual(expect.arrayContaining([
+      expect.objectContaining({ gate: '提交适配器门禁', ready: false }),
+      expect.objectContaining({ gate: '回调验签门禁', ready: false }),
+      expect.objectContaining({ gate: '成片入库门禁', ready: false }),
+      expect.objectContaining({ gate: '客户验收门禁', ready: false }),
     ]));
   });
 

@@ -371,6 +371,63 @@ export interface CutOperatingCheck {
   externalGate: string;
 }
 
+export interface VideoProviderSandboxCheck {
+  gate: string;
+  ready: boolean;
+  evidence: string;
+  internalMove: string;
+  externalGate: string;
+}
+
+export function buildVideoProviderSandboxChecks(queue: VideoProductionQueue | null): VideoProviderSandboxCheck[] {
+  const providerReadyCount = queue?.providerReadyCount || 0;
+  const submittedCount = queue?.submittedProviderExecutionCount || 0;
+  const completedCount = queue?.completedProviderExecutionCount || 0;
+  const failedCount = queue?.failedProviderExecutionCount || 0;
+  const retryableCount = queue?.retryableProviderExecutionCount || 0;
+  const resultCount = queue?.resultAssetCount || 0;
+  const reviewCount = queue?.clientReviewCount || 0;
+  const approvedCount = queue?.approvedDeliverableCount || 0;
+
+  return [
+    {
+      gate: '提交适配器门禁',
+      ready: providerReadyCount > 0 || submittedCount > 0 || completedCount > 0,
+      evidence: `provider-ready ${providerReadyCount} / submitted ${submittedCount}`,
+      internalMove: '保留 submit payload、clientRequestId、dispatchId、sourceHandoffAssetId 和 providerName，不把 token 写入页面或账本。',
+      externalGate: '需要 provider submit endpoint、服务端 token、沙盒账号和成本上限。',
+    },
+    {
+      gate: '回调验签门禁',
+      ready: completedCount > 0,
+      evidence: `完成回调 ${completedCount} / 失败 ${failedCount}`,
+      internalMove: '继续使用 callback nonce、webhook signature、taskId 和 result URL 对齐同一条 execution。',
+      externalGate: '需要 webhook secret、callback URL allowlist、provider 真实 signed callback 样例。',
+    },
+    {
+      gate: '失败恢复门禁',
+      ready: submittedCount > 0 && failedCount === 0 && retryableCount === 0,
+      evidence: `失败 ${failedCount} / 可重试 ${retryableCount}`,
+      internalMove: '失败时记录 errorMessage、nextRetryAt、blockedReasons 和人工回填入口，避免静默卡死。',
+      externalGate: '需要 provider 错误码、重试策略、费用失败处理和 SLA 约定。',
+    },
+    {
+      gate: '成片入库门禁',
+      ready: resultCount > 0,
+      evidence: `成片 ${resultCount}`,
+      internalMove: 'provider/editor result URL 必须通过 production-result 入库，不能只停在供应商后台或聊天记录。',
+      externalGate: '需要可打开的成片 URL、存储权限、下载/水印策略和素材授权证明。',
+    },
+    {
+      gate: '客户验收门禁',
+      ready: reviewCount > 0 && approvedCount > 0,
+      evidence: `review ${reviewCount} / approved ${approvedCount}`,
+      internalMove: '成片必须生成 review token，客户反馈或批准要写回生产链路。',
+      externalGate: '需要正式域名、客户访问权限、通知通道和可审计的验收记录。',
+    },
+  ];
+}
+
 export function buildCutOperatingChecks(queue: VideoProductionQueue | null): CutOperatingCheck[] {
   const items = queue?.items || [];
   const hasTask = (queue?.itemCount || 0) > 0;
@@ -681,6 +738,7 @@ export function VideoProductionQueueClient({
   const trialReadiness = friendTrialReadiness(queue, selectedVariantId);
   const cutReadiness = commercialCutReadiness(queue);
   const cutOperatingChecks = buildCutOperatingChecks(queue);
+  const providerSandboxChecks = buildVideoProviderSandboxChecks(queue);
   const variantPlaybook = buildVideoFactoryVariantPlaybook(queue, selectedVariantId);
 
   async function ingestProductionResult(event: FormEvent<HTMLFormElement>) {
@@ -837,6 +895,34 @@ export function VideoProductionQueueClient({
               <div className="text-xs font-semibold text-rose-100">停止线</div>
               <p className="mt-2 text-xs leading-5 text-rose-100/80">{cutReadiness.stopLine}</p>
             </div>
+          </div>
+        </section>
+
+        <section className="border border-cyan-300/20 bg-cyan-950/20 p-5">
+          <div className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
+            <div>
+              <p className="text-xs uppercase tracking-[0.22em] text-cyan-200">Provider Sandbox Contract</p>
+              <h2 className="mt-2 text-xl font-semibold">视频 provider 沙盒接入合约</h2>
+              <p className="mt-2 max-w-3xl text-sm leading-6 text-white/60">
+                这层不配置真实密钥，也不伪装自动成片。它把接入视频 provider 前必须验证的提交、回调、失败恢复、成片入库和客户验收拆成沙盒门禁，等外部材料齐后直接对照验收。
+              </p>
+            </div>
+            <div className="w-fit border border-white/10 bg-black/25 px-3 py-2 text-xs text-cyan-100">
+              ready {providerSandboxChecks.filter(check => check.ready).length}/{providerSandboxChecks.length}
+            </div>
+          </div>
+          <div className="mt-4 grid gap-3 lg:grid-cols-5">
+            {providerSandboxChecks.map(check => (
+              <article
+                className={`border p-3 ${check.ready ? 'border-emerald-300/25 bg-emerald-950/15' : 'border-cyan-300/20 bg-black/20'}`}
+                key={check.gate}
+              >
+                <div className={`text-sm font-semibold ${check.ready ? 'text-emerald-100' : 'text-cyan-100'}`}>{check.gate}</div>
+                <p className="mt-2 text-xs leading-5 text-white/55">证据：{check.evidence}</p>
+                <p className="mt-2 text-xs leading-5 text-cyan-100/80">内部推进：{check.internalMove}</p>
+                <p className="mt-2 text-xs leading-5 text-amber-100">外部门禁：{check.externalGate}</p>
+              </article>
+            ))}
           </div>
         </section>
 
