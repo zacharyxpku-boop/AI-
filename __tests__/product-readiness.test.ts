@@ -226,7 +226,13 @@ describe('product readiness against Kuaizi benchmark', () => {
         id: 'video-provider-submit-callback',
         category: 'video_provider',
         status: 'missing',
+        materialPriority: 'P0',
         requiredInputs: expect.arrayContaining(['provider submit endpoint', 'server-side provider token', 'webhook signing secret']),
+        releaseChecks: expect.arrayContaining([
+          'Material is configured in a secure server-side location.',
+          'Sandbox or least-privilege access is available before production access.',
+          'A verifiable callback, receipt, ledger, or audit event proves the integration.',
+        ]),
       }),
       expect.objectContaining({
         id: 'platform-oauth-account-pool',
@@ -242,6 +248,11 @@ describe('product readiness against Kuaizi benchmark', () => {
         id: 'audited-scale-ledger',
         category: 'scale_claims',
         status: 'evidence_required',
+        materialPriority: 'P1',
+        securityBoundary: expect.stringContaining('Do not convert competitor public numbers into Wenai-owned claims'),
+        releaseChecks: expect.arrayContaining([
+          expect.stringContaining('benchmark-only'),
+        ]),
       }),
     ]));
     expect(report.scaleClaimGuards).toEqual(expect.arrayContaining([
@@ -335,6 +346,20 @@ describe('product readiness against Kuaizi benchmark', () => {
       'platform-analytics-sync',
       'enterprise-asset-cloud',
       'audited-scale-ledger',
+    ]));
+    expect(body.report.externalRequirements).toEqual(expect.arrayContaining([
+      expect.objectContaining({
+        id: 'platform-analytics-sync',
+        materialPriority: 'P1',
+        securityBoundary: expect.stringContaining('Secrets must be configured server-side'),
+        releaseChecks: expect.arrayContaining([
+          expect.stringContaining('Sandbox or least-privilege access'),
+        ]),
+      }),
+      expect.objectContaining({
+        id: 'enterprise-asset-cloud',
+        materialPriority: 'P1',
+      }),
     ]));
     expect(body.report.scaleClaimGuards).toEqual(expect.arrayContaining([
       expect.objectContaining({ requestedBenchmark: '91M+ creative output', canDisplay: false }),

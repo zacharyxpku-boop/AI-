@@ -192,9 +192,12 @@ export interface ExternalIntegrationRequirement {
   label: string;
   status: ExternalRequirementStatus;
   owner: 'user' | 'provider' | 'wenai';
+  materialPriority: 'P0' | 'P1';
   evidence: string;
   requiredInputs: string[];
   acceptance: string;
+  securityBoundary: string;
+  releaseChecks: string[];
 }
 
 export interface ScaleClaimGuard {
@@ -266,6 +269,13 @@ function makeExternalRequirement(
   requiredInputs: string[],
   acceptance: string,
   owner: ExternalIntegrationRequirement['owner'] = 'user',
+  materialPriority: ExternalIntegrationRequirement['materialPriority'] = 'P0',
+  securityBoundary = 'Secrets must be configured server-side or in the deployment platform, never in browser state, chat, reports, or repository files.',
+  releaseChecks: string[] = [
+    'Material is configured in a secure server-side location.',
+    'Sandbox or least-privilege access is available before production access.',
+    'A verifiable callback, receipt, ledger, or audit event proves the integration.',
+  ],
 ): ExternalIntegrationRequirement {
   return {
     id,
@@ -273,9 +283,12 @@ function makeExternalRequirement(
     label,
     status: configured ? 'configured' : 'missing',
     owner,
+    materialPriority,
     evidence,
     requiredInputs,
     acceptance,
+    securityBoundary,
+    releaseChecks,
   };
 }
 
@@ -299,6 +312,7 @@ function buildExternalRequirements(input: ReadinessServiceInput): ExternalIntegr
       `videoTeardownConfigured=${input.videoTeardownConfigured ? 1 : 0}; projectVideoTeardownSourceReady=${input.project?.creativeVideoTeardownSourceReady ? 1 : 0}`,
       ['parser endpoint or authorized teardown feed', 'server-side parser token', 'licensed sample URLs', 'scene beat schema'],
       'Import account, rank, and video teardown observations; source health cards for all three source kinds are ready.',
+      'provider',
     ),
     makeExternalRequirement(
       'platform-oauth-account-pool',
@@ -335,6 +349,8 @@ function buildExternalRequirements(input: ReadinessServiceInput): ExternalIntegr
       `analyticsSyncConfigured=${connectors?.analyticsSyncConfigured ? 1 : 0}; measuredDispatches=${input.project?.measuredDispatchCount || 0}`,
       ['analytics API token', 'platform account id', 'metric mapping', 'scheduled sync job'],
       'Sync impressions, clicks, spend, orders, revenue, and asset_ref for one published dispatch without manual CSV.',
+      'user',
+      'P1',
     ),
     makeExternalRequirement(
       'enterprise-asset-cloud',
@@ -344,6 +360,8 @@ function buildExternalRequirements(input: ReadinessServiceInput): ExternalIntegr
       `enterpriseAssetPermissionsConfigured=${connectors?.enterpriseAssetPermissionsConfigured ? 1 : 0}; storageConfigured=${input.storageConfigured ? 1 : 0}; downloadableReady=${input.project?.downloadableAssetAccessReadyCount || 0}; shareableReady=${input.project?.shareableAssetAccessReadyCount || 0}`,
       ['object storage bucket/project', 'signed URL service', 'DLP/watermark policy', 'retention policy', 'team role mapping'],
       'Download/share/publish checks fail closed until RBAC, DLP, watermark, retention, and signed URL evidence pass.',
+      'user',
+      'P1',
     ),
     {
       id: 'audited-scale-ledger',
@@ -351,9 +369,16 @@ function buildExternalRequirements(input: ReadinessServiceInput): ExternalIntegr
       label: 'Audited Wenai scale ledger for public numbers',
       status: 'evidence_required',
       owner: 'user',
+      materialPriority: 'P1',
       evidence: '91M+ creative output and 42M+ video distribution are competitor benchmarks, not audited Wenai metrics.',
       requiredInputs: ['audited generated creative count', 'audited published video count', 'platform/source breakdown', 'dedupe rule', 'date range'],
       acceptance: 'Only display Wenai-owned scale numbers after the counters reconcile to production and platform ledgers.',
+      securityBoundary: 'Do not convert competitor public numbers into Wenai-owned claims; only audited Wenai ledgers, platform receipts, and date ranges can unlock public scale display.',
+      releaseChecks: [
+        'Creative output and video distribution ledgers reconcile to Wenai-owned production records.',
+        'Platform/source breakdown, dedupe rule, and date range are documented.',
+        'Scale claims remain benchmark-only until an auditor or customer-confirmed evidence note exists.',
+      ],
     },
   ];
 }
