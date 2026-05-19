@@ -17,7 +17,7 @@ function Invoke-Step {
 }
 
 Invoke-Step "Vitest focused suite" {
-  npm.cmd run test -- __tests__/standard-pack-routing.test.ts __tests__/sop-workflows.test.ts __tests__/poc-launch-check.test.ts __tests__/poc-report-evaluator.test.ts __tests__/poc-report-generator.test.ts __tests__/inquiry-activity.test.ts __tests__/ratelimit.test.ts __tests__/ai-route-demo-guard.test.ts __tests__/ocr-route.test.ts __tests__/browser-storage.test.ts __tests__/case-library.test.ts __tests__/ecommerce-guardrails.test.ts __tests__/content-marketing-pack.test.ts __tests__/brand-iq.test.ts __tests__/crm-pipeline.test.ts __tests__/share-readonly.test.ts __tests__/listing-factory-demo.test.ts __tests__/listing-factory-engine.test.ts __tests__/listing-factory-engine-samples.test.ts __tests__/listing-factory-workbench.test.ts __tests__/listing-factory-production-layer.test.ts __tests__/listing-factory-asset-layer.test.ts __tests__/listing-factory-batch-production.test.ts __tests__/listing-factory-production-rc.test.ts __tests__/listing-factory-core-capabilities.test.ts __tests__/listing-factory-real-provider.test.ts __tests__/listing-factory-video-assembly.test.ts __tests__/listing-factory-performance-feedback.test.ts __tests__/listing-factory-experiment-orchestration.test.ts __tests__/production-handoff-pack.test.ts __tests__/kuaizi-server.test.ts __tests__/sales-inquiry-memory-route.test.ts __tests__/product-readiness.test.ts __tests__/performance-import.test.ts __tests__/commerce-chain.test.ts __tests__/creative-intelligence.test.ts __tests__/creative-monitoring.test.ts __tests__/creative-harvest-cron-route.test.ts __tests__/channel-account-ledger.test.ts __tests__/industrial-chain-store.test.ts __tests__/industrial-action-queue.test.ts __tests__/industrial-dispatch-route.test.ts __tests__/industrial-asset-access-route.test.ts __tests__/industrial-production-handoff.test.ts __tests__/industrial-production-result.test.ts __tests__/industrial-crm-handoff.test.ts __tests__/industrial-review-portal.test.ts __tests__/industrial-review-page.test.tsx __tests__/industrial-video-workflow.test.ts __tests__/video-production-queue-page.test.tsx __tests__/asset-permission-ledger.test.ts __tests__/brand-learning-profile.test.ts __tests__/status-page.test.tsx __tests__/settings-pages.test.tsx __tests__/creative-monitoring-console-page.test.tsx __tests__/proxy-public-review.test.ts
+  npm.cmd run test -- __tests__/standard-pack-routing.test.ts __tests__/sop-workflows.test.ts __tests__/poc-launch-check.test.ts __tests__/poc-report-evaluator.test.ts __tests__/poc-report-generator.test.ts __tests__/inquiry-activity.test.ts __tests__/ratelimit.test.ts __tests__/ai-route-demo-guard.test.ts __tests__/ocr-route.test.ts __tests__/browser-storage.test.ts __tests__/case-library.test.ts __tests__/ecommerce-guardrails.test.ts __tests__/content-marketing-pack.test.ts __tests__/brand-iq.test.ts __tests__/crm-pipeline.test.ts __tests__/share-readonly.test.ts __tests__/listing-factory-demo.test.ts __tests__/listing-factory-engine.test.ts __tests__/listing-factory-engine-samples.test.ts __tests__/listing-factory-workbench.test.ts __tests__/listing-factory-production-layer.test.ts __tests__/listing-factory-asset-layer.test.ts __tests__/listing-factory-batch-production.test.ts __tests__/listing-factory-production-rc.test.ts __tests__/listing-factory-core-capabilities.test.ts __tests__/listing-factory-real-provider.test.ts __tests__/listing-factory-video-assembly.test.ts __tests__/listing-factory-performance-feedback.test.ts __tests__/listing-factory-experiment-orchestration.test.ts __tests__/production-handoff-pack.test.ts __tests__/kuaizi-server.test.ts __tests__/sales-inquiry-memory-route.test.ts __tests__/product-readiness.test.ts __tests__/performance-import.test.ts __tests__/commerce-chain.test.ts __tests__/creative-intelligence.test.ts __tests__/creative-monitoring.test.ts __tests__/creative-harvest-cron-route.test.ts __tests__/channel-account-ledger.test.ts __tests__/industrial-chain-store.test.ts __tests__/industrial-action-queue.test.ts __tests__/industrial-dispatch-route.test.ts __tests__/industrial-asset-access-route.test.ts __tests__/industrial-production-handoff.test.ts __tests__/industrial-production-result.test.ts __tests__/industrial-crm-handoff.test.ts __tests__/industrial-review-portal.test.ts __tests__/industrial-review-page.test.tsx __tests__/industrial-video-workflow.test.ts __tests__/video-production-queue-page.test.tsx __tests__/cast-distribution-console-page.test.tsx __tests__/create-asset-console-page.test.tsx __tests__/asset-permission-ledger.test.ts __tests__/brand-learning-profile.test.ts __tests__/status-page.test.tsx __tests__/settings-pages.test.tsx __tests__/creative-monitoring-console-page.test.tsx __tests__/proxy-public-review.test.ts
 }
 
 Invoke-Step "TypeScript noEmit" {
@@ -116,6 +116,8 @@ Invoke-Step "ESLint" {
     __tests__/industrial-review-page.test.tsx `
     __tests__/industrial-video-workflow.test.ts `
     __tests__/video-production-queue-page.test.tsx `
+    __tests__/cast-distribution-console-page.test.tsx `
+    __tests__/create-asset-console-page.test.tsx `
     __tests__/asset-permission-ledger.test.ts `
     __tests__/brand-learning-profile.test.ts `
     __tests__/status-page.test.tsx `
@@ -132,6 +134,8 @@ Invoke-Step "ESLint" {
     src/components/SharePageActions.tsx `
     src/components/IndustrialReviewPortalClient.tsx `
     src/components/VideoProductionQueueClient.tsx `
+    src/components/CastDistributionConsoleClient.tsx `
+    src/components/CreateAssetConsoleClient.tsx `
     src/components/CreativeMonitoringConsoleClient.tsx `
     src/components/OnboardingChecklist.tsx `
     src/components/AdminInquiryCommercialEditor.tsx `
@@ -174,6 +178,8 @@ Invoke-Step "ESLint" {
     src/app/inquire/page.tsx `
     src/app/factory/page.tsx `
     src/app/factory/creative/page.tsx `
+    src/app/factory/create/page.tsx `
+    src/app/factory/cast/page.tsx `
     src/app/factory/video/page.tsx `
     src/app/briefs/page.tsx `
     src/app/insights/page.tsx `

@@ -1,0 +1,128 @@
+import { renderToStaticMarkup } from 'react-dom/server';
+import { describe, expect, it } from 'vitest';
+
+import CreateFactoryPage from '@/app/factory/create/page';
+import { CreateAssetConsoleClient, buildCreateVariantPlaybook } from '@/components/CreateAssetConsoleClient';
+import type { IndustrializationSnapshot } from '@/lib/industrial-chain-store';
+
+function snapshot(overrides: Partial<IndustrializationSnapshot> = {}): IndustrializationSnapshot {
+  return {
+    orgId: 'test-org',
+    projectId: 'create-project',
+    assetCount: 0,
+    reportAssetCount: 0,
+    approvedAssetCount: 0,
+    reusableAssetCount: 0,
+    blockedAssetCount: 0,
+    rightsIssueAssetCount: 0,
+    assetGovernanceIssueCount: 0,
+    deliverableAssetCount: 0,
+    clientReviewAssetCount: 0,
+    approvedDeliverableCount: 0,
+    revisionRequestedCount: 0,
+    deliveryIssueCount: 0,
+    planCount: 0,
+    draftPlanCount: 0,
+    nextRoundAssetPlanCount: 0,
+    readyPlanCount: 0,
+    dispatchCount: 0,
+    executableDispatchCount: 0,
+    publishedDispatchCount: 0,
+    publishedWithEvidenceCount: 0,
+    missingPublishEvidenceCount: 0,
+    overdueReviewDispatchCount: 0,
+    measuredDispatchCount: 0,
+    performanceReturnCount: 0,
+    scaleDecisionCount: 0,
+    assetMatchAmbiguousCount: 0,
+    assetMatchUnmatchedCount: 0,
+    assetMatchIssueCount: 0,
+    missingLinks: ['Missing production brief or script asset'],
+    nextActions: ['Close gap: Missing production brief or script asset'],
+    ...overrides,
+  };
+}
+
+describe('create asset console page', () => {
+  it('renders the Create variant UI and links all role variants', async () => {
+    const page = await CreateFactoryPage({
+      searchParams: Promise.resolve({ projectId: 'launch-create', variant: 'operator' }),
+    });
+    const html = renderToStaticMarkup(page);
+
+    expect(html).toContain('资产生产控制台');
+    expect(html).toContain('Create Asset Variant');
+    expect(html).toContain('Create Action Playbook');
+    expect(html).toContain('Create 运营动作剧本');
+    expect(html).toContain('Create Seed');
+    expect(html).toContain('brief、benchmark、script 和 visual asset');
+    expect(html).toContain('/factory/create?projectId=launch-create&amp;variant=partner');
+    expect(html).toContain('/factory/create?projectId=launch-create&amp;variant=friend_trial');
+  });
+
+  it('renders distinct partner and friend trial Create variants', () => {
+    const ready = snapshot({
+      assetCount: 4,
+      approvedAssetCount: 4,
+      reusableAssetCount: 4,
+      rightsIssueAssetCount: 0,
+      deliverableAssetCount: 1,
+      clientReviewAssetCount: 1,
+      approvedDeliverableCount: 1,
+      missingLinks: [],
+      nextActions: [],
+    });
+
+    const partnerHtml = renderToStaticMarkup(
+      <CreateAssetConsoleClient initialProjectId="partner-create" initialSnapshot={ready} selectedVariantId="partner" />,
+    );
+    const friendHtml = renderToStaticMarkup(
+      <CreateAssetConsoleClient initialProjectId="friend-create" initialSnapshot={ready} selectedVariantId="friend_trial" />,
+    );
+
+    expect(partnerHtml).toContain('合作者视角');
+    expect(partnerHtml).toContain('Create 商业验收剧本');
+    expect(partnerHtml).toContain('真实 provider 和企业云资产接入验收');
+    expect(partnerHtml).toContain('一键视频、智能混剪和批量生成');
+
+    expect(friendHtml).toContain('朋友试用视角');
+    expect(friendHtml).toContain('朋友试用 Create 路径');
+    expect(friendHtml).toContain('朋友只看三项');
+    expect(friendHtml).toContain('/factory/create?projectId=friend-create&amp;variant=operator');
+  });
+
+  it('builds role-specific Create playbooks from asset evidence', () => {
+    const blocked = snapshot();
+    const ready = snapshot({
+      assetCount: 5,
+      approvedAssetCount: 5,
+      reusableAssetCount: 5,
+      rightsIssueAssetCount: 0,
+      deliverableAssetCount: 1,
+      clientReviewAssetCount: 1,
+      approvedDeliverableCount: 1,
+      deliveryIssueCount: 0,
+      missingLinks: [],
+      nextActions: [],
+    });
+
+    expect(buildCreateVariantPlaybook(blocked, 'operator')).toEqual(expect.objectContaining({
+      title: 'Create 运营动作剧本',
+      primaryAction: expect.stringContaining('Missing production brief or script asset'),
+      handoffBoundary: expect.stringContaining('不能标记自动生成完成'),
+    }));
+
+    expect(buildCreateVariantPlaybook(ready, 'partner')).toEqual(expect.objectContaining({
+      title: 'Create 商业验收剧本',
+      primaryAction: expect.stringContaining('真实 provider'),
+      cards: expect.arrayContaining([
+        expect.stringContaining('Create readiness 7/7'),
+      ]),
+    }));
+
+    expect(buildCreateVariantPlaybook(ready, 'friend_trial')).toEqual(expect.objectContaining({
+      title: '朋友试用 Create 路径',
+      proofToCheck: expect.stringContaining('朋友只看三项'),
+    }));
+  });
+});

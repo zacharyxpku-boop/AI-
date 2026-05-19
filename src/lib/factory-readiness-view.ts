@@ -73,6 +73,8 @@ export function buildFactoryOperatingLayers(report: Pick<ProductReadinessReport,
         ? '/factory/video'
         : layer.id === 'Cast'
           ? '/factory/cast'
+          : layer.id === 'Create'
+            ? '/factory/create'
           : layer.id === 'Manage'
             ? '/status'
             : '/factory',
