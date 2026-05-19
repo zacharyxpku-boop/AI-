@@ -22,6 +22,13 @@ export type ManageOperatingCheck = {
   next: string;
 };
 
+export type AssetEnforcementCheck = {
+  gate: string;
+  ready: boolean;
+  evidence: string;
+  stopLine: string;
+};
+
 const MANAGE_VARIANTS: Record<FactoryUiVariantId, {
   label: string;
   audience: string;
@@ -150,6 +157,60 @@ export function buildManageOperatingChecks(
   ];
 }
 
+export function buildAssetEnforcementChecks(permission: AssetPermissionSnapshot | null): AssetEnforcementCheck[] {
+  const states = permission?.assetAccessStates || [];
+  const blockerCount = states.reduce((sum, item) => sum + item.blockers.length, 0);
+  const downloadableReady = permission?.downloadableAccessReadyCount || 0;
+  const shareableReady = permission?.shareableAccessReadyCount || 0;
+  const securityReady = (permission?.securityPolicyCount || 0) > 0
+    && (permission?.dlpPassedPolicyCount || 0) >= (permission?.securityPolicyCount || 0)
+    && (permission?.watermarkAppliedCount || 0) >= (permission?.watermarkRequiredCount || 0)
+    && (permission?.retentionPolicyCount || 0) >= (permission?.securityPolicyCount || 0);
+
+  return [
+    {
+      gate: '下载前门禁',
+      ready: downloadableReady > 0,
+      evidence: `download-ready ${downloadableReady} / downloadable assets ${permission?.downloadableAssetCount || 0}`,
+      stopLine: downloadableReady > 0
+        ? '下载必须带临时 grant，并经过权限、对象和安全策略校验。'
+        : '没有 download permission、storage object、security policy 和临时 grant 前，默认不返回下载内容。',
+    },
+    {
+      gate: '分享前门禁',
+      ready: shareableReady > 0,
+      evidence: `share-ready ${shareableReady} / shareable assets ${permission?.shareableAssetCount || 0}`,
+      stopLine: shareableReady > 0
+        ? '分享必须经过 share grant 和对象可用性校验，不能绕过企业资产策略。'
+        : '没有 share permission、对象 URL、DLP/水印/留存和 grant 前，默认不生成公开分享。',
+    },
+    {
+      gate: '对象与安全策略',
+      ready: securityReady && (permission?.missingStorageObjectCount || 0) === 0 && (permission?.storageObjectCount || 0) > 0,
+      evidence: `objects ${permission?.storageObjectCount || 0} / missing objects ${permission?.missingStorageObjectCount || 0} / DLP passed ${permission?.dlpPassedPolicyCount || 0}`,
+      stopLine: securityReady
+        ? '对象存储、DLP、水印和留存策略已经形成内部门禁；真实云盘仍需外部对象存储接入。'
+        : '没有对象、DLP、水印或留存策略时，不能宣称企业云资产安全。',
+    },
+    {
+      gate: '发布/交付 fail-closed',
+      ready: states.length > 0 && blockerCount === 0,
+      evidence: `governed assets ${states.length} / blockers ${blockerCount}`,
+      stopLine: blockerCount === 0 && states.length > 0
+        ? '当前受管资产没有门禁阻断，可以进入发布/交付前的下一层平台授权校验。'
+        : '任一资产存在 blocker 时，发布、交付、下载和分享都应保持阻断，不用人工口头放行。',
+    },
+    {
+      gate: '访问审计',
+      ready: (permission?.accessAuditEventCount || 0) > 0,
+      evidence: `access audits ${permission?.accessAuditEventCount || 0} / permission audits ${permission?.auditEventCount || 0}`,
+      stopLine: (permission?.accessAuditEventCount || 0) > 0
+        ? '访问尝试已经落审计，可追踪越权、过期、grant 消耗和客户动作。'
+        : '没有访问审计前，只能内部验证权限模型，不能对外承诺企业级协作审计。',
+    },
+  ];
+}
+
 export function buildManageVariantPlaybook(
   industrial: IndustrializationSnapshot | null,
   permission: AssetPermissionSnapshot | null,
@@ -236,6 +297,7 @@ export function ManageOperationsConsoleClient({
   const selectedVariant = MANAGE_VARIANTS[selectedVariantId];
   const playbook = buildManageVariantPlaybook(industrialSnapshot, permissionSnapshot, selectedVariantId);
   const operatingChecks = buildManageOperatingChecks(industrialSnapshot, permissionSnapshot);
+  const enforcementChecks = buildAssetEnforcementChecks(permissionSnapshot);
   const gaps = [...(industrialSnapshot?.missingLinks || []), ...(permissionSnapshot?.missingLinks || [])];
   const nextActions = [...(industrialSnapshot?.nextActions || []), ...(permissionSnapshot?.nextActions || [])];
 
@@ -366,6 +428,35 @@ export function ManageOperationsConsoleClient({
                 <h3 className="mt-2 text-sm font-semibold text-white">{item.stage}</h3>
                 <p className="mt-2 text-xs leading-5 text-white/60">{item.evidence}</p>
                 <p className="mt-2 text-xs leading-5 text-white/45">{item.next}</p>
+              </div>
+            ))}
+          </div>
+        </section>
+
+        <section className="rounded-[8px] border border-emerald-200/15 bg-emerald-950/15 p-5">
+          <div className="flex flex-col gap-2 lg:flex-row lg:items-end lg:justify-between">
+            <div>
+              <p className="text-xs uppercase tracking-[0.22em] text-emerald-200">Asset Enforcement Matrix</p>
+              <h2 className="mt-2 text-xl font-semibold">企业资产访问门禁矩阵</h2>
+              <p className="mt-2 text-sm leading-6 text-white/55">
+                这层专门看 download/share/publish/交付前是否 fail-closed：没有权限、对象、DLP、水印、临时 grant 或访问审计时，不让素材自由流转。
+              </p>
+            </div>
+            <div className="text-sm font-semibold text-emerald-100">
+              {enforcementChecks.filter(item => item.ready).length}/{enforcementChecks.length} enforcement ready
+            </div>
+          </div>
+          <div className="mt-4 grid gap-3 lg:grid-cols-5">
+            {enforcementChecks.map(item => (
+              <div key={item.gate} className={`rounded-[8px] border p-4 ${
+                item.ready ? 'border-emerald-200/25 bg-emerald-300/10' : 'border-amber-200/20 bg-amber-300/10'
+              }`}>
+                <div className={`text-xs font-semibold ${item.ready ? 'text-emerald-100' : 'text-amber-100'}`}>
+                  {item.ready ? '门禁可执行' : '默认阻断'}
+                </div>
+                <h3 className="mt-2 text-sm font-semibold text-white">{item.gate}</h3>
+                <p className="mt-2 text-xs leading-5 text-white/60">{item.evidence}</p>
+                <p className="mt-2 text-xs leading-5 text-white/45">{item.stopLine}</p>
               </div>
             ))}
           </div>

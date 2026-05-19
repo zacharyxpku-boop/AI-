@@ -24,6 +24,8 @@ describe('current product status report', () => {
     expect(doc).toContain('Superads');
     expect(doc).toContain('Cut Operating Checks');
     expect(doc).toContain('Cut 商用品质验收板');
+    expect(doc).toContain('download/share/publish/approve fail-closed enforcement');
+    expect(doc).toContain('资产访问门禁矩阵');
     expect(doc).toContain('品牌学习不能只是报告');
     expect(doc).toContain('内部还能继续解决');
     expect(doc).toContain('必须外部提供');

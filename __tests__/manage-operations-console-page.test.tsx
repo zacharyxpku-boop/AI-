@@ -2,7 +2,7 @@ import { renderToStaticMarkup } from 'react-dom/server';
 import { describe, expect, it } from 'vitest';
 
 import ManageFactoryPage from '@/app/factory/manage/page';
-import { ManageOperationsConsoleClient, buildManageOperatingChecks, buildManageVariantPlaybook } from '@/components/ManageOperationsConsoleClient';
+import { ManageOperationsConsoleClient, buildAssetEnforcementChecks, buildManageOperatingChecks, buildManageVariantPlaybook } from '@/components/ManageOperationsConsoleClient';
 import type { AssetPermissionSnapshot } from '@/lib/asset-permission-ledger';
 import type { IndustrializationSnapshot } from '@/lib/industrial-chain-store';
 
@@ -91,6 +91,10 @@ describe('manage operations console page', () => {
     expect(html).toContain('Manage Action Playbook');
     expect(html).toContain('Manage 运营动作剧本');
     expect(html).toContain('Clico式客户交付与企业安全验收板');
+    expect(html).toContain('Asset Enforcement Matrix');
+    expect(html).toContain('企业资产访问门禁矩阵');
+    expect(html).toContain('download/share/publish');
+    expect(html).toContain('默认阻断');
     expect(html).toContain('Manage Seed');
     expect(html).toContain('客户审核权限、受控分享对象、安全策略、DLP、水印和留存规则');
     expect(html).toContain('/factory/manage?projectId=launch-manage&amp;variant=partner');
@@ -227,6 +231,87 @@ describe('manage operations console page', () => {
         stage: 'CRM / 下一步队列',
         ready: true,
       }),
+    ]));
+  });
+
+  it('builds asset enforcement checks that fail closed before download, share, and publish flow', () => {
+    const blockedPermission = permission({
+      permissionRecordCount: 1,
+      downloadableAssetCount: 1,
+      shareableAssetCount: 1,
+      storageObjectCount: 0,
+      missingStorageObjectCount: 1,
+      assetAccessStates: [{
+        assetId: 'asset-blocked',
+        hasActivePermission: true,
+        canDownload: true,
+        canShare: true,
+        hasStorageObject: false,
+        hasSecurityPolicy: false,
+        hasActiveDownloadGrant: false,
+        hasActiveShareGrant: false,
+        downloadableAccessReady: false,
+        shareableAccessReady: false,
+        blockers: ['missing_storage_object', 'missing_download_grant'],
+      }],
+      missingLinks: ['Download/share permission missing storage object (1)'],
+    });
+
+    expect(buildAssetEnforcementChecks(blockedPermission)).toEqual(expect.arrayContaining([
+      expect.objectContaining({
+        gate: '下载前门禁',
+        ready: false,
+        stopLine: expect.stringContaining('默认不返回下载内容'),
+      }),
+      expect.objectContaining({
+        gate: '分享前门禁',
+        ready: false,
+        stopLine: expect.stringContaining('默认不生成公开分享'),
+      }),
+      expect.objectContaining({
+        gate: '发布/交付 fail-closed',
+        ready: false,
+        evidence: expect.stringContaining('blockers 2'),
+      }),
+    ]));
+
+    const readyPermission = permission({
+      permissionRecordCount: 1,
+      downloadableAssetCount: 1,
+      shareableAssetCount: 1,
+      storageObjectCount: 1,
+      missingStorageObjectCount: 0,
+      activeAccessGrantCount: 2,
+      securityPolicyCount: 1,
+      watermarkRequiredCount: 1,
+      watermarkAppliedCount: 1,
+      dlpPassedPolicyCount: 1,
+      retentionPolicyCount: 1,
+      accessAuditEventCount: 1,
+      downloadableAccessReadyCount: 1,
+      shareableAccessReadyCount: 1,
+      assetAccessStates: [{
+        assetId: 'asset-ready',
+        hasActivePermission: true,
+        canDownload: true,
+        canShare: true,
+        hasStorageObject: true,
+        hasSecurityPolicy: true,
+        hasActiveDownloadGrant: true,
+        hasActiveShareGrant: true,
+        downloadableAccessReady: true,
+        shareableAccessReady: true,
+        blockers: [],
+      }],
+      missingLinks: [],
+      nextActions: [],
+    });
+
+    expect(buildAssetEnforcementChecks(readyPermission)).toEqual(expect.arrayContaining([
+      expect.objectContaining({ gate: '下载前门禁', ready: true }),
+      expect.objectContaining({ gate: '分享前门禁', ready: true }),
+      expect.objectContaining({ gate: '对象与安全策略', ready: true }),
+      expect.objectContaining({ gate: '访问审计', ready: true }),
     ]));
   });
 });
