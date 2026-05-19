@@ -123,4 +123,35 @@ describe('settings pages', () => {
     expect(doc).not.toContain('KUAIZI_API_KEY');
     expect(doc).not.toContain('API Key');
   });
+
+  it('keeps the final product blueprint grounded in reference platforms and external stop lines', () => {
+    const doc = readFileSync(join(process.cwd(), 'docs/FINAL_PRODUCT_BLUEPRINT.md'), 'utf8');
+
+    expect(doc).toContain('ecommerce AI content industrialization operating system');
+    expect(doc).toContain('Compose');
+    expect(doc).toContain('Create');
+    expect(doc).toContain('Cut');
+    expect(doc).toContain('Cast');
+    expect(doc).toContain('Manage');
+    expect(doc).toContain('Hookshot / Hookly');
+    expect(doc).toContain('Omneky');
+    expect(doc).toContain('VidMob');
+    expect(doc).toContain('Creatify');
+    expect(doc).toContain('Marpipe');
+    expect(doc).toContain('Pencil');
+    expect(doc).toContain('Smartly.io');
+    expect(doc).toContain('Creatopy');
+    expect(doc).toContain('Superads');
+    expect(doc).toContain('Video generation/editing provider pack');
+    expect(doc).toContain('Platform OAuth/account pool pack');
+    expect(doc).toContain('Ad account/campaign pack');
+    expect(doc).toContain('No provider callback');
+    expect(doc).toContain('No platform OAuth');
+    expect(doc).toContain('No ad account authorization');
+    expect(doc).toContain('91M+ creative output');
+    expect(doc).toContain('42M+ video distribution');
+    expect(doc).toContain('competitor benchmarks only');
+    expect(doc).not.toContain('API Key');
+    expect(doc).not.toContain('KUAIZI_API_KEY');
+  });
 });
