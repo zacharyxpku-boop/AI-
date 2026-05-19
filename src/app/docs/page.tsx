@@ -65,6 +65,34 @@ const BLUEPRINT_LINKS = [
   },
 ];
 
+const FRIEND_TRIAL_STEPS = [
+  {
+    href: '/status?variant=friend_trial',
+    title: '1. 看能不能试用',
+    body: '先确认哪些链路只是内部骨架，哪些已经能给非技术用户跑一遍。',
+  },
+  {
+    href: '/factory/creative?variant=friend_trial',
+    title: '2. 放入灵感线索',
+    body: '用一个竞品账号、榜单或视频线索生成可执行的创意下一步。',
+  },
+  {
+    href: '/factory/create?variant=friend_trial',
+    title: '3. 生成生产包',
+    body: '确认 brief、脚本、素材、权属和客户审核入口是否齐全。',
+  },
+  {
+    href: '/factory/video?variant=friend_trial',
+    title: '4. 排出视频任务',
+    body: '查看智能混剪、一键视频和 Clico 模板矩阵如何进入待生产队列。',
+  },
+  {
+    href: '/factory/cast?variant=friend_trial',
+    title: '5. 只看分发证据',
+    body: '没有 OAuth 和发布回执前，只验证计划和手工证据，不宣称自动投放。',
+  },
+];
+
 export default function DocsPage() {
   return (
     <div className="mx-auto max-w-[1000px] px-6 py-10">
@@ -99,6 +127,22 @@ export default function DocsPage() {
           {BLUEPRINT_LINKS.map((item) => (
             <Link key={item.href} href={item.href} className="rounded-md border border-amber-200 bg-white p-4 text-left hover:border-amber-400">
               <div className="text-[13px] font-black text-slate-950">{item.title}</div>
+              <p className="mt-2 text-[12px] leading-5 text-slate-600">{item.body}</p>
+            </Link>
+          ))}
+        </div>
+      </section>
+
+      <section className="mb-10 rounded-md border border-sky-200 bg-sky-50 p-5">
+        <div className="text-[10px] font-mono uppercase tracking-[0.18em] text-sky-700">Friend Trial Runbook</div>
+        <h2 className="mt-2 text-[18px] font-black text-slate-950">朋友/合作者零解释试用顺序</h2>
+        <p className="mt-2 text-[12px] leading-6 text-slate-700">
+          试用时不要从后台 API 或工程概念开始。按下面 5 步走，只看用户能不能理解输入、生产包、视频任务、客户审核和分发证据；遇到 provider、OAuth、广告账户或云资产门禁，就停在材料清单。
+        </p>
+        <div className="mt-4 grid grid-cols-1 gap-3 lg:grid-cols-5">
+          {FRIEND_TRIAL_STEPS.map((item) => (
+            <Link key={item.href} href={item.href} className="rounded-md border border-sky-200 bg-white p-4 hover:border-sky-400">
+              <div className="text-[12px] font-black text-slate-950">{item.title}</div>
               <p className="mt-2 text-[12px] leading-5 text-slate-600">{item.body}</p>
             </Link>
           ))}

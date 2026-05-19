@@ -33,6 +33,13 @@ describe('settings pages', () => {
     expect(html).toContain('/settings/kuaizi');
     expect(html).toContain('/factory/video');
     expect(html).toContain('Clico 模板矩阵');
+    expect(html).toContain('朋友/合作者零解释试用顺序');
+    expect(html).toContain('/status?variant=friend_trial');
+    expect(html).toContain('/factory/creative?variant=friend_trial');
+    expect(html).toContain('/factory/create?variant=friend_trial');
+    expect(html).toContain('/factory/video?variant=friend_trial');
+    expect(html).toContain('/factory/cast?variant=friend_trial');
+    expect(html).toContain('遇到 provider、OAuth、广告账户或云资产门禁，就停在材料清单');
   });
 
   it('renders Kuaizi connection settings without browser-side credential promises', () => {
