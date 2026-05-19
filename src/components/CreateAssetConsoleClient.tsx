@@ -2,6 +2,7 @@
 
 import { useState, type FormEvent } from 'react';
 
+import { FactoryVariantConsole } from '@/components/FactoryVariantConsole';
 import type { IndustrializationSnapshot } from '@/lib/industrial-chain-store';
 import type { FactoryUiVariantId } from '@/lib/factory-readiness-view';
 
@@ -46,8 +47,6 @@ const CREATE_VARIANTS: Record<FactoryUiVariantId, {
     stopLine: '没有真实成品和审核入口时，只能试用 Create 流程，不能试用自动成片效果。',
   },
 };
-
-const CREATE_VARIANT_ORDER: FactoryUiVariantId[] = ['partner', 'operator', 'friend_trial'];
 
 function createScore(snapshot: IndustrializationSnapshot | null) {
   if (!snapshot) return 0;
@@ -233,47 +232,26 @@ export function CreateAssetConsoleClient({
               <p className="mt-3 text-sm leading-6 text-amber-50/75">{selectedVariant.headline}</p>
               <p className="mt-2 text-sm leading-6 text-white/55">{selectedVariant.body}</p>
             </div>
-            <div className="flex flex-wrap gap-2">
-              {CREATE_VARIANT_ORDER.map(variant => (
-                <a
-                  key={variant}
-                  href={`/factory/create?projectId=${encodeURIComponent(projectId)}&variant=${variant}`}
-                  className={`rounded-[6px] border px-3 py-2 text-sm transition ${variant === selectedVariantId
-                    ? 'border-amber-300 bg-amber-300 text-[#0f0d09]'
-                    : 'border-white/15 bg-white/[0.03] text-white/70 hover:border-amber-200/50 hover:text-white'
-                  }`}
-                >
-                  {CREATE_VARIANTS[variant].label}
-                </a>
-              ))}
-            </div>
           </div>
         </section>
 
-        <section className="grid gap-4 lg:grid-cols-[1.05fr_0.95fr]">
-          <div className="rounded-[8px] border border-white/10 bg-white/[0.04] p-5">
-            <p className="text-xs uppercase tracking-[0.22em] text-amber-200">Create Action Playbook</p>
-            <h2 className="mt-2 text-xl font-semibold">{playbook.title}</h2>
-            <p className="mt-3 text-sm leading-6 text-white/70">{playbook.primaryAction}</p>
-            <div className="mt-4 grid gap-3 sm:grid-cols-3">
-              {playbook.cards.map(card => (
-                <div key={card} className="rounded-[6px] border border-white/10 bg-black/20 p-3 text-sm text-white/75">
-                  {card}
-                </div>
-              ))}
-            </div>
-            <div className="mt-4 grid gap-3 sm:grid-cols-2">
-              <div className="rounded-[6px] border border-cyan-200/20 bg-cyan-200/[0.06] p-3">
-                <div className="text-xs font-semibold text-cyan-100">Proof to check</div>
-                <p className="mt-1 text-sm leading-6 text-cyan-50/75">{playbook.proofToCheck}</p>
-              </div>
-              <div className="rounded-[6px] border border-amber-200/25 bg-amber-200/[0.07] p-3">
-                <div className="text-xs font-semibold text-amber-100">Boundary</div>
-                <p className="mt-1 text-sm leading-6 text-amber-50/75">{playbook.handoffBoundary}</p>
-              </div>
-            </div>
-          </div>
+        <FactoryVariantConsole
+          accent="amber"
+          basePath="/factory/create"
+          evidenceCards={playbook.cards}
+          eyebrow="Create Action Playbook"
+          firstScreen={selectedVariant.body}
+          nextAction={selectedVariant.firstAction}
+          primaryAction={playbook.primaryAction}
+          projectId={projectId}
+          proofFocus={playbook.proofToCheck}
+          selectedVariantId={selectedVariantId}
+          stopLine={playbook.handoffBoundary}
+          title={playbook.title}
+          variants={CREATE_VARIANTS}
+        />
 
+        <section className="grid gap-4">
           <form onSubmit={seedCreatePackage} className="rounded-[8px] border border-white/10 bg-white/[0.04] p-5">
             <p className="text-xs uppercase tracking-[0.22em] text-amber-200">Create Seed</p>
             <h2 className="mt-2 text-xl font-semibold">补一个可追溯生产包</h2>
