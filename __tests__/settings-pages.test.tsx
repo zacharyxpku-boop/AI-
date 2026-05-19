@@ -48,6 +48,16 @@ describe('settings pages', () => {
     expect(html).toContain('外部材料包');
     expect(html).toContain('你给材料，我按验收口径接；没有材料就保持门禁');
     expect(html).toContain('P0 先打通真实生成、真实账号和真实广告');
+    expect(html).toContain('材料获取路径');
+    expect(html).toContain('去哪里拿');
+    expect(html).toContain('6 条获取路径');
+    expect(html).toContain('供应商控制台或服务商对接群');
+    expect(html).toContain('TikTok/Douyin、小红书、快手、Meta、Google、Amazon、Shopify 开发者后台');
+    expect(html).toContain('各平台 Ads Manager 或商务管理后台');
+    expect(html).toContain('对象存储、CDN、企业网盘或云服务 IAM 控制台');
+    expect(html).toContain('账号进入 oauth_ready');
+    expect(html).toContain('设置预算上限');
+    expect(html).toContain('给出日期范围和证据 URL');
     expect(html).toContain('材料放行检查表');
     expect(html).toContain('对齐 /status 的内部 / 外部交付边界板');
     expect(html).toContain('回到 readiness 边界板');
@@ -92,6 +102,13 @@ describe('settings pages', () => {
   it('keeps the partner-facing external integration material handoff explicit', () => {
     const doc = readFileSync(join(process.cwd(), 'docs/EXTERNAL_INTEGRATION_MATERIALS.md'), 'utf8');
 
+    expect(doc).toContain('How To Obtain Materials');
+    expect(doc).toContain('Provider console or provider integration contact');
+    expect(doc).toContain('Create developer app; add redirect URI; grant sandbox/test account');
+    expect(doc).toContain('Ads Manager or business manager console');
+    expect(doc).toContain('Object storage, CDN, enterprise drive, or cloud IAM console');
+    expect(doc).toContain('Wenai production ledger, platform publish backend, analytics exports');
+    expect(doc).toContain('Account reaches `oauth_ready`');
     expect(doc).toContain('Video Generation / Editing Provider Pack');
     expect(doc).toContain('Platform OAuth / Account Pool Pack');
     expect(doc).toContain('Ad Account / Campaign Pack');

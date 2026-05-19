@@ -8,6 +8,19 @@ Wenai can already demonstrate the internal Compose / Create / Cut / Cast / Manag
 
 The 91M+ creative output and 42M+ video distribution numbers are competitor benchmarks. They must not be displayed as Wenai-owned metrics until an audited Wenai scale ledger reconciles production output, platform publish records, dedupe rules, and date ranges.
 
+## How To Obtain Materials
+
+Use this as the handoff path before sharing anything with Wenai. Do not send passwords, cookies, unlimited production tokens, or raw secret values in chat.
+
+| Lane | Where to get it | Steps | Acceptance proof |
+| --- | --- | --- | --- |
+| Video provider | Provider console or provider integration contact | Open sandbox project; configure server token in deployment secrets; register callback URL; set quota, cost cap, and retry policy | Test task id, signed callback, and playable finished-video URL |
+| Platform OAuth | TikTok/Douyin, Xiaohongshu, Kuaishou, Meta, Google, Amazon, or Shopify developer console | Create developer app; add redirect URI; grant sandbox/test account; record store, page, handle, or account id | Account reaches `oauth_ready`; Wenai can read identity, health, publish limit, and available slots |
+| Ad account | Ads Manager or business manager console | Create controlled advertiser; grant least privilege; set hard budget cap; bind conversion event and stop rules | Test campaign can be read or created with spend, impression, click, and conversion return |
+| Analytics sync | Platform analytics API, ads reporting API, or scheduled export | Define metrics; set attribution window; map `asset_ref` or UTM; choose sync cadence and timezone | Synced rows attach to dispatch, campaign, SKU, and brand learning without fake returns |
+| Enterprise asset cloud | Object storage, CDN, enterprise drive, or cloud IAM console | Create isolated bucket/project; configure service account; define signed URL, DLP, watermark, and retention policy | Customer, operator, and distribution roles receive different allowed actions with audit events |
+| Scale audit | Wenai production ledger, platform publish backend, analytics exports, and customer/auditor note | Export creative output and video publish ledgers; define dedupe rule; include date range and evidence URLs | Wenai-owned numbers reconcile to production records and platform receipts before public display |
+
 ## P0 Materials
 
 ### 1. Video Generation / Editing Provider Pack

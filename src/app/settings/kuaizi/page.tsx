@@ -149,6 +149,45 @@ const PROVIDER_MATERIAL_PACKS = [
   },
 ];
 
+const MATERIAL_ACQUISITION_PLAYBOOK = [
+  {
+    lane: '视频 provider',
+    where: '供应商控制台或服务商对接群',
+    steps: ['开 sandbox 项目', '配置服务端 token', '登记回调地址', '设置测试额度和失败重试规则'],
+    proof: '一条测试任务能返回 task id、签名 callback 和可播放成片 URL。',
+  },
+  {
+    lane: '平台 OAuth',
+    where: 'TikTok/Douyin、小红书、快手、Meta、Google、Amazon、Shopify 开发者后台',
+    steps: ['创建开发者 app', '添加 redirect URI', '授权测试账号', '记录店铺/主页/账号 ID'],
+    proof: '账号进入 oauth_ready，Wenai 可读账号身份、健康状态、发布频率和可用槽位。',
+  },
+  {
+    lane: '广告账户',
+    where: '各平台 Ads Manager 或商务管理后台',
+    steps: ['创建测试广告主', '配置最小权限', '设置预算上限', '绑定转化事件和停投规则'],
+    proof: '能读取或创建一条小预算 campaign，并回传 spend、impression、click、conversion。',
+  },
+  {
+    lane: 'Analytics sync',
+    where: '平台 analytics API、广告报表 API 或定时导出任务',
+    steps: ['确认指标定义', '配置 attribution window', '绑定 asset_ref/UTM', '设定同步频率'],
+    proof: '同步数据能落到 dispatch、campaign、SKU 和品牌学习档案，失败任务可见。',
+  },
+  {
+    lane: '企业云资产',
+    where: '对象存储、CDN、企业网盘或云服务 IAM 控制台',
+    steps: ['创建独立 bucket/project', '配置 service account', '定义 signed URL 策略', '配置 DLP/水印/留存'],
+    proof: '同一资产对客户、运营、分发角色返回不同权限结果，并写入访问审计。',
+  },
+  {
+    lane: '规模审计',
+    where: 'Wenai 生产账本、平台发布后台、analytics 报表和客户确认材料',
+    steps: ['导出创意产出台账', '导出视频发布台账', '写清去重规则', '给出日期范围和证据 URL'],
+    proof: '规模数字能从 Wenai 记录追溯到平台回执，不再混用竞品 benchmark。',
+  },
+];
+
 export default function KuaiziSettingsPage() {
   const [status, setStatus] = useState<KuaiziConnectionResult | null>(null);
   const [isTesting, setIsTesting] = useState(false);
@@ -278,6 +317,35 @@ export default function KuaiziSettingsPage() {
         <p className="mt-2 text-[13px] leading-6 text-slate-600">
           这张清单把“需要外部能力”拆成可执行交付物。P0 先打通真实生成、真实账号和真实广告；P1 再补自动回流、企业云资产和自有规模审计。任何 secret 都只进入服务端环境或部署平台，不进入仓库、不进入浏览器、不进入报告。
         </p>
+        <div className="mt-5 rounded-md border border-emerald-200 bg-emerald-50 p-4">
+          <div className="flex flex-col gap-2 sm:flex-row sm:items-start sm:justify-between">
+            <div>
+              <div className="text-[13px] font-black text-slate-950">材料获取路径</div>
+              <p className="mt-1 text-[12px] leading-5 text-slate-600">
+                下面只写“去哪里拿”和“拿到后怎么验收”。密钥不贴给我，放进部署平台 secret；账号授权走平台 OAuth 或可撤销测试账号。
+              </p>
+            </div>
+            <div className="w-fit rounded-full border border-emerald-200 bg-white px-3 py-1 text-[11px] font-black text-emerald-700">
+              {MATERIAL_ACQUISITION_PLAYBOOK.length} 条获取路径
+            </div>
+          </div>
+          <div className="mt-4 grid gap-3 md:grid-cols-2">
+            {MATERIAL_ACQUISITION_PLAYBOOK.map(item => (
+              <article className="rounded-md border border-white bg-white px-3 py-3" key={item.lane}>
+                <div className="text-[13px] font-black text-slate-950">{item.lane}</div>
+                <p className="mt-1 text-[12px] leading-5 text-slate-600"><span className="font-black text-slate-900">获取位置：</span>{item.where}</p>
+                <div className="mt-2 flex flex-wrap gap-2">
+                  {item.steps.map(step => (
+                    <span className="rounded-full border border-emerald-100 bg-emerald-50 px-2 py-1 text-[11px] font-semibold text-emerald-800" key={step}>
+                      {step}
+                    </span>
+                  ))}
+                </div>
+                <p className="mt-2 text-[12px] leading-5 text-slate-700"><span className="font-black text-slate-900">验收：</span>{item.proof}</p>
+              </article>
+            ))}
+          </div>
+        </div>
         <div className="mt-5 rounded-md border border-sky-200 bg-sky-50 p-4">
           <div className="flex flex-col gap-2 sm:flex-row sm:items-start sm:justify-between">
             <div>
