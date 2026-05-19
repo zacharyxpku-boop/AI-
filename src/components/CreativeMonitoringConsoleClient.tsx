@@ -197,6 +197,14 @@ export type CreativeIntelligenceCheck = {
   next: string;
 };
 
+export type CreativeHarvestAcceptanceCheck = {
+  gate: string;
+  ready: boolean;
+  evidence: string;
+  internalMove: string;
+  externalGate: string;
+};
+
 export function buildCreativeFactoryVariantPlaybook(
   snapshot: CreativeMonitoringSnapshot | undefined,
   creative: CreativeSnapshot | undefined,
@@ -272,6 +280,64 @@ export function buildCreativeIntelligenceChecks(
       next: providerReadySources > 0
         ? '把可用来源纳入周期采集和分发实验。'
         : '先补授权来源和采集器状态；没有数据源接入就不能宣称跨平台优化。',
+    },
+  ];
+}
+
+export function buildCreativeHarvestAcceptanceChecks(
+  snapshot: CreativeMonitoringSnapshot | undefined,
+  creative: CreativeSnapshot | undefined,
+): CreativeHarvestAcceptanceCheck[] {
+  const monitorCount = snapshot?.monitorCount || 0;
+  const sourceCount = snapshot?.sourceCount || 0;
+  const providerReadySources = snapshot?.providerReadySourceCount || 0;
+  const repeatObservationSources = snapshot?.creativeSourceRepeatObservationSourceCount || 0;
+  const sourceScaleScore = snapshot?.creativeSourceScaleScore || 0;
+  const sourceDepthScore = snapshot?.creativeSourceDepthScore || 0;
+  const coverageScore = snapshot?.sourceSyncCoverageScore || 0;
+  const multimodalParsedCount = snapshot?.sourceSyncMultimodalParsedCount || 0;
+  const opportunityCount = creative?.opportunityCount || 0;
+  const patternClusterCount = creative?.patternClusterCount || 0;
+  const crossSourcePatternCount = creative?.crossSourcePatternCount || 0;
+  const moatScore = creative?.creativeMoatScore || 0;
+
+  return [
+    {
+      gate: '来源广度门禁',
+      ready: monitorCount >= 3 && sourceCount >= 3 && sourceScaleScore >= 60,
+      evidence: `监控 ${monitorCount} / 来源 ${sourceCount} / 源规模 ${sourceScaleScore}`,
+      internalMove: '继续把竞品账号、榜单趋势、视频拆解三类来源做成同一项目账本，先保证内部可追踪。',
+      externalGate: providerReadySources > 0
+        ? '已有 provider-ready 来源，下一步验证授权采集稳定性。'
+        : '还需要合法数据源、平台授权或官方 API，才能宣称全网灵感自动管理。',
+    },
+    {
+      gate: '重复采集门禁',
+      ready: repeatObservationSources >= 2 && patternClusterCount > 0,
+      evidence: `重复观察来源 ${repeatObservationSources} / 模式簇 ${patternClusterCount}`,
+      internalMove: '同一类目至少沉淀两轮观察，避免把单条爆款误判成稳定打法。',
+      externalGate: '外部需要周期采集 provider 或运营导入节奏，否则只能做人工复盘。',
+    },
+    {
+      gate: '多模态视频解析门禁',
+      ready: multimodalParsedCount > 0 && coverageScore >= 100,
+      evidence: `多模态解析 ${multimodalParsedCount} / 覆盖 ${coverageScore}`,
+      internalMove: '已能接收 scene beats、字幕摘要、物体、音频和贴字字段时，再把结果推给 Cut。',
+      externalGate: '真实 AI 视频分析仍需要视频解析 provider、授权素材和存储权限。',
+    },
+    {
+      gate: '生产交接门禁',
+      ready: opportunityCount > 0 && crossSourcePatternCount > 0,
+      evidence: `机会 ${opportunityCount} / 跨来源模式 ${crossSourcePatternCount}`,
+      internalMove: '机会必须写入脚本资产、视频任务、分发计划和品牌学习档案，不能停在洞察报告。',
+      externalGate: '若要变成一键视频或智能混剪，还需要视频生成/剪辑 provider 的回调证据。',
+    },
+    {
+      gate: '复利学习门禁',
+      ready: moatScore >= 75 && sourceDepthScore >= 75,
+      evidence: `护城河分 ${moatScore} / 来源深度 ${sourceDepthScore}`,
+      internalMove: '把胜出的 hook、节奏、offer 和禁用表达沉淀为下一轮生产约束。',
+      externalGate: '外部还需要广告账户、平台 analytics sync 和转化数据，才能证明哪个创意真正胜出。',
     },
   ];
 }
@@ -621,6 +687,7 @@ export function CreativeMonitoringConsoleClient({
   const composePlaybook = buildCreativeComposeActionPlaybook(snapshot, creative, collectorPlan);
   const variantPlaybook = buildCreativeFactoryVariantPlaybook(snapshot, creative, selectedVariantId);
   const intelligenceChecks = buildCreativeIntelligenceChecks(snapshot, creative);
+  const harvestAcceptanceChecks = buildCreativeHarvestAcceptanceChecks(snapshot, creative);
 
   return (
     <main className="min-h-screen bg-[#101315] text-[#f8f2e8]">
@@ -713,6 +780,28 @@ export function CreativeMonitoringConsoleClient({
                 <div className="mt-2 text-xs leading-5 text-white/65">{item.evidence}</div>
                 <div className="mt-2 text-xs leading-5 text-emerald-200">Wenai 输出：{item.next}</div>
                 <div className="mt-2 text-xs leading-5 text-amber-100">状态：{item.ready ? '已具备内部证据' : '继续补内部/外部门禁'}</div>
+              </article>
+            ))}
+          </div>
+        </section>
+
+        <section className="border border-emerald-300/20 bg-emerald-950/20 p-5">
+          <div className="flex flex-col gap-2 sm:flex-row sm:items-start sm:justify-between">
+            <div>
+              <p className="text-xs uppercase tracking-[0.22em] text-emerald-200">Creative Harvest Acceptance Board</p>
+              <h2 className="mt-2 text-xl font-semibold">创意收割商用品质验收板</h2>
+            </div>
+            <p className="max-w-md text-xs leading-5 text-white/60">
+              对标 Hookshot、Omneky、VidMob、Superads 的真实能力，Wenai 不能只说“有灵感库”。每个项目都要过来源广度、重复采集、多模态解析、生产交接和复利学习五道门禁。
+            </p>
+          </div>
+          <div className="mt-4 grid gap-3 lg:grid-cols-5">
+            {harvestAcceptanceChecks.map(item => (
+              <article className="border border-white/10 bg-black/20 p-4" key={item.gate}>
+                <div className={`text-sm font-semibold ${item.ready ? 'text-emerald-200' : 'text-amber-100'}`}>{item.gate}</div>
+                <div className="mt-2 text-xs leading-5 text-white/65">{item.evidence}</div>
+                <div className="mt-2 text-xs leading-5 text-emerald-200">内部推进：{item.internalMove}</div>
+                <div className="mt-2 text-xs leading-5 text-amber-100">外部门禁：{item.externalGate}</div>
               </article>
             ))}
           </div>

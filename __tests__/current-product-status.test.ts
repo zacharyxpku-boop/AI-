@@ -22,6 +22,8 @@ describe('current product status report', () => {
     expect(doc).toContain('VidMob');
     expect(doc).toContain('Creatopy');
     expect(doc).toContain('Superads');
+    expect(doc).toContain('Creative Harvest Acceptance Board');
+    expect(doc).toContain('来源广度、重复采集、多模态解析、生产交接和复利学习');
     expect(doc).toContain('Cut Operating Checks');
     expect(doc).toContain('Cut 商用品质验收板');
     expect(doc).toContain('download/share/publish/approve fail-closed enforcement');

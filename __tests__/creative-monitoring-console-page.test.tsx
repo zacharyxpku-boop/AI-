@@ -6,6 +6,7 @@ import {
   CreativeMonitoringConsoleClient,
   buildCreativeComposeActionPlaybook,
   buildCreativeFactoryVariantPlaybook,
+  buildCreativeHarvestAcceptanceChecks,
   buildCreativeIntelligenceChecks,
 } from '@/components/CreativeMonitoringConsoleClient';
 
@@ -39,6 +40,14 @@ describe('creative monitoring console page', () => {
     expect(html).toContain('AI 视频分析、创意疲劳和跨平台 performance signal 一起看');
     expect(html).toContain('Creative analytics / fatigue 观察');
     expect(html).toContain('跨平台优化输入');
+    expect(html).toContain('Creative Harvest Acceptance Board');
+    expect(html).toContain('创意收割商用品质验收板');
+    expect(html).toContain('来源广度门禁');
+    expect(html).toContain('重复采集门禁');
+    expect(html).toContain('多模态视频解析门禁');
+    expect(html).toContain('生产交接门禁');
+    expect(html).toContain('复利学习门禁');
+    expect(html).toContain('对标 Hookshot、Omneky、VidMob、Superads 的真实能力');
     expect(html).toContain('Compose Action Playbook');
     expect(html).toContain('Compose Variant Console');
     expect(html).toContain('/factory/creative?projectId=creative-launch&amp;variant=partner');
@@ -235,6 +244,77 @@ describe('creative monitoring console page', () => {
       expect.objectContaining({ stage: '品牌安全模板化生产', ready: true }),
       expect.objectContaining({ stage: '跨平台优化输入', ready: true }),
     ]));
+  });
+
+  it('builds commercial acceptance gates for the creative harvest layer', () => {
+    const checks = buildCreativeHarvestAcceptanceChecks({
+      orgId: 'test-org',
+      projectId: 'creative-harvest-acceptance',
+      monitorCount: 3,
+      activeMonitorCount: 3,
+      competitorAccountMonitorCount: 1,
+      trendRankMonitorCount: 1,
+      videoKeywordMonitorCount: 1,
+      dueTaskCount: 0,
+      importedInsightCount: 3,
+      harvestRunCount: 2,
+      harvestedInsightCount: 6,
+      collectorTargetCount: 0,
+      collectorProviderReady: true,
+      collectorAdapterStatus: 'provider_ready',
+      sourceCount: 3,
+      providerReadySourceCount: 3,
+      sourceSyncRunCount: 2,
+      providerSourceFreshCount: 3,
+      providerSourceFailureCount: 0,
+      sourceSyncAccountObservationCount: 2,
+      sourceSyncTrendRankObservationCount: 2,
+      sourceSyncVideoTeardownObservationCount: 2,
+      sourceSyncMultimodalParsedCount: 2,
+      sourceSyncCoverageScore: 100,
+      creativeSourceObservationCount: 6,
+      creativeSourceRepeatObservationSourceCount: 3,
+      creativeSourceScaleScore: 85,
+      creativeSourceDepthScore: 82,
+      creativeReadySourceHealthCardCount: 3,
+      accountTrackingCoverageTargetCount: 3,
+      trendRankCoverageSignalCount: 3,
+      videoTeardownRepeatReady: true,
+      accountTrackingSourceReady: true,
+      trendRankSourceReady: true,
+      videoTeardownSourceReady: true,
+      multimodalTeardownReady: true,
+      missingLinks: [],
+      nextActions: [],
+    }, {
+      insightCount: 6,
+      competitorAccountCount: 2,
+      trendRankCount: 2,
+      teardownCount: 2,
+      opportunityCount: 4,
+      averageConfidenceScore: 81,
+      opportunityMap: [],
+      patternClusterCount: 2,
+      crossSourcePatternCount: 2,
+      creativeMoatScore: 80,
+      patternClusters: [],
+      missingLinks: [],
+    });
+
+    expect(checks).toHaveLength(5);
+    expect(checks).toEqual(expect.arrayContaining([
+      expect.objectContaining({ gate: '来源广度门禁', ready: true }),
+      expect.objectContaining({ gate: '重复采集门禁', ready: true }),
+      expect.objectContaining({ gate: '多模态视频解析门禁', ready: true }),
+      expect.objectContaining({ gate: '生产交接门禁', ready: true }),
+      expect.objectContaining({ gate: '复利学习门禁', ready: true }),
+    ]));
+
+    const emptyChecks = buildCreativeHarvestAcceptanceChecks(undefined, undefined);
+    expect(emptyChecks.find(check => check.gate === '来源广度门禁')).toEqual(expect.objectContaining({
+      ready: false,
+      externalGate: expect.stringContaining('全网灵感自动管理'),
+    }));
   });
 
   it('builds distinct creative variant playbooks for partner, operator, and friend trial views', () => {
