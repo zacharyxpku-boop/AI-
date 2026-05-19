@@ -71,6 +71,13 @@ interface ScaleClaimGuard {
   canDisplay: boolean;
   evidence: string;
   requiredEvidence: string[];
+  auditGates?: {
+    label: string;
+    ready: boolean;
+    severity: 'P0' | 'P1';
+    evidence: string;
+    action: string;
+  }[];
 }
 
 interface ProductCapabilityLayer {
@@ -1441,6 +1448,24 @@ export default function StatusPage() {
                     <div className="mt-2 text-[10px] leading-relaxed text-text-tertiary">
                       缺少：{guard.requiredEvidence.join(' / ')}
                     </div>
+                    {guard.auditGates && guard.auditGates.length > 0 && (
+                      <div className="mt-3 grid grid-cols-1 gap-1">
+                        {guard.auditGates.map(gate => (
+                          <div key={`${guard.requestedBenchmark}-${gate.label}`} className="rounded border border-border-subtle/70 bg-bg-root/40 px-2 py-1.5">
+                            <div className="flex items-center justify-between gap-2">
+                              <span className="text-[10px] font-semibold text-text-primary">{gate.label}</span>
+                              <span className={`text-[9px] font-mono ${gate.ready ? 'text-success' : gate.severity === 'P0' ? 'text-error' : 'text-accent'}`}>
+                                {gate.ready ? '已过门禁' : `${gate.severity} 未过`}
+                              </span>
+                            </div>
+                            <div className="mt-1 text-[9px] leading-relaxed text-text-tertiary">{gate.evidence}</div>
+                            {!gate.ready && (
+                              <div className="mt-1 text-[9px] leading-relaxed text-text-secondary">{gate.action}</div>
+                            )}
+                          </div>
+                        ))}
+                      </div>
+                    )}
                   </div>
                 ))}
               </div>

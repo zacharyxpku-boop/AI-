@@ -128,6 +128,7 @@ export interface ProjectReadinessFacts {
   brandLearningMissingLinks?: string[];
   auditedCreativeOutputCount?: number;
   auditedVideoDistributionCount?: number;
+  auditedScaleLedgerRecordCount?: number;
   auditedScalePlatformBreakdownCount?: number;
   auditedScaleEvidenceUrlCount?: number;
   auditedScaleHasDedupeRule?: boolean;
@@ -291,6 +292,13 @@ export interface ScaleClaimGuard {
   canDisplay: boolean;
   evidence: string;
   requiredEvidence: string[];
+  auditGates?: {
+    label: string;
+    ready: boolean;
+    severity: 'P0' | 'P1';
+    evidence: string;
+    action: string;
+  }[];
 }
 
 export type ProductCapabilityLayerId = 'Compose' | 'Create' | 'Cut' | 'Cast' | 'Manage';
@@ -504,18 +512,45 @@ function buildMaterialGateSummary(requirements: ExternalIntegrationRequirement[]
 
 function buildScaleClaimGuards(input: ReadinessServiceInput): ScaleClaimGuard[] {
   const project = input.project;
+  const auditGates = [{
+    label: '自有账本',
+    ready: Boolean(project?.auditedCreativeOutputCount && project?.auditedVideoDistributionCount),
+    severity: 'P0' as const,
+    evidence: `records=${project?.auditedScaleLedgerRecordCount || 0}; creative=${project?.auditedCreativeOutputCount || 0}; video=${project?.auditedVideoDistributionCount || 0}`,
+    action: '导入 Wenai 自有生产与分发账本，不把竞品规模写成自身成绩。',
+  }, {
+    label: '证据覆盖',
+    ready: Boolean(project?.auditedScaleEvidenceUrlCount && project.auditedScaleEvidenceUrlCount >= (project.auditedScaleLedgerRecordCount || 1)),
+    severity: 'P0' as const,
+    evidence: `evidenceUrls=${project?.auditedScaleEvidenceUrlCount || 0}/${project?.auditedScaleLedgerRecordCount || 0}`,
+    action: '每条规模记录都要有平台后台、客户确认或审计证据 URL。',
+  }, {
+    label: '去重/日期/确认',
+    ready: Boolean(project?.auditedScaleHasDedupeRule && project.auditedScaleHasDateRange && project.auditedScaleHasAuditorNote),
+    severity: 'P0' as const,
+    evidence: `dedupe=${project?.auditedScaleHasDedupeRule ? 1 : 0}; dateRange=${project?.auditedScaleHasDateRange ? 1 : 0}; auditorNote=${project?.auditedScaleHasAuditorNote ? 1 : 0}`,
+    action: '补齐去重口径、审计时间范围和客户/审计确认说明。',
+  }, {
+    label: '公开阈值',
+    ready: Boolean(project?.auditedScaleCanDisplayCreativeBenchmark && project.auditedScaleCanDisplayVideoBenchmark),
+    severity: 'P1' as const,
+    evidence: `creative91M=${project?.auditedScaleCanDisplayCreativeBenchmark ? 1 : 0}; video42M=${project?.auditedScaleCanDisplayVideoBenchmark ? 1 : 0}`,
+    action: '91M+/42M+ 未满足全部审计条件前只能作为竞品 benchmark。',
+  }];
   return [{
     label: 'Creative output scale',
     requestedBenchmark: '91M+ creative output',
     canDisplay: Boolean(project?.auditedScaleCanDisplayCreativeBenchmark),
     evidence: `creativeInsights=${project?.creativeInsightCount || 0}; auditedWenaiCreativeOutput=${project?.auditedCreativeOutputCount || 0}; platformBreakdown=${project?.auditedScalePlatformBreakdownCount || 0}; evidenceUrls=${project?.auditedScaleEvidenceUrlCount || 0}`,
     requiredEvidence: ['production output ledger', 'dedupe rule', 'audited date range', 'source/platform breakdown'],
+    auditGates,
   }, {
     label: 'Video distribution scale',
     requestedBenchmark: '42M+ video distribution',
     canDisplay: Boolean(project?.auditedScaleCanDisplayVideoBenchmark),
     evidence: `publishedDispatches=${project?.publishedDispatchCount || 0}; measuredDispatches=${project?.measuredDispatchCount || 0}; auditedWenaiVideoDistribution=${project?.auditedVideoDistributionCount || 0}; dedupe=${project?.auditedScaleHasDedupeRule ? 1 : 0}; dateRange=${project?.auditedScaleHasDateRange ? 1 : 0}; auditorNote=${project?.auditedScaleHasAuditorNote ? 1 : 0}`,
     requiredEvidence: ['platform publish ledger', 'video id ledger', 'analytics sync evidence', 'audited date range'],
+    auditGates,
   }];
 }
 

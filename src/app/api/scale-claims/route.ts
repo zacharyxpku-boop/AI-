@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 
 import {
+  buildScaleClaimAuditChecklist,
   getScaleClaimSnapshot,
   listScaleClaimRecords,
   upsertScaleClaimRecord,
@@ -14,7 +15,13 @@ export async function GET(request: NextRequest) {
     listScaleClaimRecords(orgId, projectId, 100),
     getScaleClaimSnapshot(orgId, projectId),
   ]);
-  return NextResponse.json({ orgId, projectId, records, snapshot }, { headers: { 'Cache-Control': 'no-store' } });
+  return NextResponse.json({
+    orgId,
+    projectId,
+    records,
+    snapshot,
+    auditChecklist: buildScaleClaimAuditChecklist(snapshot),
+  }, { headers: { 'Cache-Control': 'no-store' } });
 }
 
 export async function POST(request: NextRequest) {
@@ -43,5 +50,11 @@ export async function POST(request: NextRequest) {
     projectId,
   })));
   const snapshot = await getScaleClaimSnapshot(orgId, projectId);
-  return NextResponse.json({ ok: true, projectId, records, snapshot }, { status: 201 });
+  return NextResponse.json({
+    ok: true,
+    projectId,
+    records,
+    snapshot,
+    auditChecklist: buildScaleClaimAuditChecklist(snapshot),
+  }, { status: 201 });
 }
