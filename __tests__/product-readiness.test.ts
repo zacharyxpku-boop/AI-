@@ -228,6 +228,11 @@ describe('product readiness against Kuaizi benchmark', () => {
         category: 'video_provider',
         status: 'missing',
         materialPriority: 'P0',
+        unlocks: expect.stringContaining('One-click video'),
+        blockedGate: expect.stringContaining('Create/Cut remain production handoff'),
+        missingImpact: expect.stringContaining('stable video factory'),
+        operatorAction: expect.stringContaining('provider submit endpoint'),
+        acceptanceEvidence: expect.stringContaining('provider task id'),
         requiredInputs: expect.arrayContaining(['provider submit endpoint', 'server-side provider token', 'webhook signing secret']),
         releaseChecks: expect.arrayContaining([
           'Material is configured in a secure server-side location.',
@@ -250,6 +255,8 @@ describe('product readiness against Kuaizi benchmark', () => {
         category: 'scale_claims',
         status: 'evidence_required',
         materialPriority: 'P1',
+        unlocks: expect.stringContaining('Wenai-owned creative output'),
+        blockedGate: expect.stringContaining('competitor benchmarks'),
         securityBoundary: expect.stringContaining('Do not convert competitor public numbers into Wenai-owned claims'),
         releaseChecks: expect.arrayContaining([
           expect.stringContaining('benchmark-only'),
@@ -363,6 +370,8 @@ describe('product readiness against Kuaizi benchmark', () => {
       expect.objectContaining({
         id: 'platform-analytics-sync',
         materialPriority: 'P1',
+        unlocks: expect.stringContaining('Scheduled metric sync'),
+        missingImpact: expect.stringContaining('learning loop'),
         securityBoundary: expect.stringContaining('Secrets must be configured server-side'),
         releaseChecks: expect.arrayContaining([
           expect.stringContaining('Sandbox or least-privilege access'),
@@ -371,6 +380,8 @@ describe('product readiness against Kuaizi benchmark', () => {
       expect.objectContaining({
         id: 'enterprise-asset-cloud',
         materialPriority: 'P1',
+        blockedGate: expect.stringContaining('internal permission ledger'),
+        operatorAction: expect.stringContaining('isolated bucket'),
       }),
     ]));
     expect(body.report.materialGateSummary).toEqual(expect.objectContaining({

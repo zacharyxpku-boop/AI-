@@ -203,9 +203,14 @@ export interface ExternalIntegrationRequirement {
   status: ExternalRequirementStatus;
   owner: 'user' | 'provider' | 'wenai';
   materialPriority: 'P0' | 'P1';
+  unlocks: string;
+  blockedGate: string;
+  missingImpact: string;
+  operatorAction: string;
   evidence: string;
   requiredInputs: string[];
   acceptance: string;
+  acceptanceEvidence: string;
   securityBoundary: string;
   releaseChecks: string[];
 }
@@ -220,6 +225,65 @@ export interface MaterialGateSummary {
   nextMaterialPacks: string[];
   evidence: string;
 }
+
+const EXTERNAL_REQUIREMENT_IMPACTS: Record<string, Pick<ExternalIntegrationRequirement, 'unlocks' | 'blockedGate' | 'missingImpact' | 'operatorAction' | 'acceptanceEvidence'>> = {
+  'video-provider-submit-callback': {
+    unlocks: 'One-click video, smart remix, batch finished-video output, signed provider callback, retry, result asset ingestion, and client review proof.',
+    blockedGate: 'Create/Cut remain production handoff and manual result-fill workflows; do not claim automatic finished video or commercial smart remix.',
+    missingImpact: 'Wenai can queue and review video work, but cannot behave like a stable video factory until provider execution and callback evidence exist.',
+    operatorAction: 'Collect the provider submit endpoint, server token, webhook secret, sandbox quota, callback allowlist, and cost cap; then run one sandbox job.',
+    acceptanceEvidence: 'A provider task id, signed callback, playable result URL, stored result asset, and review token all point to the same workflow.',
+  },
+  'multimodal-video-parser': {
+    unlocks: 'Always-on AI video analysis: account tracking, trend rank capture, scene beat parsing, hook extraction, pacing tags, and next-script reuse.',
+    blockedGate: 'Compose can only use manual or semi-automatic creative insight imports; do not claim Kuaizi/Narra-level continuous video parsing.',
+    missingImpact: 'Creative depth remains ledger-driven rather than source-driven, so Wenai cannot yet build a scaled inspiration graph by itself.',
+    operatorAction: 'Provide authorized sample URLs or feeds, parser endpoint, server token, and the scene-beat schema; validate account/rank/video observations.',
+    acceptanceEvidence: 'One sync run creates account, rank, teardown, multimodal parsed observations, and ready source health cards for all source types.',
+  },
+  'platform-oauth-account-pool': {
+    unlocks: 'Real account matrix: platform identity, OAuth state, account health, rate limits, risk state, scheduling slots, and dispatch gate reads.',
+    blockedGate: 'Cast remains manual/provider-gated dispatch; no content is marked as truly published through a platform account.',
+    missingImpact: 'Wenai can design matrix operations, but cannot operate like PubPal/matrix distribution until account grants exist.',
+    operatorAction: 'Create developer apps, whitelist redirect URLs, grant sandbox accounts, and bind account ids to the channel account ledger.',
+    acceptanceEvidence: 'At least one target platform account reaches oauth_ready and is readable by distribution readiness checks without exposing secrets.',
+  },
+  'ad-account-authorization': {
+    unlocks: 'Campaign creation/read, budget caps, asset binding, stop rules, spend/order/revenue return, and campaign learning-loop evidence.',
+    blockedGate: 'Only campaign hypotheses and manual performance imports are allowed; no automatic ad delivery or optimization claim is displayed.',
+    missingImpact: 'Wenai cannot become an ecommerce growth operating system until real ad account evidence enters Cast/Manage.',
+    operatorAction: 'Provide advertiser id, account id, least-privilege token, test budget, conversion event, and rollback/stop rules.',
+    acceptanceEvidence: 'A test campaign can be read or created with capped spend and measured spend/impression/click/conversion data returns to Wenai.',
+  },
+  'platform-auto-publish': {
+    unlocks: 'Asset upload, scheduled publishing, review state polling, platform URL capture, retry, manual fallback, and publication evidence.',
+    blockedGate: 'Dispatches can be prepared, but not marked as auto-published or matrix-distributed without platform receipts.',
+    missingImpact: 'Distribution remains operational planning rather than platform-level execution, which is a severe Kuaizi/PubPal gap.',
+    operatorAction: 'Enable publish permission, upload endpoint access, content specs, platform review rules, rate limits, and sandbox publish scope.',
+    acceptanceEvidence: 'One governed asset is uploaded and published through an adapter, producing a platform URL or receipt tied to the dispatch ledger.',
+  },
+  'platform-analytics-sync': {
+    unlocks: 'Scheduled metric sync, field mapping, dedupe, attribution windows, brand learning updates, and next-round creative recommendations.',
+    blockedGate: 'Use CSV/API manual import only; do not show real-time platform optimization or automatic post-mortem claims.',
+    missingImpact: 'The learning loop is slower and less defensible without automatic source-of-truth performance data.',
+    operatorAction: 'Provide analytics permission, account id, metric definitions, sync cadence, timezone, attribution window, and API quota.',
+    acceptanceEvidence: 'A scheduled sync imports impressions, clicks, spend, orders, revenue, and asset_ref into performance returns without manual CSV.',
+  },
+  'enterprise-asset-cloud': {
+    unlocks: 'Object storage, signed URLs, download/share/publish enforcement, team roles, DLP, watermark, retention, and access audit.',
+    blockedGate: 'Manage remains an internal permission ledger; do not claim enterprise cloud drive or external team-space governance.',
+    missingImpact: 'Enterprise customers still need a real storage and access-control layer before Wenai can protect shared production assets.',
+    operatorAction: 'Provide an isolated bucket/project, service account, signed URL policy, team-role map, DLP/watermark rules, and retention policy.',
+    acceptanceEvidence: 'The same asset returns different allowed actions for client/operator/distribution roles and writes an audit event for every access.',
+  },
+  'audited-scale-ledger': {
+    unlocks: 'Wenai-owned creative output and video distribution counters with source breakdown, date range, dedupe rule, and public display permission.',
+    blockedGate: '91M+ creative output and 42M+ video distribution remain competitor benchmarks, never Wenai-owned scale claims.',
+    missingImpact: 'Wenai can explain the target scale, but cannot market itself with those numbers until audited ledgers prove them.',
+    operatorAction: 'Provide audited production and distribution ledgers, platform evidence URLs, date ranges, dedupe rules, and auditor/customer notes.',
+    acceptanceEvidence: 'Scale counters reconcile to Wenai production records, platform receipts, source breakdowns, and a documented date range.',
+  },
+};
 
 export interface ScaleClaimGuard {
   label: string;
@@ -298,7 +362,9 @@ function makeExternalRequirement(
     'Sandbox or least-privilege access is available before production access.',
     'A verifiable callback, receipt, ledger, or audit event proves the integration.',
   ],
+  impact: Partial<Pick<ExternalIntegrationRequirement, 'unlocks' | 'blockedGate' | 'missingImpact' | 'operatorAction' | 'acceptanceEvidence'>> = {},
 ): ExternalIntegrationRequirement {
+  const requirementImpact = { ...EXTERNAL_REQUIREMENT_IMPACTS[id], ...impact };
   return {
     id,
     category,
@@ -306,9 +372,14 @@ function makeExternalRequirement(
     status: configured ? 'configured' : 'missing',
     owner,
     materialPriority,
+    unlocks: requirementImpact.unlocks || `Unlocks the production-grade ${label} path.`,
+    blockedGate: requirementImpact.blockedGate || `Keep ${label} provider-gated until secure material and proof exist.`,
+    missingImpact: requirementImpact.missingImpact || `Wenai can model and queue this capability, but cannot claim real platform execution for ${label}.`,
+    operatorAction: requirementImpact.operatorAction || `Collect the required material pack, configure it server-side, then run the release checks for ${label}.`,
     evidence,
     requiredInputs,
     acceptance,
+    acceptanceEvidence: requirementImpact.acceptanceEvidence || acceptance,
     securityBoundary,
     releaseChecks,
   };
@@ -392,6 +463,7 @@ function buildExternalRequirements(input: ReadinessServiceInput): ExternalIntegr
       status: 'evidence_required',
       owner: 'user',
       materialPriority: 'P1',
+      ...EXTERNAL_REQUIREMENT_IMPACTS['audited-scale-ledger'],
       evidence: '91M+ creative output and 42M+ video distribution are competitor benchmarks, not audited Wenai metrics.',
       requiredInputs: ['audited generated creative count', 'audited published video count', 'platform/source breakdown', 'dedupe rule', 'date range'],
       acceptance: 'Only display Wenai-owned scale numbers after the counters reconcile to production and platform ledgers.',

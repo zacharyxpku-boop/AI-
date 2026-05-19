@@ -53,9 +53,14 @@ interface ExternalIntegrationRequirement {
   status: 'configured' | 'missing' | 'evidence_required';
   owner: 'user' | 'provider' | 'wenai';
   materialPriority?: 'P0' | 'P1';
+  unlocks?: string;
+  blockedGate?: string;
+  missingImpact?: string;
+  operatorAction?: string;
   evidence: string;
   requiredInputs: string[];
   acceptance: string;
+  acceptanceEvidence?: string;
   securityBoundary?: string;
   releaseChecks?: string[];
 }
@@ -1260,6 +1265,34 @@ export default function StatusPage() {
                       {formatExternalRequirementCategory(requirement.category)} · {formatExternalRequirementOwner(requirement.owner)}
                     </div>
                     <p className="mt-1 text-[10px] leading-relaxed text-text-secondary">{requirement.evidence}</p>
+                    {(requirement.unlocks || requirement.blockedGate || requirement.missingImpact || requirement.operatorAction) ? (
+                      <div className="mt-2 grid gap-2 md:grid-cols-2">
+                        {requirement.unlocks ? (
+                          <div className="rounded border border-success/20 bg-success/5 px-2 py-2">
+                            <div className="text-[10px] font-semibold text-success">接入后解锁</div>
+                            <p className="mt-1 text-[10px] leading-relaxed text-text-secondary">{requirement.unlocks}</p>
+                          </div>
+                        ) : null}
+                        {requirement.blockedGate ? (
+                          <div className="rounded border border-error/20 bg-error/5 px-2 py-2">
+                            <div className="text-[10px] font-semibold text-error">缺失时门禁</div>
+                            <p className="mt-1 text-[10px] leading-relaxed text-text-secondary">{requirement.blockedGate}</p>
+                          </div>
+                        ) : null}
+                        {requirement.missingImpact ? (
+                          <div className="rounded border border-accent/20 bg-accent/5 px-2 py-2">
+                            <div className="text-[10px] font-semibold text-accent">商用影响</div>
+                            <p className="mt-1 text-[10px] leading-relaxed text-text-secondary">{requirement.missingImpact}</p>
+                          </div>
+                        ) : null}
+                        {requirement.operatorAction ? (
+                          <div className="rounded border border-border-subtle/70 bg-bg-root/30 px-2 py-2">
+                            <div className="text-[10px] font-semibold text-text-primary">运营下一步</div>
+                            <p className="mt-1 text-[10px] leading-relaxed text-text-secondary">{requirement.operatorAction}</p>
+                          </div>
+                        ) : null}
+                      </div>
+                    ) : null}
                     <div className="mt-2 text-[10px] leading-relaxed text-text-secondary">
                       需要：{requirement.requiredInputs.slice(0, 3).join(' / ')}
                       {requirement.requiredInputs.length > 3 ? ' / ...' : ''}
@@ -1267,6 +1300,11 @@ export default function StatusPage() {
                     <div className="mt-1 text-[10px] leading-relaxed text-success">
                       验收：{requirement.acceptance}
                     </div>
+                    {requirement.acceptanceEvidence ? (
+                      <div className="mt-1 text-[10px] leading-relaxed text-success">
+                        证据闭环：{requirement.acceptanceEvidence}
+                      </div>
+                    ) : null}
                     {requirement.securityBoundary ? (
                       <div className="mt-2 rounded border border-accent/20 bg-bg-root/40 px-2 py-2 text-[10px] leading-relaxed text-accent">
                         安全边界：{requirement.securityBoundary}
