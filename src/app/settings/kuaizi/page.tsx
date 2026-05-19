@@ -159,6 +159,9 @@ export default function KuaiziSettingsPage() {
   }, []);
 
   const configured = status?.configured === true;
+  const p0MaterialPacks = PROVIDER_MATERIAL_PACKS.filter(pack => pack.priority === 'P0');
+  const p1MaterialPacks = PROVIDER_MATERIAL_PACKS.filter(pack => pack.priority === 'P1');
+  const totalMaterialItems = PROVIDER_MATERIAL_PACKS.reduce((sum, pack) => sum + pack.materials.length, 0);
 
   return (
     <main className="mx-auto max-w-3xl px-6 py-10">
@@ -263,6 +266,36 @@ export default function KuaiziSettingsPage() {
         <p className="mt-2 text-[13px] leading-6 text-slate-600">
           这张清单把“需要外部能力”拆成可执行交付物。P0 先打通真实生成、真实账号和真实广告；P1 再补自动回流、企业云资产和自有规模审计。任何 secret 都只进入服务端环境或部署平台，不进入仓库、不进入浏览器、不进入报告。
         </p>
+        <div className="mt-5 rounded-md border border-sky-200 bg-sky-50 p-4">
+          <div className="flex flex-col gap-2 sm:flex-row sm:items-start sm:justify-between">
+            <div>
+              <div className="text-[13px] font-black text-slate-950">材料放行检查表</div>
+              <p className="mt-1 text-[12px] leading-5 text-slate-600">
+                对齐 /status 的内部 / 外部交付边界板：P0 先让真实生成、真实账号、真实广告能跑；P1 再把回流、云资产和规模审计补齐。
+              </p>
+            </div>
+            <a className="w-fit rounded-full border border-sky-200 bg-white px-3 py-1 text-[11px] font-black text-sky-700" href="/status">
+              回到 readiness 边界板
+            </a>
+          </div>
+          <div className="mt-4 grid gap-3 md:grid-cols-4">
+            <MaterialGateMetric label="P0 阻断包" value={`${p0MaterialPacks.length} 个`} detail="视频 provider、平台 OAuth、广告账户必须先打通。" />
+            <MaterialGateMetric label="P1 加厚包" value={`${p1MaterialPacks.length} 个`} detail="analytics、云资产、规模审计决定商用厚度。" />
+            <MaterialGateMetric label="材料字段" value={`${totalMaterialItems} 项`} detail="每项都只进服务端环境或平台后台，不进聊天和仓库。" />
+            <MaterialGateMetric label="放行口径" value="证据优先" detail="没有 callback、发布回执、campaign 数据或审计账本就保持门禁。" />
+          </div>
+          <div className="mt-4 grid gap-2 md:grid-cols-3">
+            <div className="rounded-md border border-white bg-white px-3 py-2 text-[12px] leading-5 text-slate-700">
+              <span className="font-black text-slate-950">内部继续：</span>我负责接 adapter、callback、队列、回写、审计和降级门禁。
+            </div>
+            <div className="rounded-md border border-white bg-white px-3 py-2 text-[12px] leading-5 text-slate-700">
+              <span className="font-black text-slate-950">外部提供：</span>你统一给开发者应用、授权账号、provider、广告账户、对象存储和审计材料。
+            </div>
+            <div className="rounded-md border border-white bg-white px-3 py-2 text-[12px] leading-5 text-slate-700">
+              <span className="font-black text-slate-950">安全红线：</span>任何 token、cookie、后台登录态都不贴到对话、报告、浏览器或仓库。
+            </div>
+          </div>
+        </div>
         <div className="mt-5 grid gap-3">
           {PROVIDER_MATERIAL_PACKS.map(pack => (
             <article className="rounded-md border border-slate-200 bg-slate-50 p-4" key={pack.pack}>
@@ -289,6 +322,11 @@ export default function KuaiziSettingsPage() {
                 </div>
                 <SetupColumn label="验收证据" value={pack.acceptance} />
               </div>
+              <div className="mt-3 grid gap-2 md:grid-cols-3">
+                <MaterialCheck label="材料已放入安全位置" detail="只接受服务端环境、部署平台 secret 或平台后台授权，不接受明文粘贴。" />
+                <MaterialCheck label="有 sandbox 或最小权限" detail="先用测试账号、小预算、单独 bucket 或可撤销 app，避免直接触碰生产资产。" />
+                <MaterialCheck label="有可验证回执" detail="必须能拿到 callback、OAuth 状态、发布链接、campaign 指标或审计台账。" />
+              </div>
               <div className="mt-3 rounded-md border border-amber-200 bg-amber-50 px-3 py-2 text-[12px] leading-5 text-amber-800">
                 安全边界：{pack.doNotSend}
               </div>
@@ -314,6 +352,25 @@ function SetupColumn({ label, value }: { label: string; value: string }) {
     <div>
       <div className="text-[11px] font-black text-slate-500">{label}</div>
       <p className="mt-1 text-[12px] leading-5 text-slate-700">{value}</p>
+    </div>
+  );
+}
+
+function MaterialGateMetric({ label, value, detail }: { label: string; value: string; detail: string }) {
+  return (
+    <div className="rounded-md border border-white bg-white px-3 py-3">
+      <div className="text-[11px] font-black text-slate-500">{label}</div>
+      <div className="mt-1 text-xl font-black text-slate-950">{value}</div>
+      <p className="mt-1 text-[11px] leading-5 text-slate-600">{detail}</p>
+    </div>
+  );
+}
+
+function MaterialCheck({ label, detail }: { label: string; detail: string }) {
+  return (
+    <div className="rounded-md border border-slate-200 bg-white px-3 py-2">
+      <div className="text-[11px] font-black text-slate-900">{label}</div>
+      <p className="mt-1 text-[11px] leading-5 text-slate-600">{detail}</p>
     </div>
   );
 }
