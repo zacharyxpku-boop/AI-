@@ -348,6 +348,14 @@ describe('video production queue page', () => {
           supportAction: '打不开就先提交问题反馈。',
           nextAction: '先预览成片，再反馈或批准。',
           clientChecklist: [],
+          clientReceipt: {
+            title: '客户验收回执',
+            summary: '客户当前可以查看交付物，并决定是反馈还是批准。',
+            nextStep: '批准后进入分发、CRM 交接和表现回流。',
+            operatorRecipient: '运营 / 客服',
+            evidenceToCheck: ['成片可打开'],
+            shareNote: '审核码 review-video-1 可继续验收。',
+          },
           clientDecision: {
             primaryActionLabel: '确认无误后批准',
             primaryActionState: 'approve',

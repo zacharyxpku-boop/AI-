@@ -64,6 +64,14 @@ export interface IndustrialReviewPortalView {
     operatorNextStep: string;
     evidenceToCheck: string[];
   };
+  clientReceipt: {
+    title: string;
+    summary: string;
+    nextStep: string;
+    operatorRecipient: string;
+    evidenceToCheck: string[];
+    shareNote: string;
+  };
   escalationMessage: string;
   canSubmitFeedback: boolean;
   canApprove: boolean;
@@ -281,6 +289,73 @@ function clientDecisionFor(record: IndustrialReviewLinkRecord, status: Industria
   };
 }
 
+function clientReceiptFor(
+  record: IndustrialReviewLinkRecord,
+  status: IndustrialReviewLinkStatus,
+  hasDeliverable: boolean,
+  feedbackCount: number,
+): IndustrialReviewPortalView['clientReceipt'] {
+  const decision = clientDecisionFor(record, status);
+  if (status === 'approved') {
+    return {
+      title: '客户验收回执',
+      summary: `已由 ${record.approvalName || '客户'} 批准，结果进入分发、CRM 交接和表现回流。`,
+      nextStep: '运营继续推进分发、投放或复购跟进。',
+      operatorRecipient: '运营 / CRM / 分发',
+      evidenceToCheck: ['批准人', '批准时间', '交付物链接', '客户确认记录'],
+      shareNote: `把这张回执发给运营：审核码 ${record.token} 已批准，可继续下游动作。`,
+    };
+  }
+  if (status === 'expired') {
+    return {
+      title: '客户验收回执',
+      summary: '该审核链接已过期，不能继续用于验收旧版本。',
+      nextStep: '请运营重新生成审核链接，再让客户验收最新版本。',
+      operatorRecipient: '运营',
+      evidenceToCheck: ['新审核链接', '最新交付物版本', '有效期'],
+      shareNote: `把这张回执发给运营：审核码 ${record.token} 已过期，请重新发链接。`,
+    };
+  }
+  if (status === 'revoked') {
+    return {
+      title: '客户验收回执',
+      summary: '该审核链接已撤销，可能对应旧版本或替代版本。',
+      nextStep: '请运营重新发新的审核链接，并说明当前交付版本。',
+      operatorRecipient: '运营',
+      evidenceToCheck: ['新审核链接', '版本说明', '撤销原因'],
+      shareNote: `把这张回执发给运营：审核码 ${record.token} 已撤销，请不要继续使用旧链接。`,
+    };
+  }
+  if (!hasDeliverable) {
+    return {
+      title: '客户验收回执',
+      summary: '当前缺少可打开的交付物链接，客户不能直接批准。',
+      nextStep: '先补预览/下载链接，再继续验收。',
+      operatorRecipient: '生产运营',
+      evidenceToCheck: ['交付物链接', '预览页面', '版本说明'],
+      shareNote: `把这张回执发给运营：审核码 ${record.token} 缺少可打开交付物链接。`,
+    };
+  }
+  if (feedbackCount > 0) {
+    return {
+      title: '客户验收回执',
+      summary: '客户已提交反馈，需先处理修改再继续批准。',
+      nextStep: '把反馈转成返修任务，处理后让客户回到同一审核链接复核。',
+      operatorRecipient: '生产 / 剪辑 / 运营',
+      evidenceToCheck: ['反馈内容', '返修任务', '最新版本链接'],
+      shareNote: `把这张回执发给运营：审核码 ${record.token} 已有反馈，请先处理再回访。`,
+    };
+  }
+  return {
+    title: '客户验收回执',
+    summary: '客户当前可以查看交付物，并决定是反馈还是批准。',
+    nextStep: decision.operatorNextStep,
+    operatorRecipient: '运营 / 客服',
+    evidenceToCheck: decision.evidenceToCheck,
+    shareNote: `把这张回执发给客户或运营：审核码 ${record.token} 可继续验收。`,
+  };
+}
+
 function lockReasonFor(record: IndustrialReviewLinkRecord, status: IndustrialReviewLinkStatus) {
   if (status === 'approved') return '该交付物已经批准，审核入口已锁定为只读。';
   if (status === 'expired') return '该审核链接已经过期，不能继续提交反馈或批准。';
@@ -291,6 +366,7 @@ function lockReasonFor(record: IndustrialReviewLinkRecord, status: IndustrialRev
 
 function publicView(record: IndustrialReviewLinkRecord): IndustrialReviewPortalView {
   const status = statusFor(record);
+  const hasDeliverable = Boolean(record.deliverableUrl);
   return {
     token: record.token,
     projectId: record.projectId,
@@ -306,9 +382,10 @@ function publicView(record: IndustrialReviewLinkRecord): IndustrialReviewPortalV
     nextAction: nextActionFor(record, status),
     clientChecklist: clientChecklistFor(record, status),
     clientDecision: clientDecisionFor(record, status),
+    clientReceipt: clientReceiptFor(record, status, hasDeliverable, record.feedback.length),
     escalationMessage: escalationMessageFor(record, status),
     canSubmitFeedback: status === 'active',
-    canApprove: status === 'active' && Boolean(record.deliverableUrl),
+    canApprove: status === 'active' && hasDeliverable,
     interactionLockedReason: lockReasonFor(record, status),
     feedbackCount: record.feedback.length,
     approvedAt: record.approvedAt,

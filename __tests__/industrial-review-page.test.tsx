@@ -554,4 +554,36 @@ describe('industrial review page', () => {
     expect(source).toContain('setPayload(reviewPayloadFromResponse(data));');
     expect(source).toContain('if (nextPayload) setPayload(nextPayload);');
   });
+
+  it('renders a client acceptance receipt when the server provides one', () => {
+    const html = renderToStaticMarkup(<IndustrialReviewPortalClient
+      token="wrv_receipt_token"
+      initialPayload={{
+        review: {
+          token: 'wrv_receipt_token',
+          projectId: 'receipt-project',
+          assetId: 'receipt-asset',
+          assetTitle: 'Receipt asset',
+          deliverableUrl: 'https://cdn.example.test/receipt.mp4',
+          expiresAt: new Date(Date.now() + 86400_000).toISOString(),
+          status: 'active',
+          feedbackCount: 0,
+          clientReceipt: {
+            title: '客户验收回执',
+            summary: '客户当前可以查看交付物，并决定是反馈还是批准。',
+            nextStep: '批准后进入分发、CRM 交接和表现回流。',
+            operatorRecipient: '运营 / 客服',
+            evidenceToCheck: ['交付物链接', '客户确认记录'],
+            shareNote: '把这张回执发给客户或运营：审核码 wrv_receipt_token 可继续验收。',
+          },
+        },
+        feedback: [],
+      }}
+    />);
+
+    expect(html).toContain('客户验收回执');
+    expect(html).toContain('交给：运营 / 客服');
+    expect(html).toContain('批准后进入分发、CRM 交接和表现回流');
+    expect(html).toContain('审核码 wrv_receipt_token');
+  });
 });

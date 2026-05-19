@@ -105,6 +105,10 @@ describe('industrial review portal', () => {
     });
     const active = await createIndustrialReviewLink(orgId, { assetId: asset.id });
     const activeView = getIndustrialReviewPortalView(active!);
+    expect(activeView.clientReceipt).toMatchObject({
+      title: '客户验收回执',
+      operatorRecipient: '运营 / 客服',
+    });
     expect(activeView.clientHeadline).toBe('请先预览交付物，再选择反馈或批准');
     expect(activeView.clientRisk).toContain('批准会写回生产链路');
     expect(activeView.supportAction).toContain('不要勉强批准');
@@ -122,6 +126,7 @@ describe('industrial review portal', () => {
       body: '请先修改标题。',
     });
     const feedbackView = getIndustrialReviewPortalView((await getIndustrialReviewLink(active!.token))!);
+    expect(feedbackView.clientReceipt.summary).toContain('客户已提交反馈');
     expect(feedbackView.clientHeadline).toBe('已有反馈记录，请先确认修改是否完成');
     expect(feedbackView.supportAction).toContain('确认修改点已处理');
     expect(feedbackView.clientChecklist.find(item => item.label === '反馈是否已处理')?.state).toBe('warn');
@@ -129,6 +134,7 @@ describe('industrial review portal', () => {
 
     const approved = await approveIndustrialReviewLink(active!.token, { approvalName: 'Buyer' });
     const approvedView = getIndustrialReviewPortalView(approved!.record);
+    expect(approvedView.clientReceipt.summary).toContain('已由 Buyer 批准');
     expect(approvedView.clientHeadline).toBe('已完成验收，结果已锁定');
     expect(approvedView.clientRisk).toContain('只读');
     expect(approvedView.clientChecklist.find(item => item.label === '批准后动作')?.state).toBe('locked');
@@ -144,6 +150,7 @@ describe('industrial review portal', () => {
     });
     const missingUrl = await createIndustrialReviewLink(orgId, { assetId: noUrlAsset.id });
     const missingUrlView = getIndustrialReviewPortalView(missingUrl!);
+    expect(missingUrlView.clientReceipt.summary).toContain('缺少可打开的交付物链接');
     expect(missingUrlView.clientHeadline).toBe('交付物还没准备好，先不要批准');
     expect(missingUrlView.clientRisk).toContain('批准会被系统阻止');
     expect(missingUrlView.clientChecklist.find(item => item.label === '交付物可查看')?.state).toBe('warn');
@@ -154,6 +161,7 @@ describe('industrial review portal', () => {
       expiresAt: new Date(Date.now() - 1000).toISOString(),
     });
     const expiredView = getIndustrialReviewPortalView(expired!);
+    expect(expiredView.clientReceipt.summary).toContain('审核链接已过期');
     expect(expiredView.clientHeadline).toBe('审核链接已过期，请不要继续验收');
     expect(expiredView.supportAction).toBe('请联系运营重新生成审核链接。');
     expect(expiredView.clientChecklist.find(item => item.label === '审核链接可写入')?.state).toBe('locked');
@@ -162,6 +170,7 @@ describe('industrial review portal', () => {
     const revoked = await createIndustrialReviewLink(orgId, { assetId: asset.id });
     const revokedRecord = await revokeIndustrialReviewLink(orgId, revoked!.token);
     const revokedView = getIndustrialReviewPortalView(revokedRecord!);
+    expect(revokedView.clientReceipt.summary).toContain('审核链接已撤销');
     expect(revokedView.clientHeadline).toBe('审核链接已撤销，请等待新链接');
     expect(revokedView.clientRisk).toContain('版本混淆');
     expect(revokedView.escalationMessage).toContain('已撤销，请发送新的审核链接');

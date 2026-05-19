@@ -31,6 +31,14 @@ export interface ReviewPayload {
       operatorNextStep: string;
       evidenceToCheck: string[];
     };
+    clientReceipt?: {
+      title: string;
+      summary: string;
+      nextStep: string;
+      operatorRecipient: string;
+      evidenceToCheck: string[];
+      shareNote: string;
+    };
     escalationMessage?: string;
     canSubmitFeedback?: boolean;
     canApprove?: boolean;
@@ -1074,6 +1082,36 @@ export function IndustrialReviewPortalClient({
                     ))}
                   </div>
                 </div>
+              </div>
+            </div>
+          ) : null}
+          {review?.clientReceipt ? (
+            <div className="border border-emerald-300/25 bg-emerald-950/20 px-4 py-3 text-emerald-50">
+              <div className="flex flex-col gap-2 sm:flex-row sm:items-start sm:justify-between">
+                <div>
+                  <div className="text-xs font-semibold text-emerald-100/70">{review.clientReceipt.title}</div>
+                  <div className="mt-1 text-sm font-semibold">{review.clientReceipt.summary}</div>
+                </div>
+                <div className="w-fit border border-emerald-200/25 px-3 py-1 text-xs text-emerald-100/80">
+                  交给：{review.clientReceipt.operatorRecipient}
+                </div>
+              </div>
+              <div className="mt-3 grid gap-3 md:grid-cols-[1fr_1.1fr]">
+                <div className="border border-emerald-200/15 bg-black/15 px-3 py-2">
+                  <div className="text-xs font-semibold text-emerald-100/70">下一步</div>
+                  <div className="mt-1 text-sm leading-6 text-emerald-50/85">{review.clientReceipt.nextStep}</div>
+                </div>
+                <div className="border border-emerald-200/15 bg-black/15 px-3 py-2">
+                  <div className="text-xs font-semibold text-emerald-100/70">回执证据</div>
+                  <div className="mt-2 flex flex-wrap gap-2">
+                    {review.clientReceipt.evidenceToCheck.map(item => (
+                      <span className="border border-emerald-200/20 px-2 py-1 text-xs text-emerald-50/80" key={item}>{item}</span>
+                    ))}
+                  </div>
+                </div>
+              </div>
+              <div className="mt-3 border border-emerald-200/15 bg-black/15 px-3 py-2 text-xs leading-5 text-emerald-50/75">
+                {review.clientReceipt.shareNote}
               </div>
             </div>
           ) : null}
