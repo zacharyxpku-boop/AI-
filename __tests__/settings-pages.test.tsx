@@ -55,6 +55,16 @@ describe('settings pages', () => {
     expect(html).toContain('P1 加厚包');
     expect(html).toContain('材料字段');
     expect(html).toContain('放行口径');
+    expect(html).toContain('接入后打开的能力');
+    expect(html).toContain('缺失时保持的门禁');
+    expect(html).toContain('解锁一键视频、智能混剪、批量成片');
+    expect(html).toContain('不宣称自动成片');
+    expect(html).toContain('解锁平台账号池、OAuth 状态、账号健康');
+    expect(html).toContain('不把任何内容标记为真实发布');
+    expect(html).toContain('解锁广告账户读取、测试 campaign 创建');
+    expect(html).toContain('不宣称自动广告投放或自动优化');
+    expect(html).toContain('解锁 Wenai 自有 creative output');
+    expect(html).toContain('只能作为筷子科技 benchmark');
     expect(html).toContain('内部继续：');
     expect(html).toContain('外部提供：');
     expect(html).toContain('安全红线：');

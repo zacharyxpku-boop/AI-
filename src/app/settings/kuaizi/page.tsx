@@ -85,6 +85,8 @@ const PROVIDER_MATERIAL_PACKS = [
     priority: 'P0',
     pack: '视频生成 / 剪辑 provider 包',
     why: '决定 Create 和 Cut 能不能从工作流骨架进入真实成片工厂。',
+    unlocks: '解锁一键视频、智能混剪、批量成片、provider 回调、失败重试和客户 review 成片验收。',
+    blockedGate: '缺失时 Create/Cut 只能生成生产交接包、镜头清单和人工回填入口，不宣称自动成片。',
     provideVia: '在部署平台配置服务端 secret；测试素材用沙盒项目或无敏感商品。',
     materials: ['提交 endpoint', 'server token', 'webhook signing secret', 'sandbox task quota', '回调白名单', '成本上限'],
     doNotSend: '不要把 provider token、cookie、后台登录态贴到聊天或浏览器 localStorage。',
@@ -94,6 +96,8 @@ const PROVIDER_MATERIAL_PACKS = [
     priority: 'P0',
     pack: '平台 OAuth / 账号池授权包',
     why: '决定 Cast 能不能从 manual handoff 进入真实矩阵账号运营。',
+    unlocks: '解锁平台账号池、OAuth 状态、账号健康、发布频率、矩阵排班和 dispatch 门禁读取。',
+    blockedGate: '缺失时 Cast 只能保留 manual/provider-gated dispatch，不把任何内容标记为真实发布。',
     provideVia: '平台开发者后台创建 app，并把 Wenai 回调地址加入白名单。',
     materials: ['client id', 'client secret', 'redirect URI', '测试账号授权', '店铺/主页/账号 ID', '发布频率限制'],
     doNotSend: '不要提供个人主账号密码；只给可撤销 app 授权或测试账号授权。',
@@ -103,6 +107,8 @@ const PROVIDER_MATERIAL_PACKS = [
     priority: 'P0',
     pack: '广告账户 / Campaign 包',
     why: '决定广告投放是否能从 campaign ledger 进入真实预算和素材实验。',
+    unlocks: '解锁广告账户读取、测试 campaign 创建、预算门禁、素材绑定、停投规则和投放表现回流。',
+    blockedGate: '缺失时只能记录 campaign 假设和手动导入结果，不宣称自动广告投放或自动优化。',
     provideVia: '广告平台授权测试广告主，先用 sandbox 或小预算白名单 campaign。',
     materials: ['广告主 ID', '广告账户 ID', '创建/读取权限', '测试预算', '转化事件', '停投规则'],
     doNotSend: '不要开放无限预算或生产账户全权限；先用最小权限和预算上限。',
@@ -112,6 +118,8 @@ const PROVIDER_MATERIAL_PACKS = [
     priority: 'P1',
     pack: 'Analytics sync / 回流包',
     why: '决定 Compose 和 Cut 能不能靠真实表现数据复利，而不是靠人工判断。',
+    unlocks: '解锁平台表现自动同步、字段映射、去重、归因窗口、品牌学习档案和下一轮创意建议。',
+    blockedGate: '缺失时只能用 CSV/API 手工导入，不展示平台自动优化、自动复盘或实时表现回流。',
     provideVia: '平台 analytics API 或定时导出任务，字段先做只读同步。',
     materials: ['平台 account id', 'metric mapping', 'sync frequency', 'timezone', 'attribution window', 'API quota'],
     doNotSend: '不要混用多个平台口径；每个平台要明确指标定义和归因窗口。',
@@ -121,6 +129,8 @@ const PROVIDER_MATERIAL_PACKS = [
     priority: 'P1',
     pack: '企业云资产 / 权限包',
     why: '决定 Manage 能不能从内部 RBAC 模型进入真实企业云盘和审计。',
+    unlocks: '解锁对象存储、签名 URL、下载/分享 enforcement、团队角色、DLP、水印、留存和访问审计。',
+    blockedGate: '缺失时 Manage 只作为内部权限账本，不宣称企业云盘、团队空间或真实外部分发权限。',
     provideVia: '对象存储或企业网盘项目授权，先给单独 bucket/project 和服务账号。',
     materials: ['bucket/project', 'service account', 'signed URL policy', 'team roles', 'DLP/watermark rules', 'retention policy'],
     doNotSend: '不要把生产客户全量云盘直接授权；先用独立空间和最小权限。',
@@ -130,6 +140,8 @@ const PROVIDER_MATERIAL_PACKS = [
     priority: 'P1',
     pack: '规模数字审计包',
     why: '决定 91M+ / 42M+ 何时能从竞品 benchmark 变成 Wenai 自有规模指标。',
+    unlocks: '解锁 Wenai 自有 creative output、video distribution、平台来源、日期区间和去重口径的公开展示。',
+    blockedGate: '缺失时 91M+ / 42M+ 只能作为筷子科技 benchmark，不展示为 Wenai 自有规模运营能力。',
     provideVia: '只接受可审计来源、日期范围、去重规则和平台回执，不接受口头估算。',
     materials: ['creative output ledger', 'video distribution ledger', 'platform evidence URL', 'date range', 'dedupe rule', 'auditor note'],
     doNotSend: '不要把竞品公开数字写成 Wenai 自有成绩；没有审计前继续显示 benchmark。',
@@ -308,8 +320,10 @@ export default function KuaiziSettingsPage() {
                   {pack.priority}
                 </div>
               </div>
-              <div className="mt-3 grid gap-3 md:grid-cols-[0.9fr_1.1fr_1fr]">
+              <div className="mt-3 grid gap-3 md:grid-cols-2 xl:grid-cols-4">
                 <SetupColumn label="交付方式" value={pack.provideVia} />
+                <SetupColumn label="接入后打开的能力" value={pack.unlocks} />
+                <SetupColumn label="缺失时保持的门禁" value={pack.blockedGate} />
                 <div>
                   <div className="text-[11px] font-black text-slate-500">材料清单</div>
                   <div className="mt-2 flex flex-wrap gap-2">
@@ -320,7 +334,9 @@ export default function KuaiziSettingsPage() {
                     ))}
                   </div>
                 </div>
-                <SetupColumn label="验收证据" value={pack.acceptance} />
+              </div>
+              <div className="mt-3 rounded-md border border-emerald-200 bg-emerald-50 px-3 py-2 text-[12px] leading-5 text-emerald-800">
+                验收证据：{pack.acceptance}
               </div>
               <div className="mt-3 grid gap-2 md:grid-cols-3">
                 <MaterialCheck label="材料已放入安全位置" detail="只接受服务端环境、部署平台 secret 或平台后台授权，不接受明文粘贴。" />
