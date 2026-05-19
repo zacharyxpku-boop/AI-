@@ -256,6 +256,17 @@ describe('product readiness against Kuaizi benchmark', () => {
         ]),
       }),
     ]));
+    expect(report.materialGateSummary).toEqual(expect.objectContaining({
+      total: 8,
+      configured: expect.any(Number),
+      missingP0: expect.any(Number),
+      missingP1: expect.any(Number),
+      blocksCommercialLaunch: true,
+      evidence: expect.stringContaining('missingP0='),
+      nextMaterialPacks: expect.arrayContaining([
+        expect.stringContaining('P0: Real video generation/editing provider'),
+      ]),
+    }));
     expect(report.scaleClaimGuards).toEqual(expect.arrayContaining([
       expect.objectContaining({ requestedBenchmark: '91M+ creative output', canDisplay: false }),
       expect.objectContaining({ requestedBenchmark: '42M+ video distribution', canDisplay: false }),
@@ -362,6 +373,14 @@ describe('product readiness against Kuaizi benchmark', () => {
         materialPriority: 'P1',
       }),
     ]));
+    expect(body.report.materialGateSummary).toEqual(expect.objectContaining({
+      total: 8,
+      blocksCommercialLaunch: true,
+      evidence: expect.stringContaining('configured='),
+      nextMaterialPacks: expect.arrayContaining([
+        expect.stringContaining('P0:'),
+      ]),
+    }));
     expect(body.report.scaleClaimGuards).toEqual(expect.arrayContaining([
       expect.objectContaining({ requestedBenchmark: '91M+ creative output', canDisplay: false }),
       expect.objectContaining({ requestedBenchmark: '42M+ video distribution', canDisplay: false }),

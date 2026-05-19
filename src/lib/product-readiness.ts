@@ -210,6 +210,17 @@ export interface ExternalIntegrationRequirement {
   releaseChecks: string[];
 }
 
+export interface MaterialGateSummary {
+  total: number;
+  configured: number;
+  missingP0: number;
+  missingP1: number;
+  evidenceRequired: number;
+  blocksCommercialLaunch: boolean;
+  nextMaterialPacks: string[];
+  evidence: string;
+}
+
 export interface ScaleClaimGuard {
   label: string;
   requestedBenchmark: string;
@@ -259,6 +270,7 @@ export interface ProductReadinessReport {
   issues: ReadinessIssue[];
   friendTrialRisks: ReadinessIssue[];
   externalRequirements: ExternalIntegrationRequirement[];
+  materialGateSummary: MaterialGateSummary;
   scaleClaimGuards: ScaleClaimGuard[];
   projectReadiness?: {
     verdict: ReadinessVerdict;
@@ -391,6 +403,31 @@ function buildExternalRequirements(input: ReadinessServiceInput): ExternalIntegr
       ],
     },
   ];
+}
+
+function buildMaterialGateSummary(requirements: ExternalIntegrationRequirement[]): MaterialGateSummary {
+  const unresolved = requirements.filter(requirement => requirement.status !== 'configured');
+  const missingP0 = unresolved.filter(requirement => requirement.materialPriority === 'P0').length;
+  const missingP1 = unresolved.filter(requirement => requirement.materialPriority === 'P1').length;
+  const evidenceRequired = requirements.filter(requirement => requirement.status === 'evidence_required').length;
+  const nextMaterialPacks = unresolved
+    .sort((left, right) => {
+      if (left.materialPriority !== right.materialPriority) return left.materialPriority === 'P0' ? -1 : 1;
+      return left.label.localeCompare(right.label);
+    })
+    .slice(0, 4)
+    .map(requirement => `${requirement.materialPriority}: ${requirement.label}`);
+
+  return {
+    total: requirements.length,
+    configured: requirements.filter(requirement => requirement.status === 'configured').length,
+    missingP0,
+    missingP1,
+    evidenceRequired,
+    blocksCommercialLaunch: missingP0 > 0,
+    nextMaterialPacks,
+    evidence: `configured=${requirements.filter(requirement => requirement.status === 'configured').length}/${requirements.length}; missingP0=${missingP0}; missingP1=${missingP1}; evidenceRequired=${evidenceRequired}`,
+  };
 }
 
 function buildScaleClaimGuards(input: ReadinessServiceInput): ScaleClaimGuard[] {
@@ -813,6 +850,7 @@ export function evaluateProductReadiness(input: ReadinessServiceInput): ProductR
   const platformConnectors = input.platformConnectors;
   const platformAutomationReady = Boolean(platformConnectors?.platformAutomationReady);
   const externalRequirements = buildExternalRequirements(input);
+  const materialGateSummary = buildMaterialGateSummary(externalRequirements);
   const scaleClaimGuards = buildScaleClaimGuards(input);
   const productBlueprint = buildProductBlueprint(input, platformAutomationReady);
   const alternativeReferences = buildAlternativeReferences();
@@ -1158,6 +1196,7 @@ export function evaluateProductReadiness(input: ReadinessServiceInput): ProductR
     issues,
     friendTrialRisks,
     externalRequirements,
+    materialGateSummary,
     scaleClaimGuards,
     projectReadiness,
     recommendation: verdict === 'fail' ? '修复后保留' : '修复后保留',

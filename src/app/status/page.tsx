@@ -108,6 +108,16 @@ interface ReadinessResponse {
     issues: ReadinessIssue[];
     friendTrialRisks: ReadinessIssue[];
     externalRequirements: ExternalIntegrationRequirement[];
+    materialGateSummary?: {
+      total: number;
+      configured: number;
+      missingP0: number;
+      missingP1: number;
+      evidenceRequired: number;
+      blocksCommercialLaunch: boolean;
+      nextMaterialPacks: string[];
+      evidence: string;
+    };
     scaleClaimGuards: ScaleClaimGuard[];
     projectReadiness?: {
       verdict: 'pass' | 'conditional' | 'fail';
@@ -368,6 +378,30 @@ export function formatProjectEvidenceMetric(item: string): ProjectEvidenceMetric
     label: PROJECT_EVIDENCE_LABELS[key] || '补充证据',
     value: formatEvidenceValue(key, rawValue),
   };
+}
+
+function MaterialGateChip({
+  label,
+  value,
+  tone = 'neutral',
+}: {
+  label: string;
+  value: string;
+  tone?: 'neutral' | 'success' | 'accent' | 'error';
+}) {
+  const toneClass = tone === 'success'
+    ? 'border-success/30 text-success'
+    : tone === 'accent'
+      ? 'border-accent/30 text-accent'
+      : tone === 'error'
+        ? 'border-error/30 text-error'
+        : 'border-border-subtle text-text-primary';
+  return (
+    <div className={`rounded border px-2 py-2 ${toneClass}`}>
+      <div className="text-[9px] font-mono uppercase tracking-wider text-text-tertiary">{label}</div>
+      <div className="mt-1 text-[14px] font-semibold">{value}</div>
+    </div>
+  );
 }
 
 function projectEvidenceMap(projectMaturity?: ReadinessResponse['report']['projectReadiness']) {
@@ -787,6 +821,7 @@ export default function StatusPage() {
   const platformConnectorFeature = maturity?.features.find(feature => feature.name === 'Platform connector automation ledger');
   const platformConnectorWorkflow = maturity?.workflows.find(workflow => workflow.name.includes('Platform OAuth'));
   const externalRequirements = buildStatusExternalRequirements(maturity);
+  const materialGateSummary = maturity?.materialGateSummary;
   const scaleClaimGuards = maturity?.scaleClaimGuards || [];
   const topActions = actionQueue?.actions.slice(0, 4) || [];
   const assetPermissionAudits = assetPermissions?.accessAudits.slice(0, 4) || [];
@@ -1164,6 +1199,37 @@ export default function StatusPage() {
                   未接入前不宣称筷子等价执行
                 </div>
               </div>
+              {materialGateSummary && (
+                <div className="mb-3 rounded-md border border-accent/25 bg-bg-surface/50 p-3">
+                  <div className="flex flex-col gap-2 md:flex-row md:items-start md:justify-between">
+                    <div>
+                      <div className="text-[11px] font-semibold text-text-primary">外部材料门禁汇总</div>
+                      <p className="mt-1 text-[10px] leading-relaxed text-text-secondary">{materialGateSummary.evidence}</p>
+                    </div>
+                    <div className={`w-fit rounded border px-2 py-1 text-[10px] font-mono ${
+                      materialGateSummary.blocksCommercialLaunch ? 'border-error/30 text-error' : 'border-success/30 text-success'
+                    }`}>
+                      {materialGateSummary.blocksCommercialLaunch ? '阻断商用发布' : 'P0 材料已清'}
+                    </div>
+                  </div>
+                  <div className="mt-3 grid gap-2 md:grid-cols-4">
+                    <MaterialGateChip label="已配置" value={`${materialGateSummary.configured}/${materialGateSummary.total}`} />
+                    <MaterialGateChip label="P0 缺口" value={`${materialGateSummary.missingP0}`} tone={materialGateSummary.missingP0 ? 'error' : 'success'} />
+                    <MaterialGateChip label="P1 缺口" value={`${materialGateSummary.missingP1}`} tone={materialGateSummary.missingP1 ? 'accent' : 'success'} />
+                    <MaterialGateChip label="待审计" value={`${materialGateSummary.evidenceRequired}`} tone={materialGateSummary.evidenceRequired ? 'accent' : 'success'} />
+                  </div>
+                  {materialGateSummary.nextMaterialPacks.length > 0 && (
+                    <div className="mt-3 grid gap-1">
+                      <div className="text-[10px] font-semibold text-text-tertiary">下一批材料包</div>
+                      {materialGateSummary.nextMaterialPacks.map(pack => (
+                        <div className="rounded border border-border-subtle/70 bg-bg-root/30 px-2 py-1 text-[10px] leading-relaxed text-text-secondary" key={pack}>
+                          {pack}
+                        </div>
+                      ))}
+                    </div>
+                  )}
+                </div>
+              )}
               <div className="grid grid-cols-1 gap-2 md:grid-cols-2">
                 {externalRequirements.map(requirement => (
                   <div key={requirement.id} className={`rounded-md border px-3 py-3 ${
