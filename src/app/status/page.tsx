@@ -559,6 +559,39 @@ const FINAL_PRODUCT_BLUEPRINT = [
   },
 ];
 
+const INTERNAL_EXTERNAL_DELIVERY_BOUNDARY = [
+  {
+    layer: 'Compose / 创意洞察',
+    internal: 'Wenai 继续补 hook bank、竞品账号/榜单导入、视频结构拆解、品牌学习档案和下一轮 action queue。',
+    external: '榜单源、授权观察账号、可合法解析的视频来源、Narra/多模态解析 provider 或可审计人工导入源。',
+    stopLine: '没有持续来源和解析证据前，不宣称全网灵感管理或热门视频自动解析。',
+  },
+  {
+    layer: 'Create + Cut / 生产与混剪',
+    internal: 'Wenai 继续把 brief、脚本、素材、provider request、视频队列、成片回灌、review token 和 CRM handoff 串成一条线。',
+    external: '视频生成/剪辑 provider endpoint、server token、webhook signing secret、素材授权、对象存储和正式可访问交付域名。',
+    stopLine: '没有 provider 完成回调、可打开成片和客户批准前，不宣称一键视频或智能混剪已商用。',
+  },
+  {
+    layer: 'Cast / 分发与广告',
+    internal: 'Wenai 继续补账号矩阵、发布槽位、dispatch handoff、campaign ledger、UTM、预算门禁和表现导入。',
+    external: 'TikTok/Meta/Google/小红书等 OAuth app、广告主/广告账户 ID、发布权限、测试预算、转化事件和 analytics sync。',
+    stopLine: '没有平台授权、自动发布回执和广告账户证据前，不宣称 PubPal/矩阵分发、自动投放或自动优化。',
+  },
+  {
+    layer: 'Manage / 企业资产与权限',
+    internal: 'Wenai 继续把 RBAC、资产访问审计、DLP/watermark、下载/分享/publish 检查接到交付物和发布动作。',
+    external: '对象存储 bucket/project、service account、signed URL policy、团队角色、保留策略、DLP/水印规则和企业域名。',
+    stopLine: '没有真实对象存储和签名 URL enforcement 前，不宣称筷子云盘级企业资产协作。',
+  },
+  {
+    layer: 'Scale / 规模数字审计',
+    internal: 'Wenai 继续沉淀 creative output ledger、video distribution ledger、去重规则、证据 URL 和日期范围。',
+    external: '平台后台导出、审计口径、数据区间、去重规则、第三方或客户确认材料。',
+    stopLine: '91M+ creative output、42M+ video distribution 只能作为竞品 benchmark，不能作为 Wenai 自有规模展示。',
+  },
+];
+
 const ALTERNATIVE_PLATFORM_REFERENCES = [
   {
     name: 'Hooksy / Hooked',
@@ -831,6 +864,32 @@ export default function StatusPage() {
                 <div className="text-[10px] font-mono text-accent">Step {item.step}</div>
                 <div className="mt-1 text-[11px] font-semibold text-text-primary">{item.page}</div>
                 <p className="mt-1 text-[10px] leading-relaxed text-text-tertiary">{item.job}</p>
+              </div>
+            ))}
+          </div>
+        </div>
+        <div className="mt-4 rounded-md border border-amber-400/25 bg-amber-950/10 p-3">
+          <div className="mb-2 flex flex-col gap-1 md:flex-row md:items-center md:justify-between">
+            <div className="text-[10px] font-mono uppercase tracking-wider text-text-tertiary">
+              内部 / 外部交付边界板
+            </div>
+            <a className="text-[10px] font-mono text-accent underline-offset-4 hover:underline" href="/settings/kuaizi">
+              去外部材料包
+            </a>
+          </div>
+          <p className="mb-3 text-[10px] leading-relaxed text-text-secondary">
+            内部能继续推进的，Wenai 继续做；必须外部授权或 provider 材料才能真实闭环的，集中在这里等待你统一提供。没有证据就保持门禁，不把骨架包装成平台级规模执行。
+          </p>
+          <div className="grid grid-cols-1 gap-2 lg:grid-cols-5">
+            {INTERNAL_EXTERNAL_DELIVERY_BOUNDARY.map(item => (
+              <div key={item.layer} className="rounded-md border border-border-subtle bg-bg-surface/40 px-3 py-3">
+                <div className="text-[11px] font-semibold text-text-primary">{item.layer}</div>
+                <div className="mt-2 text-[10px] font-semibold text-success">Wenai 内部继续做</div>
+                <p className="mt-1 text-[10px] leading-relaxed text-text-secondary">{item.internal}</p>
+                <div className="mt-2 text-[10px] font-semibold text-accent">需要你统一提供/授权</div>
+                <p className="mt-1 text-[10px] leading-relaxed text-text-secondary">{item.external}</p>
+                <div className="mt-2 text-[10px] font-semibold text-error">停止线</div>
+                <p className="mt-1 text-[10px] leading-relaxed text-text-tertiary">{item.stopLine}</p>
               </div>
             ))}
           </div>

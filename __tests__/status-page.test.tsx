@@ -36,6 +36,15 @@ describe('status page', () => {
     expect(html).toContain('Wenai 内部继续做');
     expect(html).toContain('需要你统一提供/授权');
     expect(html).toContain('当前停止线');
+    expect(html).toContain('内部 / 外部交付边界板');
+    expect(html).toContain('去外部材料包');
+    expect(html).toContain('内部能继续推进的，Wenai 继续做');
+    expect(html).toContain('Create + Cut / 生产与混剪');
+    expect(html).toContain('视频生成/剪辑 provider endpoint');
+    expect(html).toContain('没有 provider 完成回调、可打开成片和客户批准前，不宣称一键视频或智能混剪已商用');
+    expect(html).toContain('没有平台授权、自动发布回执和广告账户证据前，不宣称 PubPal/矩阵分发、自动投放或自动优化');
+    expect(html).toContain('没有真实对象存储和签名 URL enforcement 前，不宣称筷子云盘级企业资产协作');
+    expect(html).toContain('91M+ creative output、42M+ video distribution 只能作为竞品 benchmark');
     expect(html).toContain('AI 视频分析、结构拆解、智能混剪、版本对比、批量成片和复盘回流');
     expect(html).toContain('多平台分发、PubPal/矩阵分发、广告投放、预算门禁、发布证据和 analytics sync');
     expect(html).toContain('没有平台授权和发布/投放回执前，不能展示已自动分发或已自动优化广告');
