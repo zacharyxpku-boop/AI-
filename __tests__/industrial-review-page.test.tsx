@@ -6,6 +6,7 @@ import IndustrialReviewTokenPage from '@/app/review/[token]/page';
 import {
   IndustrialReviewPortalClient,
   buildClientReviewPassport,
+  buildReviewCrmHandoffPacket,
   buildReviewCommercialAcceptanceChecks,
   buildReviewVariantPlaybook,
 } from '@/components/IndustrialReviewPortalClient';
@@ -69,6 +70,8 @@ describe('industrial review page', () => {
     expect(html).toContain('Review Action Playbook');
     expect(html).toContain('客户交付护照');
     expect(html).toContain('Review Commercial Acceptance Board');
+    expect(html).toContain('Review CRM Handoff Packet');
+    expect(html).toContain('客户动作进入 CRM/分发/复盘承接包');
     expect(html).toContain('客户审核商用品质验收板');
     expect(html).toContain('预览可用门禁');
     expect(html).toContain('反馈写回门禁');
@@ -208,6 +211,61 @@ describe('industrial review page', () => {
     }));
   });
 
+  it('builds CRM handoff packets from review states without pretending external automation', () => {
+    const activeReview = {
+      token: 'crm-handoff-active',
+      projectId: 'crm-project',
+      assetId: 'crm-asset',
+      assetTitle: 'CRM handoff asset',
+      deliverableUrl: 'https://cdn.example.test/crm.mp4',
+      expiresAt: new Date(Date.now() + 86400_000).toISOString(),
+      status: 'active' as const,
+      feedbackCount: 0,
+    };
+
+    expect(buildReviewCrmHandoffPacket(undefined, false, 0)).toEqual([
+      expect.objectContaining({
+        lane: '审核入口未加载',
+        ready: false,
+        releaseGate: expect.stringContaining('有效 review token'),
+      }),
+    ]);
+    expect(buildReviewCrmHandoffPacket({ ...activeReview, deliverableUrl: undefined }, false, 0)).toEqual([
+      expect.objectContaining({
+        lane: '交付物补链',
+        ready: false,
+        owner: '生产运营',
+        releaseGate: expect.stringContaining('批准与分发都保持关闭'),
+      }),
+    ]);
+    expect(buildReviewCrmHandoffPacket(activeReview, true, 2)).toEqual([
+      expect.objectContaining({
+        lane: '返修任务承接',
+        ready: false,
+        owner: '生产/剪辑运营',
+        nextAction: expect.stringContaining('返修任务'),
+      }),
+    ]);
+    expect(buildReviewCrmHandoffPacket({ ...activeReview, status: 'approved', approvalName: 'Buyer Ops' }, true, 1)).toEqual(expect.arrayContaining([
+      expect.objectContaining({
+        lane: 'CRM 成交/交付承接',
+        ready: true,
+        owner: 'CRM/销售运营',
+        evidence: expect.stringContaining('Buyer Ops'),
+      }),
+      expect.objectContaining({
+        lane: '分发与投放放行',
+        ready: true,
+        releaseGate: expect.stringContaining('自动发布仍等待 OAuth'),
+      }),
+      expect.objectContaining({
+        lane: '复盘回流',
+        ready: true,
+        releaseGate: expect.stringContaining('analytics sync'),
+      }),
+    ]));
+  });
+
   it('keeps the review client focused on feedback and approval actions', () => {
     const html = renderToStaticMarkup(<IndustrialReviewPortalClient
       token="wrv_static_token"
@@ -297,6 +355,11 @@ describe('industrial review page', () => {
     expect(html).toContain('客户交接闭环');
     expect(html).toContain('系统写回回执');
     expect(html).toContain('客户每一步都会落到可追踪的运营链路');
+    expect(html).toContain('Review CRM Handoff Packet');
+    expect(html).toContain('客户动作进入 CRM/分发/复盘承接包');
+    expect(html).toContain('客户时间线');
+    expect(html).toContain('负责人');
+    expect(html).toContain('放行门禁');
     expect(html).toContain('生产记录');
     expect(html).toContain('CRM 交接');
     expect(html).toContain('分发门禁');

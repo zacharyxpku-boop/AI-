@@ -25,7 +25,12 @@ describe('current product status report', () => {
     expect(doc).toContain('Creative Harvest Acceptance Board');
     expect(doc).toContain('来源广度、重复采集、多模态解析、生产交接和复利学习');
     expect(doc).toContain('Review Commercial Acceptance Board');
-    expect(doc).toContain('预览、反馈、批准、异常保护、下游交接');
+    expect(doc).toContain('Review CRM Handoff Packet');
+    expect(doc).toContain('CRM/分发/复盘承接');
+    expect(doc).toContain('88%');
+    expect(doc).toContain('91%');
+    expect(doc).toContain('54%');
+    expect(doc).toContain('预览、反馈、批准、异常保护、CRM/分发/复盘承接');
     expect(doc).toContain('Cut Operating Checks');
     expect(doc).toContain('Provider Sandbox Contract');
     expect(doc).toContain('submit adapter');
@@ -33,9 +38,6 @@ describe('current product status report', () => {
     expect(doc).toContain('failure recovery');
     expect(doc).toContain('result ingestion');
     expect(doc).toContain('client review');
-    expect(doc).toContain('87%');
-    expect(doc).toContain('90%');
-    expect(doc).toContain('53%');
     expect(doc).toContain('Cut 商用品质验收板');
     expect(doc).toContain('download/share/publish/approve fail-closed enforcement');
     expect(doc).toContain('资产访问门禁矩阵');

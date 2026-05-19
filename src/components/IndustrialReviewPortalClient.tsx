@@ -375,6 +375,109 @@ function systemWritebackReceipts(
   ];
 }
 
+export interface ReviewCrmHandoffPacket {
+  lane: string;
+  ready: boolean;
+  owner: string;
+  nextAction: string;
+  evidence: string;
+  releaseGate: string;
+}
+
+export function buildReviewCrmHandoffPacket(
+  review: ReviewPayload['review'] | undefined,
+  hasDeliverable: boolean,
+  feedbackCount: number,
+): ReviewCrmHandoffPacket[] {
+  const status = review?.status;
+  const statusText = displayStatusLabel(review);
+  const baseEvidence = `token ${review?.token || '-'} / project ${review?.projectId || '-'} / asset ${review?.assetId || '-'}`;
+
+  if (!review) {
+    return [{
+      lane: '审核入口未加载',
+      ready: false,
+      owner: '运营',
+      nextAction: '重新打开或重发 review token，先确认客户拿到的是最新链接。',
+      evidence: '没有 review payload，不能进入 CRM 或分发。',
+      releaseGate: '必须先拿到有效 review token。',
+    }];
+  }
+
+  if (status === 'approved') {
+    return [
+      {
+        lane: 'CRM 成交/交付承接',
+        ready: true,
+        owner: 'CRM/销售运营',
+        nextAction: '把批准人、批准时间、交付物链接和下一次跟进动作写入客户时间线。',
+        evidence: `${baseEvidence} / approved by ${review.approvalName || '客户'}`,
+        releaseGate: '可以进入客户交付、续约跟进或复购机会。',
+      },
+      {
+        lane: '分发与投放放行',
+        ready: hasDeliverable,
+        owner: 'Cast/投放运营',
+        nextAction: '把已批准交付物接到分发计划、账号矩阵和广告 campaign 待办。',
+        evidence: hasDeliverable ? '有可打开交付物，且客户已批准。' : '客户已批准但交付物链接缺失，必须先补链。',
+        releaseGate: hasDeliverable ? '允许进入人工/沙盒分发；自动发布仍等待 OAuth。' : '补齐交付物链接前不能分发。',
+      },
+      {
+        lane: '复盘回流',
+        ready: true,
+        owner: 'Manage/增长复盘',
+        nextAction: '上线后把平台表现、客户反馈和胜出结构回写到品牌学习档案。',
+        evidence: `feedback ${feedbackCount} / status ${statusText}`,
+        releaseGate: '真实表现回流仍等待 analytics sync 或手动导入。',
+      },
+    ];
+  }
+
+  if (status === 'expired' || status === 'revoked') {
+    return [{
+      lane: '链接异常承接',
+      ready: false,
+      owner: '运营',
+      nextAction: status === 'expired'
+        ? '重新生成审核链接，并说明旧链接已过期不能继续验收。'
+        : '确认撤销原因和交付版本，再发送新的审核链接。',
+      evidence: `${baseEvidence} / status ${statusText}`,
+      releaseGate: '新链接生成并通知客户前，不进入 CRM 成交或分发。',
+    }];
+  }
+
+  if (!hasDeliverable) {
+    return [{
+      lane: '交付物补链',
+      ready: false,
+      owner: '生产运营',
+      nextAction: '补齐预览/下载链接，重新通知客户验收；不要让客户口头批准空交付。',
+      evidence: `${baseEvidence} / missing deliverable url`,
+      releaseGate: '交付物可打开前，批准与分发都保持关闭。',
+    }];
+  }
+
+  if (feedbackCount > 0) {
+    return [{
+      lane: '返修任务承接',
+      ready: false,
+      owner: '生产/剪辑运营',
+      nextAction: '把客户反馈拆成返修任务，处理后让客户回到同一 review 链接复核。',
+      evidence: `${baseEvidence} / feedback ${feedbackCount}`,
+      releaseGate: '返修处理完成并获得客户批准前，不进入分发。',
+    }];
+  }
+
+  return [{
+    lane: '等待客户决策',
+    ready: false,
+    owner: '客户成功/运营',
+    nextAction: '提醒客户先预览交付物；有问题反馈，没问题批准。',
+    evidence: `${baseEvidence} / deliverable ready / status ${statusText}`,
+    releaseGate: '客户批准前不进入自动发布、广告投放或规模数字展示。',
+  }];
+}
+
 export function buildClientReviewPassport(
   review: ReviewPayload['review'] | undefined,
   hasDeliverable: boolean,
@@ -705,6 +808,7 @@ export function IndustrialReviewPortalClient({
   const path = decisionPath(review?.status, Boolean(deliverableUrl), payload?.feedback.length || 0);
   const handoffCards = clientHandoffCards(review, Boolean(deliverableUrl), payload?.feedback.length || 0);
   const writebackReceipts = systemWritebackReceipts(review, Boolean(deliverableUrl), payload?.feedback.length || 0);
+  const crmHandoffPacket = buildReviewCrmHandoffPacket(review, Boolean(deliverableUrl), payload?.feedback.length || 0);
   const clientPassport = buildClientReviewPassport(review, Boolean(deliverableUrl), payload?.feedback.length || 0);
   const commercialAcceptanceChecks = buildReviewCommercialAcceptanceChecks(review, Boolean(deliverableUrl), payload?.feedback.length || 0);
   const activeVariant = REVIEW_UI_VARIANTS.find(variant => variant.id === uiVariant) || REVIEW_UI_VARIANTS[0];
@@ -1019,6 +1123,31 @@ export function IndustrialReviewPortalClient({
                     <span className="border border-cyan-200/20 px-2 py-0.5 text-[11px] text-cyan-100/70">{item.state}</span>
                   </div>
                   <div className="mt-2 text-xs leading-5 text-cyan-100/65">{item.detail}</div>
+                </div>
+              ))}
+            </div>
+          </div> : null}
+          {activeVariant.showInternalReceipts ? <div className="border border-blue-300/20 bg-blue-950/15 px-4 py-3">
+            <div className="flex flex-col gap-1 sm:flex-row sm:items-end sm:justify-between">
+              <div>
+                <div className="text-xs font-semibold text-blue-100/65">Review CRM Handoff Packet</div>
+                <div className="mt-1 text-sm font-semibold text-blue-50">客户动作进入 CRM/分发/复盘承接包</div>
+              </div>
+              <div className="text-xs leading-5 text-blue-100/60">
+                对齐 Clico 的客户时间线思路：客户不是点完按钮就结束，系统要给运营一个可执行接力包。
+              </div>
+            </div>
+            <div className="mt-3 grid gap-2 lg:grid-cols-3">
+              {crmHandoffPacket.map(item => (
+                <div className={`border px-3 py-2 ${item.ready ? 'border-blue-300/20 bg-black/20 text-blue-100' : 'border-amber-300/25 bg-amber-950/20 text-amber-100'}`} key={item.lane}>
+                  <div className="flex items-start justify-between gap-2">
+                    <div className="text-xs font-semibold">{item.lane}</div>
+                    <span className="border border-current/20 px-2 py-0.5 text-[11px]">{item.ready ? '可承接' : '待处理'}</span>
+                  </div>
+                  <div className="mt-2 text-xs leading-5 opacity-80">负责人：{item.owner}</div>
+                  <div className="mt-2 text-xs leading-5 opacity-80">下一步：{item.nextAction}</div>
+                  <div className="mt-2 text-xs leading-5 opacity-70">证据：{item.evidence}</div>
+                  <div className="mt-2 text-xs leading-5 opacity-90">放行门禁：{item.releaseGate}</div>
                 </div>
               ))}
             </div>
