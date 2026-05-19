@@ -201,6 +201,68 @@ function manualTrialRunbook(item: VideoProductionQueue['items'][number]) {
   ];
 }
 
+export function buildVideoProductionPassport(item: VideoProductionQueue['items'][number]) {
+  const hasRemixPlan = item.remixPlan.length > 0;
+  const providerReady = item.mode === 'provider_ready';
+  const hasResult = item.resultAssetCount > 0;
+  const hasReview = item.clientReviewAssetCount > 0 || item.reviewLinks.length > 0;
+  const hasApproval = item.approvedDeliverableCount > 0;
+  const hasPerformance = item.measuredDispatchCount > 0;
+
+  return [
+    {
+      title: '洞察来源',
+      value: hasRemixPlan ? `${item.remixPlan.length} 个混剪变体` : '待补 Hook 结构',
+      tone: hasRemixPlan ? 'ready' : 'attention',
+      detail: hasRemixPlan
+        ? '已从创意机会、打法簇或基础模板生成可执行剪辑结构。'
+        : '缺少 Hook、节奏、镜头顺序和平台适配时，不进入生产。',
+    },
+    {
+      title: '生产执行',
+      value: providerReady ? 'provider 可提交' : '人工交接',
+      tone: providerReady ? 'ready' : 'attention',
+      detail: providerReady
+        ? '素材、授权和 provider gate 已满足，可进入真实执行队列。'
+        : '外部 provider 未满足前，只交付剪辑包和手工回填入口。',
+    },
+    {
+      title: '成片证据',
+      value: hasResult ? '已有成片 URL' : '待回填成片',
+      tone: hasResult ? 'ready' : 'locked',
+      detail: hasResult
+        ? '成片已经写回生产结果，可继续客户审核。'
+        : '没有可打开成片前，不能宣称一键视频已完成。',
+    },
+    {
+      title: '客户验收',
+      value: hasApproval ? '已批准' : hasReview ? '审核中' : '待生成审核',
+      tone: hasApproval ? 'ready' : hasReview ? 'attention' : 'locked',
+      detail: hasApproval
+        ? '客户批准已写回，后续可进入分发/CRM。'
+        : hasReview
+          ? '客户可通过 review 链接反馈或批准。'
+          : '成片回填后必须生成免登录 review 链接。',
+    },
+    {
+      title: '分发证据',
+      value: item.measuredDispatchCount > 0 ? `${item.measuredDispatchCount} 条回流` : `${item.dispatchCount} 条计划`,
+      tone: hasPerformance ? 'ready' : item.dispatchCount > 0 ? 'attention' : 'locked',
+      detail: hasPerformance
+        ? '发布或投放表现已经回流，可进入复盘和品牌学习。'
+        : item.dispatchCount > 0
+          ? '已有分发计划或 dispatch，仍需发布证据和表现数据。'
+          : '缺少分发计划时不能形成 Cast/Manage 闭环。',
+    },
+  ];
+}
+
+function productionPassportClass(tone: string) {
+  if (tone === 'ready') return 'border-emerald-300/25 bg-emerald-950/20 text-emerald-100';
+  if (tone === 'locked') return 'border-red-300/25 bg-red-950/25 text-red-100';
+  return 'border-amber-300/25 bg-amber-950/20 text-amber-100';
+}
+
 function friendTrialReadiness(queue: VideoProductionQueue | null, variant: FactoryUiVariantId) {
   const hasTask = (queue?.itemCount || 0) > 0;
   const hasResult = (queue?.resultAssetCount || 0) > 0;
@@ -930,6 +992,26 @@ export function VideoProductionQueueClient({
                     ) : <div className="mt-2 text-xs text-emerald-200">交接证据已覆盖计划、执行、成片、审核、批准和表现回流。</div>}
                   </div>
                   <div className="mt-3 text-xs text-white/55">渠道：{item.channels.join(', ') || '-'}</div>
+                  <div className="mt-3 border border-cyan-300/20 bg-cyan-950/20 p-3">
+                    <div className="flex flex-col gap-1 sm:flex-row sm:items-start sm:justify-between">
+                      <div>
+                        <div className="text-xs font-semibold text-cyan-100">视频生产护照</div>
+                        <div className="mt-1 text-[11px] leading-5 text-cyan-100/65">把智能混剪和一键视频拆成可验收门禁</div>
+                      </div>
+                      <div className="text-[11px] leading-5 text-cyan-100/55">
+                        没有成片、客户批准和回流证据前，不把任务队列说成真实视频工厂。
+                      </div>
+                    </div>
+                    <div className="mt-3 grid gap-2 md:grid-cols-5">
+                      {buildVideoProductionPassport(item).map(gate => (
+                        <div className={`border px-3 py-2 ${productionPassportClass(gate.tone)}`} key={gate.title}>
+                          <div className="text-xs opacity-65">{gate.title}</div>
+                          <div className="mt-1 text-sm font-semibold">{gate.value}</div>
+                          <div className="mt-1 text-xs leading-5 opacity-75">{gate.detail}</div>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
                   {item.remixPlan.length ? (
                     <div className="mt-3 border border-white/10 bg-white/[0.03] p-3">
                       <div className="text-xs font-semibold text-white/75">智能混剪计划</div>

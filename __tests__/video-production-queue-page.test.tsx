@@ -2,7 +2,7 @@ import { renderToStaticMarkup } from 'react-dom/server';
 import { describe, expect, it } from 'vitest';
 
 import VideoFactoryPage from '@/app/factory/video/page';
-import { VideoProductionQueueClient, buildVideoFactoryVariantPlaybook } from '@/components/VideoProductionQueueClient';
+import { VideoProductionQueueClient, buildVideoFactoryVariantPlaybook, buildVideoProductionPassport } from '@/components/VideoProductionQueueClient';
 import type { OneClickVideoOperationResult, VideoProductionQueue } from '@/lib/industrial-video-workflow';
 
 describe('video production queue page', () => {
@@ -297,6 +297,13 @@ describe('video production queue page', () => {
         }],
       }],
     };
+    expect(buildVideoProductionPassport(queue.items[0])).toEqual(expect.arrayContaining([
+      expect.objectContaining({ title: '洞察来源', value: '1 个混剪变体', tone: 'ready' }),
+      expect.objectContaining({ title: '生产执行', value: '人工交接', detail: expect.stringContaining('外部 provider') }),
+      expect.objectContaining({ title: '成片证据', value: '待回填成片', tone: 'locked' }),
+      expect.objectContaining({ title: '客户验收', value: '审核中' }),
+      expect.objectContaining({ title: '分发证据', value: '1 条计划' }),
+    ]));
     const html = renderToStaticMarkup(
       <VideoProductionQueueClient initialProjectId="video-project" initialQueue={queue} selectedVariantId="friend_trial" />,
     );
@@ -304,6 +311,13 @@ describe('video production queue page', () => {
     expect(html).toContain('生产交接包');
     expect(html).toContain('客户试用出口');
     expect(html).toContain('把下面链接发给客户或朋友');
+    expect(html).toContain('视频生产护照');
+    expect(html).toContain('把智能混剪和一键视频拆成可验收门禁');
+    expect(html).toContain('洞察来源');
+    expect(html).toContain('1 个混剪变体');
+    expect(html).toContain('成片证据');
+    expect(html).toContain('待回填成片');
+    expect(html).toContain('没有可打开成片前，不能宣称一键视频已完成');
     expect(html).toContain('只能测试审核入口');
     expect(html).toContain('已有 1 个视频任务');
     expect(html).toContain('已有 1 个客户审核入口');
