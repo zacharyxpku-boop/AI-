@@ -87,6 +87,18 @@ function readablePayload(payload: Record<string, unknown>) {
     .join('；');
 }
 
+function reviewUrlWithVariant(url: string, variant: FactoryUiVariantId) {
+  try {
+    const parsed = new URL(url, 'https://wenai.local');
+    parsed.searchParams.set('variant', variant);
+    if (url.startsWith('http://') || url.startsWith('https://')) return parsed.toString();
+    return `${parsed.pathname}${parsed.search}`;
+  } catch {
+    const separator = url.includes('?') ? '&' : '?';
+    return `${url}${separator}variant=${variant}`;
+  }
+}
+
 function queueText(value: string) {
   const map: Record<string, string> = {
     'Provider generation remains handoff-only until config, consent, references, and product assets are ready.': '供应商生成仍处于仅交接状态，需要完成配置、授权、参考视频和产品素材后才能执行。',
@@ -692,7 +704,7 @@ export function VideoProductionQueueClient({
                     {item.handoffPacket.reviewPortalUrls.length ? (
                       <div className="mt-2 space-y-1">
                         {item.handoffPacket.reviewPortalUrls.map(url => (
-                          <a className="block truncate text-xs text-emerald-200 underline-offset-4 hover:underline" href={url} key={url}>客户审核门户：{url}</a>
+                          <a className="block truncate text-xs text-emerald-200 underline-offset-4 hover:underline" href={reviewUrlWithVariant(url, selectedVariantId)} key={url}>客户审核门户：{reviewUrlWithVariant(url, selectedVariantId)}</a>
                         ))}
                       </div>
                     ) : null}
@@ -742,12 +754,18 @@ export function VideoProductionQueueClient({
                     </div>
                   </div>
                   {item.reviewLinks.length ? (
-                    <div className="mt-3 space-y-1">
+                    <div className="mt-3 border border-emerald-300/20 bg-emerald-950/20 p-3">
+                      <div className="text-xs font-semibold text-emerald-100">客户试用出口</div>
+                      <p className="mt-1 text-xs leading-5 text-emerald-100/70">
+                        把下面链接发给客户或朋友；当前会进入 {selectedVariant.label}，客户只需要预览、反馈或批准。
+                      </p>
+                      <div className="mt-2 space-y-1">
                       {item.reviewLinks.map(link => (
-                        <a className="block truncate text-xs text-emerald-200 underline-offset-4 hover:underline" href={`/review/${link.token}`} key={link.token}>
-                          审核：{link.assetTitle} / {link.status}
+                        <a className="block truncate text-xs text-emerald-200 underline-offset-4 hover:underline" href={reviewUrlWithVariant(`/review/${link.token}`, selectedVariantId)} key={link.token}>
+                          审核：{link.assetTitle} / {link.status} / {reviewUrlWithVariant(`/review/${link.token}`, selectedVariantId)}
                         </a>
                       ))}
+                      </div>
                     </div>
                   ) : null}
                   {item.blockers.length ? (

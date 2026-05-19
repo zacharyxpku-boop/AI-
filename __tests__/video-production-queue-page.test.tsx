@@ -178,10 +178,33 @@ describe('video production queue page', () => {
         completedProviderExecutionCount: 0,
         failedProviderExecutionCount: 0,
         resultAssetCount: 0,
-        clientReviewAssetCount: 0,
+        clientReviewAssetCount: 1,
         approvedDeliverableCount: 0,
         revisionRequestedCount: 0,
-        reviewLinks: [],
+        reviewLinks: [{
+          token: 'review-video-1',
+          projectId: 'video-project',
+          assetId: 'asset-video-1',
+          assetTitle: 'Travel Bag 成片',
+          status: 'active',
+          statusLabel: '待客户验收',
+          clientHeadline: '请先预览成片，再选择反馈或批准',
+          clientRisk: '批准会写回生产链路。',
+          supportAction: '打不开就先提交问题反馈。',
+          nextAction: '先预览成片，再反馈或批准。',
+          clientChecklist: [],
+          clientDecision: {
+            primaryActionLabel: '确认无误后批准',
+            primaryActionState: 'approve',
+            operatorNextStep: '批准后进入分发。',
+            evidenceToCheck: ['成片可打开'],
+          },
+          escalationMessage: '请运营重新确认链接。',
+          canSubmitFeedback: true,
+          canApprove: true,
+          feedbackCount: 0,
+          expiresAt: new Date(Date.now() + 86400_000).toISOString(),
+        }],
         resultUrls: [],
         channels: ['TikTok Shop'],
         remixPlan: [{
@@ -204,7 +227,7 @@ describe('video production queue page', () => {
         handoffPacket: {
           summary: 'provider_gate / handoff_only / plans:1 / dispatches:1 / results:0 / reviews:0 / approved:0',
           missingEvidence: ['Missing completed provider/editor result URL.'],
-          reviewPortalUrls: [],
+          reviewPortalUrls: ['/review/review-video-1'],
           executionTrace: ['handoff_asset:asset-video-1'],
         },
         blockers: ['Provider generation remains handoff-only until config, consent, references, and product assets are ready.'],
@@ -218,9 +241,16 @@ describe('video production queue page', () => {
         }],
       }],
     };
-    const html = renderToStaticMarkup(<VideoProductionQueueClient initialProjectId="video-project" initialQueue={queue} />);
+    const html = renderToStaticMarkup(
+      <VideoProductionQueueClient initialProjectId="video-project" initialQueue={queue} selectedVariantId="friend_trial" />,
+    );
 
     expect(html).toContain('生产交接包');
+    expect(html).toContain('客户试用出口');
+    expect(html).toContain('把下面链接发给客户或朋友');
+    expect(html).toContain('/review/review-video-1?variant=friend_trial');
+    expect(html).toContain('客户审核门户：/review/review-video-1?variant=friend_trial');
+    expect(html).toContain('审核：Travel Bag 成片 / active / /review/review-video-1?variant=friend_trial');
     expect(html).toContain('智能混剪计划');
     expect(html).toContain('人工成片试跑 Runbook');
     expect(html).toContain('不等 provider，也能把 Clico 式交付链路跑完');
@@ -232,7 +262,7 @@ describe('video production queue page', () => {
     expect(html).toContain('已有 Hook、镜头顺序、素材说明、平台适配和风险边界');
     expect(html).toContain('外部 token 未接齐时，按交接包人工剪辑；不要宣称自动成片');
     expect(html).toContain('剪辑完成后在本页写入成片 URL，系统会生成客户审核链接');
-    expect(html).toContain('成片回灌后必须创建 review 链接，不能只在聊天里确认');
+    expect(html).toContain('客户可通过 review 链接反馈或批准');
     expect(html).toContain('没有 OAuth 前保持手工回流');
     expect(html).toContain('TikTok Shop proof_test 变体');
     expect(html).toContain('创意机会');
