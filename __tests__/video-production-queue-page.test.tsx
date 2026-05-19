@@ -2,7 +2,7 @@ import { renderToStaticMarkup } from 'react-dom/server';
 import { describe, expect, it } from 'vitest';
 
 import VideoFactoryPage from '@/app/factory/video/page';
-import { VideoProductionQueueClient, buildVideoFactoryVariantPlaybook, buildVideoProductionPassport } from '@/components/VideoProductionQueueClient';
+import { VideoProductionQueueClient, buildCutOperatingChecks, buildVideoFactoryVariantPlaybook, buildVideoProductionPassport } from '@/components/VideoProductionQueueClient';
 import type { OneClickVideoOperationResult, VideoProductionQueue } from '@/lib/industrial-video-workflow';
 
 describe('video production queue page', () => {
@@ -18,7 +18,14 @@ describe('video production queue page', () => {
     expect(html).toContain('运营执行路径');
     expect(html).toContain('Friend Trial Readiness');
     expect(html).toContain('Commercial Cut Readiness');
+    expect(html).toContain('Cut Operating Checks');
     expect(html).toContain('商用 Cut 放行门禁');
+    expect(html).toContain('视频工厂商用品质验收板');
+    expect(html).toContain('Hookshot');
+    expect(html).toContain('Creatify');
+    expect(html).toContain('VidMob');
+    expect(html).toContain('AI 视频解析');
+    expect(html).toContain('Provider 执行闭环');
     expect(html).toContain('仍是 provider-gated POC');
     expect(html).toContain('score 0/5');
     expect(html).toContain('真实视频 provider 回调');
@@ -112,6 +119,47 @@ describe('video production queue page', () => {
       title: '朋友试用操作路径',
       proofToCheck: expect.stringContaining('没有真实成片 URL'),
     }));
+  });
+
+  it('builds Cut operating checks that separate internal progress from external gates', () => {
+    const emptyQueue: VideoProductionQueue = {
+      orgId: 'test-org',
+      projectId: 'cut-empty-project',
+      itemCount: 0,
+      providerReadyCount: 0,
+      handoffOnlyCount: 0,
+      blockedCount: 0,
+      measuredCount: 0,
+      providerExecutionCount: 0,
+      submittedProviderExecutionCount: 0,
+      completedProviderExecutionCount: 0,
+      failedProviderExecutionCount: 0,
+      retryableProviderExecutionCount: 0,
+      resultAssetCount: 0,
+      clientReviewCount: 0,
+      approvedDeliverableCount: 0,
+      revisionRequestedCount: 0,
+      averageLoopCompletionScore: 0,
+      items: [],
+    };
+
+    expect(buildCutOperatingChecks(emptyQueue)).toEqual(expect.arrayContaining([
+      expect.objectContaining({
+        label: 'AI 视频解析',
+        status: 'blocked',
+        externalGate: expect.stringContaining('真实多模态解析 provider'),
+      }),
+      expect.objectContaining({
+        label: '一键视频编排',
+        status: 'blocked',
+        internalMove: expect.stringContaining('provider-gated'),
+      }),
+      expect.objectContaining({
+        label: '分发表现回流',
+        status: 'blocked',
+        externalGate: expect.stringContaining('平台 OAuth'),
+      }),
+    ]));
   });
 
   it('shows provider gating in Chinese instead of pretending automatic video generation', () => {

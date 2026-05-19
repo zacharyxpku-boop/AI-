@@ -363,6 +363,78 @@ function commercialCutReadiness(queue: VideoProductionQueue | null) {
   };
 }
 
+export interface CutOperatingCheck {
+  label: string;
+  status: 'ready' | 'blocked';
+  evidence: string;
+  internalMove: string;
+  externalGate: string;
+}
+
+export function buildCutOperatingChecks(queue: VideoProductionQueue | null): CutOperatingCheck[] {
+  const items = queue?.items || [];
+  const hasTask = (queue?.itemCount || 0) > 0;
+  const hasRemixPlan = items.some(item => item.remixPlan.length > 0);
+  const providerReady = (queue?.providerReadyCount || 0) > 0;
+  const providerCompleted = (queue?.completedProviderExecutionCount || 0) > 0;
+  const hasResult = (queue?.resultAssetCount || 0) > 0;
+  const hasReview = (queue?.clientReviewCount || 0) > 0;
+  const hasApproval = (queue?.approvedDeliverableCount || 0) > 0;
+  const hasPerformance = (queue?.measuredCount || 0) > 0;
+  const hasProviderRecovery = (queue?.failedProviderExecutionCount || 0) > 0 || (queue?.retryableProviderExecutionCount || 0) > 0;
+
+  return [
+    {
+      label: 'AI 视频解析',
+      status: hasTask && hasRemixPlan ? 'ready' : 'blocked',
+      evidence: hasTask
+        ? `任务 ${queue?.itemCount || 0} 条 / remix plan ${items.reduce((sum, item) => sum + item.remixPlan.length, 0)} 条`
+        : '还没有视频任务和可拆解素材结构。',
+      internalMove: '继续把竞品视频、Hook、scene beat、字幕节奏、风险边界写入同一条视频任务护照。',
+      externalGate: '真实多模态解析 provider、合法视频源、下载/转写/存储授权。',
+    },
+    {
+      label: '智能混剪',
+      status: hasRemixPlan ? 'ready' : 'blocked',
+      evidence: hasRemixPlan ? '已有可交给剪辑师或 provider 的镜头顺序、素材说明和平台适配。' : '还没有可执行 remix plan。',
+      internalMove: '把 15s/30s/45s 版本、素材清单、字幕节奏、平台时长规则和禁用表达沉淀为可复用模板。',
+      externalGate: '真实剪辑引擎、素材授权、音乐/字体授权、成片回调。',
+    },
+    {
+      label: '一键视频编排',
+      status: hasTask ? 'ready' : 'blocked',
+      evidence: hasTask
+        ? `已能从 brief 创建生产 handoff、分发计划和 dispatch，provider ready ${queue?.providerReadyCount || 0}/${queue?.itemCount || 0}。`
+        : '还没有从 brief 自动生成视频工作流。',
+      internalMove: '保留一键编排能力，但 UI 必须继续标注 provider-gated，避免把编排误说成自动成片。',
+      externalGate: '视频生成 provider token、webhook secret、成本上限、失败重试和回调验签。',
+    },
+    {
+      label: 'Provider 执行闭环',
+      status: providerReady && providerCompleted && !hasProviderRecovery ? 'ready' : 'blocked',
+      evidence: providerCompleted
+        ? `完成回调 ${queue?.completedProviderExecutionCount || 0} 条 / 失败或待重试 ${(queue?.failedProviderExecutionCount || 0) + (queue?.retryableProviderExecutionCount || 0)} 条`
+        : `已提交 ${queue?.submittedProviderExecutionCount || 0} 条 / 完成 0 条`,
+      internalMove: '继续保留 callback nonce、失败原因、retryable 状态和人工回填入口。',
+      externalGate: 'provider sandbox 账号、真实任务回调、失败码、重试策略、成本账单。',
+    },
+    {
+      label: '成片入库与客户审核',
+      status: hasResult && hasReview && hasApproval ? 'ready' : 'blocked',
+      evidence: `成片 ${queue?.resultAssetCount || 0} / review ${queue?.clientReviewCount || 0} / 批准 ${queue?.approvedDeliverableCount || 0}`,
+      internalMove: '成片 URL 必须进入 production result，再生成 review token，客户批准或返修要写回生产链路。',
+      externalGate: '正式域名、客户权限策略、签名 URL、下载/水印/DLP 策略。',
+    },
+    {
+      label: '分发表现回流',
+      status: hasPerformance ? 'ready' : 'blocked',
+      evidence: `已回流 ${queue?.measuredCount || 0} 条表现数据 / dispatch ${items.reduce((sum, item) => sum + item.dispatchCount, 0)} 条`,
+      internalMove: '把发布证据、投放假设、表现 CSV/API 数据回写到 SKU、素材、账号和品牌学习档案。',
+      externalGate: '平台 OAuth、广告账户授权、自动发布回执、analytics sync、归因窗口。',
+    },
+  ];
+}
+
 const MIXCUT_OPERATION_BOARD = [
   {
     title: 'Hook Bank 入场',
@@ -608,6 +680,7 @@ export function VideoProductionQueueClient({
   const selectedVariant = VIDEO_FACTORY_UI_VARIANTS[selectedVariantId];
   const trialReadiness = friendTrialReadiness(queue, selectedVariantId);
   const cutReadiness = commercialCutReadiness(queue);
+  const cutOperatingChecks = buildCutOperatingChecks(queue);
   const variantPlaybook = buildVideoFactoryVariantPlaybook(queue, selectedVariantId);
 
   async function ingestProductionResult(event: FormEvent<HTMLFormElement>) {
@@ -764,6 +837,39 @@ export function VideoProductionQueueClient({
               <div className="text-xs font-semibold text-rose-100">停止线</div>
               <p className="mt-2 text-xs leading-5 text-rose-100/80">{cutReadiness.stopLine}</p>
             </div>
+          </div>
+        </section>
+
+        <section className="border border-orange-300/20 bg-orange-950/20 p-5">
+          <div className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
+            <div>
+              <p className="text-xs uppercase tracking-[0.22em] text-orange-200">Cut Operating Checks</p>
+              <h2 className="mt-2 text-xl font-semibold">视频工厂商用品质验收板</h2>
+              <p className="mt-2 max-w-3xl text-sm leading-6 text-white/60">
+                对照筷子科技、Hookshot、Creatify、Pencil、VidMob 这一类平台，Cut 不能只看“有没有按钮”，而要逐项检查 AI 视频解析、智能混剪、一键视频、provider 执行、成片审核和表现回流是否真的闭环。
+              </p>
+            </div>
+            <div className="w-fit border border-white/10 bg-black/25 px-3 py-2 text-xs text-orange-100">
+              ready {cutOperatingChecks.filter(check => check.status === 'ready').length}/{cutOperatingChecks.length}
+            </div>
+          </div>
+          <div className="mt-4 grid gap-3 md:grid-cols-2 xl:grid-cols-3">
+            {cutOperatingChecks.map(check => (
+              <article
+                className={`border p-4 ${check.status === 'ready' ? 'border-emerald-300/25 bg-emerald-950/15' : 'border-amber-300/20 bg-black/20'}`}
+                key={check.label}
+              >
+                <div className="flex items-start justify-between gap-3">
+                  <h3 className="text-sm font-semibold text-white">{check.label}</h3>
+                  <span className={`shrink-0 border px-2 py-1 text-[11px] ${check.status === 'ready' ? 'border-emerald-300/35 text-emerald-100' : 'border-amber-300/35 text-amber-100'}`}>
+                    {check.status === 'ready' ? '内部已具备' : '仍有阻断'}
+                  </span>
+                </div>
+                <p className="mt-2 text-xs leading-5 text-white/55">证据：{check.evidence}</p>
+                <p className="mt-2 text-xs leading-5 text-orange-100/80">内部推进：{check.internalMove}</p>
+                <p className="mt-2 text-xs leading-5 text-amber-100">外部门禁：{check.externalGate}</p>
+              </article>
+            ))}
           </div>
         </section>
 
