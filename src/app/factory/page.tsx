@@ -142,7 +142,7 @@ export default async function FactoryPage({
             {factoryOperatingLayers.map(layer => (
               <Link
                 className="rounded-md border border-white/10 bg-white/[0.045] p-4 transition hover:border-amber-300/40 hover:bg-white/[0.07]"
-                href={layer.href}
+                href={`${layer.href}?variant=${selectedVariantId}`}
                 key={layer.name}
               >
                 <div className="text-[11px] font-black text-amber-200">{layer.name}</div>

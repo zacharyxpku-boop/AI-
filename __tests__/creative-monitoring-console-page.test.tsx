@@ -2,12 +2,16 @@ import { renderToStaticMarkup } from 'react-dom/server';
 import { describe, expect, it } from 'vitest';
 
 import CreativeFactoryPage from '@/app/factory/creative/page';
-import { CreativeMonitoringConsoleClient, buildCreativeComposeActionPlaybook } from '@/components/CreativeMonitoringConsoleClient';
+import {
+  CreativeMonitoringConsoleClient,
+  buildCreativeComposeActionPlaybook,
+  buildCreativeFactoryVariantPlaybook,
+} from '@/components/CreativeMonitoringConsoleClient';
 
 describe('creative monitoring console page', () => {
   it('renders the creative factory as a Chinese operator console', async () => {
     const page = await CreativeFactoryPage({
-      searchParams: Promise.resolve({ projectId: 'creative-launch' }),
+      searchParams: Promise.resolve({ projectId: 'creative-launch', variant: 'operator' }),
     });
     const html = renderToStaticMarkup(page);
 
@@ -31,6 +35,9 @@ describe('creative monitoring console page', () => {
     expect(html).toContain('Offer Test Matrix');
     expect(html).toContain('Compose Intelligence Stack');
     expect(html).toContain('Compose Action Playbook');
+    expect(html).toContain('Compose Variant Console');
+    expect(html).toContain('/factory/creative?projectId=creative-launch&amp;variant=partner');
+    expect(html).toContain('/factory/creative?projectId=creative-launch&amp;variant=friend_trial');
     expect(html).toContain('Compose 启动下一步');
     expect(html).toContain('全网灵感管理');
     expect(html).toContain('热门视频解析');
@@ -159,6 +166,23 @@ describe('creative monitoring console page', () => {
       title: 'Compose 启动下一步',
       primaryAction: expect.stringContaining('三类监控'),
       handoffBoundary: expect.stringContaining('不生成伪洞察'),
+    }));
+  });
+  it('builds distinct creative variant playbooks for partner, operator, and friend trial views', () => {
+    expect(buildCreativeFactoryVariantPlaybook(undefined, undefined, 'partner')).toEqual(expect.objectContaining({
+      label: '合作者视角',
+      title: 'Compose 商业验收剧本',
+      nextAction: expect.stringContaining('三类监控源'),
+    }));
+    expect(buildCreativeFactoryVariantPlaybook(undefined, undefined, 'operator')).toEqual(expect.objectContaining({
+      label: '运营工作台',
+      title: 'Compose 执行队列剧本',
+      stopLine: expect.stringContaining('未授权来源'),
+    }));
+    expect(buildCreativeFactoryVariantPlaybook(undefined, undefined, 'friend_trial')).toEqual(expect.objectContaining({
+      label: '朋友试用版',
+      proofFocus: expect.stringContaining('为什么可用'),
+      stopLine: expect.stringContaining('不暴露 provider'),
     }));
   });
 });

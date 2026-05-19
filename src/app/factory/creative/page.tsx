@@ -1,6 +1,7 @@
 import type { Metadata } from 'next';
 
 import { CreativeMonitoringConsoleClient } from '@/components/CreativeMonitoringConsoleClient';
+import { normalizeFactoryUiVariantId } from '@/lib/factory-readiness-view';
 
 export const metadata: Metadata = {
   title: '创意情报台 | Wenai',
@@ -10,8 +11,14 @@ export const metadata: Metadata = {
 export default async function CreativeFactoryPage({
   searchParams,
 }: {
-  searchParams?: Promise<{ projectId?: string }>;
+  searchParams?: Promise<{ projectId?: string; variant?: string }>;
 }) {
   const params = searchParams ? await searchParams : {};
-  return <CreativeMonitoringConsoleClient initialProjectId={params.projectId || 'default-project'} />;
+  const selectedVariantId = normalizeFactoryUiVariantId(params.variant);
+  return (
+    <CreativeMonitoringConsoleClient
+      initialProjectId={params.projectId || 'default-project'}
+      selectedVariantId={selectedVariantId}
+    />
+  );
 }

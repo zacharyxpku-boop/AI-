@@ -1,7 +1,9 @@
 'use client';
 
 import { useEffect, useMemo, useState, type FormEvent, type ReactNode } from 'react';
+import Link from 'next/link';
 
+import { FACTORY_UI_VARIANT_IDS, type FactoryUiVariantId } from '@/lib/factory-readiness-view';
 import type {
   CreativeCollectionTask,
   CreativeCollectorRunPlan,
@@ -150,6 +152,72 @@ const COMPOSE_INTELLIGENCE_STACK = [
   },
 ];
 
+const CREATIVE_FACTORY_VARIANTS: Record<FactoryUiVariantId, {
+  label: string;
+  audience: string;
+  title: string;
+  firstScreen: string;
+  primaryAction: string;
+  proofFocus: string;
+  stopLine: string;
+}> = {
+  partner: {
+    label: '合作者视角',
+    audience: '给合作者、客户和供应商看 Wenai 的创意洞察是否真的能承接生产。',
+    title: 'Compose 商业验收剧本',
+    firstScreen: '先看创意来源、结构化拆解、品牌学习和下一步生产交接，而不是只看灵感卡片。',
+    primaryAction: '检查监控源、机会地图、模式簇和 apply-to-industrial-chain 是否能把洞察写入脚本/资产/分发计划。',
+    proofFocus: '证据必须能追到 source、insight_id、creative_opportunity_id、risk boundary 和后续生产资产。',
+    stopLine: '没有授权来源、多模态解析 provider 和表现回流前，不宣称全网自动洞察或爆款复制能力。',
+  },
+  operator: {
+    label: '运营工作台',
+    audience: '给内部运营看今天该补哪些来源、跑哪些采集、把哪些机会推进生产。',
+    title: 'Compose 执行队列剧本',
+    firstScreen: '先看缺口、到期任务、采集器状态、机会地图和下一步写入生产链路的动作。',
+    primaryAction: '补齐账号/榜单/视频拆解三类监控，导入真实观察，结算采集，再把机会地图写入 Create/Cut/Cast。',
+    proofFocus: '每个动作要有 monitor_id、source_url、hook、proof point、reusable angle 和不能复制的表达边界。',
+    stopLine: '空结果只记录缺口，不生成伪洞察；未授权来源不抓取、不下载、不自动解析。',
+  },
+  friend_trial: {
+    label: '朋友试用版',
+    audience: '给非技术朋友看一条简单路径：先放一个竞品/榜单/视频线索，再得到可执行下一步。',
+    title: 'Compose 试用引导剧本',
+    firstScreen: '只保留一个入口：导入一个公开或已授权观察，系统告诉你能不能变成脚本和分发计划。',
+    primaryAction: '从示例模板开始，填一个真实标题、链接、钩子和证据点，再查看系统如何沉淀为机会。',
+    proofFocus: '朋友需要看到“为什么可用、哪里不能用、下一步去哪做视频/分发”。',
+    stopLine: '不暴露 provider、环境变量和内部队列术语；无法形成真实证据时要明确说还不能用。',
+  },
+};
+
+export function buildCreativeFactoryVariantPlaybook(
+  snapshot: CreativeMonitoringSnapshot | undefined,
+  creative: CreativeSnapshot | undefined,
+  variant: FactoryUiVariantId,
+) {
+  const config = CREATIVE_FACTORY_VARIANTS[variant];
+  const monitorCount = snapshot?.monitorCount || 0;
+  const opportunityCount = creative?.opportunityCount || 0;
+  const patternClusterCount = creative?.patternClusterCount || 0;
+  const sourceCoverage = snapshot?.sourceSyncCoverageScore || 0;
+  const providerReadySources = snapshot?.providerReadySourceCount || 0;
+  const nextAction = opportunityCount > 0
+    ? '把机会地图写入脚本资产、视频任务、分发计划和品牌学习档案。'
+    : monitorCount > 0
+      ? '结算到期采集或导入真实观察，先形成第一批可复用机会。'
+      : '先补账号、榜单、视频拆解三类监控源。';
+
+  return {
+    ...config,
+    nextAction,
+    evidenceCards: [
+      `监控源 ${monitorCount} / provider-ready 来源 ${providerReadySources}`,
+      `机会 ${opportunityCount} / 模式簇 ${patternClusterCount}`,
+      `采集覆盖 ${sourceCoverage} / ${sourceCoverage >= 100 ? '可进入生产复用' : '还需要补来源覆盖'}`,
+    ],
+  };
+}
+
 function typeLabel(type: CreativeMonitorType) {
   return TYPE_LABELS[type] || type;
 }
@@ -249,7 +317,13 @@ export function buildCreativeComposeActionPlaybook(
   };
 }
 
-export function CreativeMonitoringConsoleClient({ initialProjectId = 'default-project' }: { initialProjectId?: string }) {
+export function CreativeMonitoringConsoleClient({
+  initialProjectId = 'default-project',
+  selectedVariantId = 'partner',
+}: {
+  initialProjectId?: string;
+  selectedVariantId?: FactoryUiVariantId;
+}) {
   const [projectId, setProjectId] = useState(initialProjectId);
   const [platform, setPlatform] = useState('TikTok Shop');
   const [type, setType] = useState<CreativeMonitorType>('competitor_account');
@@ -487,6 +561,7 @@ export function CreativeMonitoringConsoleClient({ initialProjectId = 'default-pr
   const creative = data?.creativeSnapshot;
   const collectorPlan = data?.collectorRunPlan;
   const composePlaybook = buildCreativeComposeActionPlaybook(snapshot, creative, collectorPlan);
+  const variantPlaybook = buildCreativeFactoryVariantPlaybook(snapshot, creative, selectedVariantId);
 
   return (
     <main className="min-h-screen bg-[#101315] text-[#f8f2e8]">
@@ -498,6 +573,59 @@ export function CreativeMonitoringConsoleClient({ initialProjectId = 'default-pr
             把筷子科技式的爆款拆解、账号追踪、榜单监控先做成可运行的内部账本。当前不伪装未授权自动抓取：运营人员只导入公开可用或已授权观察，系统负责沉淀开头钩子、节奏、证据点、可复用角度和周期采集缺口。
           </p>
         </header>
+
+        <section className="border border-white/10 bg-white/[0.035] p-5">
+          <div className="flex flex-col gap-4 lg:flex-row lg:items-start lg:justify-between">
+            <div>
+              <p className="text-xs uppercase tracking-[0.22em] text-emerald-200">Compose Variant Console</p>
+              <h2 className="mt-2 text-xl font-semibold">{variantPlaybook.title}</h2>
+              <p className="mt-2 max-w-3xl text-sm leading-6 text-white/60">{variantPlaybook.firstScreen}</p>
+            </div>
+            <div className="grid gap-2 sm:grid-cols-3 lg:w-[520px]">
+              {FACTORY_UI_VARIANT_IDS.map(variantId => {
+                const variant = CREATIVE_FACTORY_VARIANTS[variantId];
+                const href = `/factory/creative?projectId=${encodeURIComponent(projectId || 'default-project')}&variant=${variantId}`;
+                return (
+                  <Link
+                    aria-current={variantId === selectedVariantId ? 'page' : undefined}
+                    className={`border p-3 text-left transition ${
+                      variantId === selectedVariantId
+                        ? 'border-emerald-300/60 bg-emerald-300/10 text-white'
+                        : 'border-white/10 bg-black/20 text-white/60 hover:border-emerald-300/35 hover:bg-white/[0.05]'
+                    }`}
+                    href={href}
+                    key={variantId}
+                  >
+                    <span className="block text-sm font-semibold">{variant.label}</span>
+                    <span className="mt-1 block text-[11px] leading-4">{variant.audience}</span>
+                  </Link>
+                );
+              })}
+            </div>
+          </div>
+          <div className="mt-4 grid gap-3 md:grid-cols-[1fr_1fr_0.8fr]">
+            <div className="border border-white/10 bg-black/20 p-4 text-sm leading-6 text-white/70">
+              <div className="text-xs font-semibold uppercase tracking-[0.18em] text-white/35">第一动作</div>
+              <p className="mt-2">{variantPlaybook.primaryAction}</p>
+            </div>
+            <div className="border border-white/10 bg-black/20 p-4 text-sm leading-6 text-emerald-100/85">
+              <div className="text-xs font-semibold uppercase tracking-[0.18em] text-white/35">证据检查</div>
+              <p className="mt-2">{variantPlaybook.proofFocus}</p>
+            </div>
+            <div className="border border-rose-300/20 bg-rose-950/20 p-4 text-sm leading-6 text-rose-100">
+              <div className="text-xs font-semibold uppercase tracking-[0.18em] text-white/35">停止线</div>
+              <p className="mt-2">{variantPlaybook.stopLine}</p>
+            </div>
+          </div>
+          <div className="mt-3 grid gap-2 md:grid-cols-4">
+            {variantPlaybook.evidenceCards.map(card => (
+              <div className="border border-white/10 bg-black/20 p-3 text-xs leading-5 text-white/60" key={card}>{card}</div>
+            ))}
+            <div className="border border-amber-300/20 bg-amber-300/10 p-3 text-xs leading-5 text-amber-100">
+              下一步：{variantPlaybook.nextAction}
+            </div>
+          </div>
+        </section>
 
         <section className="border border-amber-300/20 bg-amber-300/[0.06] p-5">
           <div className="flex flex-col gap-2 sm:flex-row sm:items-start sm:justify-between">
