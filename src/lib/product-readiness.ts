@@ -633,6 +633,12 @@ function buildAlternativeReferences(): AlternativeCompetitorReference[] {
       wenaiDecision: '品牌学习档案必须沉淀胜出的 hook、禁用表达、素材偏好和下一轮规则，反哺 Compose/Create/Cut。',
       boundary: '没有真实投放表现、品牌批准和素材权属证明前，不让自动生成内容绕过客户审核。',
     },
+    {
+      name: 'Smartly.io / creative-media-intelligence',
+      pattern: '把 creative、media、intelligence 统一到一个跨平台广告运营系统里：创意交付、投放管理、实时优化和报告必须同屏协作。',
+      wenaiDecision: 'Wenai 的 Cast/Manage 不能只停留在分发计划，要把素材版本、账号、预算、campaign、平台回执、表现回流和下一轮 action queue 合并成一个可审计运营面板。',
+      boundary: '没有平台 OAuth、广告账户、analytics sync 和预算止损规则前，只能展示 readiness 和人工执行建议，不能宣称自动跨平台优化。',
+    },
   ];
 }
 

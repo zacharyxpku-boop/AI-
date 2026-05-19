@@ -34,6 +34,8 @@ describe('status page', () => {
     expect(html).toContain('Creatify 类');
     expect(html).toContain('Marpipe / catalog testing 类');
     expect(html).toContain('Pencil 类');
+    expect(html).toContain('Smartly.io');
+    expect(html).toContain('creative、media、intelligence');
     expect(html).toContain('电商增长作战系统');
     expect(html).toContain('最终产品形态指挥板');
     expect(html).toContain('电商 AI 内容工业化操作系统');

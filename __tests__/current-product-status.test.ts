@@ -18,6 +18,7 @@ describe('current product status report', () => {
     expect(doc).toContain('Hookshot / Hookly');
     expect(doc).toContain('Creatify');
     expect(doc).toContain('Marpipe');
+    expect(doc).toContain('Smartly.io');
     expect(doc).toContain('品牌学习不能只是报告');
     expect(doc).toContain('内部还能继续解决');
     expect(doc).toContain('必须外部提供');

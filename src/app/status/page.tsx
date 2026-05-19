@@ -715,6 +715,11 @@ const ALTERNATIVE_PLATFORM_REFERENCES = [
     reference: '生成式广告创意和品牌学习结合，持续积累胜出结构、禁用表达和下一轮创意规则。',
     wenaiDecision: 'Wenai 的品牌学习档案必须反哺 Compose/Create/Cut，而不是只作为复盘报告存在。',
   },
+  {
+    name: 'Smartly.io',
+    reference: 'creative、media、intelligence 一体化：创意交付、媒体购买、实时优化、报告和平台协作必须连成运营系统。',
+    wenaiDecision: 'Wenai 的 Cast/Manage 要把素材版本、账号、预算、campaign、平台回执、表现回流和下一轮 action queue 放在同一块可审计面板里。',
+  },
 ];
 
 type StatusProductBlueprintItem = {
