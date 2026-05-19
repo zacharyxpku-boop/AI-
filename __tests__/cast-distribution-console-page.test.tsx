@@ -2,7 +2,7 @@ import { renderToStaticMarkup } from 'react-dom/server';
 import { describe, expect, it } from 'vitest';
 
 import CastFactoryPage from '@/app/factory/cast/page';
-import { CastDistributionConsoleClient, buildCastVariantPlaybook } from '@/components/CastDistributionConsoleClient';
+import { CastDistributionConsoleClient, buildCastManageOperatingChecks, buildCastVariantPlaybook } from '@/components/CastDistributionConsoleClient';
 import type { ChannelAccountSnapshot } from '@/lib/channel-account-ledger';
 
 function snapshot(overrides: Partial<ChannelAccountSnapshot> = {}): ChannelAccountSnapshot {
@@ -45,6 +45,7 @@ describe('cast distribution console page', () => {
     expect(html).toContain('Cast Distribution Variant');
     expect(html).toContain('Cast Action Playbook');
     expect(html).toContain('Cast 运营动作剧本');
+    expect(html).toContain('Smartly式 Cast/Manage 一体化验收板');
     expect(html).toContain('Matrix Seed');
     expect(html).toContain('账号矩阵');
     expect(html).toContain('广告 campaign ledger');
@@ -125,5 +126,53 @@ describe('cast distribution console page', () => {
       title: '朋友试用 Cast 路径',
       proofToCheck: expect.stringContaining('朋友只看三项'),
     }));
+  });
+
+  it('builds Smartly-style Cast/Manage operating checks from matrix and campaign evidence', () => {
+    const ready = snapshot({
+      accountCount: 2,
+      connectedAccountCount: 2,
+      healthyAccountCount: 1,
+      totalDailyPublishLimit: 4,
+      scheduledCount: 1,
+      availableSlotCount: 3,
+      adCampaignCount: 1,
+      readyAdCampaignCount: 1,
+      activeAdCampaignCount: 1,
+      measuredAdCampaignCount: 1,
+      adBudgetCents: 50000,
+      adSpendCents: 12000,
+      adEvidenceCount: 1,
+      missingLinks: [],
+      adMissingLinks: [],
+      nextActions: [],
+    });
+
+    expect(buildCastManageOperatingChecks(ready)).toEqual(expect.arrayContaining([
+      expect.objectContaining({
+        stage: '素材版本 / Campaign 绑定',
+        ready: true,
+      }),
+      expect.objectContaining({
+        stage: '账号与发布槽位',
+        ready: true,
+      }),
+      expect.objectContaining({
+        stage: '预算与投放门禁',
+        ready: true,
+      }),
+      expect.objectContaining({
+        stage: '平台回执',
+        ready: true,
+      }),
+      expect.objectContaining({
+        stage: '表现回流',
+        ready: true,
+      }),
+      expect.objectContaining({
+        stage: '下一轮 Action Queue',
+        ready: true,
+      }),
+    ]));
   });
 });

@@ -14,6 +14,13 @@ type CastPlaybook = {
   cards: string[];
 };
 
+export type CastManageOperatingCheck = {
+  stage: string;
+  ready: boolean;
+  evidence: string;
+  next: string;
+};
+
 const CAST_VARIANTS: Record<FactoryUiVariantId, {
   label: string;
   audience: string;
@@ -63,6 +70,67 @@ function castScore(snapshot: ChannelAccountSnapshot | null) {
     snapshot.adEvidenceCount > 0,
     snapshot.measuredAdCampaignCount > 0,
   ].filter(Boolean).length;
+}
+
+export function buildCastManageOperatingChecks(snapshot: ChannelAccountSnapshot | null): CastManageOperatingCheck[] {
+  const campaignCount = snapshot?.adCampaignCount || 0;
+  const accountCount = snapshot?.accountCount || 0;
+  const healthyCount = snapshot?.healthyAccountCount || 0;
+  const slotCount = snapshot?.availableSlotCount || 0;
+  const budgetCents = snapshot?.adBudgetCents || 0;
+  const evidenceCount = snapshot?.adEvidenceCount || 0;
+  const measuredCount = snapshot?.measuredAdCampaignCount || 0;
+  const gaps = [...(snapshot?.missingLinks || []), ...(snapshot?.adMissingLinks || [])];
+  const nextActions = snapshot?.nextActions || [];
+
+  return [
+    {
+      stage: '素材版本 / Campaign 绑定',
+      ready: campaignCount > 0,
+      evidence: `campaign ledger ${campaignCount} 条`,
+      next: campaignCount > 0
+        ? '把每个素材版本绑定到 campaign、SKU、tracking code 和实验单元。'
+        : '先创建广告 campaign ledger；没有 campaign 就无法对齐 Smartly 式创意-媒体-情报闭环。',
+    },
+    {
+      stage: '账号与发布槽位',
+      ready: accountCount > 0 && healthyCount > 0 && slotCount > 0,
+      evidence: `账号 ${accountCount} / 健康 ${healthyCount} / 槽位 ${slotCount}`,
+      next: '补齐 OAuth 前先保持 manual-ready；有健康账号和发布槽位后才允许进入发布交接。',
+    },
+    {
+      stage: '预算与投放门禁',
+      ready: budgetCents > 0,
+      evidence: `预算 ${money(budgetCents)} / 花费 ${money(snapshot?.adSpendCents || 0)}`,
+      next: budgetCents > 0
+        ? '继续补 spend cap、暂停/放量规则和广告账户授权证据。'
+        : '先写入预算上限；没有预算门禁不能开放自动投放或优化。',
+    },
+    {
+      stage: '平台回执',
+      ready: evidenceCount > 0,
+      evidence: `平台证据 URL ${evidenceCount} 条`,
+      next: evidenceCount > 0
+        ? '把回执继续绑定到 dispatch、campaign 和客户审核后的资产版本。'
+        : '没有 evidence URL 时只能标记为待发布或手工交接，不能宣称已自动发布。',
+    },
+    {
+      stage: '表现回流',
+      ready: measuredCount > 0,
+      evidence: `已衡量广告 ${measuredCount} 条`,
+      next: measuredCount > 0
+        ? '把 impressions、clicks、orders、revenue 反哺品牌学习和下一轮脚本。'
+        : '补 analytics sync 或手工 CSV 回流；没有回流就不能宣称自动优化。',
+    },
+    {
+      stage: '下一轮 Action Queue',
+      ready: gaps.length === 0,
+      evidence: gaps.length ? `阻断 ${gaps.length} 项 / 动作 ${nextActions.length} 条` : `动作队列 ${nextActions.length} 条 / 无硬阻断`,
+      next: gaps.length
+        ? `先处理：${gaps[0]}。`
+        : '进入下一轮素材版本、预算策略和平台授权验收。',
+    },
+  ];
 }
 
 export function buildCastVariantPlaybook(
@@ -152,6 +220,7 @@ export function CastDistributionConsoleClient({
 
   const selectedVariant = CAST_VARIANTS[selectedVariantId];
   const playbook = buildCastVariantPlaybook(snapshot, selectedVariantId);
+  const operatingChecks = buildCastManageOperatingChecks(snapshot);
   const nextActions = snapshot?.nextActions || [];
   const gaps = [...(snapshot?.missingLinks || []), ...(snapshot?.adMissingLinks || [])];
 
@@ -237,6 +306,35 @@ export function CastDistributionConsoleClient({
           title={playbook.title}
           variants={CAST_VARIANTS}
         />
+
+        <section className="rounded-[8px] border border-emerald-200/15 bg-white/[0.04] p-5">
+          <div className="flex flex-col gap-2 lg:flex-row lg:items-end lg:justify-between">
+            <div>
+              <p className="text-xs uppercase tracking-[0.22em] text-emerald-200">Smartly-style Operating Board</p>
+              <h2 className="mt-2 text-xl font-semibold">Smartly式 Cast/Manage 一体化验收板</h2>
+              <p className="mt-2 text-sm leading-6 text-white/55">
+                这里把素材版本、账号、预算、campaign、平台回执、表现回流和下一轮 action queue 放到同一块板上；缺一项就保持手工门禁。
+              </p>
+            </div>
+            <div className="text-sm font-semibold text-emerald-100">
+              {operatingChecks.filter(item => item.ready).length}/{operatingChecks.length} 就绪
+            </div>
+          </div>
+          <div className="mt-4 grid gap-3 lg:grid-cols-3">
+            {operatingChecks.map(item => (
+              <div key={item.stage} className={`rounded-[8px] border p-4 ${
+                item.ready ? 'border-emerald-200/25 bg-emerald-300/10' : 'border-amber-200/20 bg-amber-300/10'
+              }`}>
+                <div className={`text-xs font-semibold ${item.ready ? 'text-emerald-100' : 'text-amber-100'}`}>
+                  {item.ready ? '已具备证据' : '继续补证据'}
+                </div>
+                <h3 className="mt-2 text-sm font-semibold text-white">{item.stage}</h3>
+                <p className="mt-2 text-xs leading-5 text-white/60">{item.evidence}</p>
+                <p className="mt-2 text-xs leading-5 text-white/45">{item.next}</p>
+              </div>
+            ))}
+          </div>
+        </section>
 
         <section className="grid gap-4">
           <form onSubmit={seedMatrix} className="rounded-[8px] border border-white/10 bg-white/[0.04] p-5">
