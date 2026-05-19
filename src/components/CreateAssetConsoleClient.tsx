@@ -14,6 +14,13 @@ type CreatePlaybook = {
   cards: string[];
 };
 
+export type CreateBrandProductionCheck = {
+  stage: string;
+  ready: boolean;
+  evidence: string;
+  next: string;
+};
+
 const CREATE_VARIANTS: Record<FactoryUiVariantId, {
   label: string;
   audience: string;
@@ -59,6 +66,61 @@ function createScore(snapshot: IndustrializationSnapshot | null) {
     snapshot.clientReviewAssetCount > 0,
     snapshot.approvedDeliverableCount > 0,
   ].filter(Boolean).length;
+}
+
+export function buildCreateBrandProductionChecks(snapshot: IndustrializationSnapshot | null): CreateBrandProductionCheck[] {
+  const assetCount = snapshot?.assetCount || 0;
+  const approvedCount = snapshot?.approvedAssetCount || 0;
+  const reusableCount = snapshot?.reusableAssetCount || 0;
+  const rightsIssues = snapshot?.rightsIssueAssetCount || 0;
+  const governanceIssues = snapshot?.assetGovernanceIssueCount || 0;
+  const deliverables = snapshot?.deliverableAssetCount || 0;
+  const reviewCount = snapshot?.clientReviewAssetCount || 0;
+  const approvedDeliverables = snapshot?.approvedDeliverableCount || 0;
+  const handoffReady = (snapshot?.planCount || 0) > 0 || (snapshot?.nextRoundAssetPlanCount || 0) > 0;
+
+  return [
+    {
+      stage: '品牌资产与素材权属',
+      ready: assetCount > 0 && rightsIssues === 0,
+      evidence: `资产 ${assetCount} / 版权问题 ${rightsIssues}`,
+      next: rightsIssues === 0 && assetCount > 0
+        ? '继续把品牌 kit、产品图、禁用表达和素材授权写进生产约束。'
+        : '先补品牌资产和权属证明；没有素材授权不能进入批量生成。',
+    },
+    {
+      stage: '模板与版本矩阵',
+      ready: reusableCount > 0,
+      evidence: `可复用资产 ${reusableCount} / 已审批 ${approvedCount}`,
+      next: reusableCount > 0
+        ? '把可复用结构转成多平台模板、脚本骨架、封面和短视频版本矩阵。'
+        : '先沉淀可复用脚本、视觉结构和平台尺寸模板。',
+    },
+    {
+      stage: '生产交接与 provider 门禁',
+      ready: handoffReady && deliverables > 0,
+      evidence: `分发/下一轮计划 ${snapshot?.planCount || 0}/${snapshot?.nextRoundAssetPlanCount || 0} / 交付物 ${deliverables}`,
+      next: deliverables > 0
+        ? '继续接 provider callback、成本上限、失败重试和结果入库。'
+        : '先把 brief、script、visual asset 转成生产 handoff；没有 provider 回调不宣称自动成片。',
+    },
+    {
+      stage: '客户审核与批准',
+      ready: reviewCount > 0 && approvedDeliverables > 0,
+      evidence: `客户审核 ${reviewCount} / 客户批准 ${approvedDeliverables}`,
+      next: reviewCount > 0
+        ? '把客户反馈、批准、返修和过期状态写回生产包。'
+        : '先生成 review token；没有客户审核入口不能给朋友零解释试用。',
+    },
+    {
+      stage: '治理与发布前停止线',
+      ready: governanceIssues === 0 && rightsIssues === 0,
+      evidence: `治理问题 ${governanceIssues} / 版权问题 ${rightsIssues}`,
+      next: governanceIssues === 0 && rightsIssues === 0
+        ? '可以进入 Cast/Manage 的发布门禁和权限审计。'
+        : '先处理版权、DLP、水印、对象存储和权限问题；不能把草稿当成成品。',
+    },
+  ];
 }
 
 export function buildCreateVariantPlaybook(
@@ -145,6 +207,7 @@ export function CreateAssetConsoleClient({
 
   const selectedVariant = CREATE_VARIANTS[selectedVariantId];
   const playbook = buildCreateVariantPlaybook(snapshot, selectedVariantId);
+  const productionChecks = buildCreateBrandProductionChecks(snapshot);
   const nextActions = snapshot?.nextActions || [];
   const gaps = snapshot?.missingLinks || [];
 
@@ -250,6 +313,35 @@ export function CreateAssetConsoleClient({
           title={playbook.title}
           variants={CREATE_VARIANTS}
         />
+
+        <section className="rounded-[8px] border border-amber-200/15 bg-white/[0.04] p-5">
+          <div className="flex flex-col gap-2 lg:flex-row lg:items-end lg:justify-between">
+            <div>
+              <p className="text-xs uppercase tracking-[0.22em] text-amber-200">Creatopy / Pencil 参考层</p>
+              <h2 className="mt-2 text-xl font-semibold">品牌安全批量生产验收板</h2>
+              <p className="mt-2 text-sm leading-6 text-white/55">
+                这里把品牌资产、素材权属、模板复用、版本矩阵、provider 门禁、客户审核和发布前停止线放到同一块板上；缺一项就不宣称一键视频或批量混剪。
+              </p>
+            </div>
+            <div className="text-sm font-semibold text-amber-100">
+              {productionChecks.filter(item => item.ready).length}/{productionChecks.length} 就绪
+            </div>
+          </div>
+          <div className="mt-4 grid gap-3 lg:grid-cols-5">
+            {productionChecks.map(item => (
+              <article className={`rounded-[8px] border p-4 ${
+                item.ready ? 'border-amber-200/25 bg-amber-300/10' : 'border-red-200/20 bg-red-300/10'
+              }`} key={item.stage}>
+                <div className={`text-xs font-semibold ${item.ready ? 'text-amber-100' : 'text-red-100'}`}>
+                  {item.ready ? '已具备证据' : '继续补证据'}
+                </div>
+                <h3 className="mt-2 text-sm font-semibold text-white">{item.stage}</h3>
+                <p className="mt-2 text-xs leading-5 text-white/60">{item.evidence}</p>
+                <p className="mt-2 text-xs leading-5 text-white/45">{item.next}</p>
+              </article>
+            ))}
+          </div>
+        </section>
 
         <section className="grid gap-4">
           <form onSubmit={seedCreatePackage} className="rounded-[8px] border border-white/10 bg-white/[0.04] p-5">

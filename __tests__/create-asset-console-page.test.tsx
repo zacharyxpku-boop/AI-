@@ -2,7 +2,7 @@ import { renderToStaticMarkup } from 'react-dom/server';
 import { describe, expect, it } from 'vitest';
 
 import CreateFactoryPage from '@/app/factory/create/page';
-import { CreateAssetConsoleClient, buildCreateVariantPlaybook } from '@/components/CreateAssetConsoleClient';
+import { CreateAssetConsoleClient, buildCreateBrandProductionChecks, buildCreateVariantPlaybook } from '@/components/CreateAssetConsoleClient';
 import type { IndustrializationSnapshot } from '@/lib/industrial-chain-store';
 
 function snapshot(overrides: Partial<IndustrializationSnapshot> = {}): IndustrializationSnapshot {
@@ -54,6 +54,8 @@ describe('create asset console page', () => {
     expect(html).toContain('Create Asset Variant');
     expect(html).toContain('Create Action Playbook');
     expect(html).toContain('Create 运营动作剧本');
+    expect(html).toContain('Creatopy / Pencil 参考层');
+    expect(html).toContain('品牌安全批量生产验收板');
     expect(html).toContain('Create Seed');
     expect(html).toContain('brief、benchmark、script 和 visual asset');
     expect(html).toContain('/factory/create?projectId=launch-create&amp;variant=partner');
@@ -124,5 +126,30 @@ describe('create asset console page', () => {
       title: '朋友试用 Create 路径',
       proofToCheck: expect.stringContaining('朋友只看三项'),
     }));
+  });
+
+  it('builds Creatopy and Pencil style brand production checks from asset evidence', () => {
+    const ready = snapshot({
+      assetCount: 5,
+      approvedAssetCount: 5,
+      reusableAssetCount: 4,
+      rightsIssueAssetCount: 0,
+      assetGovernanceIssueCount: 0,
+      planCount: 1,
+      nextRoundAssetPlanCount: 1,
+      deliverableAssetCount: 1,
+      clientReviewAssetCount: 1,
+      approvedDeliverableCount: 1,
+      missingLinks: [],
+      nextActions: [],
+    });
+
+    expect(buildCreateBrandProductionChecks(ready)).toEqual(expect.arrayContaining([
+      expect.objectContaining({ stage: '品牌资产与素材权属', ready: true }),
+      expect.objectContaining({ stage: '模板与版本矩阵', ready: true }),
+      expect.objectContaining({ stage: '生产交接与 provider 门禁', ready: true }),
+      expect.objectContaining({ stage: '客户审核与批准', ready: true }),
+      expect.objectContaining({ stage: '治理与发布前停止线', ready: true }),
+    ]));
   });
 });
