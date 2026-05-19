@@ -3,6 +3,7 @@ import { describe, expect, it } from 'vitest';
 
 import StatusPage, {
   buildStatusAlternativeReferences,
+  buildStatusExternalRequirements,
   buildStatusProductBlueprint,
   buildStatusUiVariants,
   formatAssetPermissionAuditEvent,
@@ -104,7 +105,34 @@ describe('status page', () => {
       workflows: [],
       issues: [],
       friendTrialRisks: [],
-      externalRequirements: [],
+      externalRequirements: [{
+        id: 'video-provider-submit-callback',
+        category: 'video_provider' as const,
+        label: 'Real video generation/editing provider',
+        status: 'missing' as const,
+        owner: 'user' as const,
+        materialPriority: 'P0' as const,
+        evidence: 'videoConfigured=0; webhookSignature=0',
+        requiredInputs: ['provider submit endpoint', 'server-side provider token'],
+        acceptance: 'Submit one provider-ready workflow and receive a signed callback.',
+        securityBoundary: 'Secrets must be configured server-side or in the deployment platform.',
+        releaseChecks: [
+          'Sandbox or least-privilege access is available before production access.',
+          'A verifiable callback, receipt, ledger, or audit event proves the integration.',
+        ],
+      }, {
+        id: 'platform-analytics-sync',
+        category: 'analytics_sync' as const,
+        label: 'Platform analytics sync',
+        status: 'configured' as const,
+        owner: 'provider' as const,
+        materialPriority: 'P1' as const,
+        evidence: 'analyticsSyncConfigured=1',
+        requiredInputs: ['analytics API token'],
+        acceptance: 'Sync metrics without manual CSV.',
+        securityBoundary: 'Metrics must map back to audited platform receipts.',
+        releaseChecks: ['Metrics reconcile to dispatch ledger.'],
+      }],
       scaleClaimGuards: [],
     };
 
@@ -126,6 +154,64 @@ describe('status page', () => {
       reference: expect.stringContaining('边界'),
       wenaiDecision: expect.stringContaining('campaign ledger'),
     })]);
+  });
+
+  it('preserves external material gates for the status readiness UI', () => {
+    const report = {
+      verdict: 'conditional' as const,
+      label: 'conditional',
+      score: 72,
+      features: [],
+      workflows: [],
+      issues: [],
+      friendTrialRisks: [],
+      externalRequirements: [{
+        id: 'video-provider-submit-callback',
+        category: 'video_provider' as const,
+        label: 'Real video generation/editing provider',
+        status: 'missing' as const,
+        owner: 'user' as const,
+        materialPriority: 'P0' as const,
+        evidence: 'videoConfigured=0; webhookSignature=0',
+        requiredInputs: ['provider submit endpoint', 'server-side provider token'],
+        acceptance: 'Submit one provider-ready workflow and receive a signed callback.',
+        securityBoundary: 'Secrets must be configured server-side or in the deployment platform.',
+        releaseChecks: [
+          'Sandbox or least-privilege access is available before production access.',
+          'A verifiable callback, receipt, ledger, or audit event proves the integration.',
+        ],
+      }, {
+        id: 'platform-analytics-sync',
+        category: 'analytics_sync' as const,
+        label: 'Platform analytics sync',
+        status: 'configured' as const,
+        owner: 'provider' as const,
+        materialPriority: 'P1' as const,
+        evidence: 'analyticsSyncConfigured=1',
+        requiredInputs: ['analytics API token'],
+        acceptance: 'Sync metrics without manual CSV.',
+        securityBoundary: 'Metrics must map back to audited platform receipts.',
+        releaseChecks: ['Metrics reconcile to dispatch ledger.'],
+      }],
+      scaleClaimGuards: [],
+    };
+
+    expect(buildStatusExternalRequirements(report)).toEqual([
+      expect.objectContaining({
+        id: 'video-provider-submit-callback',
+        materialPriority: 'P0',
+        securityBoundary: expect.stringContaining('Secrets must be configured server-side'),
+        releaseChecks: expect.arrayContaining([
+          expect.stringContaining('Sandbox or least-privilege access'),
+          expect.stringContaining('verifiable callback'),
+        ]),
+      }),
+      expect.objectContaining({
+        id: 'platform-analytics-sync',
+        materialPriority: 'P1',
+        status: 'configured',
+      }),
+    ]);
   });
 
   it('formats project evidence as Chinese operator metrics instead of raw ledger keys', () => {

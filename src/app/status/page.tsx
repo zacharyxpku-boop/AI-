@@ -52,9 +52,12 @@ interface ExternalIntegrationRequirement {
   label: string;
   status: 'configured' | 'missing' | 'evidence_required';
   owner: 'user' | 'provider' | 'wenai';
+  materialPriority?: 'P0' | 'P1';
   evidence: string;
   requiredInputs: string[];
   acceptance: string;
+  securityBoundary?: string;
+  releaseChecks?: string[];
 }
 
 interface ScaleClaimGuard {
@@ -625,6 +628,10 @@ type StatusProductBlueprintItem = {
   status?: ReadinessFeature['status'];
 };
 
+export function buildStatusExternalRequirements(report?: ReadinessResponse['report']) {
+  return report?.externalRequirements || [];
+}
+
 export function buildStatusUiVariants(report?: ReadinessResponse['report']) {
   if (!report?.uiVariants?.length) return STATUS_UI_VARIANTS;
 
@@ -772,7 +779,7 @@ export default function StatusPage() {
   const projectMaturity = maturity?.projectReadiness;
   const platformConnectorFeature = maturity?.features.find(feature => feature.name === 'Platform connector automation ledger');
   const platformConnectorWorkflow = maturity?.workflows.find(workflow => workflow.name.includes('Platform OAuth'));
-  const externalRequirements = maturity?.externalRequirements || [];
+  const externalRequirements = buildStatusExternalRequirements(maturity);
   const scaleClaimGuards = maturity?.scaleClaimGuards || [];
   const topActions = actionQueue?.actions.slice(0, 4) || [];
   const assetPermissionAudits = assetPermissions?.accessAudits.slice(0, 4) || [];
@@ -1161,10 +1168,19 @@ export default function StatusPage() {
                   }`}>
                     <div className="mb-1 flex flex-col gap-1 md:flex-row md:items-center md:justify-between">
                       <div className="text-[11px] font-semibold text-text-primary">{requirement.label}</div>
-                      <div className={`text-[9px] font-mono ${
-                        requirement.status === 'configured' ? 'text-success' : requirement.status === 'evidence_required' ? 'text-accent' : 'text-error'
-                      }`}>
-                        {formatExternalRequirementStatus(requirement.status)}
+                      <div className="flex flex-wrap gap-2">
+                        {requirement.materialPriority ? (
+                          <div className={`rounded border px-2 py-0.5 text-[9px] font-mono ${
+                            requirement.materialPriority === 'P0' ? 'border-error/30 text-error' : 'border-accent/30 text-accent'
+                          }`}>
+                            {requirement.materialPriority} material
+                          </div>
+                        ) : null}
+                        <div className={`text-[9px] font-mono ${
+                          requirement.status === 'configured' ? 'text-success' : requirement.status === 'evidence_required' ? 'text-accent' : 'text-error'
+                        }`}>
+                          {formatExternalRequirementStatus(requirement.status)}
+                        </div>
                       </div>
                     </div>
                     <div className="text-[10px] leading-relaxed text-text-tertiary">
@@ -1178,6 +1194,21 @@ export default function StatusPage() {
                     <div className="mt-1 text-[10px] leading-relaxed text-success">
                       验收：{requirement.acceptance}
                     </div>
+                    {requirement.securityBoundary ? (
+                      <div className="mt-2 rounded border border-accent/20 bg-bg-root/40 px-2 py-2 text-[10px] leading-relaxed text-accent">
+                        安全边界：{requirement.securityBoundary}
+                      </div>
+                    ) : null}
+                    {requirement.releaseChecks?.length ? (
+                      <div className="mt-2 grid gap-1">
+                        <div className="text-[10px] font-semibold text-text-tertiary">放行检查</div>
+                        {requirement.releaseChecks.slice(0, 3).map(check => (
+                          <div className="rounded border border-border-subtle/70 bg-bg-root/30 px-2 py-1 text-[10px] leading-relaxed text-text-secondary" key={check}>
+                            {check}
+                          </div>
+                        ))}
+                      </div>
+                    ) : null}
                   </div>
                 ))}
               </div>
