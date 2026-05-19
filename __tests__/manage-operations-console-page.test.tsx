@@ -2,7 +2,7 @@ import { renderToStaticMarkup } from 'react-dom/server';
 import { describe, expect, it } from 'vitest';
 
 import ManageFactoryPage from '@/app/factory/manage/page';
-import { ManageOperationsConsoleClient, buildManageVariantPlaybook } from '@/components/ManageOperationsConsoleClient';
+import { ManageOperationsConsoleClient, buildManageOperatingChecks, buildManageVariantPlaybook } from '@/components/ManageOperationsConsoleClient';
 import type { AssetPermissionSnapshot } from '@/lib/asset-permission-ledger';
 import type { IndustrializationSnapshot } from '@/lib/industrial-chain-store';
 
@@ -90,6 +90,7 @@ describe('manage operations console page', () => {
     expect(html).toContain('Manage Operations Variant');
     expect(html).toContain('Manage Action Playbook');
     expect(html).toContain('Manage 运营动作剧本');
+    expect(html).toContain('Clico式客户交付与企业安全验收板');
     expect(html).toContain('Manage Seed');
     expect(html).toContain('客户审核权限、受控分享对象、安全策略、DLP、水印和留存规则');
     expect(html).toContain('/factory/manage?projectId=launch-manage&amp;variant=partner');
@@ -172,5 +173,60 @@ describe('manage operations console page', () => {
       title: '朋友试用 Manage 路径',
       proofToCheck: expect.stringContaining('朋友只看三项'),
     }));
+  });
+
+  it('builds Clico-style Manage operating checks from review, security, audit, and return evidence', () => {
+    const readyIndustrial = industrial({
+      clientReviewAssetCount: 1,
+      approvedDeliverableCount: 1,
+      performanceReturnCount: 1,
+      scaleDecisionCount: 1,
+      missingLinks: [],
+      nextActions: [],
+    });
+    const readyPermission = permission({
+      permissionRecordCount: 1,
+      clientReviewScopeCount: 1,
+      securityPolicyCount: 1,
+      watermarkRequiredCount: 1,
+      watermarkAppliedCount: 1,
+      dlpPassedPolicyCount: 1,
+      retentionPolicyCount: 1,
+      auditEventCount: 1,
+      accessAuditEventCount: 1,
+      missingLinks: [],
+      nextActions: [],
+    });
+
+    expect(buildManageOperatingChecks(readyIndustrial, readyPermission)).toEqual(expect.arrayContaining([
+      expect.objectContaining({
+        stage: '客户审核入口',
+        ready: true,
+      }),
+      expect.objectContaining({
+        stage: '客户批准与交付',
+        ready: true,
+      }),
+      expect.objectContaining({
+        stage: '权限范围与受控分享',
+        ready: true,
+      }),
+      expect.objectContaining({
+        stage: 'DLP / 水印 / 留存',
+        ready: true,
+      }),
+      expect.objectContaining({
+        stage: '访问审计',
+        ready: true,
+      }),
+      expect.objectContaining({
+        stage: '表现回流与复盘',
+        ready: true,
+      }),
+      expect.objectContaining({
+        stage: 'CRM / 下一步队列',
+        ready: true,
+      }),
+    ]));
   });
 });

@@ -15,6 +15,13 @@ type ManagePlaybook = {
   cards: string[];
 };
 
+export type ManageOperatingCheck = {
+  stage: string;
+  ready: boolean;
+  evidence: string;
+  next: string;
+};
+
 const MANAGE_VARIANTS: Record<FactoryUiVariantId, {
   label: string;
   audience: string;
@@ -62,6 +69,85 @@ function manageScore(
     (permission?.dlpPassedPolicyCount || 0) >= (permission?.securityPolicyCount || 0) && (permission?.securityPolicyCount || 0) > 0,
     (permission?.accessAuditEventCount || 0) > 0,
   ].filter(Boolean).length;
+}
+
+export function buildManageOperatingChecks(
+  industrial: IndustrializationSnapshot | null,
+  permission: AssetPermissionSnapshot | null,
+): ManageOperatingCheck[] {
+  const reviewCount = industrial?.clientReviewAssetCount || 0;
+  const approvedCount = industrial?.approvedDeliverableCount || 0;
+  const performanceCount = industrial?.performanceReturnCount || 0;
+  const scaleDecisionCount = industrial?.scaleDecisionCount || 0;
+  const permissionCount = permission?.permissionRecordCount || 0;
+  const clientScopeCount = permission?.clientReviewScopeCount || 0;
+  const securityCount = permission?.securityPolicyCount || 0;
+  const watermarkReady = (permission?.watermarkRequiredCount || 0) > 0
+    ? (permission?.watermarkAppliedCount || 0) >= (permission?.watermarkRequiredCount || 0)
+    : false;
+  const dlpReady = securityCount > 0 && (permission?.dlpPassedPolicyCount || 0) >= securityCount;
+  const accessAuditCount = permission?.accessAuditEventCount || 0;
+  const gaps = [...(industrial?.missingLinks || []), ...(permission?.missingLinks || [])];
+  const nextActions = [...(industrial?.nextActions || []), ...(permission?.nextActions || [])];
+
+  return [
+    {
+      stage: '客户审核入口',
+      ready: reviewCount > 0,
+      evidence: `review token / 客户审核资产 ${reviewCount} 条`,
+      next: reviewCount > 0
+        ? '继续把反馈、批准、返修和过期状态写回生产记录。'
+        : '先创建客户审核入口；没有 review token 就不能给非技术客户零解释试用。',
+    },
+    {
+      stage: '客户批准与交付',
+      ready: approvedCount > 0,
+      evidence: `已批准交付 ${approvedCount} 条`,
+      next: approvedCount > 0
+        ? '批准后推进 CRM 交接、分发门禁和表现回流。'
+        : '先补客户批准或返修结论；没有批准不能进入发布/CRM 闭环。',
+    },
+    {
+      stage: '权限范围与受控分享',
+      ready: permissionCount > 0 && clientScopeCount > 0,
+      evidence: `权限策略 ${permissionCount} 条 / 客户审核范围 ${clientScopeCount} 条`,
+      next: permissionCount > 0
+        ? '把 download/share/publish/approve 都接入权限检查，失败默认关闭。'
+        : '先写入资产权限策略；没有权限账本不能宣称企业级数据安全。',
+    },
+    {
+      stage: 'DLP / 水印 / 留存',
+      ready: dlpReady && watermarkReady && (permission?.retentionPolicyCount || 0) > 0,
+      evidence: `安全策略 ${securityCount} / DLP 通过 ${permission?.dlpPassedPolicyCount || 0} / 水印 ${permission?.watermarkAppliedCount || 0}`,
+      next: dlpReady && watermarkReady
+        ? '继续接真实对象存储、签名 URL、DLP provider 和水印服务。'
+        : '先补 DLP、水印和留存规则；没有安全策略不开放外部下载或分享。',
+    },
+    {
+      stage: '访问审计',
+      ready: accessAuditCount > 0,
+      evidence: `访问审计 ${accessAuditCount} 条 / 权限审计 ${permission?.auditEventCount || 0} 条`,
+      next: accessAuditCount > 0
+        ? '把审计事件展示给运营，用于定位越权、过期和客户操作证据。'
+        : '先生成 view/download/share/approve/publish 的访问审计；没有审计不算企业协作。',
+    },
+    {
+      stage: '表现回流与复盘',
+      ready: performanceCount > 0 && scaleDecisionCount > 0,
+      evidence: `表现回流 ${performanceCount} 条 / scale 决策 ${scaleDecisionCount} 条`,
+      next: performanceCount > 0
+        ? '把结果反哺品牌学习、下一轮生产计划和 CRM 续约动作。'
+        : '补 analytics sync 或手工表现导入；没有回流不能宣称自动优化。',
+    },
+    {
+      stage: 'CRM / 下一步队列',
+      ready: gaps.length === 0,
+      evidence: gaps.length ? `阻断 ${gaps.length} 项 / 动作 ${nextActions.length} 条` : `动作队列 ${nextActions.length} 条 / 无硬阻断`,
+      next: gaps.length
+        ? `先处理：${gaps[0]}。`
+        : '进入企业云资产、外部 CRM 和 analytics sync 接入验收。',
+    },
+  ];
 }
 
 export function buildManageVariantPlaybook(
@@ -149,6 +235,7 @@ export function ManageOperationsConsoleClient({
 
   const selectedVariant = MANAGE_VARIANTS[selectedVariantId];
   const playbook = buildManageVariantPlaybook(industrialSnapshot, permissionSnapshot, selectedVariantId);
+  const operatingChecks = buildManageOperatingChecks(industrialSnapshot, permissionSnapshot);
   const gaps = [...(industrialSnapshot?.missingLinks || []), ...(permissionSnapshot?.missingLinks || [])];
   const nextActions = [...(industrialSnapshot?.nextActions || []), ...(permissionSnapshot?.nextActions || [])];
 
@@ -254,6 +341,35 @@ export function ManageOperationsConsoleClient({
           title={playbook.title}
           variants={MANAGE_VARIANTS}
         />
+
+        <section className="rounded-[8px] border border-sky-200/15 bg-white/[0.04] p-5">
+          <div className="flex flex-col gap-2 lg:flex-row lg:items-end lg:justify-between">
+            <div>
+              <p className="text-xs uppercase tracking-[0.22em] text-sky-200">Clico-style Manage Board</p>
+              <h2 className="mt-2 text-xl font-semibold">Clico式客户交付与企业安全验收板</h2>
+              <p className="mt-2 text-sm leading-6 text-white/55">
+                这里把客户审核、客户批准、权限范围、DLP/水印、访问审计、表现回流和 CRM 下一步放到同一块板上；缺一项就不开放企业级承诺。
+              </p>
+            </div>
+            <div className="text-sm font-semibold text-sky-100">
+              {operatingChecks.filter(item => item.ready).length}/{operatingChecks.length} 就绪
+            </div>
+          </div>
+          <div className="mt-4 grid gap-3 lg:grid-cols-3">
+            {operatingChecks.map(item => (
+              <div key={item.stage} className={`rounded-[8px] border p-4 ${
+                item.ready ? 'border-sky-200/25 bg-sky-300/10' : 'border-amber-200/20 bg-amber-300/10'
+              }`}>
+                <div className={`text-xs font-semibold ${item.ready ? 'text-sky-100' : 'text-amber-100'}`}>
+                  {item.ready ? '已具备证据' : '继续补证据'}
+                </div>
+                <h3 className="mt-2 text-sm font-semibold text-white">{item.stage}</h3>
+                <p className="mt-2 text-xs leading-5 text-white/60">{item.evidence}</p>
+                <p className="mt-2 text-xs leading-5 text-white/45">{item.next}</p>
+              </div>
+            ))}
+          </div>
+        </section>
 
         <section className="grid gap-4">
           <form onSubmit={seedManagePolicy} className="rounded-[8px] border border-white/10 bg-white/[0.04] p-5">
