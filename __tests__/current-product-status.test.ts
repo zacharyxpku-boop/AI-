@@ -7,12 +7,20 @@ describe('current product status report', () => {
     const doc = readFileSync(join(process.cwd(), 'docs/CURRENT_PRODUCT_STATUS.md'), 'utf8');
 
     expect(doc).toContain('Compose / Create / Cut / Cast / Manage');
-    expect(doc).toContain('Kuaizi-level live platform executor');
+    expect(doc).toContain('筷子科技级 live platform executor');
     expect(doc).toContain('docs/EXTERNAL_INTEGRATION_MATERIALS.md');
     expect(doc).toContain('91M+ creative output');
     expect(doc).toContain('42M+ video distribution');
     expect(doc).toContain('No provider callback');
     expect(doc).toContain('No platform OAuth');
     expect(doc).toContain('No ad account authorization');
+    expect(doc).toContain('最终产品形态');
+    expect(doc).toContain('Hookshot / Hookly');
+    expect(doc).toContain('Creatify');
+    expect(doc).toContain('Marpipe');
+    expect(doc).toContain('品牌学习不能只是报告');
+    expect(doc).toContain('内部还能继续解决');
+    expect(doc).toContain('必须外部提供');
+    expect(doc).toContain('不建议公开售卖为筷子科技等价平台');
   });
 });
