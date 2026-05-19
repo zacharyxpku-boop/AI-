@@ -470,6 +470,81 @@ const REVIEW_UI_VARIANTS: Array<{
   },
 ];
 
+export function buildReviewVariantPlaybook(
+  review: ReviewPayload['review'] | undefined,
+  variant: ReviewUiVariant,
+  hasDeliverable = false,
+  feedbackCount = 0,
+) {
+  const status = review?.status;
+  const approved = status === 'approved';
+  const locked = status === 'expired' || status === 'revoked';
+  const activeWithFeedback = status === 'active' && feedbackCount > 0;
+  const missingDeliverable = status === 'active' && !hasDeliverable;
+
+  if (variant === 'friend_trial') {
+    return {
+      title: '朋友试用下一步',
+      primaryAction: approved
+        ? '你已经完成验收，不需要继续操作；后续由运营处理。'
+        : locked
+          ? '不要继续使用这条旧链接，等待运营发新的审核链接。'
+          : missingDeliverable
+            ? '先提交“交付物打不开或缺失”的问题反馈，不要批准。'
+            : activeWithFeedback
+              ? '先确认上一轮修改是否解决；没解决继续反馈，解决后再批准。'
+              : '先打开交付物；有问题就反馈，确认无误再批准。',
+      proofToCheck: hasDeliverable
+        ? '只检查交付物能否打开、内容是否正确、版本是否能用于下一步。'
+        : '没有可打开交付物时，朋友试用只能验证审核入口，不能完成验收。',
+      handoffBoundary: '朋友不需要理解 provider、CRM、分发和投放；页面只暴露反馈和批准。',
+      cards: [
+        `状态 ${displayStatusLabel(review)} / 反馈 ${feedbackCount}`,
+        hasDeliverable ? '交付物已附加，可预览或打开。' : '交付物缺失，批准按钮必须保持不可用。',
+        approved ? '批准结果已写回生产链路。' : '批准前不会进入自动分发或投放。',
+      ],
+    };
+  }
+
+  if (variant === 'operator') {
+    return {
+      title: '运营承接下一步',
+      primaryAction: approved
+        ? '把批准结果推进到分发计划、CRM 交接和表现回流待办。'
+        : locked
+          ? '生成新的 review token，并确认旧链接不会继续写入。'
+          : missingDeliverable
+            ? '补齐预览/下载链接后重发审核，不要要求客户口头批准。'
+            : activeWithFeedback
+              ? '把客户反馈转成返修任务，完成后让客户回到同一审核链路确认。'
+              : '等待客户反馈或批准，并确保所有动作写回生产记录。',
+      proofToCheck: '运营要核对反馈、批准、锁定状态、review token、assetId、projectId 和下一步 owner。',
+      handoffBoundary: '未批准前不放行分发；未接外部 CRM/平台 API 前，先保留系统回执和人工交接。',
+      cards: [
+        `项目 ${review?.projectId || '-'} / 资产 ${review?.assetId || '-'}`,
+        `状态 ${displayStatusLabel(review)} / 反馈 ${feedbackCount}`,
+        '每次客户动作都要落到生产、CRM、分发门禁或表现回流。',
+      ],
+    };
+  }
+
+  return {
+    title: '合作者证据链下一步',
+    primaryAction: approved
+      ? '展示客户批准、写回回执、分发门禁和 CRM 后续动作，证明 Manage 闭环成立。'
+      : locked
+        ? '展示过期/撤销保护，证明客户前台不会误审旧版本。'
+        : '展示免登录 review、反馈/批准写回、异常保护和运营承接边界。',
+    proofToCheck: '这不是静态交付页；它要证明 Wenai 已承接 Clico 式客户前台，并把审核动作接回 Compose/Create/Cut/Cast/Manage。',
+    handoffBoundary: '没有客户批准和系统回执前，不能宣称交付已完成，也不能进入自动发布、投放或规模数字展示。',
+    cards: [
+      `Review token ${review?.token || '-'} / 状态 ${displayStatusLabel(review)}`,
+      `项目 ${review?.projectId || '-'} / 资产 ${review?.assetId || '-'}`,
+      '证据链必须覆盖反馈、批准、过期/撤销、审计和后续运营动作。',
+    ],
+  };
+}
+
 export function IndustrialReviewPortalClient({
   token,
   initialPayload = null,
@@ -508,6 +583,7 @@ export function IndustrialReviewPortalClient({
   const handoffCards = clientHandoffCards(review, Boolean(deliverableUrl), payload?.feedback.length || 0);
   const writebackReceipts = systemWritebackReceipts(review, Boolean(deliverableUrl), payload?.feedback.length || 0);
   const activeVariant = REVIEW_UI_VARIANTS.find(variant => variant.id === uiVariant) || REVIEW_UI_VARIANTS[0];
+  const variantPlaybook = buildReviewVariantPlaybook(review, uiVariant, Boolean(deliverableUrl), payload?.feedback.length || 0);
   const decisionClass = decision.tone === 'ok'
     ? 'border-emerald-400/40 bg-emerald-950/35 text-emerald-100'
     : decision.tone === 'danger'
@@ -641,6 +717,22 @@ export function IndustrialReviewPortalClient({
                 {activeVariant.focusChecklist.map(item => (
                   <span className="border border-amber-200/20 bg-black/15 px-2 py-1 text-xs text-amber-50/85" key={item}>{item}</span>
                 ))}
+              </div>
+            </div>
+            <div className="mt-3 border border-sky-300/20 bg-sky-950/20 px-3 py-3">
+              <div className="text-xs font-semibold text-sky-100/70">Review Action Playbook</div>
+              <div className="mt-1 text-sm font-semibold text-sky-50">{variantPlaybook.title}</div>
+              <p className="mt-2 text-xs leading-5 text-sky-100/75">{variantPlaybook.primaryAction}</p>
+              <div className="mt-3 grid gap-2 md:grid-cols-4">
+                {variantPlaybook.cards.map(card => (
+                  <div className="border border-sky-300/15 bg-black/15 px-3 py-2 text-xs leading-5 text-sky-100/70" key={card}>{card}</div>
+                ))}
+                <div className="border border-rose-300/20 bg-rose-950/20 px-3 py-2 text-xs leading-5 text-rose-100">
+                  停止线：{variantPlaybook.handoffBoundary}
+                </div>
+              </div>
+              <div className="mt-3 border border-sky-300/15 bg-black/15 px-3 py-2 text-xs leading-5 text-sky-100/70">
+                验收证据：{variantPlaybook.proofToCheck}
               </div>
             </div>
           </div>

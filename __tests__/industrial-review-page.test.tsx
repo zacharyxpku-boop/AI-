@@ -3,7 +3,7 @@ import { renderToStaticMarkup } from 'react-dom/server';
 import { readFileSync } from 'node:fs';
 import { join } from 'node:path';
 import IndustrialReviewTokenPage from '@/app/review/[token]/page';
-import { IndustrialReviewPortalClient } from '@/components/IndustrialReviewPortalClient';
+import { IndustrialReviewPortalClient, buildReviewVariantPlaybook } from '@/components/IndustrialReviewPortalClient';
 import { addContentAsset } from '@/lib/industrial-chain-store';
 import { createIndustrialReviewLink, revokeIndustrialReviewLink } from '@/lib/industrial-review-portal';
 import { listAssetPermissionAccessAudits } from '@/lib/asset-permission-ledger';
@@ -61,6 +61,8 @@ describe('industrial review page', () => {
     expect(html).toContain('合作者/投资人版');
     expect(html).toContain('当前选择：<span class="font-semibold text-white">运营工作台版</span>');
     expect(html).toContain('当前视角任务卡');
+    expect(html).toContain('Review Action Playbook');
+    expect(html).toContain('运营承接下一步');
     expect(html).toContain('把客户动作接回运营链路');
     expect(html).toContain('反馈是否进入生产记录');
     expect(html).toContain('/review/wrv_variant_token?variant=friend_trial');
@@ -68,6 +70,38 @@ describe('industrial review page', () => {
     expect(html).toContain('/review/wrv_variant_token?variant=partner');
     expect(html).toContain('每次客户动作都要进入生产记录、CRM 交接、分发门禁或复盘回流');
     expect(html).not.toContain('provider token');
+  });
+
+  it('builds review variant playbooks from approval, feedback, and deliverable evidence', () => {
+    const review = {
+      token: 'wrv_playbook_token',
+      projectId: 'review-playbook-project',
+      assetId: 'asset-playbook',
+      assetTitle: 'Review playbook video',
+      deliverableUrl: 'https://cdn.example.test/playbook.mp4',
+      expiresAt: new Date(Date.now() + 86400_000).toISOString(),
+      status: 'active' as const,
+      feedbackCount: 1,
+    };
+
+    expect(buildReviewVariantPlaybook(review, 'operator', true, 1)).toEqual(expect.objectContaining({
+      title: '运营承接下一步',
+      primaryAction: expect.stringContaining('客户反馈转成返修任务'),
+      proofToCheck: expect.stringContaining('review token'),
+      handoffBoundary: expect.stringContaining('未批准前不放行分发'),
+      cards: expect.arrayContaining([
+        expect.stringContaining('项目 review-playbook-project / 资产 asset-playbook'),
+      ]),
+    }));
+    expect(buildReviewVariantPlaybook(review, 'friend_trial', true, 1)).toEqual(expect.objectContaining({
+      title: '朋友试用下一步',
+      handoffBoundary: expect.stringContaining('朋友不需要理解 provider'),
+    }));
+    expect(buildReviewVariantPlaybook({ ...review, status: 'approved' as const, approvalName: 'Buyer Ops', approvedAt: new Date().toISOString() }, 'partner', true, 0)).toEqual(expect.objectContaining({
+      title: '合作者证据链下一步',
+      primaryAction: expect.stringContaining('证明 Manage 闭环成立'),
+      handoffBoundary: expect.stringContaining('不能宣称交付已完成'),
+    }));
   });
 
   it('keeps the review client focused on feedback and approval actions', () => {
