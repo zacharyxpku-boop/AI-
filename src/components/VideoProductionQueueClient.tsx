@@ -2,6 +2,7 @@
 
 import { useState, type FormEvent } from 'react';
 
+import { FactoryVariantConsole } from '@/components/FactoryVariantConsole';
 import type { FactoryUiVariantId } from '@/lib/factory-readiness-view';
 import type { OneClickVideoOperationResult, VideoProductionQueue } from '@/lib/industrial-video-workflow';
 
@@ -401,8 +402,6 @@ const VIDEO_FACTORY_UI_VARIANTS: Record<FactoryUiVariantId, {
   },
 };
 
-const VIDEO_FACTORY_VARIANT_ORDER: FactoryUiVariantId[] = ['partner', 'operator', 'friend_trial'];
-
 export function buildVideoFactoryVariantPlaybook(queue: VideoProductionQueue | null, variant: FactoryUiVariantId) {
   const trial = friendTrialReadiness(queue, variant);
   const cut = commercialCutReadiness(queue);
@@ -604,75 +603,26 @@ export function VideoProductionQueueClient({
           </p>
         </header>
 
-        <section className="border border-amber-300/25 bg-amber-300/[0.06] p-5">
-          <div className="flex flex-col gap-4 lg:flex-row lg:items-start lg:justify-between">
-            <div className="max-w-3xl">
-              <p className="text-xs uppercase tracking-[0.22em] text-amber-200">Video Factory Variant</p>
-              <h2 className="mt-2 text-2xl font-semibold">{selectedVariant.headline}</h2>
-              <p className="mt-3 text-sm leading-6 text-white/65">{selectedVariant.body}</p>
-            </div>
-            <div className="grid gap-2 text-xs sm:grid-cols-3 lg:w-[24rem] lg:grid-cols-1">
-              {VIDEO_FACTORY_VARIANT_ORDER.map(variantId => {
-                const variant = VIDEO_FACTORY_UI_VARIANTS[variantId];
-                const href = `/factory/video?projectId=${encodeURIComponent(projectId || 'default-project')}&variant=${variantId}`;
-                return (
-                  <a
-                    aria-current={variantId === selectedVariantId ? 'page' : undefined}
-                    className={`border px-3 py-2 transition hover:border-amber-200/50 hover:bg-white/[0.07] ${
-                      variantId === selectedVariantId
-                        ? 'border-amber-200/55 bg-amber-200/10 text-amber-50'
-                        : 'border-white/10 bg-black/20 text-white/60'
-                    }`}
-                    href={href}
-                    key={variantId}
-                  >
-                    <span className="block font-semibold text-white">{variant.label}</span>
-                    <span className="mt-1 block leading-5">{variant.audience}</span>
-                  </a>
-                );
-              })}
-            </div>
-          </div>
-          <div className="mt-4 grid gap-3 md:grid-cols-4">
-            <div className="border border-white/10 bg-black/20 p-3">
-              <div className="text-xs font-semibold text-white/85">第一动作</div>
-              <p className="mt-2 text-xs leading-5 text-emerald-100/85">{selectedVariant.firstAction}</p>
-            </div>
-            <div className="border border-white/10 bg-black/20 p-3">
-              <div className="text-xs font-semibold text-white/85">证据标准</div>
-              <p className="mt-2 text-xs leading-5 text-white/60">{selectedVariant.proof}</p>
-            </div>
-            <div className="border border-white/10 bg-black/20 p-3">
-              <div className="text-xs font-semibold text-white/85">参考平台</div>
-              <p className="mt-2 text-xs leading-5 text-white/60">{selectedVariant.reference}</p>
-            </div>
-            <div className="border border-rose-300/20 bg-rose-950/20 p-3">
-              <div className="text-xs font-semibold text-rose-100">停止线</div>
-              <p className="mt-2 text-xs leading-5 text-rose-100/80">{selectedVariant.stopLine}</p>
-            </div>
-          </div>
-        </section>
-
-        <section className="border border-cyan-300/20 bg-cyan-950/20 p-5">
-          <div className="flex flex-col gap-3 border-b border-cyan-300/15 pb-4 sm:flex-row sm:items-start sm:justify-between">
-            <div>
-              <p className="text-xs uppercase tracking-[0.22em] text-cyan-200">Variant Action Playbook</p>
-              <h2 className="mt-2 text-xl font-semibold">{variantPlaybook.title}</h2>
-              <p className="mt-2 max-w-3xl text-sm leading-6 text-white/60">{variantPlaybook.primaryAction}</p>
-            </div>
-            <div className="w-full border border-cyan-300/20 bg-black/20 p-3 text-xs leading-5 text-cyan-100 sm:max-w-sm">
-              {variantPlaybook.proofToCheck}
-            </div>
-          </div>
-          <div className="mt-4 grid gap-3 md:grid-cols-4">
-            {variantPlaybook.cards.map(card => (
-              <div className="border border-white/10 bg-black/20 p-3 text-xs leading-5 text-white/60" key={card}>{card}</div>
-            ))}
-            <div className="border border-rose-300/20 bg-rose-950/20 p-3 text-xs leading-5 text-rose-100">
-              停止线：{variantPlaybook.handoffBoundary}
-            </div>
-          </div>
-        </section>
+        <FactoryVariantConsole
+          accent="cyan"
+          basePath="/factory/video"
+          evidenceCards={[
+            ...variantPlaybook.cards,
+            selectedVariant.proof,
+            selectedVariant.stopLine,
+            selectedVariant.reference,
+          ]}
+          eyebrow="Video Factory Variant / Variant Action Playbook"
+          firstScreen={`${selectedVariant.headline} ${selectedVariant.body}`}
+          nextAction={selectedVariant.firstAction}
+          primaryAction={variantPlaybook.primaryAction}
+          projectId={projectId || queue?.projectId || 'default-project'}
+          proofFocus={variantPlaybook.proofToCheck}
+          selectedVariantId={selectedVariantId}
+          stopLine={variantPlaybook.handoffBoundary}
+          title={variantPlaybook.title}
+          variants={VIDEO_FACTORY_UI_VARIANTS}
+        />
 
         <section className="border border-cyan-300/20 bg-cyan-950/20 p-5">
           <div className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
