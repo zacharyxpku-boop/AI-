@@ -334,11 +334,18 @@ describe('product readiness against Kuaizi benchmark', () => {
       'Creatify / UGC video ads',
       'Marpipe / catalog creative testing',
       'Pencil / generative ad creative',
+      'Smartly.io / creative-media-intelligence',
+      'VidMob / creative analytics',
+      'Creatopy / brand-safe ad generation',
+      'Superads / creative insights',
     ]));
     expect(report.alternativeReferences.find(reference => reference.name === 'Omneky')?.wenaiDecision).toContain('campaign ledger');
     expect(report.alternativeReferences.find(reference => reference.name === 'Creatify / UGC video ads')?.boundary).toContain('provider 回调');
     expect(report.alternativeReferences.find(reference => reference.name === 'Marpipe / catalog creative testing')?.wenaiDecision).toContain('SKU feed');
     expect(report.alternativeReferences.find(reference => reference.name === 'Pencil / generative ad creative')?.wenaiDecision).toContain('品牌学习档案');
+    expect(report.alternativeReferences.find(reference => reference.name === 'VidMob / creative analytics')?.wenaiDecision).toContain('AI 视频分析');
+    expect(report.alternativeReferences.find(reference => reference.name === 'Creatopy / brand-safe ad generation')?.wenaiDecision).toContain('品牌资产');
+    expect(report.alternativeReferences.find(reference => reference.name === 'Superads / creative insights')?.wenaiDecision).toContain('跨平台性能信号');
     expect(report.uiVariants.map(variant => variant.id)).toEqual(['partner', 'operator', 'friend_trial']);
     expect(report.uiVariants.find(variant => variant.id === 'friend_trial')?.stopLine).toContain('环境变量');
     expect(JSON.stringify(report)).not.toContain('client-secret');

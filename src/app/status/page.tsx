@@ -720,6 +720,21 @@ const ALTERNATIVE_PLATFORM_REFERENCES = [
     reference: 'creative、media、intelligence 一体化：创意交付、媒体购买、实时优化、报告和平台协作必须连成运营系统。',
     wenaiDecision: 'Wenai 的 Cast/Manage 要把素材版本、账号、预算、campaign、平台回执、表现回流和下一轮 action queue 放在同一块可审计面板里。',
   },
+  {
+    name: 'VidMob',
+    reference: '创意分析、平台就绪、表现学习和账号发布一体化，强调 creative analytics 而不是只看素材产出。',
+    wenaiDecision: 'Wenai 的 AI 视频分析和表现回流要把 creative、platform 和 optimization 连起来，不能只停在任务状态。',
+  },
+  {
+    name: 'Creatopy',
+    reference: 'brand kit、模板复用、URL-to-ad 和权限控制，强调品牌安全的大规模创意生产。',
+    wenaiDecision: 'Create/Cut 要把品牌资产、模板、权限和多语言版本统一起来，才能做规模化内容工厂。',
+  },
+  {
+    name: 'Superads',
+    reference: '跨平台 creative insights、fatigue 识别和格式/钩子分析。',
+    wenaiDecision: 'Wenai 的创意洞察要接上跨平台性能信号和疲劳识别，而不是只做竞品拆解。',
+  },
 ];
 
 type StatusProductBlueprintItem = {

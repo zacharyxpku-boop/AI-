@@ -67,6 +67,12 @@ describe('status page', () => {
     expect(html).toContain('Creatify');
     expect(html).toContain('Marpipe');
     expect(html).toContain('Pencil');
+    expect(html).toContain('Smartly.io');
+    expect(html).toContain('VidMob');
+    expect(html).toContain('Creatopy');
+    expect(html).toContain('Superads');
+    expect(html).toContain('creative、media、intelligence');
+    expect(html).toContain('fatigue');
     expect(html).toContain('品牌学习档案必须反哺 Compose/Create/Cut');
     expect(html).toContain('不展示伪规模');
     expect(html).toContain('Manage Acceptance Board');

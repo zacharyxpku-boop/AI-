@@ -639,6 +639,24 @@ function buildAlternativeReferences(): AlternativeCompetitorReference[] {
       wenaiDecision: 'Wenai 的 Cast/Manage 不能只停留在分发计划，要把素材版本、账号、预算、campaign、平台回执、表现回流和下一轮 action queue 合并成一个可审计运营面板。',
       boundary: '没有平台 OAuth、广告账户、analytics sync 和预算止损规则前，只能展示 readiness 和人工执行建议，不能宣称自动跨平台优化。',
     },
+    {
+      name: 'VidMob / creative analytics',
+      pattern: '把 creative analytics、platform readiness、performance learning 和 account publishing 放进一个智能创意分析平台。',
+      wenaiDecision: 'AI 视频分析和表现回流应升级为“看得见创意、看得见平台、看得见优化”的三层结构，而不是只保留任务状态。',
+      boundary: '没有真实平台数据、ad account read-only 权限和 publish proof 前，不宣称已具备 VidMob 级创意分析。',
+    },
+    {
+      name: 'Creatopy / brand-safe ad generation',
+      pattern: '用 brand kit、URL-to-ad、模板复用和权限控制批量生产品牌安全广告。',
+      wenaiDecision: 'Create/Cut 要把品牌资产、模板、权限和多语言版本统一起来，才能做出稳定规模化的内容工厂。',
+      boundary: '没有品牌 kit、素材权属和模板权限前，只能做内部生产草案，不能宣称自动品牌化发布。',
+    },
+    {
+      name: 'Superads / creative insights',
+      pattern: '把 Meta / TikTok / Google / LinkedIn 等平台的 creative performance 统一分析，识别 fatigue、hook、format 和 cross-channel patterns。',
+      wenaiDecision: 'Wenai 的创意洞察必须接到跨平台性能信号和疲劳识别，而不是只停留在竞品拆解和手工复盘。',
+      boundary: '没有 analytics sync 和跨平台数据接入前，只能保留洞察假设和手工导入，不宣称自动创意分析。',
+    },
   ];
 }
 
