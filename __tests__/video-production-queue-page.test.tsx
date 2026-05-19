@@ -2,7 +2,7 @@ import { renderToStaticMarkup } from 'react-dom/server';
 import { describe, expect, it } from 'vitest';
 
 import VideoFactoryPage from '@/app/factory/video/page';
-import { VideoProductionQueueClient } from '@/components/VideoProductionQueueClient';
+import { VideoProductionQueueClient, buildVideoFactoryVariantPlaybook } from '@/components/VideoProductionQueueClient';
 import type { OneClickVideoOperationResult, VideoProductionQueue } from '@/lib/industrial-video-workflow';
 
 describe('video production queue page', () => {
@@ -14,6 +14,8 @@ describe('video production queue page', () => {
 
     expect(html).toContain('视频生产队列');
     expect(html).toContain('Video Factory Variant');
+    expect(html).toContain('Variant Action Playbook');
+    expect(html).toContain('运营执行路径');
     expect(html).toContain('Friend Trial Readiness');
     expect(html).toContain('Commercial Cut Readiness');
     expect(html).toContain('商用 Cut 放行门禁');
@@ -55,16 +57,61 @@ describe('video production queue page', () => {
     );
 
     expect(partnerHtml).toContain('合作者视角');
+    expect(partnerHtml).toContain('合作者验收路径');
+    expect(partnerHtml).toContain('未接真实视频 provider、平台 OAuth、广告账户、analytics sync 和审计规模账本前，不展示 91M+/42M+ 为 Wenai 自有能力');
     expect(partnerHtml).toContain('Cut 不是单个生成按钮，而是一条可审计的视频工业化生产线');
     expect(partnerHtml).toContain('Hookly / Omneky');
     expect(partnerHtml).toContain('筷子科技的编拍剪投管');
     expect(partnerHtml).toContain('未接真实视频 provider、平台 OAuth、广告账户和 analytics sync 前，不宣称自动规模化');
 
     expect(friendHtml).toContain('朋友试用视角');
+    expect(friendHtml).toContain('朋友试用操作路径');
+    expect(friendHtml).toContain('朋友不看 provider、OAuth、广告账户和内部账本，只看交付物能否验收');
     expect(friendHtml).toContain('给一个产品和参考视频，系统帮你排出可审核的视频生产流程');
     expect(friendHtml).toContain('朋友不需要理解 API');
     expect(friendHtml).toContain('如果没有真实成片 URL，页面不能让用户误以为视频已经自动生成');
     expect(friendHtml).toContain('/factory/video?projectId=friend-video&amp;variant=operator');
+  });
+
+  it('builds variant-specific video factory action playbooks from queue evidence', () => {
+    const queue: VideoProductionQueue = {
+      orgId: 'test-org',
+      projectId: 'variant-playbook-project',
+      itemCount: 1,
+      providerReadyCount: 0,
+      handoffOnlyCount: 1,
+      blockedCount: 1,
+      measuredCount: 0,
+      providerExecutionCount: 0,
+      submittedProviderExecutionCount: 0,
+      completedProviderExecutionCount: 0,
+      failedProviderExecutionCount: 0,
+      retryableProviderExecutionCount: 0,
+      resultAssetCount: 0,
+      clientReviewCount: 1,
+      approvedDeliverableCount: 0,
+      revisionRequestedCount: 0,
+      averageLoopCompletionScore: 30,
+      items: [],
+    };
+
+    expect(buildVideoFactoryVariantPlaybook(queue, 'operator')).toEqual(expect.objectContaining({
+      title: '运营执行路径',
+      primaryAction: expect.stringContaining('先处理阻断项'),
+      proofToCheck: expect.stringContaining('missing evidence'),
+      handoffBoundary: expect.stringContaining('人工交接和手动回流'),
+      cards: expect.arrayContaining([
+        expect.stringContaining('队列任务 1 / 阻断 1'),
+      ]),
+    }));
+    expect(buildVideoFactoryVariantPlaybook(queue, 'partner')).toEqual(expect.objectContaining({
+      title: '合作者验收路径',
+      handoffBoundary: expect.stringContaining('不展示 91M+/42M+ 为 Wenai 自有能力'),
+    }));
+    expect(buildVideoFactoryVariantPlaybook(queue, 'friend_trial')).toEqual(expect.objectContaining({
+      title: '朋友试用操作路径',
+      proofToCheck: expect.stringContaining('没有真实成片 URL'),
+    }));
   });
 
   it('shows provider gating in Chinese instead of pretending automatic video generation', () => {

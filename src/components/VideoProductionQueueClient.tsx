@@ -403,6 +403,61 @@ const VIDEO_FACTORY_UI_VARIANTS: Record<FactoryUiVariantId, {
 
 const VIDEO_FACTORY_VARIANT_ORDER: FactoryUiVariantId[] = ['partner', 'operator', 'friend_trial'];
 
+export function buildVideoFactoryVariantPlaybook(queue: VideoProductionQueue | null, variant: FactoryUiVariantId) {
+  const trial = friendTrialReadiness(queue, variant);
+  const cut = commercialCutReadiness(queue);
+  const itemCount = queue?.itemCount || 0;
+  const blockedCount = queue?.blockedCount || 0;
+  const resultCount = queue?.resultAssetCount || 0;
+  const reviewCount = queue?.clientReviewCount || 0;
+  const approvedCount = queue?.approvedDeliverableCount || 0;
+  const measuredCount = queue?.measuredCount || 0;
+
+  if (variant === 'friend_trial') {
+    return {
+      title: '朋友试用操作路径',
+      primaryAction: trial.firstReviewLink
+        ? `把 ${trial.firstReviewLink} 发给朋友，只让对方预览、反馈或批准。`
+        : trial.nextAction,
+      proofToCheck: '必须有可打开成片和客户审核入口；没有真实成片 URL 时，只能验证审核前台，不能说视频已经自动生成。',
+      handoffBoundary: trial.stopLine,
+      cards: [
+        `任务 ${itemCount} / 成片 ${resultCount} / 审核入口 ${reviewCount}`,
+        `客户批准 ${approvedCount} / 表现回流 ${measuredCount}`,
+        '朋友不看 provider、OAuth、广告账户和内部账本，只看交付物能否验收。',
+      ],
+    };
+  }
+
+  if (variant === 'operator') {
+    return {
+      title: '运营执行路径',
+      primaryAction: blockedCount > 0
+        ? '先处理阻断项：补素材授权、provider 配置、成片 URL、review 链接或发布回流证据。'
+        : '继续创建视频工作流、回灌成片、生成 review 链接，并把下一步动作写回队列。',
+      proofToCheck: '每个视频任务都要有 missing evidence、runbook action、owner、接口路径和可追踪的下一步。',
+      handoffBoundary: '外部 token、平台账号、广告账户或 analytics sync 未接入时，运营只能走人工交接和手动回流。',
+      cards: [
+        `队列任务 ${itemCount} / 阻断 ${blockedCount} / Cut readiness ${cut.score}`,
+        `成片 ${resultCount} / 审核 ${reviewCount} / 批准 ${approvedCount}`,
+        '运营视角必须把聊天里的确认转成系统里的反馈、批准、返修、发布证据和表现回流。',
+      ],
+    };
+  }
+
+  return {
+    title: '合作者验收路径',
+    primaryAction: '先看 Commercial Cut Readiness 和 Scale Claim Guard，再判断是否已经具备商用交付边界。',
+    proofToCheck: '证明 Wenai 是 Compose/Create/Cut/Cast/Manage 的闭环，不是单个生成按钮：队列、handoff、review、dispatch、performance return 必须同项目可追踪。',
+    handoffBoundary: '未接真实视频 provider、平台 OAuth、广告账户、analytics sync 和审计规模账本前，不展示 91M+/42M+ 为 Wenai 自有能力。',
+    cards: [
+      `Cut readiness ${cut.score} / ${cut.verdict}`,
+      `任务 ${itemCount} / 成片 ${resultCount} / 表现回流 ${measuredCount}`,
+      '合作者视角要看到外部材料清单、内部已完成能力和不能越线宣传的边界。',
+    ],
+  };
+}
+
 export function VideoProductionQueueClient({
   initialProjectId = 'default-project',
   initialQueue = null,
@@ -492,6 +547,7 @@ export function VideoProductionQueueClient({
   const selectedVariant = VIDEO_FACTORY_UI_VARIANTS[selectedVariantId];
   const trialReadiness = friendTrialReadiness(queue, selectedVariantId);
   const cutReadiness = commercialCutReadiness(queue);
+  const variantPlaybook = buildVideoFactoryVariantPlaybook(queue, selectedVariantId);
 
   async function ingestProductionResult(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
@@ -593,6 +649,27 @@ export function VideoProductionQueueClient({
             <div className="border border-rose-300/20 bg-rose-950/20 p-3">
               <div className="text-xs font-semibold text-rose-100">停止线</div>
               <p className="mt-2 text-xs leading-5 text-rose-100/80">{selectedVariant.stopLine}</p>
+            </div>
+          </div>
+        </section>
+
+        <section className="border border-cyan-300/20 bg-cyan-950/20 p-5">
+          <div className="flex flex-col gap-3 border-b border-cyan-300/15 pb-4 sm:flex-row sm:items-start sm:justify-between">
+            <div>
+              <p className="text-xs uppercase tracking-[0.22em] text-cyan-200">Variant Action Playbook</p>
+              <h2 className="mt-2 text-xl font-semibold">{variantPlaybook.title}</h2>
+              <p className="mt-2 max-w-3xl text-sm leading-6 text-white/60">{variantPlaybook.primaryAction}</p>
+            </div>
+            <div className="w-full border border-cyan-300/20 bg-black/20 p-3 text-xs leading-5 text-cyan-100 sm:max-w-sm">
+              {variantPlaybook.proofToCheck}
+            </div>
+          </div>
+          <div className="mt-4 grid gap-3 md:grid-cols-4">
+            {variantPlaybook.cards.map(card => (
+              <div className="border border-white/10 bg-black/20 p-3 text-xs leading-5 text-white/60" key={card}>{card}</div>
+            ))}
+            <div className="border border-rose-300/20 bg-rose-950/20 p-3 text-xs leading-5 text-rose-100">
+              停止线：{variantPlaybook.handoffBoundary}
             </div>
           </div>
         </section>
