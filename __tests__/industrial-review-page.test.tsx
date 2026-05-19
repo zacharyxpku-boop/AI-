@@ -3,7 +3,7 @@ import { renderToStaticMarkup } from 'react-dom/server';
 import { readFileSync } from 'node:fs';
 import { join } from 'node:path';
 import IndustrialReviewTokenPage from '@/app/review/[token]/page';
-import { IndustrialReviewPortalClient, buildReviewVariantPlaybook } from '@/components/IndustrialReviewPortalClient';
+import { IndustrialReviewPortalClient, buildClientReviewPassport, buildReviewVariantPlaybook } from '@/components/IndustrialReviewPortalClient';
 import { addContentAsset } from '@/lib/industrial-chain-store';
 import { createIndustrialReviewLink, revokeIndustrialReviewLink } from '@/lib/industrial-review-portal';
 import { listAssetPermissionAccessAudits } from '@/lib/asset-permission-ledger';
@@ -62,6 +62,11 @@ describe('industrial review page', () => {
     expect(html).toContain('当前选择：<span class="font-semibold text-white">运营工作台版</span>');
     expect(html).toContain('当前视角任务卡');
     expect(html).toContain('Review Action Playbook');
+    expect(html).toContain('客户交付护照');
+    expect(html).toContain('一眼判断：能不能看、能不能改、能不能批、批完去哪');
+    expect(html).toContain('可打开交付物');
+    expect(html).toContain('可提交反馈');
+    expect(html).toContain('可在确认后批准');
     expect(html).toContain('运营承接下一步');
     expect(html).toContain('把客户动作接回运营链路');
     expect(html).toContain('反馈是否进入生产记录');
@@ -102,6 +107,38 @@ describe('industrial review page', () => {
       primaryAction: expect.stringContaining('证明 Manage 闭环成立'),
       handoffBoundary: expect.stringContaining('不能宣称交付已完成'),
     }));
+  });
+
+  it('builds a zero-explanation client review passport for client and operator handoff', () => {
+    const activeReview = {
+      token: 'passport-active',
+      projectId: 'passport-project',
+      assetId: 'passport-asset',
+      assetTitle: 'Passport asset',
+      deliverableUrl: 'https://cdn.example.test/passport.mp4',
+      expiresAt: new Date(Date.now() + 86400_000).toISOString(),
+      status: 'active' as const,
+      feedbackCount: 0,
+    };
+
+    expect(buildClientReviewPassport(activeReview, true, 0)).toEqual(expect.arrayContaining([
+      expect.objectContaining({ title: '预览状态', value: '可打开交付物', tone: 'ready' }),
+      expect.objectContaining({ title: '反馈入口', value: '可提交反馈', detail: expect.stringContaining('有问题就写清楚') }),
+      expect.objectContaining({ title: '批准门禁', value: '可在确认后批准', detail: expect.stringContaining('写回生产') }),
+      expect.objectContaining({ title: '后续流向', value: '等待客户动作' }),
+    ]));
+    expect(buildClientReviewPassport({ ...activeReview, deliverableUrl: undefined }, false, 1)).toEqual(expect.arrayContaining([
+      expect.objectContaining({ title: '预览状态', value: '待补交付物', detail: expect.stringContaining('不能完成验收') }),
+      expect.objectContaining({ title: '批准门禁', value: '暂不可批准' }),
+    ]));
+    expect(buildClientReviewPassport({ ...activeReview, status: 'approved' as const, approvalName: 'Buyer Ops' }, true, 0)).toEqual(expect.arrayContaining([
+      expect.objectContaining({ title: '批准门禁', value: '已批准', detail: expect.stringContaining('Buyer Ops') }),
+      expect.objectContaining({ title: '后续流向', value: '进入分发/CRM/回流' }),
+    ]));
+    expect(buildClientReviewPassport({ ...activeReview, status: 'revoked' as const }, true, 0)).toEqual(expect.arrayContaining([
+      expect.objectContaining({ title: '反馈入口', value: '只读留档' }),
+      expect.objectContaining({ title: '后续流向', value: '等待新链接' }),
+    ]));
   });
 
   it('keeps the review client focused on feedback and approval actions', () => {

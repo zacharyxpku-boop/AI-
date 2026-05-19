@@ -375,6 +375,64 @@ function systemWritebackReceipts(
   ];
 }
 
+export function buildClientReviewPassport(
+  review: ReviewPayload['review'] | undefined,
+  hasDeliverable: boolean,
+  feedbackCount: number,
+) {
+  const status = review?.status;
+  const active = status === 'active';
+  const approved = status === 'approved';
+  const locked = status === 'expired' || status === 'revoked';
+
+  return [
+    {
+      title: '预览状态',
+      value: hasDeliverable ? '可打开交付物' : '待补交付物',
+      tone: hasDeliverable ? 'ready' : 'attention',
+      detail: hasDeliverable
+        ? '客户可以直接预览或打开原始链接，再判断是否需要修改。'
+        : '缺少可打开链接时只能提交问题，不能完成验收。',
+    },
+    {
+      title: '反馈入口',
+      value: active ? '可提交反馈' : '只读留档',
+      tone: active ? 'ready' : 'locked',
+      detail: active
+        ? feedbackCount > 0
+          ? `已有 ${feedbackCount} 条反馈，继续补充会写回生产记录。`
+          : '有问题就写清楚位置、原因和希望修改方式。'
+        : '当前链接不会继续写入反馈，避免误审旧版本。',
+    },
+    {
+      title: '批准门禁',
+      value: approved ? '已批准' : active && hasDeliverable ? '可在确认后批准' : '暂不可批准',
+      tone: approved ? 'ready' : active && hasDeliverable ? 'attention' : locked ? 'locked' : 'attention',
+      detail: approved
+        ? `批准人 ${review?.approvalName || '客户'} 已锁定结果。`
+        : active && hasDeliverable
+          ? '批准会锁定本链接，并写回生产、交付和后续运营链路。'
+          : '未满足交付物或链接状态门禁前，系统会阻止批准。',
+    },
+    {
+      title: '后续流向',
+      value: approved ? '进入分发/CRM/回流' : locked ? '等待新链接' : '等待客户动作',
+      tone: approved ? 'ready' : locked ? 'locked' : 'attention',
+      detail: approved
+        ? '运营可以继续推进分发计划、CRM 交接和表现回流。'
+        : locked
+          ? '过期或撤销后，需要运营重新生成审核链接。'
+          : '反馈进入返修；批准进入后续交付动作。',
+    },
+  ];
+}
+
+function passportClass(tone: string) {
+  if (tone === 'ready') return 'border-emerald-300/25 bg-emerald-950/20 text-emerald-100';
+  if (tone === 'locked') return 'border-red-300/25 bg-red-950/25 text-red-100';
+  return 'border-amber-300/25 bg-amber-950/20 text-amber-100';
+}
+
 const ZERO_EXPLANATION_REVIEW_STEPS = [
   {
     title: '先打开交付物',
@@ -582,6 +640,7 @@ export function IndustrialReviewPortalClient({
   const path = decisionPath(review?.status, Boolean(deliverableUrl), payload?.feedback.length || 0);
   const handoffCards = clientHandoffCards(review, Boolean(deliverableUrl), payload?.feedback.length || 0);
   const writebackReceipts = systemWritebackReceipts(review, Boolean(deliverableUrl), payload?.feedback.length || 0);
+  const clientPassport = buildClientReviewPassport(review, Boolean(deliverableUrl), payload?.feedback.length || 0);
   const activeVariant = REVIEW_UI_VARIANTS.find(variant => variant.id === uiVariant) || REVIEW_UI_VARIANTS[0];
   const variantPlaybook = buildReviewVariantPlaybook(review, uiVariant, Boolean(deliverableUrl), payload?.feedback.length || 0);
   const decisionClass = decision.tone === 'ok'
@@ -757,6 +816,26 @@ export function IndustrialReviewPortalClient({
               </div>
             </div>
           ) : null}
+          <div className="border border-white/10 bg-white/[0.03] px-4 py-3">
+            <div className="flex flex-col gap-1 sm:flex-row sm:items-end sm:justify-between">
+              <div>
+                <div className="text-xs font-semibold text-white/55">客户交付护照</div>
+                <div className="mt-1 text-sm font-semibold text-white">一眼判断：能不能看、能不能改、能不能批、批完去哪</div>
+              </div>
+              <div className="text-xs leading-5 text-white/45">
+                这张卡只展示客户和运营都能核对的事实，不暴露 provider、token 或后台配置。
+              </div>
+            </div>
+            <div className="mt-3 grid gap-2 sm:grid-cols-4">
+              {clientPassport.map(item => (
+                <div className={`border px-3 py-2 ${passportClass(item.tone)}`} key={item.title}>
+                  <div className="text-xs opacity-65">{item.title}</div>
+                  <div className="mt-1 text-sm font-semibold">{item.value}</div>
+                  <div className="mt-1 text-xs leading-5 opacity-75">{item.detail}</div>
+                </div>
+              ))}
+            </div>
+          </div>
           <div className="border border-emerald-300/20 bg-emerald-950/20 px-4 py-3">
             <div className="flex flex-col gap-1 sm:flex-row sm:items-center sm:justify-between">
               <div>
