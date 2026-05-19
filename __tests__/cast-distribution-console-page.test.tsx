@@ -2,7 +2,13 @@ import { renderToStaticMarkup } from 'react-dom/server';
 import { describe, expect, it } from 'vitest';
 
 import CastFactoryPage from '@/app/factory/cast/page';
-import { CastDistributionConsoleClient, buildAdDeliveryGuardrails, buildCastManageOperatingChecks, buildCastVariantPlaybook } from '@/components/CastDistributionConsoleClient';
+import {
+  CastDistributionConsoleClient,
+  buildAdDeliveryGuardrails,
+  buildCastManageOperatingChecks,
+  buildCastVariantPlaybook,
+  buildManualPublishReceiptChecks,
+} from '@/components/CastDistributionConsoleClient';
 import type { ChannelAccountSnapshot } from '@/lib/channel-account-ledger';
 
 function snapshot(overrides: Partial<ChannelAccountSnapshot> = {}): ChannelAccountSnapshot {
@@ -47,6 +53,13 @@ describe('cast distribution console page', () => {
     expect(html).toContain('Cast 运营动作剧本');
     expect(html).toContain('Smartly式 Cast/Manage 一体化验收板');
     expect(html).toContain('Ad Delivery Guardrails');
+    expect(html).toContain('Manual Publish Receipt Board');
+    expect(html).toContain('人工发布回执与矩阵频控验收板');
+    expect(html).toContain('账号健康门禁');
+    expect(html).toContain('频控余量门禁');
+    expect(html).toContain('去重排期门禁');
+    expect(html).toContain('人工发布回执门禁');
+    expect(html).toContain('表现回流门禁');
     expect(html).toContain('广告投放止损与放量门禁');
     expect(html).toContain('预算 cap');
     expect(html).toContain('不宣称自动优化');
@@ -236,6 +249,56 @@ describe('cast distribution console page', () => {
       expect.objectContaining({ rule: '平台证据', ready: true }),
       expect.objectContaining({ rule: '放量规则', ready: true }),
       expect.objectContaining({ rule: '回滚原因', ready: true }),
+    ]));
+  });
+
+  it('builds manual publish receipt checks for account health frequency dedupe evidence and return flow', () => {
+    const blocked = snapshot({
+      accountCount: 1,
+      connectedAccountCount: 1,
+      healthyAccountCount: 0,
+      rateLimitedAccountCount: 1,
+      totalDailyPublishLimit: 2,
+      scheduledCount: 2,
+      availableSlotCount: 0,
+      adCampaignCount: 0,
+      adEvidenceCount: 0,
+      measuredAdCampaignCount: 0,
+    });
+
+    expect(buildManualPublishReceiptChecks(blocked)).toEqual(expect.arrayContaining([
+      expect.objectContaining({ gate: '账号健康门禁', ready: false }),
+      expect.objectContaining({ gate: '频控余量门禁', ready: false }),
+      expect.objectContaining({ gate: '去重排期门禁', ready: false }),
+      expect.objectContaining({ gate: '人工发布回执门禁', ready: false }),
+      expect.objectContaining({ gate: '表现回流门禁', ready: false }),
+    ]));
+
+    const ready = snapshot({
+      accountCount: 2,
+      connectedAccountCount: 2,
+      healthyAccountCount: 2,
+      rateLimitedAccountCount: 0,
+      totalDailyPublishLimit: 6,
+      scheduledCount: 2,
+      availableSlotCount: 4,
+      adCampaignCount: 1,
+      adEvidenceCount: 1,
+      measuredAdCampaignCount: 1,
+      missingLinks: [],
+      adMissingLinks: [],
+    });
+
+    expect(buildManualPublishReceiptChecks(ready)).toEqual(expect.arrayContaining([
+      expect.objectContaining({ gate: '账号健康门禁', ready: true }),
+      expect.objectContaining({ gate: '频控余量门禁', ready: true }),
+      expect.objectContaining({ gate: '去重排期门禁', ready: true }),
+      expect.objectContaining({ gate: '人工发布回执门禁', ready: true }),
+      expect.objectContaining({ gate: '表现回流门禁', ready: true }),
+      expect.objectContaining({
+        gate: '人工发布回执门禁',
+        externalGate: expect.stringContaining('发布 API'),
+      }),
     ]));
   });
 });

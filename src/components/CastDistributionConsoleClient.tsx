@@ -29,6 +29,14 @@ export type AdDeliveryGuardrail = {
   stopLine: string;
 };
 
+export type ManualPublishReceiptCheck = {
+  gate: string;
+  ready: boolean;
+  evidence: string;
+  operatorAction: string;
+  externalGate: string;
+};
+
 const CAST_VARIANTS: Record<FactoryUiVariantId, {
   label: string;
   audience: string;
@@ -209,6 +217,74 @@ export function buildAdDeliveryGuardrails(snapshot: ChannelAccountSnapshot | nul
   ];
 }
 
+export function buildManualPublishReceiptChecks(snapshot: ChannelAccountSnapshot | null): ManualPublishReceiptCheck[] {
+  const accountCount = snapshot?.accountCount || 0;
+  const healthyCount = snapshot?.healthyAccountCount || 0;
+  const rateLimitedCount = snapshot?.rateLimitedAccountCount || 0;
+  const totalLimit = snapshot?.totalDailyPublishLimit || 0;
+  const scheduledCount = snapshot?.scheduledCount || 0;
+  const availableSlotCount = snapshot?.availableSlotCount || 0;
+  const evidenceCount = snapshot?.adEvidenceCount || 0;
+  const measuredCount = snapshot?.measuredAdCampaignCount || 0;
+  const campaignCount = snapshot?.adCampaignCount || 0;
+  const gaps = [...(snapshot?.missingLinks || []), ...(snapshot?.adMissingLinks || [])];
+
+  return [
+    {
+      gate: '账号健康门禁',
+      ready: accountCount > 0 && healthyCount > 0 && rateLimitedCount === 0,
+      evidence: `账号 ${accountCount} / 健康 ${healthyCount} / 限频 ${rateLimitedCount}`,
+      operatorAction: healthyCount > 0
+        ? '优先使用 healthy/warmup 账号；at-risk、blocked、rate-limited 账号不能进入发布排期。'
+        : '先补一个 manual_ready 且健康的账号，否则矩阵分发只能停在计划。'
+      ,
+      externalGate: '真实自动发布仍需要平台 OAuth、账号授权和发布权限。',
+    },
+    {
+      gate: '频控余量门禁',
+      ready: totalLimit > 0 && scheduledCount <= totalLimit && availableSlotCount > 0,
+      evidence: `日上限 ${totalLimit} / 已排 ${scheduledCount} / 余量 ${availableSlotCount}`,
+      operatorAction: availableSlotCount > 0
+        ? '把下一条内容排到有余量的账号槽位，避免同账号过密发布。'
+        : '先减少排期或换账号，不能继续塞入同一个账号。'
+      ,
+      externalGate: '自动限频需要平台返回 rate limit、账号健康和发布失败码。',
+    },
+    {
+      gate: '去重排期门禁',
+      ready: campaignCount > 0 && scheduledCount <= Math.max(totalLimit, 1),
+      evidence: `campaign ${campaignCount} / scheduled ${scheduledCount}`,
+      operatorAction: campaignCount > 0
+        ? '同一素材必须绑定 campaign/dispatch 后再排期，避免重复发同一版本。'
+        : '先建立 campaign/dispatch 账本；没有版本归属就不进入矩阵排期。'
+      ,
+      externalGate: '跨平台自动去重仍需要发布回执、asset_ref 和平台内容 ID。',
+    },
+    {
+      gate: '人工发布回执门禁',
+      ready: evidenceCount > 0,
+      evidence: `平台证据 ${evidenceCount}`,
+      operatorAction: evidenceCount > 0
+        ? '把平台 URL、后台截图或 campaign 回执绑定到 ledger，作为人工发布完成证据。'
+        : '没有 evidence URL 时只能标记 manual-ready，不能标记已发布或已投放。'
+      ,
+      externalGate: '自动回执需要发布 API、平台 post/campaign id 和 webhook 或轮询同步。',
+    },
+    {
+      gate: '表现回流门禁',
+      ready: measuredCount > 0,
+      evidence: `已回流 campaign ${measuredCount}`,
+      operatorAction: measuredCount > 0
+        ? '把转化、收入或有效互动写回品牌学习和下一轮 action queue。'
+        : gaps.length
+          ? `先处理阻断项：${gaps[0]}。`
+          : '发布后导入 CSV 或等待 analytics sync，未回流前不宣称自动优化。'
+      ,
+      externalGate: '自动表现回流需要 analytics API、指标映射、归因窗口和同步频率。',
+    },
+  ];
+}
+
 export function buildCastVariantPlaybook(
   snapshot: ChannelAccountSnapshot | null,
   variant: FactoryUiVariantId,
@@ -298,6 +374,7 @@ export function CastDistributionConsoleClient({
   const playbook = buildCastVariantPlaybook(snapshot, selectedVariantId);
   const operatingChecks = buildCastManageOperatingChecks(snapshot);
   const adGuardrails = buildAdDeliveryGuardrails(snapshot);
+  const manualReceiptChecks = buildManualPublishReceiptChecks(snapshot);
   const nextActions = snapshot?.nextActions || [];
   const gaps = [...(snapshot?.missingLinks || []), ...(snapshot?.adMissingLinks || [])];
 
@@ -438,6 +515,36 @@ export function CastDistributionConsoleClient({
                 <p className="mt-2 text-xs leading-5 text-white/60">{item.evidence}</p>
                 <p className="mt-2 text-xs leading-5 text-lime-100/70">{item.operatorAction}</p>
                 <p className="mt-2 text-xs leading-5 text-white/45">{item.stopLine}</p>
+              </div>
+            ))}
+          </div>
+        </section>
+
+        <section className="rounded-[8px] border border-cyan-200/15 bg-cyan-950/15 p-5">
+          <div className="flex flex-col gap-2 lg:flex-row lg:items-end lg:justify-between">
+            <div>
+              <p className="text-xs uppercase tracking-[0.22em] text-cyan-200">Manual Publish Receipt Board</p>
+              <h2 className="mt-2 text-xl font-semibold">人工发布回执与矩阵频控验收板</h2>
+              <p className="mt-2 text-sm leading-6 text-white/55">
+                没接 OAuth 时，Cast 也不能停在计划。这里把账号健康、频控余量、去重排期、人工发布证据和表现回流拆成门禁；没有平台证据时只允许 manual-ready，不把人工流程包装成自动分发。
+              </p>
+            </div>
+            <div className="text-sm font-semibold text-cyan-100">
+              {manualReceiptChecks.filter(item => item.ready).length}/{manualReceiptChecks.length} receipt gates ready
+            </div>
+          </div>
+          <div className="mt-4 grid gap-3 lg:grid-cols-5">
+            {manualReceiptChecks.map(item => (
+              <div key={item.gate} className={`rounded-[8px] border p-4 ${
+                item.ready ? 'border-cyan-200/25 bg-cyan-300/10' : 'border-amber-200/20 bg-amber-300/10'
+              }`}>
+                <div className={`text-xs font-semibold ${item.ready ? 'text-cyan-100' : 'text-amber-100'}`}>
+                  {item.ready ? '已有证据' : '继续补证据'}
+                </div>
+                <h3 className="mt-2 text-sm font-semibold text-white">{item.gate}</h3>
+                <p className="mt-2 text-xs leading-5 text-white/60">{item.evidence}</p>
+                <p className="mt-2 text-xs leading-5 text-cyan-100/70">{item.operatorAction}</p>
+                <p className="mt-2 text-xs leading-5 text-white/45">{item.externalGate}</p>
               </div>
             ))}
           </div>

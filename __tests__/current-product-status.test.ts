@@ -26,10 +26,12 @@ describe('current product status report', () => {
     expect(doc).toContain('来源广度、重复采集、多模态解析、生产交接和复利学习');
     expect(doc).toContain('Review Commercial Acceptance Board');
     expect(doc).toContain('Review CRM Handoff Packet');
+    expect(doc).toContain('Manual Publish Receipt Board');
+    expect(doc).toContain('账号健康、频控余量、去重排期、人工发布回执和表现回流');
     expect(doc).toContain('CRM/分发/复盘承接');
-    expect(doc).toContain('88%');
-    expect(doc).toContain('91%');
-    expect(doc).toContain('54%');
+    expect(doc).toContain('89%');
+    expect(doc).toContain('92%');
+    expect(doc).toContain('55%');
     expect(doc).toContain('预览、反馈、批准、异常保护、CRM/分发/复盘承接');
     expect(doc).toContain('Cut Operating Checks');
     expect(doc).toContain('Provider Sandbox Contract');
