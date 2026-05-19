@@ -425,24 +425,48 @@ const REVIEW_UI_VARIANTS: Array<{
   label: string;
   intent: string;
   proof: string;
+  eyebrow: string;
+  heroBody: string;
+  focusTitle: string;
+  focusBody: string;
+  focusChecklist: string[];
+  showInternalReceipts: boolean;
 }> = [
   {
     id: 'friend_trial',
     label: '朋友试用版',
     intent: '只保留客户需要判断的事：能否打开、是否正确、有问题就反馈、没问题再批准。',
     proof: '非技术客户不需要理解 provider、ledger、CRM 或分发系统，也能独立完成验收。',
+    eyebrow: '朋友试用审核',
+    heroBody: '你只需要判断交付物能不能用：能打开、内容正确、没有明显问题就批准；有问题就写清楚，运营会接手修改。',
+    focusTitle: '不用懂后台，只做验收',
+    focusBody: '页面会把不能批准的情况拦住。你不需要理解生产队列、平台授权或投放系统。',
+    focusChecklist: ['能不能打开交付物', '商品和文案是否正确', '是否需要修改', '确认无误再批准'],
+    showInternalReceipts: false,
   },
   {
     id: 'operator',
     label: '运营工作台版',
     intent: '突出反馈、批准、锁定状态、写回回执和卡住时的运营接力动作。',
     proof: '每次客户动作都要进入生产记录、CRM 交接、分发门禁或复盘回流。',
+    eyebrow: '运营验收工作台',
+    heroBody: '这里要看客户动作是否已经写回生产链路，并判断下一步是返修、补链接、推进分发，还是进入 CRM 和表现回流。',
+    focusTitle: '把客户动作接回运营链路',
+    focusBody: '重点不是页面好不好看，而是反馈、批准、锁定和异常状态是否都有明确承接人和下一步。',
+    focusChecklist: ['反馈是否进入生产记录', '批准是否解锁分发门禁', '卡住时运营要补什么', 'CRM/表现回流是否可追踪'],
+    showInternalReceipts: true,
   },
   {
     id: 'partner',
     label: '合作者/投资人版',
     intent: '展示 Wenai 已吸收 Clico 的免登录客户审核、反馈、批准、撤销/过期和审计闭环。',
     proof: '这不是静态交付页，而是 Manage 链路里的客户验收前台。',
+    eyebrow: '合作者验收视角',
+    heroBody: '这页展示 Wenai 的 Manage 能力：客户免登录验收、反馈写回、批准锁定、异常保护和后续分发/CRM/回流承接。',
+    focusTitle: 'Clico 式客户前台已产品化',
+    focusBody: '合作者应看到的不只是审核按钮，而是客户动作如何变成可审计的生产、交付和运营证据。',
+    focusChecklist: ['免登录客户审核', '反馈/批准写回', '过期/撤销保护', '交付到分发的证据链'],
+    showInternalReceipts: true,
   },
 ];
 
@@ -564,13 +588,13 @@ export function IndustrialReviewPortalClient({
             </span>
           </div>
           <div>
-            <p className="text-sm text-white/55">交付审核</p>
+            <p className="text-sm text-white/55">{activeVariant.eyebrow}</p>
             <h1 className="mt-2 max-w-3xl text-3xl font-semibold leading-tight sm:text-5xl">
               {review?.assetTitle || '审核链接未加载'}
             </h1>
           </div>
           <p className="max-w-3xl text-sm leading-6 text-white/65">
-            你可以在这里查看交付物、留下明确修改意见，或批准进入分发与 CRM 交接。链接批准、过期或撤销后，本页面会变为只读。
+            {activeVariant.heroBody}
           </p>
           <div className="border border-white/10 bg-white/[0.03] px-4 py-3">
             <div className="flex flex-col gap-1 sm:flex-row sm:items-end sm:justify-between">
@@ -608,6 +632,16 @@ export function IndustrialReviewPortalClient({
             </div>
             <div className="mt-3 border border-white/10 bg-black/20 px-3 py-2 text-xs leading-5 text-white/60">
               当前选择：<span className="font-semibold text-white">{activeVariant.label}</span>。{activeVariant.proof}
+            </div>
+            <div className="mt-3 border border-amber-300/20 bg-amber-950/20 px-3 py-3">
+              <div className="text-xs font-semibold text-amber-100/70">当前视角任务卡</div>
+              <div className="mt-1 text-sm font-semibold text-amber-50">{activeVariant.focusTitle}</div>
+              <p className="mt-2 text-xs leading-5 text-amber-100/75">{activeVariant.focusBody}</p>
+              <div className="mt-3 flex flex-wrap gap-2">
+                {activeVariant.focusChecklist.map(item => (
+                  <span className="border border-amber-200/20 bg-black/15 px-2 py-1 text-xs text-amber-50/85" key={item}>{item}</span>
+                ))}
+              </div>
             </div>
           </div>
           {lockedReason ? <div className={`border px-4 py-3 text-sm ${statusClass(review!.status)}`}>{lockedReason}</div> : null}
@@ -709,7 +743,7 @@ export function IndustrialReviewPortalClient({
               ))}
             </div>
           </div>
-          <div className="border border-cyan-300/20 bg-cyan-950/15 px-4 py-3">
+          {activeVariant.showInternalReceipts ? <div className="border border-cyan-300/20 bg-cyan-950/15 px-4 py-3">
             <div className="flex flex-col gap-1 sm:flex-row sm:items-end sm:justify-between">
               <div>
                 <div className="text-xs font-semibold text-cyan-100/65">系统写回回执</div>
@@ -730,8 +764,8 @@ export function IndustrialReviewPortalClient({
                 </div>
               ))}
             </div>
-          </div>
-          <div className="border border-fuchsia-300/20 bg-fuchsia-950/15 px-4 py-3">
+          </div> : null}
+          {activeVariant.showInternalReceipts ? <div className="border border-fuchsia-300/20 bg-fuchsia-950/15 px-4 py-3">
             <div className="flex flex-col gap-1 sm:flex-row sm:items-end sm:justify-between">
               <div>
                 <div className="text-xs font-semibold text-fuchsia-100/65">客户验收作战卡</div>
@@ -749,7 +783,7 @@ export function IndustrialReviewPortalClient({
                 </div>
               ))}
             </div>
-          </div>
+          </div> : null}
           {review ? (
             <div className="grid gap-3 lg:grid-cols-[0.95fr_1.05fr]">
               <div className="border border-white/10 bg-white/[0.03] px-4 py-3">

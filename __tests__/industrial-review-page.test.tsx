@@ -15,7 +15,7 @@ describe('industrial review page', () => {
     });
     const html = renderToStaticMarkup(page);
     expect(html).toContain('Wenai 客户审核');
-    expect(html).toContain('交付审核');
+    expect(html).toContain('朋友试用审核');
     expect(html).toContain('批准并写回状态');
     expect(html).toContain('批准后本链接会锁定');
     expect(html).toContain('提交反馈');
@@ -60,6 +60,9 @@ describe('industrial review page', () => {
     expect(html).toContain('运营工作台版');
     expect(html).toContain('合作者/投资人版');
     expect(html).toContain('当前选择：<span class="font-semibold text-white">运营工作台版</span>');
+    expect(html).toContain('当前视角任务卡');
+    expect(html).toContain('把客户动作接回运营链路');
+    expect(html).toContain('反馈是否进入生产记录');
     expect(html).toContain('/review/wrv_variant_token?variant=friend_trial');
     expect(html).toContain('/review/wrv_variant_token?variant=operator');
     expect(html).toContain('/review/wrv_variant_token?variant=partner');
@@ -83,7 +86,10 @@ describe('industrial review page', () => {
         feedback: [],
       }}
     />);
-    expect(html).toContain('交付审核');
+    expect(html).toContain('朋友试用审核');
+    expect(html).toContain('不用懂后台，只做验收');
+    expect(html).toContain('页面会把不能批准的情况拦住');
+    expect(html).toContain('能不能打开交付物');
     expect(html).toContain('交付物预览');
     expect(html).toContain('批准交付');
     expect(html).toContain('有问题就提交修改意见');
@@ -97,12 +103,15 @@ describe('industrial review page', () => {
     expect(html).toContain('提交问题');
     expect(html).toContain('确认后批准');
     expect(html).toContain('补齐交付物前，批准按钮会保持不可用');
+    expect(html).not.toContain('系统写回回执');
+    expect(html).not.toContain('客户验收作战卡');
     expect(html).not.toContain('API key');
   });
 
   it('renders client-readable review guidance from server-provided status fields', () => {
     const html = renderToStaticMarkup(<IndustrialReviewPortalClient
       token="wrv_guidance_token"
+      initialVariant="operator"
       initialPayload={{
         review: {
           token: 'wrv_guidance_token',
@@ -229,6 +238,7 @@ describe('industrial review page', () => {
 
     const html = renderToStaticMarkup(<IndustrialReviewPortalClient
       token={link!.token}
+      initialVariant="operator"
       initialPayload={{
         review: {
           token: link!.token,
