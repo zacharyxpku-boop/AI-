@@ -126,6 +126,16 @@ export interface ProjectReadinessFacts {
   brandLearningWinningAssetCount?: number;
   brandLearningRuleCount?: number;
   brandLearningMissingLinks?: string[];
+  auditedCreativeOutputCount?: number;
+  auditedVideoDistributionCount?: number;
+  auditedScalePlatformBreakdownCount?: number;
+  auditedScaleEvidenceUrlCount?: number;
+  auditedScaleHasDedupeRule?: boolean;
+  auditedScaleHasDateRange?: boolean;
+  auditedScaleHasAuditorNote?: boolean;
+  auditedScaleCanDisplayCreativeBenchmark?: boolean;
+  auditedScaleCanDisplayVideoBenchmark?: boolean;
+  auditedScaleMissingLinks?: string[];
   missingLinks: string[];
   nextActions: string[];
 }
@@ -384,17 +394,18 @@ function buildExternalRequirements(input: ReadinessServiceInput): ExternalIntegr
 }
 
 function buildScaleClaimGuards(input: ReadinessServiceInput): ScaleClaimGuard[] {
+  const project = input.project;
   return [{
     label: 'Creative output scale',
     requestedBenchmark: '91M+ creative output',
-    canDisplay: false,
-    evidence: `creativeInsights=${input.project?.creativeInsightCount || 0}; auditedWenaiCreativeOutput=missing`,
+    canDisplay: Boolean(project?.auditedScaleCanDisplayCreativeBenchmark),
+    evidence: `creativeInsights=${project?.creativeInsightCount || 0}; auditedWenaiCreativeOutput=${project?.auditedCreativeOutputCount || 0}; platformBreakdown=${project?.auditedScalePlatformBreakdownCount || 0}; evidenceUrls=${project?.auditedScaleEvidenceUrlCount || 0}`,
     requiredEvidence: ['production output ledger', 'dedupe rule', 'audited date range', 'source/platform breakdown'],
   }, {
     label: 'Video distribution scale',
     requestedBenchmark: '42M+ video distribution',
-    canDisplay: false,
-    evidence: `publishedDispatches=${input.project?.publishedDispatchCount || 0}; measuredDispatches=${input.project?.measuredDispatchCount || 0}; auditedWenaiVideoDistribution=missing`,
+    canDisplay: Boolean(project?.auditedScaleCanDisplayVideoBenchmark),
+    evidence: `publishedDispatches=${project?.publishedDispatchCount || 0}; measuredDispatches=${project?.measuredDispatchCount || 0}; auditedWenaiVideoDistribution=${project?.auditedVideoDistributionCount || 0}; dedupe=${project?.auditedScaleHasDedupeRule ? 1 : 0}; dateRange=${project?.auditedScaleHasDateRange ? 1 : 0}; auditorNote=${project?.auditedScaleHasAuditorNote ? 1 : 0}`,
     requiredEvidence: ['platform publish ledger', 'video id ledger', 'analytics sync evidence', 'audited date range'],
   }];
 }
