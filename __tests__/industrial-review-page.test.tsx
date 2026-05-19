@@ -3,7 +3,12 @@ import { renderToStaticMarkup } from 'react-dom/server';
 import { readFileSync } from 'node:fs';
 import { join } from 'node:path';
 import IndustrialReviewTokenPage from '@/app/review/[token]/page';
-import { IndustrialReviewPortalClient, buildClientReviewPassport, buildReviewVariantPlaybook } from '@/components/IndustrialReviewPortalClient';
+import {
+  IndustrialReviewPortalClient,
+  buildClientReviewPassport,
+  buildReviewCommercialAcceptanceChecks,
+  buildReviewVariantPlaybook,
+} from '@/components/IndustrialReviewPortalClient';
 import { addContentAsset } from '@/lib/industrial-chain-store';
 import { createIndustrialReviewLink, revokeIndustrialReviewLink } from '@/lib/industrial-review-portal';
 import { listAssetPermissionAccessAudits } from '@/lib/asset-permission-ledger';
@@ -63,6 +68,14 @@ describe('industrial review page', () => {
     expect(html).toContain('当前视角任务卡');
     expect(html).toContain('Review Action Playbook');
     expect(html).toContain('客户交付护照');
+    expect(html).toContain('Review Commercial Acceptance Board');
+    expect(html).toContain('客户审核商用品质验收板');
+    expect(html).toContain('预览可用门禁');
+    expect(html).toContain('反馈写回门禁');
+    expect(html).toContain('批准锁定门禁');
+    expect(html).toContain('异常保护门禁');
+    expect(html).toContain('下游交接门禁');
+    expect(html).toContain('客户不需要解释，也不会误批空交付或旧版本');
     expect(html).toContain('一眼判断：能不能看、能不能改、能不能批、批完去哪');
     expect(html).toContain('可打开交付物');
     expect(html).toContain('可提交反馈');
@@ -139,6 +152,60 @@ describe('industrial review page', () => {
       expect.objectContaining({ title: '反馈入口', value: '只读留档' }),
       expect.objectContaining({ title: '后续流向', value: '等待新链接' }),
     ]));
+  });
+
+  it('builds commercial acceptance checks for Clico-style client review handoff', () => {
+    const activeReview = {
+      token: 'acceptance-active',
+      projectId: 'acceptance-project',
+      assetId: 'acceptance-asset',
+      assetTitle: 'Acceptance video',
+      deliverableUrl: 'https://cdn.example.test/acceptance.mp4',
+      expiresAt: new Date(Date.now() + 86400_000).toISOString(),
+      status: 'active' as const,
+      canSubmitFeedback: true,
+      canApprove: true,
+      clientChecklist: [
+        { label: '交付物可查看', state: 'ok' as const, detail: '可以预览。' },
+        { label: '审核链接可写入', state: 'ok' as const, detail: '可以提交反馈或批准。' },
+      ],
+      clientDecision: {
+        primaryActionLabel: '确认无误后批准',
+        primaryActionState: 'approve' as const,
+        operatorNextStep: '批准后进入分发。',
+        evidenceToCheck: ['画面内容'],
+      },
+      feedbackCount: 0,
+    };
+
+    expect(buildReviewCommercialAcceptanceChecks(activeReview, true, 0)).toEqual(expect.arrayContaining([
+      expect.objectContaining({ gate: '预览可用门禁', ready: true }),
+      expect.objectContaining({ gate: '反馈写回门禁', ready: true }),
+      expect.objectContaining({ gate: '批准锁定门禁', ready: true }),
+      expect.objectContaining({ gate: '异常保护门禁', ready: true }),
+      expect.objectContaining({ gate: '下游交接门禁', ready: false }),
+    ]));
+
+    const approvedChecks = buildReviewCommercialAcceptanceChecks({
+      ...activeReview,
+      status: 'approved',
+      approvalName: 'Buyer Ops',
+      approvedAt: new Date().toISOString(),
+    }, true, 1);
+    expect(approvedChecks).toEqual(expect.arrayContaining([
+      expect.objectContaining({ gate: '批准锁定门禁', ready: true, evidence: expect.stringContaining('Buyer Ops') }),
+      expect.objectContaining({ gate: '下游交接门禁', ready: true, operatorHandoff: expect.stringContaining('CRM handoff') }),
+    ]));
+
+    const missingDeliverableChecks = buildReviewCommercialAcceptanceChecks({
+      ...activeReview,
+      deliverableUrl: undefined,
+      canApprove: false,
+    }, false, 0);
+    expect(missingDeliverableChecks.find(check => check.gate === '预览可用门禁')).toEqual(expect.objectContaining({
+      ready: false,
+      clientInstruction: expect.stringContaining('不要批准'),
+    }));
   });
 
   it('keeps the review client focused on feedback and approval actions', () => {

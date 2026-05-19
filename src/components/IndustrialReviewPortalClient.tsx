@@ -427,6 +427,71 @@ export function buildClientReviewPassport(
   ];
 }
 
+export type ReviewCommercialAcceptanceCheck = {
+  gate: string;
+  ready: boolean;
+  evidence: string;
+  clientInstruction: string;
+  operatorHandoff: string;
+};
+
+export function buildReviewCommercialAcceptanceChecks(
+  review: ReviewPayload['review'] | undefined,
+  hasDeliverable: boolean,
+  feedbackCount: number,
+): ReviewCommercialAcceptanceCheck[] {
+  const status = review?.status;
+  const active = status === 'active';
+  const approved = status === 'approved';
+  const locked = status === 'expired' || status === 'revoked' || approved;
+  const canFeedback = review?.canSubmitFeedback ?? active;
+  const canApprove = review?.canApprove ?? (active && hasDeliverable);
+  const checklist = review?.clientChecklist || [];
+  const hasViewChecklist = checklist.some(item => item.label.includes('交付物') && item.state === 'ok');
+  const hasWritableChecklist = checklist.some(item => item.label.includes('写入') && item.state === 'ok');
+  const decisionState = review?.clientDecision?.primaryActionState;
+
+  return [
+    {
+      gate: '预览可用门禁',
+      ready: hasDeliverable && status !== 'expired' && status !== 'revoked',
+      evidence: hasDeliverable ? '交付物链接存在，可直接预览或打开。' : '缺少可打开的交付物链接。',
+      clientInstruction: hasDeliverable ? '先检查画面、文案、商品信息和平台适配。' : '不要批准，直接反馈交付物缺失或打不开。',
+      operatorHandoff: hasDeliverable ? '保留当前版本作为审核对象。' : '补齐预览/下载链接后重新通知客户审核。',
+    },
+    {
+      gate: '反馈写回门禁',
+      ready: Boolean(canFeedback && active && hasWritableChecklist),
+      evidence: `反馈 ${feedbackCount} 条 / 可写入 ${canFeedback ? '是' : '否'} / 状态 ${displayStatusLabel(review)}`,
+      clientInstruction: active ? '有问题就写清楚位置、原因和希望修改方式。' : '当前只读，等待运营发送新链接。',
+      operatorHandoff: feedbackCount > 0 ? '把反馈转成返修任务，并在处理后让客户复核。' : '保持反馈入口可用，避免客户转去私聊丢失证据。',
+    },
+    {
+      gate: '批准锁定门禁',
+      ready: Boolean(approved || (canApprove && hasDeliverable && decisionState === 'approve')),
+      evidence: approved ? `已由 ${review?.approvalName || '客户'} 批准。` : `可批准 ${canApprove ? '是' : '否'} / 决策 ${decisionState || '未加载'}`,
+      clientInstruction: approved ? '不需要继续操作，等待运营后续交付。' : '确认无误后再批准；需要修改就先反馈。',
+      operatorHandoff: approved ? '推进分发、CRM 交接和表现回流。' : '未批准前不要放行自动分发、投放或交付完成。',
+    },
+    {
+      gate: '异常保护门禁',
+      ready: Boolean(locked || active),
+      evidence: locked ? `链接已锁定为 ${displayStatusLabel(review)}。` : '链接处于 active，可继续审核。',
+      clientInstruction: locked && !approved ? '不要继续使用旧链接，等待新审核链接。' : '按页面状态继续反馈或批准。',
+      operatorHandoff: locked && !approved ? '生成新 token，并说明旧版本状态。' : '保持当前 token 和资产版本可追踪。',
+    },
+    {
+      gate: '下游交接门禁',
+      ready: Boolean(approved && hasDeliverable && hasViewChecklist),
+      evidence: approved ? '批准、交付物、审核记录齐全，可进入后续链路。' : '仍等待客户批准或交付物补齐。',
+      clientInstruction: approved ? '本页作为验收留档。' : '客户只需要完成反馈或批准，不需要理解后台链路。',
+      operatorHandoff: approved
+        ? '把批准结果接到分发计划、CRM handoff、资产权限和表现回流。'
+        : '在批准前维持人工承接，不展示自动发布或投放完成。',
+    },
+  ];
+}
+
 function passportClass(tone: string) {
   if (tone === 'ready') return 'border-emerald-300/25 bg-emerald-950/20 text-emerald-100';
   if (tone === 'locked') return 'border-red-300/25 bg-red-950/25 text-red-100';
@@ -641,6 +706,7 @@ export function IndustrialReviewPortalClient({
   const handoffCards = clientHandoffCards(review, Boolean(deliverableUrl), payload?.feedback.length || 0);
   const writebackReceipts = systemWritebackReceipts(review, Boolean(deliverableUrl), payload?.feedback.length || 0);
   const clientPassport = buildClientReviewPassport(review, Boolean(deliverableUrl), payload?.feedback.length || 0);
+  const commercialAcceptanceChecks = buildReviewCommercialAcceptanceChecks(review, Boolean(deliverableUrl), payload?.feedback.length || 0);
   const activeVariant = REVIEW_UI_VARIANTS.find(variant => variant.id === uiVariant) || REVIEW_UI_VARIANTS[0];
   const variantPlaybook = buildReviewVariantPlaybook(review, uiVariant, Boolean(deliverableUrl), payload?.feedback.length || 0);
   const decisionClass = decision.tone === 'ok'
@@ -852,6 +918,27 @@ export function IndustrialReviewPortalClient({
                   <div className="text-[11px] font-semibold text-emerald-100/60">0{index + 1}</div>
                   <div className="mt-1 text-xs font-semibold text-emerald-50">{item.title}</div>
                   <div className="mt-1 text-xs leading-5 text-emerald-100/70">{item.body}</div>
+                </div>
+              ))}
+            </div>
+          </div>
+          <div className="border border-lime-300/20 bg-lime-950/15 px-4 py-3">
+            <div className="flex flex-col gap-1 sm:flex-row sm:items-end sm:justify-between">
+              <div>
+                <div className="text-xs font-semibold text-lime-100/65">Review Commercial Acceptance Board</div>
+                <div className="mt-1 text-sm font-semibold text-lime-50">客户审核商用品质验收板</div>
+              </div>
+              <div className="text-xs leading-5 text-lime-100/60">
+                对标 Clico 客户前台：客户不需要解释，也不会误批空交付或旧版本。
+              </div>
+            </div>
+            <div className="mt-3 grid gap-2 lg:grid-cols-5">
+              {commercialAcceptanceChecks.map(item => (
+                <div className={`border px-3 py-2 ${item.ready ? 'border-lime-300/20 bg-black/20 text-lime-100' : 'border-amber-300/25 bg-amber-950/20 text-amber-100'}`} key={item.gate}>
+                  <div className="text-xs font-semibold">{item.gate}</div>
+                  <div className="mt-2 text-xs leading-5 opacity-75">{item.evidence}</div>
+                  <div className="mt-2 text-xs leading-5 opacity-80">客户：{item.clientInstruction}</div>
+                  <div className="mt-2 text-xs leading-5 opacity-80">运营：{item.operatorHandoff}</div>
                 </div>
               ))}
             </div>
