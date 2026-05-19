@@ -189,6 +189,66 @@ function formatTime(value?: string) {
   return Number.isFinite(time) ? new Date(time).toLocaleString('zh-CN') : value;
 }
 
+export function buildCreativeComposeActionPlaybook(
+  snapshot?: CreativeMonitoringSnapshot,
+  creative?: CreativeSnapshot,
+  collectorPlan?: CreativeCollectorRunPlan,
+) {
+  const monitorCount = snapshot?.monitorCount || 0;
+  const dueTaskCount = snapshot?.dueTaskCount || 0;
+  const coverageScore = snapshot?.sourceSyncCoverageScore || 0;
+  const sourceScaleScore = snapshot?.creativeSourceScaleScore || 0;
+  const insightCount = creative?.insightCount || 0;
+  const opportunityCount = creative?.opportunityCount || 0;
+  const patternClusterCount = creative?.patternClusterCount || 0;
+  const moatScore = creative?.creativeMoatScore || 0;
+  const providerReady = Boolean(collectorPlan?.providerReady);
+
+  if (opportunityCount > 0 && patternClusterCount > 0) {
+    return {
+      title: 'Compose 到生产的下一步',
+      primaryAction: '把机会地图写入脚本资产、分发计划和视频工厂输入，不再停留在灵感收藏。',
+      proofToCheck: '必须能追踪 creative_opportunity_id、insight_id、来源组合、合规边界和回流指标。',
+      handoffBoundary: providerReady
+        ? 'provider 可执行采集，但仍只能复用结构和验证逻辑，不能复制竞品表达。'
+        : '未接授权采集 provider 前，保持人工/授权来源回灌，不宣称全网自动监控。',
+      cards: [
+        `洞察 ${insightCount} / 机会 ${opportunityCount} / 模式簇 ${patternClusterCount}`,
+        `采集覆盖 ${coverageScore} / 源规模 ${sourceScaleScore} / 护城河分 ${moatScore}`,
+        '下一步应进入脚本、视频任务、分发计划和品牌学习档案。',
+      ],
+    };
+  }
+
+  if (insightCount > 0) {
+    return {
+      title: '洞察沉淀下一步',
+      primaryAction: '继续补竞品账号、榜单趋势和视频拆解三类来源，直到能形成跨来源模式簇。',
+      proofToCheck: '单条洞察不能直接当爆款打法；至少需要跨来源证据和风险边界。',
+      handoffBoundary: '没有模式簇和表现回流前，只能生成生产假设，不能宣称已找到稳定爆款结构。',
+      cards: [
+        `洞察 ${insightCount} / 机会 ${opportunityCount} / 模式簇 ${patternClusterCount}`,
+        `监控项 ${monitorCount} / 到期任务 ${dueTaskCount}`,
+        '优先补齐 account、rank、video teardown 三类信号。',
+      ],
+    };
+  }
+
+  return {
+    title: 'Compose 启动下一步',
+    primaryAction: monitorCount > 0
+      ? '先结算到期采集或导入真实观察，形成第一批可复用洞察。'
+      : '先补齐竞品账号、榜单趋势和视频关键词三类监控，建立 Hook Bank 输入源。',
+    proofToCheck: '每条输入都要有来源、证据点、可复用角度和不可复制边界。',
+    handoffBoundary: '没有授权来源、公开证据或手工观察前，不生成伪洞察，也不自动抓取平台内容。',
+    cards: [
+      `监控项 ${monitorCount} / 到期任务 ${dueTaskCount}`,
+      `洞察 ${insightCount} / 机会 ${opportunityCount}`,
+      providerReady ? '采集 provider 已接入，可执行授权来源任务。' : '当前仍是人工/授权来源回灌模式。',
+    ],
+  };
+}
+
 export function CreativeMonitoringConsoleClient({ initialProjectId = 'default-project' }: { initialProjectId?: string }) {
   const [projectId, setProjectId] = useState(initialProjectId);
   const [platform, setPlatform] = useState('TikTok Shop');
@@ -426,6 +486,7 @@ export function CreativeMonitoringConsoleClient({ initialProjectId = 'default-pr
   const snapshot = data?.snapshot;
   const creative = data?.creativeSnapshot;
   const collectorPlan = data?.collectorRunPlan;
+  const composePlaybook = buildCreativeComposeActionPlaybook(snapshot, creative, collectorPlan);
 
   return (
     <main className="min-h-screen bg-[#101315] text-[#f8f2e8]">
@@ -482,6 +543,27 @@ export function CreativeMonitoringConsoleClient({ initialProjectId = 'default-pr
                 </div>
               </article>
             ))}
+          </div>
+        </section>
+
+        <section className="border border-sky-300/20 bg-sky-950/20 p-5">
+          <div className="flex flex-col gap-3 border-b border-sky-300/15 pb-4 sm:flex-row sm:items-start sm:justify-between">
+            <div>
+              <p className="text-xs uppercase tracking-[0.22em] text-sky-200">Compose Action Playbook</p>
+              <h2 className="mt-2 text-xl font-semibold">{composePlaybook.title}</h2>
+              <p className="mt-2 max-w-3xl text-sm leading-6 text-white/60">{composePlaybook.primaryAction}</p>
+            </div>
+            <div className="w-full border border-sky-300/20 bg-black/20 p-3 text-xs leading-5 text-sky-100 sm:max-w-sm">
+              {composePlaybook.proofToCheck}
+            </div>
+          </div>
+          <div className="mt-4 grid gap-3 md:grid-cols-4">
+            {composePlaybook.cards.map(card => (
+              <div className="border border-white/10 bg-black/20 p-3 text-xs leading-5 text-white/60" key={card}>{card}</div>
+            ))}
+            <div className="border border-rose-300/20 bg-rose-950/20 p-3 text-xs leading-5 text-rose-100">
+              停止线：{composePlaybook.handoffBoundary}
+            </div>
           </div>
         </section>
 

@@ -2,7 +2,7 @@ import { renderToStaticMarkup } from 'react-dom/server';
 import { describe, expect, it } from 'vitest';
 
 import CreativeFactoryPage from '@/app/factory/creative/page';
-import { CreativeMonitoringConsoleClient } from '@/components/CreativeMonitoringConsoleClient';
+import { CreativeMonitoringConsoleClient, buildCreativeComposeActionPlaybook } from '@/components/CreativeMonitoringConsoleClient';
 
 describe('creative monitoring console page', () => {
   it('renders the creative factory as a Chinese operator console', async () => {
@@ -30,6 +30,8 @@ describe('creative monitoring console page', () => {
     expect(html).toContain('UGC Script Spine');
     expect(html).toContain('Offer Test Matrix');
     expect(html).toContain('Compose Intelligence Stack');
+    expect(html).toContain('Compose Action Playbook');
+    expect(html).toContain('Compose 启动下一步');
     expect(html).toContain('全网灵感管理');
     expect(html).toContain('热门视频解析');
     expect(html).toContain('把灵感、视频、Hook 和投放假设串成一条生产约束链');
@@ -61,8 +63,102 @@ describe('creative monitoring console page', () => {
     expect(html).toContain('开头钩子');
     expect(html).toContain('空结果只记录缺口，不生成洞察');
     expect(html).toContain('当前继续走人工运营回灌，不假装已完成未授权自动抓取。');
+    expect(html).toContain('没有授权来源、公开证据或手工观察前，不生成伪洞察');
     expect(html).not.toContain('provider-gated');
     expect(html).not.toContain('automation-ready');
     expect(html).not.toContain('Manifest');
+  });
+
+  it('builds a compose action playbook from monitoring and creative evidence', () => {
+    expect(buildCreativeComposeActionPlaybook({
+      orgId: 'test-org',
+      projectId: 'compose-playbook-project',
+      monitorCount: 3,
+      activeMonitorCount: 3,
+      competitorAccountMonitorCount: 1,
+      trendRankMonitorCount: 1,
+      videoKeywordMonitorCount: 1,
+      dueTaskCount: 0,
+      importedInsightCount: 3,
+      harvestRunCount: 1,
+      harvestedInsightCount: 3,
+      collectorTargetCount: 3,
+      collectorProviderReady: false,
+      collectorAdapterStatus: 'manual_ops',
+      sourceCount: 3,
+      providerReadySourceCount: 0,
+      sourceSyncRunCount: 0,
+      providerSourceFreshCount: 0,
+      providerSourceFailureCount: 0,
+      sourceSyncAccountObservationCount: 0,
+      sourceSyncTrendRankObservationCount: 0,
+      sourceSyncVideoTeardownObservationCount: 0,
+      sourceSyncMultimodalParsedCount: 0,
+      sourceSyncCoverageScore: 60,
+      creativeSourceObservationCount: 3,
+      creativeSourceRepeatObservationSourceCount: 2,
+      creativeSourceScaleScore: 55,
+      creativeSourceDepthScore: 70,
+      creativeReadySourceHealthCardCount: 0,
+      accountTrackingCoverageTargetCount: 2,
+      trendRankCoverageSignalCount: 1,
+      videoTeardownRepeatReady: false,
+      accountTrackingSourceReady: false,
+      trendRankSourceReady: false,
+      videoTeardownSourceReady: false,
+      multimodalTeardownReady: false,
+      missingLinks: [],
+      nextActions: [],
+    }, {
+      insightCount: 3,
+      competitorAccountCount: 1,
+      trendRankCount: 1,
+      teardownCount: 1,
+      opportunityCount: 2,
+      averageConfidenceScore: 78,
+      opportunityMap: [],
+      patternClusterCount: 1,
+      crossSourcePatternCount: 1,
+      creativeMoatScore: 72,
+      patternClusters: [],
+      missingLinks: [],
+    }, {
+      providerReady: false,
+      dispatchMode: 'manual_ops',
+      adapterStatus: {
+        status: 'not_configured',
+        mode: 'manual_ops',
+        providerName: 'manual-creative-ops',
+        endpointConfigured: false,
+        authConfigured: false,
+        missingLinks: [],
+        nextActions: [],
+        supportedMonitorTypes: [],
+        providerReady: false,
+        failureCount: 0,
+      },
+      orgId: 'test-org',
+      projectId: 'compose-playbook-project',
+      generatedAt: new Date().toISOString(),
+      targetCount: 0,
+      highPriorityCount: 0,
+      retryTargetCount: 0,
+      targets: [],
+      batchInstructions: [],
+    })).toEqual(expect.objectContaining({
+      title: 'Compose 到生产的下一步',
+      primaryAction: expect.stringContaining('脚本资产'),
+      proofToCheck: expect.stringContaining('creative_opportunity_id'),
+      handoffBoundary: expect.stringContaining('不宣称全网自动监控'),
+      cards: expect.arrayContaining([
+        expect.stringContaining('洞察 3 / 机会 2 / 模式簇 1'),
+      ]),
+    }));
+
+    expect(buildCreativeComposeActionPlaybook(undefined, undefined, undefined)).toEqual(expect.objectContaining({
+      title: 'Compose 启动下一步',
+      primaryAction: expect.stringContaining('三类监控'),
+      handoffBoundary: expect.stringContaining('不生成伪洞察'),
+    }));
   });
 });
