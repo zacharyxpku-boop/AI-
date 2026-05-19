@@ -14,6 +14,9 @@ describe('video production queue page', () => {
 
     expect(html).toContain('视频生产队列');
     expect(html).toContain('Video Factory Variant');
+    expect(html).toContain('Friend Trial Readiness');
+    expect(html).toContain('朋友试用放行判断');
+    expect(html).toContain('非技术用户能不能从视频任务进入客户审核');
     expect(html).toContain('运营视角');
     expect(html).toContain('先看卡在哪里，再把下一步动作写回队列');
     expect(html).toContain('/factory/video?projectId=launch-video&amp;variant=partner');
@@ -248,6 +251,11 @@ describe('video production queue page', () => {
     expect(html).toContain('生产交接包');
     expect(html).toContain('客户试用出口');
     expect(html).toContain('把下面链接发给客户或朋友');
+    expect(html).toContain('只能测试审核入口');
+    expect(html).toContain('已有 1 个视频任务');
+    expect(html).toContain('已有 1 个客户审核入口');
+    expect(html).toContain('有审核入口但没有真实成片，只能验证客户前台，不能让朋友以为视频已经产出');
+    expect(html).toContain('内部下一步：先回写真实成片 URL；没有可打开成片时，只能测试审核入口，不能算完整朋友试用');
     expect(html).toContain('/review/review-video-1?variant=friend_trial');
     expect(html).toContain('客户审核门户：/review/review-video-1?variant=friend_trial');
     expect(html).toContain('审核：Travel Bag 成片 / active / /review/review-video-1?variant=friend_trial');

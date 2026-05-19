@@ -99,6 +99,11 @@ function reviewUrlWithVariant(url: string, variant: FactoryUiVariantId) {
   }
 }
 
+function reviewIdentity(value: string) {
+  const match = value.match(/\/review\/([^/?#]+)/);
+  return match?.[1] || value;
+}
+
 function queueText(value: string) {
   const map: Record<string, string> = {
     'Provider generation remains handoff-only until config, consent, references, and product assets are ready.': '供应商生成仍处于仅交接状态，需要完成配置、授权、参考视频和产品素材后才能执行。',
@@ -193,6 +198,56 @@ function manualTrialRunbook(item: VideoProductionQueue['items'][number]) {
         : '发布或投放后补平台证据和表现数据；没有 OAuth 前保持手工回流。',
     },
   ];
+}
+
+function friendTrialReadiness(queue: VideoProductionQueue | null, variant: FactoryUiVariantId) {
+  const hasTask = (queue?.itemCount || 0) > 0;
+  const hasResult = (queue?.resultAssetCount || 0) > 0;
+  const itemReviewKeys = new Set((queue?.items || []).flatMap(item => [
+    ...item.reviewLinks.map(link => link.token),
+    ...item.handoffPacket.reviewPortalUrls.map(reviewIdentity),
+  ]));
+  const itemReviewCount = itemReviewKeys.size;
+  const reviewCount = Math.max(queue?.clientReviewCount || 0, itemReviewCount);
+  const hasReview = reviewCount > 0;
+  const hasApproval = (queue?.approvedDeliverableCount || 0) > 0;
+  const hasReturn = (queue?.measuredCount || 0) > 0;
+  const firstReviewLink = (queue?.items || [])
+    .flatMap(item => item.reviewLinks.map(link => `/review/${link.token}`))
+    [0];
+  const verdict = hasTask && hasResult && hasReview
+    ? '可以发起完整朋友试用'
+    : hasTask && hasReview
+      ? '只能测试审核入口'
+      : '暂不建议直接发给朋友';
+
+  return {
+    verdict,
+    evidence: [
+      hasTask ? `已有 ${queue?.itemCount || 0} 个视频任务` : '还没有视频任务',
+      hasResult ? `已有 ${queue?.resultAssetCount || 0} 个成片结果` : '尚未回写真实成片',
+      hasReview ? `已有 ${reviewCount} 个客户审核入口` : '尚未生成客户审核链接',
+      hasApproval ? `已有 ${queue?.approvedDeliverableCount || 0} 个批准结果` : '尚未获得客户批准',
+      hasReturn ? `已有 ${queue?.measuredCount || 0} 条表现回流` : '尚未形成发布后表现回流',
+    ],
+    firstReviewLink: firstReviewLink ? reviewUrlWithVariant(firstReviewLink, variant) : '',
+    nextAction: !hasTask
+      ? '先创建一个视频工作流，把产品、平台、参考视频和素材写入队列。'
+      : !hasResult
+        ? '先回写真实成片 URL；没有可打开成片时，只能测试审核入口，不能算完整朋友试用。'
+      : !hasReview
+        ? '先回写真实成片 URL，并让系统生成客户审核链接。'
+        : !hasApproval
+          ? '把审核链接发给朋友或客户，让他们只做反馈或批准。'
+          : !hasReturn
+            ? '批准后进入分发或手工发布，并补回发布证据与表现数据。'
+            : '把表现回流写入品牌学习档案，进入下一轮 Compose / Cut 优化。',
+    stopLine: hasResult && hasReview
+      ? '可以让朋友试用审核动作，但未接真实 provider/OAuth 前仍不能宣称自动出片或自动发布。'
+      : hasReview
+        ? '有审核入口但没有真实成片，只能验证客户前台，不能让朋友以为视频已经产出。'
+      : '缺少 review 链接前，不要把内部队列截图发给朋友；先回写成片并生成审核入口。',
+  };
 }
 
 const MIXCUT_OPERATION_BOARD = [
@@ -385,6 +440,7 @@ export function VideoProductionQueueClient({
     ? `${queue.providerReadyCount}/${queue.itemCount}`
     : '0/0';
   const selectedVariant = VIDEO_FACTORY_UI_VARIANTS[selectedVariantId];
+  const trialReadiness = friendTrialReadiness(queue, selectedVariantId);
 
   async function ingestProductionResult(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
@@ -486,6 +542,46 @@ export function VideoProductionQueueClient({
             <div className="border border-rose-300/20 bg-rose-950/20 p-3">
               <div className="text-xs font-semibold text-rose-100">停止线</div>
               <p className="mt-2 text-xs leading-5 text-rose-100/80">{selectedVariant.stopLine}</p>
+            </div>
+          </div>
+        </section>
+
+        <section className="border border-cyan-300/20 bg-cyan-950/20 p-5">
+          <div className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
+            <div>
+              <p className="text-xs uppercase tracking-[0.22em] text-cyan-200">Friend Trial Readiness</p>
+              <h2 className="mt-2 text-xl font-semibold">朋友试用放行判断</h2>
+              <p className="mt-2 max-w-3xl text-sm leading-6 text-white/60">
+                这张卡不看“页面是否好看”，只看非技术用户能不能从视频任务进入客户审核并完成反馈或批准。
+              </p>
+            </div>
+            <span className={`w-fit border px-3 py-1 text-xs ${trialReadiness.firstReviewLink ? 'border-emerald-300/35 text-emerald-100' : 'border-amber-300/35 text-amber-100'}`}>
+              {trialReadiness.verdict}
+            </span>
+          </div>
+          <div className="mt-4 grid gap-3 md:grid-cols-[1fr_1fr_1fr]">
+            <div className="border border-white/10 bg-black/20 p-3">
+              <div className="text-xs font-semibold text-white/80">试用证据</div>
+              <div className="mt-2 space-y-1">
+                {trialReadiness.evidence.map(item => (
+                  <div className="text-xs leading-5 text-white/55" key={item}>{item}</div>
+                ))}
+              </div>
+            </div>
+            <div className="border border-white/10 bg-black/20 p-3">
+              <div className="text-xs font-semibold text-white/80">可发入口</div>
+              {trialReadiness.firstReviewLink ? (
+                <a className="mt-2 block truncate text-xs leading-5 text-cyan-200 underline-offset-4 hover:underline" href={trialReadiness.firstReviewLink}>
+                  {trialReadiness.firstReviewLink}
+                </a>
+              ) : (
+                <p className="mt-2 text-xs leading-5 text-amber-100">先写入成片 URL，并生成客户审核链接。</p>
+              )}
+            </div>
+            <div className="border border-white/10 bg-black/20 p-3">
+              <div className="text-xs font-semibold text-white/80">停止线</div>
+              <p className="mt-2 text-xs leading-5 text-amber-100">{trialReadiness.stopLine}</p>
+              <p className="mt-2 text-xs leading-5 text-cyan-100">内部下一步：{trialReadiness.nextAction}</p>
             </div>
           </div>
         </section>
