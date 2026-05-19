@@ -458,7 +458,12 @@ function overallLabel(status: HealthResponse['overall']) {
   return '核心服务不可用，需要立即处理';
 }
 
-type StatusUiVariant = string;
+type StatusUiVariant = 'partner' | 'operator' | 'friend_trial';
+
+function normalizeStatusUiVariantId(value?: string): StatusUiVariant {
+  if (value === 'operator' || value === 'friend_trial' || value === 'partner') return value;
+  return 'partner';
+}
 
 const STATUS_UI_VARIANTS: Array<{
   id: StatusUiVariant;
@@ -467,30 +472,30 @@ const STATUS_UI_VARIANTS: Array<{
   proof: string;
 }> = [
   {
-    id: 'stable',
-    label: '稳定验收版',
-    intent: '保留当前服务状态、成熟度、外部门禁和审计证据，作为每轮改 UI 后的对照组。',
-    proof: '看状态、看接口、看缺口，不做营销包装。',
-  },
-  {
-    id: 'industrial',
-    label: '工业化对标版',
-    intent: '面向筷子科技对标，把 Compose / Create / Cut / Cast / Manage 的链路、门禁和外部材料放到首屏。',
-    proof: '合作者 30 秒内能看懂 Wenai 已经有哪些工业化能力，以及为什么还不能宣称等价筷子。',
-  },
-  {
     id: 'partner',
-    label: '合作者演示版',
-    intent: '减少技术词，把“能演示什么、要补什么、下一步谁提供材料”讲清楚。',
-    proof: '非技术合作者能自己判断是否值得继续接 provider、平台授权和客户试跑。',
+    label: '合作者/投资人版',
+    intent: '先看全链路产品形态、竞品差距、外部材料和不能宣称的边界。',
+    proof: '用于判断 Wenai 是否值得继续接 provider、平台授权、客户试跑和商业合作；不展示未审计规模数字。',
+  },
+  {
+    id: 'operator',
+    label: '运营工作台版',
+    intent: '先看可执行修复队列、项目闭环证据、平台门禁、资产权限审计和下一步 owner。',
+    proof: '用于内部推进：每个 P0/P1 必须有 endpoint、method、acceptance，不能只停留在汇报。',
+  },
+  {
+    id: 'friend_trial',
+    label: '朋友试用版',
+    intent: '先看是否能放心给非技术用户试用，哪些环节会困惑、卡死或需要人工解释。',
+    proof: '用于朋友/客户试用前验收：只要核心链路、反馈、批准、交付边界仍需要解释，就不能说可商用无阻塞。',
   },
 ];
 
 const STATUS_VARIANT_ROADMAP = [
-  { step: '1', page: '/status', job: '先做验收台 variant：稳定版做对照，工业化版展示全链路和外部门禁。' },
-  { step: '2', page: '/factory/creative', job: '再做创意洞察 variant：突出竞品账号、榜单、视频拆解、品牌学习和 action queue。' },
-  { step: '3', page: '/factory/video', job: '再做视频工厂 variant：区分内部一键视频队列和真实外部生成门禁后的成片。' },
-  { step: '4', page: '/settings/kuaizi', job: '最后做接入清单 variant：把 OAuth、广告账户、自动发布、云资产材料变成可执行 checklist。' },
+  { step: '1', page: '/status', job: '验收台统一 partner / operator / friend_trial 三视角：分别讲商业边界、执行队列和朋友试用风险。' },
+  { step: '2', page: '/factory/creative', job: '创意洞察继续加厚：突出竞品账号、榜单、视频拆解、品牌学习和 action queue。' },
+  { step: '3', page: '/factory/video', job: '视频工厂继续加厚：区分内部一键视频队列和真实外部生成门禁后的成片。' },
+  { step: '4', page: '/settings/kuaizi', job: '接入清单继续加厚：把 OAuth、广告账户、自动发布、云资产材料变成可执行 checklist。' },
 ];
 
 const COMPETITOR_REFERENCE_RADAR = [
@@ -591,7 +596,7 @@ export function buildStatusUiVariants(report?: ReadinessResponse['report']) {
   if (!report?.uiVariants?.length) return STATUS_UI_VARIANTS;
 
   return report.uiVariants.map(variant => ({
-    id: variant.id,
+    id: normalizeStatusUiVariantId(variant.id),
     label: variant.label,
     intent: `${variant.audience} ${variant.firstScreen}`,
     proof: `${variant.primaryAction} 停止线：${variant.stopLine}`,
@@ -668,7 +673,7 @@ export default function StatusPage() {
   const [projectId, setProjectId] = useState('default-project');
   const [loading, setLoading] = useState(true);
   const [lastFetch, setLastFetch] = useState<Date | null>(null);
-  const [uiVariant, setUiVariant] = useState<StatusUiVariant>('industrial');
+  const [uiVariant, setUiVariant] = useState<StatusUiVariant>('partner');
 
   const fetchHealth = useCallback(async () => {
     try {
@@ -708,6 +713,20 @@ export default function StatusPage() {
     const timer = setInterval(fetchHealth, 30000);
     return () => clearInterval(timer);
   }, [fetchHealth]);
+
+  useEffect(() => {
+    if (typeof window === 'undefined') return;
+    const selected = new URLSearchParams(window.location.search).get('variant');
+    setUiVariant(normalizeStatusUiVariantId(selected || undefined));
+  }, []);
+
+  const selectUiVariant = useCallback((variant: StatusUiVariant) => {
+    setUiVariant(variant);
+    if (typeof window === 'undefined') return;
+    const url = new URL(window.location.href);
+    url.searchParams.set('variant', variant);
+    window.history.replaceState(null, '', `${url.pathname}${url.search}${url.hash}`);
+  }, []);
 
   const overall = health?.overall || 'down';
   const meta = STATUS_META[overall];
@@ -780,10 +799,14 @@ export default function StatusPage() {
         </div>
         <div className="grid grid-cols-1 gap-2 md:grid-cols-3">
           {statusUiVariants.map(variant => (
-            <button
+            <a
               key={variant.id}
-              type="button"
-              onClick={() => setUiVariant(variant.id)}
+              href={`/status?variant=${variant.id}`}
+              aria-current={uiVariant === variant.id ? 'page' : undefined}
+              onClick={(event) => {
+                event.preventDefault();
+                selectUiVariant(variant.id);
+              }}
               className={`rounded-md border px-3 py-3 text-left transition ${
                 uiVariant === variant.id
                   ? 'border-accent/50 bg-accent/10 text-text-primary'
@@ -792,7 +815,7 @@ export default function StatusPage() {
             >
               <div className="text-[12px] font-semibold">{variant.label}</div>
               <div className="mt-1 text-[10px] leading-relaxed">{variant.intent}</div>
-            </button>
+            </a>
           ))}
         </div>
         <div className="mt-4 rounded-md border border-border-subtle bg-bg-root/50 p-3">
