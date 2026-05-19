@@ -2,6 +2,7 @@
 
 import { useState, type FormEvent } from 'react';
 
+import type { FactoryUiVariantId } from '@/lib/factory-readiness-view';
 import type { OneClickVideoOperationResult, VideoProductionQueue } from '@/lib/industrial-video-workflow';
 
 const DEFAULT_PLATFORMS = 'TikTok Shop,Instagram Reels';
@@ -241,14 +242,60 @@ const CUT_PRODUCTION_LINE = [
   },
 ];
 
+const VIDEO_FACTORY_UI_VARIANTS: Record<FactoryUiVariantId, {
+  label: string;
+  audience: string;
+  headline: string;
+  body: string;
+  firstAction: string;
+  proof: string;
+  stopLine: string;
+  reference: string;
+}> = {
+  partner: {
+    label: '合作者视角',
+    audience: '给合作者、客户负责人和投资评审看清产品形态',
+    headline: 'Cut 不是单个生成按钮，而是一条可审计的视频工业化生产线',
+    body: '这一屏展示 Wenai 如何把 AI 视频分析、智能混剪、一键视频、客户审核、分发回流串成闭环；Hookly / Omneky 这类广告平台提供 UGC 变体和表现优化参考，筷子科技提供编拍剪投管的全链路参照。',
+    firstAction: '先看能力矩阵和外部门禁，再判断是否具备商用交付条件。',
+    proof: '证明点：队列、handoff、review token、dispatch、performance return 都是同一项目账本。',
+    stopLine: '未接真实视频 provider、平台 OAuth、广告账户和 analytics sync 前，不宣称自动规模化。',
+    reference: '参考：筷子科技的编拍剪投管；Hookly/Hookshot 类平台的 hook/UGC 变体；Omneky 的广告创意表现回流。',
+  },
+  operator: {
+    label: '运营视角',
+    audience: '给内部运营、剪辑交付和增长负责人每天处理任务',
+    headline: '先看卡在哪里，再把下一步动作写回队列',
+    body: '这一屏优先暴露任务阶段、provider gate、成片回写、客户审核、返修和表现回流，避免视频任务停在聊天记录、表格或供应商私信里。',
+    firstAction: '创建视频工作流，回写真实成片 URL，然后把 review 链接交给客户确认。',
+    proof: '证明点：每个任务都有 missing evidence、runbook action、SLA、渠道和闭环分数。',
+    stopLine: '缺素材授权、provider token、平台账号或发布证据时，只能人工交接，不能进入自动发布。',
+    reference: '参考：Clico 的客户 review / production handoff；广告平台的任务看板和结果回灌。',
+  },
+  friend_trial: {
+    label: '朋友试用视角',
+    audience: '给非技术朋友或客户第一次打开时不迷路',
+    headline: '给一个产品和参考视频，系统帮你排出可审核的视频生产流程',
+    body: '这一屏少讲内部术语，只保留三件事：创建任务、等待成片、打开审核链接。复杂的 provider、OAuth、广告账户和数据回流都放在后台边界里。',
+    firstAction: '填写产品名、平台、参考视频和素材链接，先生成一个可交接的视频任务。',
+    proof: '证明点：朋友不需要理解 API，也能看到任务、成片、审核和下一步。',
+    stopLine: '如果没有真实成片 URL，页面不能让用户误以为视频已经自动生成。',
+    reference: '参考：短视频广告工具的一键试用体验，但保留 Wenai 的审核与回流闭环。',
+  },
+};
+
+const VIDEO_FACTORY_VARIANT_ORDER: FactoryUiVariantId[] = ['partner', 'operator', 'friend_trial'];
+
 export function VideoProductionQueueClient({
   initialProjectId = 'default-project',
   initialQueue = null,
   initialOperation = null,
+  selectedVariantId = 'partner',
 }: {
   initialProjectId?: string;
   initialQueue?: VideoProductionQueue | null;
   initialOperation?: OneClickVideoOperationResult | null;
+  selectedVariantId?: FactoryUiVariantId;
 }) {
   const [projectId, setProjectId] = useState(initialProjectId);
   const [productName, setProductName] = useState('');
@@ -325,6 +372,7 @@ export function VideoProductionQueueClient({
   const providerReadyRatio = queue && queue.itemCount > 0
     ? `${queue.providerReadyCount}/${queue.itemCount}`
     : '0/0';
+  const selectedVariant = VIDEO_FACTORY_UI_VARIANTS[selectedVariantId];
 
   async function ingestProductionResult(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
@@ -380,6 +428,55 @@ export function VideoProductionQueueClient({
             把商品 brief、参考视频、产品素材、AI 视频分析、智能混剪、供应商门禁、分发计划和执行记录统一到一条队列里。没有真实供应商授权时，任务保持仅交接，不伪装自动生成。
           </p>
         </header>
+
+        <section className="border border-amber-300/25 bg-amber-300/[0.06] p-5">
+          <div className="flex flex-col gap-4 lg:flex-row lg:items-start lg:justify-between">
+            <div className="max-w-3xl">
+              <p className="text-xs uppercase tracking-[0.22em] text-amber-200">Video Factory Variant</p>
+              <h2 className="mt-2 text-2xl font-semibold">{selectedVariant.headline}</h2>
+              <p className="mt-3 text-sm leading-6 text-white/65">{selectedVariant.body}</p>
+            </div>
+            <div className="grid gap-2 text-xs sm:grid-cols-3 lg:w-[24rem] lg:grid-cols-1">
+              {VIDEO_FACTORY_VARIANT_ORDER.map(variantId => {
+                const variant = VIDEO_FACTORY_UI_VARIANTS[variantId];
+                const href = `/factory/video?projectId=${encodeURIComponent(projectId || 'default-project')}&variant=${variantId}`;
+                return (
+                  <a
+                    aria-current={variantId === selectedVariantId ? 'page' : undefined}
+                    className={`border px-3 py-2 transition hover:border-amber-200/50 hover:bg-white/[0.07] ${
+                      variantId === selectedVariantId
+                        ? 'border-amber-200/55 bg-amber-200/10 text-amber-50'
+                        : 'border-white/10 bg-black/20 text-white/60'
+                    }`}
+                    href={href}
+                    key={variantId}
+                  >
+                    <span className="block font-semibold text-white">{variant.label}</span>
+                    <span className="mt-1 block leading-5">{variant.audience}</span>
+                  </a>
+                );
+              })}
+            </div>
+          </div>
+          <div className="mt-4 grid gap-3 md:grid-cols-4">
+            <div className="border border-white/10 bg-black/20 p-3">
+              <div className="text-xs font-semibold text-white/85">第一动作</div>
+              <p className="mt-2 text-xs leading-5 text-emerald-100/85">{selectedVariant.firstAction}</p>
+            </div>
+            <div className="border border-white/10 bg-black/20 p-3">
+              <div className="text-xs font-semibold text-white/85">证据标准</div>
+              <p className="mt-2 text-xs leading-5 text-white/60">{selectedVariant.proof}</p>
+            </div>
+            <div className="border border-white/10 bg-black/20 p-3">
+              <div className="text-xs font-semibold text-white/85">参考平台</div>
+              <p className="mt-2 text-xs leading-5 text-white/60">{selectedVariant.reference}</p>
+            </div>
+            <div className="border border-rose-300/20 bg-rose-950/20 p-3">
+              <div className="text-xs font-semibold text-rose-100">停止线</div>
+              <p className="mt-2 text-xs leading-5 text-rose-100/80">{selectedVariant.stopLine}</p>
+            </div>
+          </div>
+        </section>
 
         {error ? <div className="border border-red-400/40 bg-red-950/40 px-4 py-3 text-sm text-red-100">{error}</div> : null}
         {notice ? <div className="border border-emerald-400/40 bg-emerald-950/40 px-4 py-3 text-sm text-emerald-100">{notice}</div> : null}

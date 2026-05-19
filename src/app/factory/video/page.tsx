@@ -1,6 +1,7 @@
 import type { Metadata } from 'next';
 
 import { VideoProductionQueueClient } from '@/components/VideoProductionQueueClient';
+import { normalizeFactoryUiVariantId } from '@/lib/factory-readiness-view';
 import { getIndustrialVideoProductionQueue } from '@/lib/industrial-video-workflow';
 
 export const metadata: Metadata = {
@@ -11,10 +12,17 @@ export const metadata: Metadata = {
 export default async function VideoFactoryPage({
   searchParams,
 }: {
-  searchParams?: Promise<{ projectId?: string }>;
+  searchParams?: Promise<{ projectId?: string; variant?: string }>;
 }) {
   const params = searchParams ? await searchParams : {};
   const projectId = params.projectId || 'default-project';
+  const selectedVariantId = normalizeFactoryUiVariantId(params.variant);
   const queue = await getIndustrialVideoProductionQueue('anon', projectId);
-  return <VideoProductionQueueClient initialProjectId={projectId} initialQueue={queue} />;
+  return (
+    <VideoProductionQueueClient
+      initialProjectId={projectId}
+      initialQueue={queue}
+      selectedVariantId={selectedVariantId}
+    />
+  );
 }

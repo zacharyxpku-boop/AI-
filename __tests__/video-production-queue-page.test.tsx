@@ -8,11 +8,16 @@ import type { OneClickVideoOperationResult, VideoProductionQueue } from '@/lib/i
 describe('video production queue page', () => {
   it('renders the video factory page as a Chinese operator queue surface', async () => {
     const page = await VideoFactoryPage({
-      searchParams: Promise.resolve({ projectId: 'launch-video' }),
+      searchParams: Promise.resolve({ projectId: 'launch-video', variant: 'operator' }),
     });
     const html = renderToStaticMarkup(page);
 
     expect(html).toContain('视频生产队列');
+    expect(html).toContain('Video Factory Variant');
+    expect(html).toContain('运营视角');
+    expect(html).toContain('先看卡在哪里，再把下一步动作写回队列');
+    expect(html).toContain('/factory/video?projectId=launch-video&amp;variant=partner');
+    expect(html).toContain('/factory/video?projectId=launch-video&amp;variant=friend_trial');
     expect(html).toContain('智能混剪');
     expect(html).toContain('从 Hook 结构库到智能混剪包');
     expect(html).toContain('Hook Bank 入场');
@@ -30,6 +35,27 @@ describe('video production queue page', () => {
     expect(html).toContain('写入成片并创建客户审核');
     expect(html).toContain('运营动作包');
     expect(html).toContain('launch-video');
+  });
+
+  it('renders distinct video factory variants for partner and friend trial workflows', async () => {
+    const partnerHtml = renderToStaticMarkup(
+      <VideoProductionQueueClient initialProjectId="partner-video" selectedVariantId="partner" />,
+    );
+    const friendHtml = renderToStaticMarkup(
+      <VideoProductionQueueClient initialProjectId="friend-video" selectedVariantId="friend_trial" />,
+    );
+
+    expect(partnerHtml).toContain('合作者视角');
+    expect(partnerHtml).toContain('Cut 不是单个生成按钮，而是一条可审计的视频工业化生产线');
+    expect(partnerHtml).toContain('Hookly / Omneky');
+    expect(partnerHtml).toContain('筷子科技的编拍剪投管');
+    expect(partnerHtml).toContain('未接真实视频 provider、平台 OAuth、广告账户和 analytics sync 前，不宣称自动规模化');
+
+    expect(friendHtml).toContain('朋友试用视角');
+    expect(friendHtml).toContain('给一个产品和参考视频，系统帮你排出可审核的视频生产流程');
+    expect(friendHtml).toContain('朋友不需要理解 API');
+    expect(friendHtml).toContain('如果没有真实成片 URL，页面不能让用户误以为视频已经自动生成');
+    expect(friendHtml).toContain('/factory/video?projectId=friend-video&amp;variant=operator');
   });
 
   it('shows provider gating in Chinese instead of pretending automatic video generation', () => {

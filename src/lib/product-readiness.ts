@@ -470,6 +470,24 @@ function buildAlternativeReferences(): AlternativeCompetitorReference[] {
       wenaiDecision: 'Wenai 的 action queue 需要记录做了什么、没做什么、为什么没做，避免 agent 直接碰生产系统。',
       boundary: '没有广告主授权、预算上限和回滚策略前，不做真实自动投放。',
     },
+    {
+      name: 'Creatify / UGC video ads',
+      pattern: '把商品链接、素材和脚本结构快速转成 UGC 风格短视频广告变体。',
+      wenaiDecision: 'Create/Cut 要把商品素材、avatar/voice/scene 选择、版本矩阵、成片 URL 和客户审核写进同一条视频任务，而不是只生成一段孤立视频。',
+      boundary: '没有素材授权、肖像/声音授权和 provider 回调前，只能生成生产交接包与审核任务，不能宣称自动 UGC 成片。',
+    },
+    {
+      name: 'Marpipe / catalog creative testing',
+      pattern: '用商品 feed、设计变量和广告实验矩阵批量测试创意组合。',
+      wenaiDecision: 'Cast/Manage 要把 SKU feed、offer、版式变量、受众、预算和表现回流绑定到可复盘实验，而不是只做单条内容分发。',
+      boundary: '没有广告账户、catalog 权限和转化回流前，只能保留实验设计与手工导入结果。',
+    },
+    {
+      name: 'Pencil / generative ad creative',
+      pattern: '把生成式创意、品牌约束和投放表现合成持续学习的广告生产循环。',
+      wenaiDecision: '品牌学习档案必须沉淀胜出的 hook、禁用表达、素材偏好和下一轮规则，反哺 Compose/Create/Cut。',
+      boundary: '没有真实投放表现、品牌批准和素材权属证明前，不让自动生成内容绕过客户审核。',
+    },
   ];
 }
 

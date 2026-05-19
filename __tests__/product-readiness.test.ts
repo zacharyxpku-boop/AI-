@@ -301,8 +301,14 @@ describe('product readiness against Kuaizi benchmark', () => {
       'Hooksy / Hooked',
       'Omneky',
       'AdHawk / AI Media Buyer',
+      'Creatify / UGC video ads',
+      'Marpipe / catalog creative testing',
+      'Pencil / generative ad creative',
     ]));
     expect(report.alternativeReferences.find(reference => reference.name === 'Omneky')?.wenaiDecision).toContain('campaign ledger');
+    expect(report.alternativeReferences.find(reference => reference.name === 'Creatify / UGC video ads')?.boundary).toContain('provider 回调');
+    expect(report.alternativeReferences.find(reference => reference.name === 'Marpipe / catalog creative testing')?.wenaiDecision).toContain('SKU feed');
+    expect(report.alternativeReferences.find(reference => reference.name === 'Pencil / generative ad creative')?.wenaiDecision).toContain('品牌学习档案');
     expect(report.uiVariants.map(variant => variant.id)).toEqual(['partner', 'operator', 'friend_trial']);
     expect(report.uiVariants.find(variant => variant.id === 'friend_trial')?.stopLine).toContain('环境变量');
     expect(JSON.stringify(report)).not.toContain('client-secret');
@@ -339,6 +345,9 @@ describe('product readiness against Kuaizi benchmark', () => {
       'Hookshot / Hookly',
       'Omneky',
       'AdHawk / AI Media Buyer',
+      'Creatify / UGC video ads',
+      'Marpipe / catalog creative testing',
+      'Pencil / generative ad creative',
     ]));
     expect(body.report.uiVariants.map((item: { id: string }) => item.id)).toEqual(expect.arrayContaining([
       'partner',
