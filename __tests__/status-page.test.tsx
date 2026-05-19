@@ -31,7 +31,15 @@ describe('status page', () => {
     expect(html).toContain('/status?variant=friend_trial');
     expect(html).toContain('竞品参考雷达');
     expect(html).toContain('Hookshot / Hookly 类');
+    expect(html).toContain('Creatify 类');
+    expect(html).toContain('Marpipe / catalog testing 类');
+    expect(html).toContain('Pencil 类');
     expect(html).toContain('电商增长作战系统');
+    expect(html).toContain('最终产品形态指挥板');
+    expect(html).toContain('电商 AI 内容工业化操作系统');
+    expect(html).toContain('先定终局，再分内部任务和外部材料');
+    expect(html).toContain('provider / OAuth / ads / cloud / audit');
+    expect(html).toContain('真实视频 provider、多平台 OAuth、广告账户、自动发布、analytics sync、企业云资产和规模审计缺一项');
     expect(html).toContain('最终产品形态蓝图');
     expect(html).toContain('内部继续补厚；外部材料接齐后才开放平台级承诺');
     expect(html).toContain('Wenai 内部继续做');
@@ -54,6 +62,10 @@ describe('status page', () => {
     expect(html).toContain('Omneky');
     expect(html).toContain('AdHawk / AI Media Buyer');
     expect(html).toContain('受治理的 AI agents');
+    expect(html).toContain('Creatify');
+    expect(html).toContain('Marpipe');
+    expect(html).toContain('Pencil');
+    expect(html).toContain('品牌学习档案必须反哺 Compose/Create/Cut');
     expect(html).toContain('不展示伪规模');
     expect(html).toContain('Manage Acceptance Board');
     expect(html).toContain('交付前验收台');

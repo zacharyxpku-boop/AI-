@@ -568,6 +568,44 @@ const COMPETITOR_REFERENCE_RADAR = [
     lesson: '真正商业化靠投放和回流：广告账户、动态 URL、素材标签、预算、ROAS 和自动优化。',
     wenaiMove: 'Cast 不停在分发计划，必须接广告账户和 analytics sync 后才能宣称平台级执行。',
   },
+  {
+    name: 'Creatify 类',
+    lesson: '商品素材到 UGC 视频广告要有 avatar、voice、scene、版本矩阵、成片 URL 和客户审核，不是单次生成。',
+    wenaiMove: 'Create/Cut 继续把商品素材、脚本、视频任务、成片回灌和 review token 绑到同一条生产护照。',
+  },
+  {
+    name: 'Marpipe / catalog testing 类',
+    lesson: '目录商品广告靠变量实验和表现归因：SKU feed、offer、版式、受众和预算必须能复盘。',
+    wenaiMove: 'Cast/Manage 继续把 dispatch、campaign ledger、表现回流和品牌学习档案接到下一轮创意约束。',
+  },
+  {
+    name: 'Pencil 类',
+    lesson: '生成式广告平台的护城河来自品牌记忆：胜出 hook、禁用表达、素材偏好和下一轮规则持续复利。',
+    wenaiMove: 'Manage 必须把批准交付物、表现赢家和品牌学习档案沉淀成 Compose/Create/Cut 的生产约束。',
+  },
+];
+
+const FINAL_PRODUCT_COMMAND_CENTER = [
+  {
+    title: '最终形态',
+    value: '电商 AI 内容工业化操作系统',
+    body: '不是单点 AI 生成工具，而是从灵感、素材、视频、分发、广告、客户验收、资产权限到表现回流的运营系统。',
+  },
+  {
+    title: '主工作流',
+    value: 'Compose → Create → Cut → Cast → Manage',
+    body: '每个项目都要留下来源、生产、成片、客户批准、发布证据、回流指标和下一轮规则，形成可审计闭环。',
+  },
+  {
+    title: '内部继续推进',
+    value: '厚度、证据、护照、前台',
+    body: '继续补创意洞察深度、视频生产护照、客户审核前台、资产权限 enforcement、品牌学习和 action queue。',
+  },
+  {
+    title: '外部停线',
+    value: 'provider / OAuth / ads / cloud / audit',
+    body: '真实视频 provider、多平台 OAuth、广告账户、自动发布、analytics sync、企业云资产和规模审计缺一项，就不宣称平台级商用等价。',
+  },
 ];
 
 const FINAL_PRODUCT_BLUEPRINT = [
@@ -661,6 +699,21 @@ const ALTERNATIVE_PLATFORM_REFERENCES = [
     name: 'Hookshot',
     reference: '受治理的 AI agents：先预演、再执行、全程留痕，失败或跳过也要可审计。',
     wenaiDecision: 'Wenai 的 action queue 和 readiness 需要记录“做了/没做/为什么没做”，防止 agent 直接碰生产系统。',
+  },
+  {
+    name: 'Creatify',
+    reference: '商品链接、素材、avatar、voice、scene 和 UGC ad variants 连接到视频广告生产。',
+    wenaiDecision: 'Wenai 要把商品素材、版本矩阵、成片 URL、客户审核和 CRM/分发交接放进同一条 Create/Cut 任务。',
+  },
+  {
+    name: 'Marpipe',
+    reference: '目录商品广告测试强调 SKU feed、变量组合、受众、预算和表现归因。',
+    wenaiDecision: 'Wenai 要让 Cast/Manage 把 SKU、offer、素材变量、dispatch、campaign 和 performance return 绑定成可复盘实验。',
+  },
+  {
+    name: 'Pencil',
+    reference: '生成式广告创意和品牌学习结合，持续积累胜出结构、禁用表达和下一轮创意规则。',
+    wenaiDecision: 'Wenai 的品牌学习档案必须反哺 Compose/Create/Cut，而不是只作为复盘报告存在。',
   },
 ];
 
@@ -918,6 +971,25 @@ export default function StatusPage() {
                 <div className="text-[10px] font-mono text-accent">Step {item.step}</div>
                 <div className="mt-1 text-[11px] font-semibold text-text-primary">{item.page}</div>
                 <p className="mt-1 text-[10px] leading-relaxed text-text-tertiary">{item.job}</p>
+              </div>
+            ))}
+          </div>
+        </div>
+        <div className="mt-4 rounded-md border border-border-subtle bg-bg-root/50 p-3">
+          <div className="mb-2 flex flex-col gap-1 md:flex-row md:items-center md:justify-between">
+            <div className="text-[10px] font-mono uppercase tracking-wider text-text-tertiary">
+              最终产品形态指挥板
+            </div>
+            <div className="text-[10px] font-mono text-accent">
+              先定终局，再分内部任务和外部材料
+            </div>
+          </div>
+          <div className="grid grid-cols-1 gap-2 md:grid-cols-2">
+            {FINAL_PRODUCT_COMMAND_CENTER.map(item => (
+              <div key={item.title} className="rounded-md border border-border-subtle/70 bg-bg-surface/40 px-3 py-3">
+                <div className="text-[11px] font-semibold text-text-primary">{item.title}</div>
+                <div className="mt-1 text-[12px] font-semibold text-success">{item.value}</div>
+                <p className="mt-2 text-[10px] leading-relaxed text-text-secondary">{item.body}</p>
               </div>
             ))}
           </div>
