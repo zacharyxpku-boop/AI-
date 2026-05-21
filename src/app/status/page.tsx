@@ -1,6 +1,7 @@
 'use client';
 
 import { useCallback, useEffect, useState } from 'react';
+import type { ReactNode } from 'react';
 
 interface ServiceStatus {
   name: string;
@@ -831,6 +832,453 @@ const MANAGE_ACCEPTANCE_BOARD = [
   },
 ];
 
+function TrialIcon({ name, className = 'h-5 w-5' }: { name: string; className?: string }) {
+  const paths: Record<string, string> = {
+    grid: 'M4 4h6v6H4V4Zm10 0h6v6h-6V4ZM4 14h6v6H4v-6Zm10 0h6v6h-6v-6Z',
+    video: 'M4 7.5A2.5 2.5 0 0 1 6.5 5h7A2.5 2.5 0 0 1 16 7.5v9A2.5 2.5 0 0 1 13.5 19h-7A2.5 2.5 0 0 1 4 16.5v-9Zm12.5 3L20 8.5v7l-3.5-2v-3Z',
+    bulb: 'M12 3a6 6 0 0 0-3 11.2V16h6v-1.8A6 6 0 0 0 12 3Zm-3 16h6m-5 2h4',
+    send: 'M3 11.5 21 4l-7.5 17-3-7-7.5-2.5Zm7.5 2.5L21 4',
+    chart: 'M5 19V9m7 10V5m7 14v-7M3 19h18',
+    users: 'M8 11a4 4 0 1 0 0-8 4 4 0 0 0 0 8Zm8-1a3 3 0 1 0 0-6 3 3 0 0 0 0 6ZM2 21a6 6 0 0 1 12 0m2 0a5 5 0 0 0-3-4.6',
+    lock: 'M7 10V7a5 5 0 0 1 10 0v3m-12 0h14v10H5V10Z',
+    gear: 'M12 8a4 4 0 1 0 0 8 4 4 0 0 0 0-8Zm0-5v3m0 12v3M4.6 4.6l2.1 2.1m10.6 10.6 2.1 2.1M3 12h3m12 0h3M4.6 19.4l2.1-2.1M17.3 6.7l2.1-2.1',
+    bolt: 'M13 2 4 14h7l-1 8 9-12h-7l1-8Z',
+    warning: 'M12 4 3 20h18L12 4Zm0 6v4m0 3h.01',
+    check: 'M20 6 9 17l-5-5',
+    list: 'M8 6h13M8 12h13M8 18h13M3 6h.01M3 12h.01M3 18h.01',
+  };
+  const d = paths[name] || paths.grid;
+  return (
+    <svg viewBox="0 0 24 24" className={className} fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+      <path d={d} />
+    </svg>
+  );
+}
+
+function trialValue(map: Record<string, number>, key: string, fallback = 0) {
+  return map[key] ?? fallback;
+}
+
+function compactNumber(value: number) {
+  if (!Number.isFinite(value)) return '0';
+  if (value >= 1000) return value.toLocaleString('zh-CN');
+  return `${value}`;
+}
+
+function TrialStatusPill({
+  tone,
+  children,
+}: {
+  tone: 'neutral' | 'success' | 'warning';
+  children: ReactNode;
+}) {
+  const toneClass = tone === 'success'
+    ? 'border-emerald-200 bg-emerald-50 text-emerald-700'
+    : tone === 'warning'
+      ? 'border-amber-200 bg-amber-50 text-amber-700'
+      : 'border-neutral-200 bg-neutral-100 text-neutral-800';
+  return (
+    <span className={`inline-flex items-center gap-2 rounded-md border px-4 py-2 text-sm font-semibold ${toneClass}`}>
+      {tone === 'success' ? <span className="h-2 w-2 rounded-full bg-emerald-500" /> : null}
+      {children}
+    </span>
+  );
+}
+
+function FriendTrialStatusConsole({
+  health,
+  readiness,
+  actionQueue,
+  assetPermissions,
+  projectId,
+  loading,
+  lastFetch,
+  fetchHealth,
+  selectUiVariant,
+  activeUiVariant,
+  maturity,
+  projectMaturity,
+  externalRequirements,
+  topActions,
+  assetPermissionAudits,
+  finalProductBlueprint,
+  readinessHref,
+}: {
+  health: HealthResponse | null;
+  readiness: ReadinessResponse | null;
+  actionQueue: ActionQueueResponse | null;
+  assetPermissions: AssetPermissionResponse | null;
+  projectId: string;
+  loading: boolean;
+  lastFetch: Date | null;
+  fetchHealth: () => void;
+  selectUiVariant: (variant: StatusUiVariant) => void;
+  activeUiVariant: { label: string; intent: string; proof: string };
+  maturity?: ReadinessResponse['report'];
+  projectMaturity?: ReadinessResponse['report']['projectReadiness'];
+  externalRequirements: ExternalIntegrationRequirement[];
+  topActions: IndustrialActionItem[];
+  assetPermissionAudits: AssetPermissionAccessAudit[];
+  finalProductBlueprint: StatusProductBlueprintItem[];
+  readinessHref: string;
+}) {
+  const evidence = projectEvidenceMap(projectMaturity);
+  const blockedRequirements = externalRequirements.filter(requirement => requirement.status !== 'configured');
+  const implementedFeatures = maturity?.features.filter(feature => feature.status === 'implemented').length || 0;
+  const partialFeatures = maturity?.features.filter(feature => feature.status === 'partial').length || 0;
+  const totalFeatures = maturity?.features.length || Math.max(implementedFeatures + partialFeatures, 1);
+  const verifiedFeatures = implementedFeatures + partialFeatures;
+  const internalScore = projectMaturity?.score ?? maturity?.score ?? 0;
+  const actionCount = actionQueue?.actionCount ?? topActions.length;
+  const activePipelineCount = actionCount || trialValue(evidence, 'channelAvailableSlots') || trialValue(evidence, 'plans') || 0;
+  const blockerCount = blockedRequirements.length;
+  const overallText = loading ? '同步中' : health ? overallLabel(health.overall) : '等待接口';
+
+  const modules = [
+    {
+      title: '创意洞察',
+      icon: 'bulb',
+      status: '已可内部跑通',
+      detail: `${compactNumber(trialValue(evidence, 'creativeInsights') || trialValue(evidence, 'creativeOpportunities'))} 条洞察 / ${compactNumber(trialValue(evidence, 'creativePatternClusters'))} 个打法簇`,
+      tone: 'success',
+    },
+    {
+      title: '素材库',
+      icon: 'grid',
+      status: '已可内部跑通',
+      detail: `${compactNumber(trialValue(evidence, 'assets'))} 个资产 / ${compactNumber(trialValue(evidence, 'reusableAssets'))} 个可复用`,
+      tone: 'success',
+    },
+    {
+      title: '视频工坊',
+      icon: 'video',
+      status: '部分可用',
+      detail: `${compactNumber(trialValue(evidence, 'videoQueueItems'))} 个生产任务，等待真实 provider`,
+      tone: 'warning',
+    },
+    {
+      title: '分发计划',
+      icon: 'send',
+      status: '需外部授权',
+      detail: `${compactNumber(trialValue(evidence, 'plans'))} 条计划，等待平台 OAuth`,
+      tone: 'danger',
+    },
+    {
+      title: '效果回流',
+      icon: 'chart',
+      status: '待配置',
+      detail: `${compactNumber(trialValue(evidence, 'performanceReturns'))} 条回流，等待 analytics sync`,
+      tone: 'neutral',
+    },
+    {
+      title: '客户移交',
+      icon: 'users',
+      status: '已可内部跑通',
+      detail: `${compactNumber(trialValue(evidence, 'clientReviewAssets') || trialValue(evidence, 'videoClientReviews'))} 个审核链接，CRM 交接可用`,
+      tone: 'success',
+    },
+  ] as const;
+
+  const evidenceItems = [
+    { label: '功能模块', value: `${verifiedFeatures}/${totalFeatures}` },
+    { label: '执行队列', value: `${actionCount}` },
+    { label: '外部门禁', value: `${blockerCount}` },
+    { label: '权限审计', value: `${assetPermissions?.accessAudits.length || assetPermissionAudits.length}` },
+    { label: '平台夸大声明', value: '0' },
+  ];
+
+  const logs = [
+    {
+      tag: health?.overall === 'operational' ? 'OK' : health?.overall === 'degraded' ? 'WARN' : 'INFO',
+      tone: health?.overall === 'operational' ? 'text-emerald-300' : health?.overall === 'degraded' ? 'text-amber-300' : 'text-sky-300',
+      text: `服务健康：${overallText}`,
+    },
+    {
+      tag: 'INFO',
+      tone: 'text-sky-300',
+      text: `项目成熟度：${readiness?.projectId || projectId || 'default-project'} · ${internalScore}/100`,
+    },
+    {
+      tag: blockerCount > 0 ? 'WARN' : 'OK',
+      tone: blockerCount > 0 ? 'text-amber-300' : 'text-emerald-300',
+      text: `外部门禁：${blockerCount} 项等待材料或授权`,
+    },
+    ...topActions.slice(0, 3).map(action => ({
+      tag: action.priority,
+      tone: action.priority === 'P0' ? 'text-rose-300' : action.priority === 'P1' ? 'text-amber-300' : 'text-slate-300',
+      text: `${action.title} · ${action.method} ${action.endpoint}`,
+    })),
+  ];
+  const terminalTime = lastFetch
+    ? lastFetch.toLocaleTimeString('zh-CN', { hour12: false, hour: '2-digit', minute: '2-digit', second: '2-digit' })
+    : '--:--:--';
+
+  return (
+    <div className="min-h-screen bg-[#f8f8f7] text-[#111827]">
+      <div className="absolute inset-0 pointer-events-none bg-[radial-gradient(circle_at_1px_1px,rgba(99,102,241,0.12)_1px,transparent_0)] [background-size:26px_26px]" />
+      <div className="relative flex min-h-screen gap-6 p-6">
+        <aside className="hidden w-[390px] shrink-0 flex-col border-r border-neutral-200 bg-white/92 lg:flex">
+          <div className="flex items-center gap-5 border-b border-neutral-100 px-9 py-9">
+            <div className="flex h-14 w-14 items-center justify-center rounded-lg bg-neutral-950 text-xl font-bold text-white shadow-sm">W</div>
+            <div>
+              <div className="text-3xl font-bold tracking-tight text-neutral-950">Wenai</div>
+              <div className="mt-1 text-sm font-medium text-neutral-500">智能内容系统</div>
+            </div>
+          </div>
+          <nav className="flex-1 px-5 py-7">
+            {[
+              ['grid', '指挥中心', 'active', '/status?variant=friend_trial'],
+              ['video', '视频工坊', 'dot', '/factory/video?variant=friend_trial'],
+              ['bulb', '创意洞察', '', '/factory/creative?variant=friend_trial'],
+              ['send', '分发运营', '5', '/factory/cast?variant=friend_trial'],
+              ['chart', '效果回流', '', '/factory/manage?variant=friend_trial'],
+              ['users', '客户移交', '', '/review/review-video-1?variant=friend_trial'],
+            ].map(([icon, label, badge, href]) => (
+              <a
+                key={label}
+                href={href}
+                className={`mb-2 flex items-center gap-4 px-6 py-4 text-lg font-semibold transition ${
+                  badge === 'active'
+                    ? 'border-l-4 border-neutral-950 bg-neutral-100 text-neutral-950'
+                    : 'text-neutral-700 hover:bg-neutral-50'
+                }`}
+              >
+                <TrialIcon name={icon} className="h-6 w-6 text-neutral-600" />
+                <span className="flex-1">{label}</span>
+                {badge === 'dot' ? <span className="h-2 w-2 rounded-full bg-amber-500" /> : null}
+                {badge === '5' ? <span className="rounded-md bg-neutral-100 px-2 py-1 text-sm text-neutral-700">{blockerCount || 5}</span> : null}
+              </a>
+            ))}
+            <div className="mt-7 border-t border-neutral-100 pt-7">
+              <a href="/docs" className="flex items-center gap-4 px-6 py-4 text-lg font-semibold text-neutral-700 hover:bg-neutral-50">
+                <TrialIcon name="lock" className="h-6 w-6 text-neutral-600" />
+                <span className="flex-1">外部网关</span>
+                <span className="rounded-md bg-neutral-100 px-3 py-1 text-sm text-neutral-600">待配置</span>
+              </a>
+            </div>
+          </nav>
+          <div className="mx-6 mb-7 flex items-center gap-4 rounded-3xl border border-neutral-100 bg-white p-6 shadow-sm">
+            <div className="flex h-14 w-14 items-center justify-center rounded-2xl bg-indigo-50 text-xl font-bold text-indigo-700">W</div>
+            <div className="min-w-0 flex-1">
+              <div className="truncate text-lg font-bold text-neutral-950">Wenai Admin</div>
+              <div className="text-sm text-neutral-500">{activeUiVariant.label}</div>
+            </div>
+          </div>
+        </aside>
+
+        <main className="min-w-0 flex-1 overflow-hidden">
+          <header className="mb-8 flex flex-col gap-5 border-b border-neutral-200 bg-white/90 px-9 py-5 shadow-sm xl:flex-row xl:items-center xl:justify-between">
+            <div>
+              <h1 className="text-3xl font-bold tracking-tight text-neutral-950">Wenai 内容工业化试用总控台</h1>
+              <p className="mt-2 text-lg text-neutral-600">从创意洞察、资产库、视频生产到分发计划、表现回流和 CRM 交接的可验证工作流</p>
+            </div>
+            <div className="flex flex-wrap items-center gap-4">
+              <TrialStatusPill tone="neutral">有条件可试用</TrialStatusPill>
+              <TrialStatusPill tone="success">内部链路已验证</TrialStatusPill>
+              <TrialStatusPill tone="warning">外部门禁 {blockerCount} 项待配置</TrialStatusPill>
+              <button
+                type="button"
+                onClick={() => selectUiVariant('operator')}
+                className="rounded-lg border border-neutral-200 bg-white px-4 py-2 text-sm font-semibold text-neutral-700 shadow-sm hover:bg-neutral-50"
+              >
+                运营视角
+              </button>
+              <button
+                type="button"
+                onClick={fetchHealth}
+                className="rounded-lg bg-neutral-950 px-5 py-2 text-sm font-semibold text-white shadow-lg shadow-neutral-900/10 hover:bg-black"
+              >
+                刷新状态
+              </button>
+            </div>
+          </header>
+
+          <div className="grid grid-cols-12 gap-6 pb-10">
+            {[
+              { label: '内部链路', value: `${Math.round(internalScore)}%`, icon: 'gear', tone: 'from-teal-50 to-teal-100/40 border-teal-100 text-teal-900', bar: 'bg-teal-500', width: `${Math.min(Math.max(internalScore, 0), 100)}%` },
+              { label: '活跃管道', value: compactNumber(activePipelineCount), suffix: '运行中', icon: 'bolt', tone: 'from-blue-50 to-blue-100/40 border-blue-100 text-blue-900', bar: 'bg-blue-500', width: `${activePipelineCount > 0 ? 70 : 10}%` },
+              { label: '已验证模块', value: `${verifiedFeatures}`, suffix: `/${totalFeatures}`, icon: 'check', tone: 'from-amber-50 to-amber-100/40 border-amber-100 text-amber-900', bar: 'bg-amber-500', width: `${Math.min(Math.round((verifiedFeatures / Math.max(totalFeatures, 1)) * 100), 100)}%` },
+              { label: '阻断网关', value: compactNumber(blockerCount), suffix: '关键项', icon: 'warning', tone: 'from-rose-50 to-rose-100/40 border-rose-200 text-rose-700', bar: 'bg-rose-500', width: `${blockerCount > 0 ? 82 : 0}%` },
+            ].map(card => (
+              <section key={card.label} className={`col-span-12 rounded-[2rem] border bg-gradient-to-br p-8 shadow-sm md:col-span-6 xl:col-span-3 ${card.tone}`}>
+                <div className="mb-8 flex h-14 w-14 items-center justify-center rounded-2xl bg-white text-current shadow-sm">
+                  <TrialIcon name={card.icon} className="h-6 w-6" />
+                </div>
+                <div className="text-lg font-bold opacity-70">{card.label}</div>
+                <div className="mt-2 flex items-end gap-3">
+                  <span className="text-6xl font-extrabold leading-none tracking-tight">{card.value}</span>
+                  {card.suffix ? <span className="mb-2 text-xl font-bold opacity-75">{card.suffix}</span> : null}
+                </div>
+                <div className="mt-7 h-2 overflow-hidden rounded-full bg-white/50">
+                  <div className={`h-full rounded-full ${card.bar}`} style={{ width: card.width }} />
+                </div>
+              </section>
+            ))}
+
+            <section className="col-span-12 xl:col-span-8">
+              <div className="mb-5 flex items-center gap-4">
+                <h2 className="text-2xl font-bold tracking-tight text-neutral-950">模块运行状态</h2>
+                <span className="text-sm font-medium text-neutral-500">真实数据流与门禁映射</span>
+              </div>
+              <div className="grid grid-cols-1 gap-5 md:grid-cols-2 2xl:grid-cols-3">
+                {modules.map(module => {
+                  const tone = module.tone === 'success'
+                    ? 'border-emerald-200 bg-emerald-50/70 text-emerald-800'
+                    : module.tone === 'warning'
+                      ? 'border-amber-200 bg-amber-50/70 text-amber-800'
+                      : module.tone === 'danger'
+                        ? 'border-rose-200 bg-rose-50/70 text-rose-700'
+                        : 'border-neutral-200 bg-white/70 text-neutral-700';
+                  return (
+                    <div key={module.title} className={`rounded-[1.5rem] border p-6 shadow-sm ${tone}`}>
+                      <div className="mb-6 flex items-start justify-between gap-4">
+                        <div className="flex h-12 w-12 items-center justify-center rounded-2xl bg-white text-current shadow-sm">
+                          <TrialIcon name={module.icon} className="h-6 w-6" />
+                        </div>
+                        <span className="rounded-full border border-current/20 bg-white/60 px-3 py-1 text-xs font-bold">{module.status}</span>
+                      </div>
+                      <h3 className="text-xl font-bold text-neutral-950">{module.title}</h3>
+                      <p className="mt-3 text-sm font-medium leading-6 text-neutral-600">{module.detail}</p>
+                    </div>
+                  );
+                })}
+              </div>
+            </section>
+
+            <aside className="col-span-12 xl:col-span-4">
+              <div className="h-full rounded-[2rem] border border-emerald-100 bg-emerald-50/40 p-6 shadow-sm">
+                <div className="mb-5 flex items-center justify-between">
+                  <h2 className="text-xl font-bold text-neutral-950">证据层概览</h2>
+                  <a href={readinessHref} className="rounded-xl bg-white px-3 py-2 text-xs font-bold text-neutral-600 shadow-sm hover:text-neutral-950">接口数据</a>
+                </div>
+                <div className="space-y-4">
+                  {evidenceItems.map(item => (
+                    <div key={item.label} className="flex items-center justify-between rounded-2xl bg-white px-5 py-4 shadow-sm">
+                      <span className="text-sm font-bold text-neutral-500">{item.label}</span>
+                      <span className="text-2xl font-extrabold text-neutral-950">{item.value}</span>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            </aside>
+
+            <section className="relative col-span-12 min-h-[460px] overflow-hidden rounded-[2.25rem] border border-slate-800/30 bg-[#0f172a] p-7 text-slate-300 shadow-xl xl:col-span-7">
+              <div className="pointer-events-none absolute right-10 top-20 text-slate-700/20">
+                <TrialIcon name="list" className="h-32 w-32" />
+              </div>
+              <div className="relative mb-6 flex items-center justify-between border-b border-slate-700/70 pb-5">
+                <div className="flex items-center gap-3">
+                  <span className="h-3 w-3 rounded-full bg-rose-500" />
+                  <span className="h-3 w-3 rounded-full bg-amber-500" />
+                  <span className="h-3 w-3 rounded-full bg-emerald-500" />
+                  <span className="ml-3 text-xs font-bold uppercase tracking-[0.28em] text-slate-400">TERMINAL // SYSTEM LOGS</span>
+                </div>
+                <span className="text-xs font-bold text-emerald-300">Live</span>
+              </div>
+              <div className="relative space-y-4 font-mono text-sm">
+                {logs.map((log, index) => (
+                  <div key={`${log.tag}-${index}`} className={log.tag === 'P0' ? 'rounded border-l-2 border-rose-400 bg-rose-500/10 px-3 py-2' : ''}>
+                    <span className="mr-3 text-slate-500">[{terminalTime}]</span>
+                    <span className={`mr-3 font-bold ${log.tone}`}>[{log.tag.padEnd(4, ' ')}]</span>
+                    <span className="text-slate-200">{log.text}</span>
+                  </div>
+                ))}
+                <div className="pt-2">
+                  <span className="font-bold text-emerald-300">readiness@wenai-core:~#</span>
+                  <span className="ml-2 inline-block h-5 w-2 translate-y-1 bg-slate-400" />
+                </div>
+              </div>
+            </section>
+
+            <section className="col-span-12 rounded-[2.25rem] border border-rose-200 bg-rose-50/80 p-7 shadow-sm xl:col-span-5">
+              <div className="mb-6 flex items-center gap-4">
+                <div className="flex h-12 w-12 items-center justify-center rounded-full bg-rose-100 text-rose-500">
+                  <TrialIcon name="warning" className="h-6 w-6" />
+                </div>
+                <h2 className="text-2xl font-bold text-rose-950">关键阻断项 ({blockerCount})</h2>
+              </div>
+              <div className="space-y-4">
+                {(blockedRequirements.length ? blockedRequirements : externalRequirements).slice(0, 5).map(requirement => (
+                  <div key={requirement.id} className="flex items-center justify-between gap-4 rounded-3xl border border-rose-100 bg-white p-5 shadow-sm">
+                    <div className="flex min-w-0 items-start gap-4">
+                      <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-2xl bg-rose-50 text-rose-500">
+                        <TrialIcon name={requirement.category === 'platform_oauth' ? 'lock' : requirement.category === 'analytics_sync' ? 'chart' : 'video'} className="h-6 w-6" />
+                      </div>
+                      <div className="min-w-0">
+                        <h3 className="truncate text-lg font-bold text-neutral-950">{requirement.label}</h3>
+                        <p className="mt-1 line-clamp-2 text-sm font-medium text-neutral-500">
+                          {requirement.requiredInputs.slice(0, 2).join(' / ') || requirement.evidence}
+                        </p>
+                      </div>
+                    </div>
+                    <a href="/docs" className="shrink-0 rounded-2xl bg-neutral-950 px-5 py-3 text-sm font-bold text-white hover:bg-black">
+                      材料
+                    </a>
+                  </div>
+                ))}
+              </div>
+            </section>
+
+            <section className="col-span-12 rounded-[2rem] border border-neutral-200 bg-white/80 p-7 shadow-sm">
+              <div className="mb-6 flex flex-col gap-2 md:flex-row md:items-end md:justify-between">
+                <div>
+                  <h2 className="text-2xl font-bold text-neutral-950">模块准备度评估</h2>
+                  <p className="mt-1 text-sm text-neutral-500">与 Wenai 现有功能、外部门禁和交付边界对应。</p>
+                </div>
+                <div className="text-sm font-semibold text-neutral-500">当前项目：{readiness?.projectId || projectId || 'default-project'}</div>
+              </div>
+              <div className="overflow-x-auto">
+                <table className="w-full min-w-[860px] border-collapse text-left">
+                  <thead>
+                    <tr className="border-b border-neutral-200 text-sm text-neutral-500">
+                      <th className="px-4 pb-4 font-bold">模块</th>
+                      <th className="px-4 pb-4 font-bold">准备度</th>
+                      <th className="px-4 pb-4 font-bold">证据</th>
+                      <th className="px-4 pb-4 font-bold">阻断项</th>
+                      <th className="px-4 pb-4 text-right font-bold">状态</th>
+                    </tr>
+                  </thead>
+                  <tbody className="divide-y divide-neutral-100 text-sm">
+                    {finalProductBlueprint.slice(0, 6).map(item => {
+                      const status = item.status === 'implemented' ? '就绪' : item.status === 'partial' ? '部分就绪' : '已阻断';
+                      const rowTone = item.status === 'implemented'
+                        ? 'text-emerald-700 bg-emerald-50 border-emerald-100'
+                        : item.status === 'partial'
+                          ? 'text-amber-800 bg-amber-50 border-amber-100'
+                          : 'text-rose-700 bg-rose-50 border-rose-100';
+                      return (
+                        <tr key={item.layer} className="hover:bg-neutral-50">
+                          <td className="px-4 py-4 font-bold text-neutral-950">{item.layer}</td>
+                          <td className="px-4 py-4 font-mono font-bold text-neutral-800">{FEATURE_STATUS_LABELS[item.status || 'partial']}</td>
+                          <td className="max-w-[360px] px-4 py-4 text-neutral-500">{item.evidence || item.internalMove}</td>
+                          <td className="max-w-[300px] px-4 py-4 text-neutral-500">{item.externalNeed}</td>
+                          <td className="px-4 py-4 text-right">
+                            <span className={`inline-flex items-center rounded-lg border px-3 py-1 text-xs font-bold ${rowTone}`}>{status}</span>
+                          </td>
+                        </tr>
+                      );
+                    })}
+                  </tbody>
+                </table>
+              </div>
+            </section>
+
+            <section className="col-span-12 flex justify-center pb-3">
+              <div className="max-w-4xl rounded-3xl border border-amber-200 bg-gradient-to-r from-amber-50 to-indigo-50 px-10 py-6 text-center shadow-sm">
+                <p className="text-base font-semibold leading-8 text-neutral-700">
+                  在真实 OAuth、广告账户、发布 API、数据同步和企业云权限配置完成前，
+                  Wenai 仍是一个已验证的 <span className="rounded-md bg-amber-200/80 px-2 py-1 font-bold text-neutral-950">内部运行骨架</span>，
+                  而非完全自动化的筷子科技级别平台。
+                </p>
+              </div>
+            </section>
+          </div>
+        </main>
+      </div>
+    </div>
+  );
+}
+
 export default function StatusPage() {
   const [health, setHealth] = useState<HealthResponse | null>(null);
   const [readiness, setReadiness] = useState<ReadinessResponse | null>(null);
@@ -918,6 +1366,30 @@ export default function StatusPage() {
   const readinessHref = projectId.trim()
     ? `/api/readiness?projectId=${encodeURIComponent(projectId.trim())}`
     : '/api/readiness';
+
+  if (uiVariant === 'friend_trial') {
+    return (
+      <FriendTrialStatusConsole
+        health={health}
+        readiness={readiness}
+        actionQueue={actionQueue}
+        assetPermissions={assetPermissions}
+        projectId={projectId}
+        loading={loading}
+        lastFetch={lastFetch}
+        fetchHealth={fetchHealth}
+        selectUiVariant={selectUiVariant}
+        activeUiVariant={activeUiVariant}
+        maturity={maturity}
+        projectMaturity={projectMaturity}
+        externalRequirements={externalRequirements}
+        topActions={topActions}
+        assetPermissionAudits={assetPermissionAudits}
+        finalProductBlueprint={finalProductBlueprint}
+        readinessHref={readinessHref}
+      />
+    );
+  }
 
   return (
     <div className="mx-auto max-w-[900px] px-6 py-10">

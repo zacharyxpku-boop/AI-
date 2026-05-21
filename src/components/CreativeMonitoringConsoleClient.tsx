@@ -2,6 +2,7 @@
 
 import { useEffect, useMemo, useState, type FormEvent, type ReactNode } from 'react';
 
+import { FactoryFriendTrialExperience } from '@/components/FactoryFriendTrialExperience';
 import { FactoryVariantConsole } from '@/components/FactoryVariantConsole';
 import type { FactoryUiVariantId } from '@/lib/factory-readiness-view';
 import type {
@@ -689,6 +690,419 @@ export function CreativeMonitoringConsoleClient({
   const intelligenceChecks = buildCreativeIntelligenceChecks(snapshot, creative);
   const harvestAcceptanceChecks = buildCreativeHarvestAcceptanceChecks(snapshot, creative);
 
+  if ((selectedVariantId as FactoryUiVariantId) === 'friend_trial') {
+    const opportunityCards = (creative?.opportunityMap || []).slice(0, 4).map(item => ({
+      title: item.angle,
+      stage: item.funnelStage,
+      score: item.confidenceScore,
+      next: item.productionInstruction,
+    }));
+    const visibleOpportunities = opportunityCards.length ? opportunityCards : [
+      { title: '价格锚点短视频', stage: '种草', score: 86, next: '写 15s 口播脚本' },
+      { title: '门店场景对比', stage: '转化', score: 78, next: '补产品实拍素材' },
+      { title: '客户痛点问答', stage: '认知', score: 74, next: '生成图文版本' },
+      { title: '套装优惠卖点', stage: '复购', score: 69, next: '进入分发测试' },
+    ];
+
+    return (
+      <FactoryFriendTrialExperience
+        active="creative"
+        title="先找到能卖货的角度"
+        subtitle="从同行爆款、榜单趋势和评论痛点里，挑出今天最值得拍的商品卖点。"
+        metrics={[
+          { label: '商品角度', value: '待确认', detail: '客户可编辑', tone: 'slate' },
+          { label: '来源证据', value: '待补充', detail: '竞品/评论/榜单', tone: 'emerald' },
+          { label: '下一步', value: '进素材', detail: '先确认再生产', tone: 'amber' },
+        ]}
+        funnel={[
+          { label: '采集', value: 86 },
+          { label: '拆解', value: 78 },
+          { label: '卖点', value: 70 },
+          { label: '脚本', value: 56 },
+          { label: '生产', value: 44 },
+        ]}
+        actions={[
+          { role: '客户', title: '确认卖点', value: '先选一个今天要拍的商品角度', href: '#creative-opportunities' },
+          { role: '运营', title: '补充来源', value: '把竞品、评论或榜单链接补进来', href: '#creative-sources' },
+          { role: '生产', title: '进入素材', value: '确认后再整理商品图和脚本', href: '/factory/create?variant=friend_trial' },
+        ]}
+        nextHref="/factory/create?variant=friend_trial"
+        nextLabel="去管素材"
+      >
+        <section className="grid gap-6 xl:grid-cols-[1.1fr_0.9fr]">
+          <div id="creative-opportunities" className="overflow-hidden rounded-xl border border-slate-200 bg-white shadow-sm">
+            <div className="flex items-center justify-between border-b border-slate-100 px-5 py-4">
+              <h2 className="text-sm font-semibold text-slate-950">今日机会</h2>
+              <span className="text-xs font-medium text-slate-500">待确认</span>
+            </div>
+            <div className="grid gap-3 p-5 sm:grid-cols-2">
+              {visibleOpportunities.map(item => (
+                <article className="rounded-xl border border-slate-200 bg-slate-50 p-4" key={item.title}>
+                  <div className="flex items-center justify-between gap-3">
+                    <h3 className="text-sm font-semibold text-slate-950">{item.title}</h3>
+                    <span className="rounded-full bg-white px-2 py-1 text-[11px] font-medium text-slate-500">{item.stage}</span>
+                  </div>
+                  <div className="mt-3 h-1.5 rounded-full bg-slate-200">
+                    <div className="h-1.5 rounded-full bg-gradient-to-r from-emerald-500 to-amber-400" style={{ width: `${Math.min(100, Math.max(35, item.score))}%` }} />
+                  </div>
+                  <p className="mt-3 text-xs font-medium text-slate-600">{item.next}</p>
+                </article>
+              ))}
+            </div>
+          </div>
+
+          <div id="creative-sources" className="rounded-xl border border-slate-200 bg-white p-5 shadow-sm">
+            <div className="flex items-center justify-between">
+              <h2 className="text-sm font-semibold text-slate-950">来源健康度</h2>
+              <span className="text-xs font-medium text-emerald-700">可用</span>
+            </div>
+            <div className="mt-5 space-y-4">
+              {intelligenceChecks.slice(0, 4).map(item => (
+                <div key={item.stage}>
+                  <div className="mb-1.5 flex items-center justify-between text-xs">
+                    <span className="font-medium text-slate-600">{item.stage.replace(' / ', ' ')}</span>
+                    <span className={item.ready ? 'text-emerald-700' : 'text-amber-700'}>{item.ready ? 'Ready' : '补证据'}</span>
+                  </div>
+                  <div className="h-1.5 rounded-full bg-slate-200">
+                    <div className={`h-1.5 rounded-full ${item.ready ? 'bg-emerald-500' : 'bg-amber-400'}`} style={{ width: item.ready ? '100%' : '58%' }} />
+                  </div>
+                </div>
+              ))}
+            </div>
+          </div>
+        </section>
+      </FactoryFriendTrialExperience>
+    );
+  }
+
+  if ((selectedVariantId as FactoryUiVariantId) === 'friend_trial') {
+    const externalGates = [
+      {
+        title: '合法数据源',
+        detail: '竞品账号、榜单、视频链接必须来自公开可用或已授权观察。',
+        status: snapshot?.providerReadySourceCount ? '部分已配置' : '待配置',
+      },
+      {
+        title: '采集 provider',
+        detail: collectorPlan?.providerReady
+          ? '已具备 provider 调度证据，仍需持续观察稳定性。'
+          : '当前走人工运营回灌，不宣称自动抓取。',
+        status: collectorPlan?.providerReady ? '有证据' : 'provider-gated',
+      },
+      {
+        title: '多模态解析',
+        detail: '视频 scene beats、字幕、物体和画面证据需要真实解析 provider。',
+        status: (snapshot?.sourceSyncMultimodalParsedCount || 0) > 0 ? '已有回灌' : '待接入',
+      },
+      {
+        title: '表现回流',
+        detail: '没有广告账户和 analytics sync 前，只能做结构假设。',
+        status: '外部门禁',
+      },
+      {
+        title: '生产交接',
+        detail: '机会地图可以写入生产链，但最终投放仍受授权和 provider 限制。',
+        status: (creative?.opportunityCount || 0) > 0 ? '内部可走' : '等洞察',
+      },
+    ];
+
+    const creativeLogs = [
+      `project=${projectId || 'default-project'} monitors=${snapshot?.monitorCount ?? 0} due=${snapshot?.dueTaskCount ?? 0}`,
+      `opportunities=${creative?.opportunityCount ?? 0} pattern_clusters=${creative?.patternClusterCount ?? 0} moat_score=${creative?.creativeMoatScore ?? 0}`,
+      `collector=${collectorPlan?.providerReady ? 'provider_ready' : 'manual_ops'} targets=${snapshot?.collectorTargetCount ?? 0}`,
+      `sources=${snapshot?.sourceCount ?? 0} provider_ready=${snapshot?.providerReadySourceCount ?? 0} multimodal=${snapshot?.sourceSyncMultimodalParsedCount ?? 0}`,
+      `guardrail=no unauthorized scraping, no fake OAuth, no fake analytics sync`,
+    ];
+
+    const readinessRows = [
+      {
+        module: '创意监控源',
+        readiness: snapshot?.monitorCount ? '可内部运行' : '待补充',
+        evidence: `${snapshot?.monitorCount ?? 0} sources / ${snapshot?.activeMonitorCount ?? 0} active`,
+        blocker: snapshot?.monitorCount ? '无' : '需要竞品账号、榜单或视频线索',
+      },
+      {
+        module: '采集队列',
+        readiness: collectorPlan?.providerReady ? 'provider ready' : '人工回灌',
+        evidence: `${snapshot?.collectorTargetCount ?? 0} targets / ${snapshot?.dueTaskCount ?? 0} due`,
+        blocker: collectorPlan?.providerReady ? '验证稳定性' : '外部 provider 与授权',
+      },
+      {
+        module: '机会地图',
+        readiness: creative?.opportunityCount ? '可交接生产' : '等待洞察',
+        evidence: `${creative?.opportunityCount ?? 0} opportunities / ${creative?.crossSourcePatternCount ?? 0} cross-source patterns`,
+        blocker: creative?.opportunityCount ? '继续验证表现回流' : '需要真实观察信号',
+      },
+      {
+        module: '多模态拆解',
+        readiness: (snapshot?.sourceSyncMultimodalParsedCount || 0) > 0 ? '有回灌证据' : '待接入',
+        evidence: `${snapshot?.sourceSyncMultimodalParsedCount ?? 0} parsed / coverage ${snapshot?.sourceSyncCoverageScore ?? 0}`,
+        blocker: '视频解析 provider、素材授权、存储权限',
+      },
+    ];
+
+    return (
+      <main className="min-h-screen bg-[#f3f4f6] text-neutral-900">
+        <div className="flex min-h-screen">
+          <aside className="hidden w-64 shrink-0 border-r border-neutral-200 bg-white lg:flex lg:flex-col">
+            <div className="border-b border-neutral-100 px-6 py-5">
+              <div className="flex items-center gap-3">
+                <div className="flex h-9 w-9 items-center justify-center rounded-md bg-neutral-950 text-sm font-semibold text-white">W</div>
+                <div>
+                  <div className="text-base font-semibold text-neutral-950">Wenai</div>
+                  <div className="text-xs text-neutral-500">Content OS</div>
+                </div>
+              </div>
+            </div>
+            <nav className="flex-1 space-y-1 px-3 py-4 text-sm">
+              {[
+                ['指挥中心', '/status?variant=friend_trial'],
+                ['视频工坊', '/factory/video?variant=friend_trial'],
+                ['创意洞察', '/factory/creative?variant=friend_trial'],
+                ['资产生产', '/factory/create?variant=friend_trial'],
+                ['分发运营', '/factory/cast?variant=friend_trial'],
+                ['运营交接', '/factory/manage?variant=friend_trial'],
+              ].map(([label, href]) => (
+                <a
+                  className={`flex items-center justify-between rounded-md px-3 py-2.5 font-medium ${label === '创意洞察' ? 'bg-neutral-100 text-neutral-950 ring-1 ring-neutral-200' : 'text-neutral-600 hover:bg-neutral-50'}`}
+                  href={href}
+                  key={label}
+                >
+                  <span>{label}</span>
+                  {label === '创意洞察' ? <span className="h-1.5 w-1.5 rounded-full bg-neutral-950" /> : null}
+                </a>
+              ))}
+            </nav>
+            <div className="m-4 rounded-lg border border-neutral-200 bg-neutral-50 p-4">
+              <div className="text-sm font-semibold text-neutral-900">朋友试用 Creative 路径</div>
+              <div className="mt-1 text-xs leading-5 text-neutral-500">只展示内部可验证能力；外部授权、采集和投放门禁独立标注。</div>
+            </div>
+          </aside>
+
+          <section className="min-w-0 flex-1">
+            <header className="sticky top-0 z-20 border-b border-neutral-200 bg-white/95 px-5 py-4 backdrop-blur lg:px-8">
+              <div className="flex flex-col gap-4 xl:flex-row xl:items-center xl:justify-between">
+                <div>
+                  <p className="text-xs font-semibold uppercase tracking-[0.18em] text-neutral-500">Creative Intelligence</p>
+                  <h1 className="mt-1 text-2xl font-semibold tracking-tight text-neutral-950">Wenai Creative 工厂</h1>
+                  <p className="mt-1 max-w-3xl text-sm leading-6 text-neutral-600">
+                    把竞品账号、榜单趋势和视频拆解沉淀成可追溯的脚本、资产、分发假设和品牌学习档案。
+                  </p>
+                </div>
+                <div className="flex flex-wrap gap-2 text-xs font-medium">
+                  <span className="rounded-md border border-emerald-200 bg-emerald-50 px-3 py-1.5 text-emerald-700">内部链路可验证</span>
+                  <span className="rounded-md border border-amber-200 bg-amber-50 px-3 py-1.5 text-amber-700">外部采集 provider-gated</span>
+                  <a className="rounded-md border border-neutral-200 bg-white px-3 py-1.5 text-neutral-600 hover:text-neutral-950" href={`/factory/creative?projectId=${encodeURIComponent(projectId)}&variant=operator`}>
+                    切换 operator
+                  </a>
+                </div>
+              </div>
+            </header>
+
+            <div className="space-y-6 px-5 py-6 lg:px-8">
+              <section className="grid gap-4 md:grid-cols-2 xl:grid-cols-4">
+                <LightMetric label="监控源" value={snapshot?.monitorCount ?? 0} detail={`${snapshot?.activeMonitorCount ?? 0} active`} />
+                <LightMetric label="待采集任务" value={snapshot?.dueTaskCount ?? 0} detail={`${snapshot?.collectorTargetCount ?? 0} collector targets`} tone="amber" />
+                <LightMetric label="机会地图" value={creative?.opportunityCount ?? 0} detail={`${creative?.patternClusterCount ?? 0} pattern clusters`} />
+                <LightMetric label="护城河分" value={creative?.creativeMoatScore ?? 0} detail={`${creative?.crossSourcePatternCount ?? 0} cross-source patterns`} />
+              </section>
+
+              <section className="grid gap-6 xl:grid-cols-[1.25fr_0.75fr]">
+                <LightPanel title="Terminal // Creative Logs" eyebrow="grounded system state">
+                  <div className="rounded-lg border border-neutral-200 bg-neutral-950 p-4 font-mono text-xs leading-6 text-neutral-200">
+                    {creativeLogs.map((line, index) => (
+                      <div key={line}>
+                        <span className="mr-2 text-neutral-500">[{String(index + 1).padStart(2, '0')}]</span>
+                        <span className={line.includes('guardrail') ? 'text-amber-200' : 'text-neutral-100'}>{line}</span>
+                      </div>
+                    ))}
+                    <div className="mt-3 text-emerald-300">creative@wenai-core:~# <span className="inline-block h-3 w-1.5 translate-y-0.5 bg-emerald-300" /></div>
+                  </div>
+                </LightPanel>
+
+                <LightPanel title="Creative 外部门禁" eyebrow="no fake platform claims">
+                  <div className="space-y-3">
+                    {externalGates.map(gate => (
+                      <div className="rounded-lg border border-neutral-200 bg-white p-3" key={gate.title}>
+                        <div className="flex items-start justify-between gap-3">
+                          <div>
+                            <div className="text-sm font-semibold text-neutral-950">{gate.title}</div>
+                            <div className="mt-1 text-xs leading-5 text-neutral-500">{gate.detail}</div>
+                          </div>
+                          <span className="shrink-0 rounded-md border border-neutral-200 bg-neutral-50 px-2 py-1 text-[11px] font-medium text-neutral-600">{gate.status}</span>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                </LightPanel>
+              </section>
+
+              <section className="grid gap-6 xl:grid-cols-[0.9fr_1.1fr]">
+                <div className="space-y-6">
+                  <LightPanel title="补一个创意监控源" eyebrow="watchlist input">
+                    <form className="grid gap-3" onSubmit={createMonitor}>
+                      <input className="rounded-md border border-neutral-200 bg-white px-3 py-2 text-sm outline-none focus:border-neutral-500" value={projectId} onChange={event => setProjectId(event.target.value)} placeholder="项目 ID" />
+                      <select className="rounded-md border border-neutral-200 bg-white px-3 py-2 text-sm outline-none focus:border-neutral-500" value={type} onChange={event => setType(event.target.value as CreativeMonitorType)}>
+                        <option value="competitor_account">竞品账号</option>
+                        <option value="trend_rank">榜单趋势</option>
+                        <option value="video_keyword">视频拆解</option>
+                      </select>
+                      <input className="rounded-md border border-neutral-200 bg-white px-3 py-2 text-sm outline-none focus:border-neutral-500" value={platform} onChange={event => setPlatform(event.target.value)} placeholder="平台" />
+                      <input className="rounded-md border border-neutral-200 bg-white px-3 py-2 text-sm outline-none focus:border-neutral-500" value={target} onChange={event => setTarget(event.target.value)} placeholder="账号、榜单或视频线索" />
+                      <div className="grid gap-3 sm:grid-cols-2">
+                        <input className="rounded-md border border-neutral-200 bg-white px-3 py-2 text-sm outline-none focus:border-neutral-500" value={category} onChange={event => setCategory(event.target.value)} placeholder="类目" />
+                        <input className="rounded-md border border-neutral-200 bg-white px-3 py-2 text-sm outline-none focus:border-neutral-500" type="number" min={1} max={720} value={cadenceHours} onChange={event => setCadenceHours(Number(event.target.value) || 24)} placeholder="采集间隔小时" />
+                      </div>
+                      <div className="flex flex-wrap gap-2">
+                        <button disabled={loading} className="rounded-md bg-neutral-950 px-4 py-2 text-sm font-semibold text-white disabled:bg-neutral-300" type="submit">写入监控清单</button>
+                        <button disabled={loading} className="rounded-md border border-neutral-300 bg-white px-4 py-2 text-sm font-semibold text-neutral-700 disabled:text-neutral-300" type="button" onClick={() => void bootstrapWatchlist()}>补齐三类监控</button>
+                        <button disabled={loading} className="rounded-md border border-neutral-300 bg-white px-4 py-2 text-sm text-neutral-600 disabled:text-neutral-300" type="button" onClick={() => void refresh()}>刷新</button>
+                      </div>
+                    </form>
+                  </LightPanel>
+
+                  <LightPanel title="导入真实观察" eyebrow="manual or authorized only">
+                    <form className="grid gap-3" onSubmit={importSignal}>
+                      <select className="rounded-md border border-neutral-200 bg-white px-3 py-2 text-sm outline-none focus:border-neutral-500" value={selectedMonitor?.id || ''} onChange={event => setSelectedMonitorId(event.target.value)}>
+                        {monitors.length ? monitors.map(monitor => (
+                          <option value={monitor.id} key={monitor.id}>{typeLabel(monitor.type)} / {monitor.target}</option>
+                        )) : <option value="">请先创建监控源</option>}
+                      </select>
+                      <input className="rounded-md border border-neutral-200 bg-white px-3 py-2 text-sm outline-none focus:border-neutral-500" value={signalTitle} onChange={event => setSignalTitle(event.target.value)} placeholder="观察标题" />
+                      <input className="rounded-md border border-neutral-200 bg-white px-3 py-2 text-sm outline-none focus:border-neutral-500" value={signalUrl} onChange={event => setSignalUrl(event.target.value)} placeholder="公开视频、榜单或账号链接" />
+                      <textarea className="min-h-20 rounded-md border border-neutral-200 bg-white px-3 py-2 text-sm outline-none focus:border-neutral-500" value={signalAngle} onChange={event => setSignalAngle(event.target.value)} placeholder="可复用角度，只提取结构，不复制表达" />
+                      <textarea className="min-h-20 rounded-md border border-neutral-200 bg-white px-3 py-2 text-sm outline-none focus:border-neutral-500" value={signalProof} onChange={event => setSignalProof(event.target.value)} placeholder="证据点或视频拆解摘要" />
+                      <button disabled={loading} className="rounded-md bg-neutral-950 px-4 py-2 text-sm font-semibold text-white disabled:bg-neutral-300" type="submit">写入创意洞察</button>
+                    </form>
+                  </LightPanel>
+
+                  {message ? <div className="rounded-lg border border-amber-200 bg-amber-50 px-4 py-3 text-sm leading-6 text-amber-800">{message}</div> : null}
+                </div>
+
+                <div className="space-y-6">
+                  <LightPanel title="模块准备度评估" eyebrow="readiness matrix">
+                    <div className="overflow-x-auto">
+                      <table className="w-full min-w-[720px] text-left text-sm">
+                        <thead className="border-b border-neutral-200 text-xs text-neutral-500">
+                          <tr>
+                            <th className="py-3 pr-4 font-medium">模块</th>
+                            <th className="py-3 pr-4 font-medium">准备度</th>
+                            <th className="py-3 pr-4 font-medium">证据</th>
+                            <th className="py-3 pr-4 font-medium">阻断项</th>
+                          </tr>
+                        </thead>
+                        <tbody className="divide-y divide-neutral-100">
+                          {readinessRows.map(row => (
+                            <tr key={row.module}>
+                              <td className="py-3 pr-4 font-semibold text-neutral-950">{row.module}</td>
+                              <td className="py-3 pr-4 text-neutral-700">{row.readiness}</td>
+                              <td className="py-3 pr-4 font-mono text-xs text-neutral-500">{row.evidence}</td>
+                              <td className="py-3 pr-4 text-neutral-500">{row.blocker}</td>
+                            </tr>
+                          ))}
+                        </tbody>
+                      </table>
+                    </div>
+                  </LightPanel>
+
+                  <LightPanel title="Creative Harvest Acceptance Board" eyebrow="commercial quality gates">
+                    <div className="grid gap-3 md:grid-cols-2">
+                      {harvestAcceptanceChecks.map(item => (
+                        <article className="rounded-lg border border-neutral-200 bg-white p-4" key={item.gate}>
+                          <div className="flex items-center justify-between gap-3">
+                            <h3 className="text-sm font-semibold text-neutral-950">{item.gate}</h3>
+                            <span className={`rounded-md px-2 py-1 text-[11px] font-medium ${item.ready ? 'bg-emerald-50 text-emerald-700' : 'bg-amber-50 text-amber-700'}`}>{item.ready ? 'ready' : 'gated'}</span>
+                          </div>
+                          <div className="mt-2 text-xs leading-5 text-neutral-500">{item.evidence}</div>
+                          <div className="mt-2 text-xs leading-5 text-neutral-700">{item.internalMove}</div>
+                          <div className="mt-2 text-xs leading-5 text-amber-700">{item.externalGate}</div>
+                        </article>
+                      ))}
+                    </div>
+                  </LightPanel>
+
+                  <LightPanel title="机会地图与生产交接" eyebrow="compose handoff">
+                    <div className="mb-4 flex flex-col gap-3 rounded-lg border border-neutral-200 bg-neutral-50 p-4 sm:flex-row sm:items-center sm:justify-between">
+                      <div className="text-sm leading-6 text-neutral-600">
+                        洞察 {creative?.insightCount ?? 0} / 机会 {creative?.opportunityCount ?? 0} / 跨来源模式 {creative?.crossSourcePatternCount ?? 0}
+                      </div>
+                      <button
+                        disabled={loading || !creative?.opportunityCount}
+                        className="rounded-md bg-neutral-950 px-4 py-2 text-sm font-semibold text-white disabled:bg-neutral-300"
+                        type="button"
+                        onClick={() => void applyOpportunityMap()}
+                      >
+                        生成脚本与分发计划
+                      </button>
+                    </div>
+                    <div className="space-y-3">
+                      {(creative?.opportunityMap || []).length ? creative!.opportunityMap.slice(0, 4).map(opportunity => (
+                        <article className="rounded-lg border border-neutral-200 bg-white p-4" key={opportunity.insightId}>
+                          <div className="flex flex-col gap-2 sm:flex-row sm:items-start sm:justify-between">
+                            <div>
+                              <div className="text-sm font-semibold text-neutral-950">{opportunity.platform} / {funnelStageLabel(opportunity.funnelStage)}</div>
+                              <div className="mt-1 text-sm leading-6 text-neutral-600">{opportunity.angle}</div>
+                            </div>
+                            <span className="w-fit rounded-md border border-neutral-200 bg-neutral-50 px-2 py-1 text-xs text-neutral-600">confidence {opportunity.confidenceScore}</span>
+                          </div>
+                          <div className="mt-2 text-xs leading-5 text-neutral-500">生产：{opportunity.productionInstruction}</div>
+                          <div className="mt-1 text-xs leading-5 text-neutral-500">分发：{opportunity.distributionInstruction}</div>
+                          <div className="mt-1 text-xs leading-5 text-amber-700">边界：{opportunity.complianceBoundary}</div>
+                        </article>
+                      )) : <div className="rounded-lg border border-dashed border-neutral-300 bg-white px-4 py-8 text-sm leading-6 text-neutral-500">暂无机会地图。先导入竞品账号、榜单或视频拆解信号，再生成可执行脚本与分发计划。</div>}
+                    </div>
+                  </LightPanel>
+                </div>
+              </section>
+
+              <section className="grid gap-6 xl:grid-cols-2">
+                <LightPanel title="采集器回灌" eyebrow="authorized collector result">
+                  <form onSubmit={ingestCollectorRun}>
+                    <div className="flex flex-wrap items-center justify-between gap-2">
+                      <p className="text-sm leading-6 text-neutral-600">用于承接人工运营或已授权 provider 的非空 JSON 数组；空结果只记录缺口，不生成洞察。</p>
+                      <button disabled={loading} className="rounded-md border border-neutral-300 bg-white px-3 py-2 text-xs font-semibold text-neutral-700 disabled:text-neutral-300" type="button" onClick={fillCollectorExample}>填入示例模板</button>
+                    </div>
+                    <textarea
+                      className="mt-4 min-h-52 w-full rounded-md border border-neutral-200 bg-white px-3 py-2 font-mono text-xs leading-5 outline-none focus:border-neutral-500"
+                      value={collectorJson}
+                      onChange={event => setCollectorJson(event.target.value)}
+                      placeholder='[{"monitorId":"...","title":"爆款视频拆解","reusableAngle":"只复用结构","proofPoint":"公开指标或画面证据"}]'
+                    />
+                    <button disabled={loading} className="mt-3 rounded-md bg-neutral-950 px-4 py-2 text-sm font-semibold text-white disabled:bg-neutral-300" type="submit">写入采集运行</button>
+                  </form>
+                </LightPanel>
+
+                <LightPanel title="监控运营面板" eyebrow="queue controls">
+                  <div className="grid gap-3 sm:grid-cols-3">
+                    <LightMetric label="竞品账号" value={snapshot?.competitorAccountMonitorCount ?? 0} detail="account" compact />
+                    <LightMetric label="榜单趋势" value={snapshot?.trendRankMonitorCount ?? 0} detail="rank" compact />
+                    <LightMetric label="视频拆解" value={snapshot?.videoKeywordMonitorCount ?? 0} detail="teardown" compact />
+                  </div>
+                  <button disabled={loading} className="mt-4 rounded-md border border-neutral-300 bg-white px-4 py-2 text-sm font-semibold text-neutral-700 disabled:text-neutral-300" type="button" onClick={() => void runHarvest()}>
+                    结算到期采集
+                  </button>
+                  <div className="mt-4 space-y-3">
+                    {monitors.length ? monitors.slice(0, 4).map(monitor => (
+                      <article className="rounded-lg border border-neutral-200 bg-white p-3" key={monitor.id}>
+                        <div className="flex items-start justify-between gap-3">
+                          <div>
+                            <div className="text-sm font-semibold text-neutral-950">{monitor.target}</div>
+                            <div className="mt-1 text-xs text-neutral-500">{monitor.platform} / {typeLabel(monitor.type)} / 每 {monitor.cadenceHours} 小时</div>
+                          </div>
+                          <span className="rounded-md bg-emerald-50 px-2 py-1 text-xs font-medium text-emerald-700">{monitor.status === 'active' ? '监控中' : '暂停'}</span>
+                        </div>
+                      </article>
+                    )) : <div className="rounded-lg border border-dashed border-neutral-300 bg-white px-4 py-8 text-sm text-neutral-500">当前项目还没有创意监控源。</div>}
+                  </div>
+                </LightPanel>
+              </section>
+            </div>
+          </section>
+        </div>
+      </main>
+    );
+  }
+
   return (
     <main className="min-h-screen bg-[#101315] text-[#f8f2e8]">
       <section className="mx-auto flex w-full max-w-6xl flex-col gap-7 px-5 py-10 sm:px-8">
@@ -1083,5 +1497,42 @@ function Panel({ title, children }: { title: string; children: ReactNode }) {
       <h3 className="text-sm font-semibold">{title}</h3>
       <div className="mt-3">{children}</div>
     </div>
+  );
+}
+
+function LightMetric({
+  label,
+  value,
+  detail,
+  tone = 'neutral',
+  compact = false,
+}: {
+  label: string;
+  value: string | number;
+  detail: string;
+  tone?: 'neutral' | 'amber';
+  compact?: boolean;
+}) {
+  const toneClass = tone === 'amber' ? 'text-amber-700 bg-amber-50 border-amber-200' : 'text-neutral-600 bg-neutral-50 border-neutral-200';
+  return (
+    <div className={`rounded-lg border border-neutral-200 bg-white ${compact ? 'p-3' : 'p-5'}`}>
+      <div className="flex items-center justify-between gap-3">
+        <span className="text-xs font-medium uppercase tracking-[0.14em] text-neutral-500">{label}</span>
+        <span className={`rounded-md border px-2 py-1 text-[11px] font-medium ${toneClass}`}>{detail}</span>
+      </div>
+      <div className={`${compact ? 'mt-2 text-2xl' : 'mt-4 text-4xl'} font-semibold tracking-tight text-neutral-950`}>{value}</div>
+    </div>
+  );
+}
+
+function LightPanel({ title, eyebrow, children }: { title: string; eyebrow?: string; children: ReactNode }) {
+  return (
+    <section className="rounded-lg border border-neutral-200 bg-white p-5">
+      <div className="mb-4">
+        {eyebrow ? <p className="text-xs font-semibold uppercase tracking-[0.16em] text-neutral-400">{eyebrow}</p> : null}
+        <h2 className="mt-1 text-base font-semibold text-neutral-950">{title}</h2>
+      </div>
+      {children}
+    </section>
   );
 }

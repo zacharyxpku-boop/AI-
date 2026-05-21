@@ -133,10 +133,32 @@ describe('manage operations console page', () => {
     expect(partnerHtml).toContain('企业云资产、CRM 同步和 analytics sync');
     expect(partnerHtml).toContain('企业云盘、团队空间、自动 CRM');
 
-    expect(friendHtml).toContain('朋友试用视角');
-    expect(friendHtml).toContain('朋友试用 Manage 路径');
-    expect(friendHtml).toContain('朋友只看三项');
-    expect(friendHtml).toContain('/factory/manage?projectId=friend-manage&amp;variant=operator');
+    expect(friendHtml).toContain('销售下一步怎么跟进');
+    expect(friendHtml).toContain('商品增长工作台');
+    expect(friendHtml).toContain('客户可试用工作台');
+    expect(friendHtml).toContain('把发布证明和客户反馈交给负责人');
+    expect(friendHtml).toContain('跟进处理路径');
+    expect(friendHtml).toContain('今天该拍什么');
+    expect(friendHtml).toContain('内容发完有没有用');
+    expect(friendHtml).toContain('谁继续把钱收回来');
+    expect(friendHtml).toContain('卖点雷达');
+    expect(friendHtml).toContain('素材货架');
+    expect(friendHtml).toContain('内容矩阵');
+    expect(friendHtml).toContain('渠道种草');
+    expect(friendHtml).toContain('线索回收');
+    expect(friendHtml).toContain('销售跟进');
+    expect(friendHtml).toContain('三类人各看一件事');
+    expect(friendHtml).toContain('少解释，直接看动作');
+    expect(friendHtml).toContain('去多平台发 +');
+    expect(friendHtml).toContain('/factory/cast?variant=friend_trial');
+    expect(friendHtml).toContain('已接通能力');
+    expect(friendHtml).toContain('只展示已确认结果');
+    expect(friendHtml).toContain('发布证明');
+    expect(friendHtml).toContain('效果优化表');
+    expect(friendHtml).toContain('今天要确认的事');
+    expect(friendHtml).toContain('销售跟进面板');
+    expect(friendHtml).toContain('查看可跟进清单');
+    expect(friendHtml).toContain('查看完整服务链路');
   });
 
   it('builds role-specific Manage playbooks from review, permission, and audit evidence', () => {

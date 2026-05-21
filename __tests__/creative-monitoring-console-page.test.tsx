@@ -11,6 +11,23 @@ import {
 } from '@/components/CreativeMonitoringConsoleClient';
 
 describe('creative monitoring console page', () => {
+  it('renders the friend trial creative console as a light enterprise workflow', async () => {
+    const page = await CreativeFactoryPage({
+      searchParams: Promise.resolve({ projectId: 'friend-creative', variant: 'friend_trial' }),
+    });
+    const html = renderToStaticMarkup(page);
+
+    expect(html).toContain('Wenai 商品增长工作台');
+    expect(html).toContain('先找到能卖货的角度');
+    expect(html).toContain('创建一个商品增长任务');
+    expect(html).toContain('今日机会');
+    expect(html).toContain('来源健康度');
+    expect(html).toContain('/factory/create?variant=friend_trial');
+    expect(html).not.toContain('automation-ready');
+    expect(html).not.toContain('OAuth 已连接');
+    expect(html).not.toContain('自动发布已接通');
+  });
+
   it('renders the creative factory as a Chinese operator console', async () => {
     const page = await CreativeFactoryPage({
       searchParams: Promise.resolve({ projectId: 'creative-launch', variant: 'operator' }),

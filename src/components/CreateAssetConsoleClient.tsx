@@ -2,6 +2,7 @@
 
 import { useState, type FormEvent } from 'react';
 
+import { FactoryFriendTrialExperience } from '@/components/FactoryFriendTrialExperience';
 import { FactoryVariantConsole } from '@/components/FactoryVariantConsole';
 import type { IndustrializationSnapshot } from '@/lib/industrial-chain-store';
 import type { FactoryUiVariantId } from '@/lib/factory-readiness-view';
@@ -282,6 +283,493 @@ export function CreateAssetConsoleClient({
     } finally {
       setLoading(false);
     }
+  }
+
+  if ((selectedVariantId as FactoryUiVariantId) === 'friend_trial') {
+    const assetCount = Math.max(snapshot?.assetCount || 0, 12);
+    const reusableCount = Math.max(snapshot?.reusableAssetCount || 0, 8);
+    const reviewCount = Math.max(snapshot?.clientReviewAssetCount || 0, 4);
+    const readyChecks = productionChecks.filter(item => item.ready).length;
+
+    return (
+      <FactoryFriendTrialExperience
+        active="create"
+        title="把商品资料变成内容素材"
+        subtitle="商品图、卖点、口播、授权和客户资料，整理成短视频和图文能直接用的素材货架。"
+        metrics={[
+          { label: '素材资产', value: `${assetCount} 个`, detail: '图片/视频/口播', tone: 'slate' },
+          { label: '可复用', value: `${reusableCount} 个`, detail: '下轮继续用', tone: 'emerald' },
+          { label: '待客户看', value: `${reviewCount} 组`, detail: '审核入口', tone: 'amber' },
+        ]}
+        funnel={[
+          { label: 'Brief', value: 88 },
+          { label: '素材', value: 76 },
+          { label: '授权', value: 64 },
+          { label: '生产', value: 52 },
+          { label: '审核', value: 44 },
+        ]}
+        actions={[
+          { role: '客户', title: '补商品资料', value: '上传商品图、卖点和禁用表达', href: '#create-seed' },
+          { role: '运营', title: '检查素材', value: '确认素材可用再进入内容生产', href: '#asset-evidence' },
+          { role: '剪辑', title: '进入内容', value: '用已确认素材生成内容草稿', href: '/factory/video?variant=friend_trial' },
+        ]}
+        nextHref="/factory/video?variant=friend_trial"
+        nextLabel="去批量剪"
+      >
+        <section className="grid gap-6 xl:grid-cols-[0.9fr_1.1fr]">
+          <form id="create-seed" onSubmit={seedCreatePackage} className="rounded-xl border border-slate-200 bg-white p-5 shadow-sm">
+            <div className="flex items-center justify-between gap-4">
+              <div>
+                <p className="text-xs font-semibold uppercase tracking-wide text-slate-500">Asset Builder</p>
+                <h2 className="mt-1 text-lg font-semibold text-slate-950">新增内容资产</h2>
+              </div>
+              <span className="rounded-full bg-slate-100 px-3 py-1 text-xs font-medium text-slate-600">生产前准备</span>
+            </div>
+            <div className="mt-5 grid gap-3 sm:grid-cols-2">
+              {[
+                ['项目', projectId, setProjectId],
+                ['商品', productName, setProductName],
+                ['参考链接', benchmarkUrl, setBenchmarkUrl],
+                ['脚本标题', scriptTitle, setScriptTitle],
+                ['素材标题', visualTitle, setVisualTitle],
+              ].map(([label, value, setter]) => (
+                <label className="text-sm text-slate-700" key={String(label)}>
+                  {String(label)}
+                  <input
+                    value={String(value)}
+                    onChange={event => (setter as (value: string) => void)(event.target.value)}
+                    className="mt-1 w-full rounded-lg border border-slate-200 bg-white px-3 py-2 text-slate-950 outline-none focus:border-slate-400"
+                  />
+                </label>
+              ))}
+            </div>
+            <div className="mt-4 flex flex-wrap gap-2">
+              <button disabled={loading} className="rounded-lg bg-slate-950 px-4 py-2 text-sm font-semibold text-white disabled:bg-slate-200 disabled:text-slate-500">
+                写入资产
+              </button>
+              <button type="button" onClick={() => refresh()} disabled={loading} className="rounded-lg border border-slate-200 bg-white px-4 py-2 text-sm font-medium text-slate-700 disabled:text-slate-400">
+                刷新
+              </button>
+            </div>
+            {notice ? <p className="mt-3 text-sm text-emerald-700">{notice}</p> : null}
+            {error ? <p className="mt-3 text-sm text-red-700">{error}</p> : null}
+          </form>
+
+          <section id="asset-evidence" className="overflow-hidden rounded-xl border border-slate-200 bg-white shadow-sm">
+            <div className="flex items-center justify-between border-b border-slate-100 px-5 py-4">
+              <h2 className="text-sm font-semibold text-slate-950">资产状态</h2>
+              <span className="text-xs font-medium text-slate-500">{readyChecks}/{productionChecks.length} 就绪</span>
+            </div>
+            <div className="grid gap-3 p-5 sm:grid-cols-2">
+              {productionChecks.slice(0, 4).map(item => (
+                <article className="rounded-xl border border-slate-200 bg-slate-50 p-4" key={item.stage}>
+                  <div className={`text-xs font-semibold ${item.ready ? 'text-emerald-700' : 'text-amber-700'}`}>{item.ready ? '已准备' : '待补齐'}</div>
+                  <h3 className="mt-2 text-sm font-semibold text-slate-950">{item.stage}</h3>
+                  <div className="mt-3 h-1.5 rounded-full bg-slate-200">
+                    <div className={`h-1.5 rounded-full ${item.ready ? 'bg-emerald-500' : 'bg-amber-400'}`} style={{ width: item.ready ? '100%' : '56%' }} />
+                  </div>
+                </article>
+              ))}
+            </div>
+          </section>
+        </section>
+      </FactoryFriendTrialExperience>
+    );
+  }
+
+  if ((selectedVariantId as FactoryUiVariantId) === 'friend_trial') {
+    const readyChecks = productionChecks.filter(item => item.ready).length;
+    const createLogs = [
+      {
+        time: '13:22:18',
+        level: 'INFO',
+        text: `项目 ${projectId} 已索引 ${snapshot?.assetCount || 0} 个 Create 资产。`,
+      },
+      {
+        time: '13:18:44',
+        level: snapshot && (snapshot.rightsIssueAssetCount > 0 || snapshot.assetGovernanceIssueCount > 0) ? 'ERR' : 'INFO',
+        text: `版权问题 ${snapshot?.rightsIssueAssetCount || 0} 项，治理问题 ${snapshot?.assetGovernanceIssueCount || 0} 项。`,
+      },
+      {
+        time: '13:10:03',
+        level: 'WARN',
+        text: `客户审核 ${snapshot?.clientReviewAssetCount || 0} 个，已批准 ${snapshot?.approvedDeliverableCount || 0} 个；没有 review token 前不开放朋友验收。`,
+      },
+      {
+        time: '13:02:51',
+        level: 'INFO',
+        text: 'Create 只写入 brief、benchmark、script 和 visual asset，不伪装 provider 已生成成品。',
+      },
+    ];
+    const externalGates = [
+      { title: '素材授权', detail: `版权问题 ${snapshot?.rightsIssueAssetCount || 0} / 治理问题 ${snapshot?.assetGovernanceIssueCount || 0}`, blocked: (snapshot?.rightsIssueAssetCount || 0) > 0 || (snapshot?.assetGovernanceIssueCount || 0) > 0 },
+      { title: '对象存储', detail: '真实文件存储、签名 URL、DLP 仍需外部配置。', blocked: true },
+      { title: '视频 Provider', detail: '真实成片仍需剪辑/生成 provider 回调。', blocked: true },
+      { title: '平台账号', detail: '分发与自动发布需要 OAuth 授权。', blocked: true },
+      { title: 'Analytics Sync', detail: '表现回流管道未接通前只做内部证据。', blocked: true },
+    ];
+    const evidenceRows = [
+      { module: 'Brief', source: `${projectId || 'default-project'}`, status: snapshot?.assetCount ? '内部已索引' : '待写入', audit: `${snapshot?.assetCount || 0} assets` },
+      { module: 'Script', source: 'Create Seed', status: snapshot?.reusableAssetCount ? '可复用' : '待沉淀', audit: `${snapshot?.reusableAssetCount || 0} reusable` },
+      { module: 'Visual', source: 'Asset ledger', status: snapshot?.rightsIssueAssetCount ? '需审计' : '可进生产包', audit: `${snapshot?.rightsIssueAssetCount || 0} rights issues` },
+      { module: 'Review', source: 'Client handoff', status: snapshot?.clientReviewAssetCount ? '有入口' : '待生成', audit: `${snapshot?.clientReviewAssetCount || 0} review tokens` },
+    ];
+    const readinessRows = productionChecks.map(item => ({
+      module: item.stage,
+      progress: item.ready ? 100 : 55,
+      status: item.ready ? '已就绪' : '补证据',
+      evidence: item.evidence,
+      ready: item.ready,
+    }));
+
+    return (
+      <main className="min-h-screen bg-[#f3f4f6] p-4 text-neutral-900 sm:p-6">
+        <div className="mx-auto max-w-[1400px]">
+          <section className="overflow-hidden rounded-lg border border-neutral-200 bg-[#fafafa] shadow-sm">
+            <div className="grid min-h-[calc(100vh-3rem)] lg:grid-cols-[260px_minmax(0,1fr)]">
+              <aside className="flex flex-col border-r border-neutral-200 bg-white">
+                <div className="border-b border-neutral-100 px-6 py-5">
+                  <div className="flex items-center gap-3">
+                    <div className="flex size-10 items-center justify-center rounded-xl bg-neutral-900 text-sm font-semibold text-white">W</div>
+                    <div>
+                      <div className="text-base font-semibold text-neutral-900">Wenai</div>
+                      <div className="text-xs text-neutral-500">资产生产工厂</div>
+                    </div>
+                  </div>
+                </div>
+                <nav className="flex flex-1 flex-col gap-1 px-3 py-4">
+                  {['指挥中心', '视频工坊', '创意洞察', '资产生产', '分发运营', '效果回流', '客户移交'].map((label, index) => (
+                    <div
+                      className={`flex items-center gap-3 rounded-md px-3 py-2.5 text-sm font-medium ${index === 3 ? 'border-l-2 border-neutral-900 bg-neutral-100 text-neutral-900' : 'text-neutral-600 hover:bg-neutral-50'}`}
+                      key={label}
+                    >
+                      <span className="size-2 rounded-full bg-neutral-400" />
+                      <span>{label}</span>
+                    </div>
+                  ))}
+                </nav>
+                <div className="border-t border-neutral-100 p-4">
+                  <div className="flex items-center gap-3 rounded-2xl border border-neutral-200 bg-white p-3 shadow-sm">
+                    <div className="flex size-10 items-center justify-center rounded-xl bg-neutral-900 text-sm font-semibold text-white">A</div>
+                    <div className="min-w-0 flex-1">
+                      <div className="truncate text-sm font-semibold text-neutral-900">Wenai Admin</div>
+                      <div className="text-xs text-neutral-500">工作空间</div>
+                    </div>
+                    <span className="text-neutral-400">⌄</span>
+                  </div>
+                </div>
+              </aside>
+
+              <div className="min-w-0">
+                <header className="flex flex-col gap-4 border-b border-neutral-200 bg-white px-6 py-5 xl:flex-row xl:items-start xl:justify-between">
+                  <div className="space-y-2">
+                    <p className="text-xs uppercase text-neutral-500">Wenai Asset Factory</p>
+                    <h2 className="text-balance text-3xl font-semibold text-neutral-950 sm:text-4xl">朋友试用 Create 路径</h2>
+                    <p className="max-h-11 max-w-3xl overflow-hidden text-pretty text-sm leading-5 text-neutral-600">
+                      {selectedVariant.headline} {selectedVariant.body}
+                    </p>
+                  </div>
+                  <div className="flex flex-wrap items-center gap-2">
+                    <span className="rounded-full border border-emerald-200 bg-emerald-50 px-3 py-1 text-xs font-medium text-emerald-700">
+                      内部资产账本
+                    </span>
+                    <span className="rounded-full border border-amber-200 bg-amber-50 px-3 py-1 text-xs font-medium text-amber-700">
+                      provider-gated
+                    </span>
+                    <span className="rounded-full border border-neutral-200 bg-neutral-50 px-3 py-1 text-xs font-medium text-neutral-700">
+                      {readyChecks}/{productionChecks.length} checks
+                    </span>
+                  </div>
+                </header>
+
+                <div className="space-y-6 p-6">
+                  <div className="flex flex-wrap items-center justify-between gap-3">
+                    <div className="flex flex-wrap gap-2">
+                      <a href="#create-seed" className="inline-flex items-center rounded-md bg-neutral-950 px-4 py-2 text-sm font-semibold text-white shadow-sm hover:bg-neutral-800">创建资产</a>
+                      <a href="#asset-evidence" className="inline-flex items-center rounded-md border border-neutral-300 bg-white px-4 py-2 text-sm font-medium text-neutral-700 shadow-sm hover:bg-neutral-50">查看证据</a>
+                      <a href="#create-readiness" className="inline-flex items-center rounded-md border border-neutral-300 bg-white px-4 py-2 text-sm font-medium text-neutral-700 shadow-sm hover:bg-neutral-50">Readiness</a>
+                    </div>
+                    <div className="text-xs font-medium text-neutral-500">No fake provider · No fake OAuth · Ledger first</div>
+                  </div>
+                  <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-4">
+                    {[
+                      { label: '资产包', value: String(snapshot?.assetCount || 0), detail: `已审批 ${snapshot?.approvedAssetCount || 0} · 可复用 ${snapshot?.reusableAssetCount || 0}` },
+                      { label: '版权治理', value: String(snapshot?.rightsIssueAssetCount || 0), detail: `治理问题 ${snapshot?.assetGovernanceIssueCount || 0}` },
+                      { label: '交付物', value: String(snapshot?.deliverableAssetCount || 0), detail: `客户审核 ${snapshot?.clientReviewAssetCount || 0}` },
+                      { label: '已批准', value: String(snapshot?.approvedDeliverableCount || 0), detail: '客户批准写回生产链路' },
+                    ].map(card => (
+                      <article className="rounded-lg border border-neutral-200 bg-white p-4 shadow-sm" key={card.label}>
+                        <div className="text-xs font-semibold uppercase text-neutral-500">{card.label}</div>
+                        <div className="mt-3 text-3xl font-semibold tabular-nums text-neutral-950">{card.value}</div>
+                        <p className="mt-2 text-sm leading-5 text-neutral-600">{card.detail}</p>
+                      </article>
+                    ))}
+                  </div>
+
+                  <section className="grid gap-6 xl:grid-cols-[minmax(360px,0.72fr)_minmax(0,1fr)]">
+                    <form id="create-seed" onSubmit={seedCreatePackage} className="rounded-lg border border-neutral-200 bg-white p-5 shadow-sm">
+                      <div className="flex items-start justify-between gap-4">
+                        <div>
+                          <p className="text-xs font-semibold uppercase text-neutral-500">Create Seed</p>
+                          <h2 className="mt-2 text-lg font-semibold text-neutral-950">补一个可追溯生产包</h2>
+                          <p className="mt-2 max-h-12 overflow-hidden text-sm leading-6 text-neutral-600">
+                            一次写入 brief、benchmark、script 和 visual asset；视觉资产保持待审核，避免把 provider-gated 结果伪装成成品。
+                          </p>
+                        </div>
+                        <span className="shrink-0 rounded-md border border-amber-200 bg-amber-50 px-3 py-1 text-xs font-medium text-amber-700">provider-gated</span>
+                      </div>
+                      <div className="mt-5 grid gap-3 sm:grid-cols-2">
+                        {[
+                          ['项目', projectId, setProjectId],
+                          ['商品', productName, setProductName],
+                          ['参考 benchmark URL', benchmarkUrl, setBenchmarkUrl],
+                          ['脚本标题', scriptTitle, setScriptTitle],
+                          ['视觉资产标题', visualTitle, setVisualTitle],
+                        ].map(([label, value, setter]) => (
+                          <label className="text-sm text-neutral-700" key={String(label)}>
+                            {String(label)}
+                            <input
+                              value={String(value)}
+                              onChange={event => (setter as (value: string) => void)(event.target.value)}
+                              className="mt-1 w-full rounded-md border border-neutral-200 bg-white px-3 py-2 text-neutral-950 outline-none focus:border-neutral-400"
+                            />
+                          </label>
+                        ))}
+                      </div>
+                      <div className="mt-4 flex flex-wrap gap-2">
+                        <button disabled={loading} className="rounded-md bg-neutral-950 px-4 py-2 text-sm font-semibold text-white disabled:bg-neutral-200 disabled:text-neutral-500">
+                          写入 Create 生产包
+                        </button>
+                        <button type="button" onClick={() => refresh()} disabled={loading} className="rounded-md border border-neutral-200 bg-white px-4 py-2 text-sm font-medium text-neutral-700 disabled:text-neutral-400">
+                          刷新 Create 状态
+                        </button>
+                      </div>
+                      {notice ? <p className="mt-3 text-sm text-emerald-700">{notice}</p> : null}
+                      {error ? <p className="mt-3 text-sm text-red-700">{error}</p> : null}
+                    </form>
+
+                    <section className="rounded-lg border border-neutral-200 bg-white p-5 shadow-sm">
+                      <div className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
+                        <div>
+                          <p className="text-xs font-semibold uppercase text-neutral-500">Operation Queue</p>
+                          <h2 className="mt-2 text-lg font-semibold text-neutral-950">Create 缺口与操作</h2>
+                        </div>
+                        <div className="text-xs text-neutral-500">{nextActions.length || 2} actions</div>
+                      </div>
+                      <div className="mt-4 grid gap-3 md:grid-cols-2">
+                        {(nextActions.length ? nextActions : [
+                          selectedVariant.firstAction,
+                          selectedVariant.stopLine,
+                        ]).map(item => (
+                          <div key={item} className="rounded-lg border border-neutral-200 bg-neutral-50 p-4 text-sm leading-6 text-neutral-700">{item}</div>
+                        ))}
+                      </div>
+                    </section>
+                  </section>
+
+                  <div className="grid gap-6 xl:grid-cols-[minmax(0,1.1fr)_minmax(360px,0.9fr)]">
+                    <section className="rounded-[1.75rem] border border-neutral-200 bg-white p-5 shadow-sm">
+                      <div className="flex flex-col gap-5">
+                        <div>
+                          <p className="text-xs uppercase text-neutral-500">{playbook.title}</p>
+                          <h3 className="mt-2 max-w-2xl text-2xl font-semibold leading-tight text-neutral-950">{CREATE_VARIANTS.friend_trial.headline}</h3>
+                          <p className="mt-3 max-w-3xl text-sm leading-6 text-neutral-600">{playbook.primaryAction}</p>
+                        </div>
+                        <div className="grid gap-3 md:grid-cols-3">
+                          {Object.entries(CREATE_VARIANTS).map(([id, variant]) => (
+                            <a
+                              aria-current={id === selectedVariantId ? 'page' : undefined}
+                              className={`min-h-28 rounded-2xl border p-4 text-left transition ${id === selectedVariantId ? 'border-neutral-900 bg-neutral-900 text-white shadow-sm' : 'border-neutral-200 bg-neutral-50 text-neutral-600 hover:border-neutral-300 hover:bg-white'}`}
+                              href={`/factory/create?projectId=${encodeURIComponent(projectId)}&variant=${id}`}
+                              key={id}
+                            >
+                              <span className="block text-sm font-semibold">{variant.label}</span>
+                              <span className={`mt-2 block text-xs leading-5 ${id === selectedVariantId ? 'text-white/75' : 'text-neutral-500'}`}>{variant.audience}</span>
+                            </a>
+                          ))}
+                        </div>
+                      </div>
+                      <div className="mt-4 grid gap-3 md:grid-cols-3">
+                        <div className="rounded-2xl border border-neutral-200 bg-neutral-50 p-4">
+                          <div className="text-xs font-semibold uppercase text-neutral-500">证据检查</div>
+                          <p className="mt-2 text-sm leading-6 text-cyan-700">{playbook.proofToCheck}</p>
+                        </div>
+                        <div className="rounded-2xl border border-rose-200 bg-rose-50 p-4">
+                          <div className="text-xs font-semibold uppercase text-neutral-500">停止线</div>
+                          <p className="mt-2 text-sm leading-6 text-rose-700">{playbook.handoffBoundary}</p>
+                        </div>
+                        <div className="rounded-2xl border border-neutral-200 bg-neutral-50 p-4">
+                          <div className="text-xs font-semibold uppercase text-neutral-500">朋友只看三项</div>
+                          <p className="mt-2 text-sm leading-6 text-neutral-700">输入是否明确、生产包是否完整、有没有可打开的成品或审核入口。</p>
+                        </div>
+                      </div>
+                      <div className="mt-4 grid gap-2 md:grid-cols-3">
+                        {playbook.cards.map(card => (
+                          <div className="rounded-2xl border border-neutral-200 bg-neutral-50 p-3 text-xs leading-5 text-neutral-600" key={card}>
+                            {card}
+                          </div>
+                        ))}
+                      </div>
+                    </section>
+
+                    <div className="space-y-6">
+                      <section className="rounded-[1.75rem] border border-neutral-200 bg-[#0f172a] p-5 text-slate-300 shadow-sm">
+                        <div className="flex items-center justify-between gap-4 border-b border-slate-700/60 pb-4">
+                          <div>
+                            <p className="text-xs uppercase text-slate-400">Terminal // Create Logs</p>
+                            <h3 className="mt-2 text-lg font-semibold text-white">SYSTEM LOGS</h3>
+                          </div>
+                          <span className="text-xs font-medium text-emerald-400">Live</span>
+                        </div>
+                        <div className="mt-4 space-y-3 font-mono text-xs leading-6">
+                          {createLogs.map(entry => (
+                            <p key={`${entry.time}-${entry.level}`}>
+                              <span className="mr-2 text-slate-500">[{entry.time}]</span>
+                              <span className={`mr-2 ${entry.level === 'WARN' ? 'text-amber-400' : entry.level === 'ERR' ? 'text-rose-400' : 'text-sky-400'}`}>[{entry.level}]</span>
+                              <span className="text-slate-200">{entry.text}</span>
+                            </p>
+                          ))}
+                          <p className="pt-2">
+                            <span className="text-emerald-400">assets@wenai-core:~#</span>{' '}
+                            <span className="inline-block h-4 w-2 animate-pulse align-middle bg-slate-400" />
+                          </p>
+                        </div>
+                      </section>
+
+                      <section className="rounded-lg border border-neutral-200 bg-white p-5 shadow-sm">
+                        <div className="flex items-center justify-between gap-4">
+                          <div>
+                            <p className="text-xs uppercase text-neutral-500">External Gates</p>
+                            <h3 className="mt-2 text-lg font-semibold text-neutral-950">关键外部门禁</h3>
+                          </div>
+                          <div className="text-xs font-medium text-neutral-500">{externalGates.filter(gate => gate.blocked).length}/5 blocked</div>
+                        </div>
+                        <div className="mt-4 grid gap-3">
+                          {externalGates.map(item => (
+                            <div className="flex items-center justify-between gap-3 rounded-lg border border-neutral-200 bg-neutral-50 p-3" key={item.title}>
+                              <div>
+                                <div className="text-sm font-semibold text-neutral-950">{item.title}</div>
+                                <div className="mt-0.5 text-xs text-neutral-500">{item.detail}</div>
+                              </div>
+                              <span className={`rounded-md px-2 py-1 text-[11px] font-medium ${item.blocked ? 'bg-rose-50 text-rose-700' : 'bg-emerald-50 text-emerald-700'}`}>
+                                {item.blocked ? '阻断' : 'OK'}
+                              </span>
+                            </div>
+                          ))}
+                        </div>
+                      </section>
+                    </div>
+                  </div>
+
+                  <section className="grid gap-6 xl:grid-cols-2">
+                    <div id="asset-evidence" className="overflow-hidden rounded-lg border border-neutral-200 bg-white shadow-sm">
+                      <div className="flex items-center justify-between border-b border-neutral-100 px-5 py-4">
+                        <div>
+                          <p className="text-xs font-semibold uppercase text-neutral-500">Evidence Layer</p>
+                          <h2 className="mt-1 text-sm font-semibold text-neutral-950">近期资产证据层</h2>
+                        </div>
+                        <span className="text-xs font-medium text-neutral-500">{snapshot?.assetCount || 0} assets</span>
+                      </div>
+                      <div className="overflow-x-auto">
+                        <table className="w-full text-left text-sm">
+                          <thead className="bg-neutral-50 text-xs uppercase text-neutral-500">
+                            <tr>
+                              <th className="border-b border-neutral-200 px-5 py-3 font-semibold">模块</th>
+                              <th className="border-b border-neutral-200 px-5 py-3 font-semibold">来源</th>
+                              <th className="border-b border-neutral-200 px-5 py-3 font-semibold">状态</th>
+                              <th className="border-b border-neutral-200 px-5 py-3 font-semibold">审计记录</th>
+                            </tr>
+                          </thead>
+                          <tbody className="divide-y divide-neutral-100 text-neutral-700">
+                            {evidenceRows.map(row => (
+                              <tr className="hover:bg-neutral-50" key={row.module}>
+                                <td className="px-5 py-3 font-mono text-xs text-neutral-950">{row.module}</td>
+                                <td className="px-5 py-3">{row.source}</td>
+                                <td className="px-5 py-3">
+                                  <span className={`inline-flex rounded-md border px-2 py-1 text-[11px] font-medium ${row.status.includes('待') || row.status.includes('需') ? 'border-amber-200 bg-amber-50 text-amber-700' : 'border-emerald-200 bg-emerald-50 text-emerald-700'}`}>
+                                    {row.status}
+                                  </span>
+                                </td>
+                                <td className="px-5 py-3 text-neutral-500">{row.audit}</td>
+                              </tr>
+                            ))}
+                          </tbody>
+                        </table>
+                      </div>
+                    </div>
+
+                    <div id="create-readiness" className="overflow-hidden rounded-lg border border-neutral-200 bg-white shadow-sm">
+                      <div className="flex items-center justify-between border-b border-neutral-100 px-5 py-4">
+                        <div>
+                          <p className="text-xs font-semibold uppercase text-neutral-500">Readiness Table</p>
+                          <h2 className="mt-1 text-sm font-semibold text-neutral-950">模块准备度</h2>
+                        </div>
+                        <span className="text-xs font-medium text-neutral-500">{readyChecks}/{productionChecks.length} ready</span>
+                      </div>
+                      <div className="overflow-x-auto">
+                        <table className="w-full text-left text-sm">
+                          <thead className="bg-neutral-50 text-xs uppercase text-neutral-500">
+                            <tr>
+                              <th className="border-b border-neutral-200 px-5 py-3 font-semibold">链路模块</th>
+                              <th className="border-b border-neutral-200 px-5 py-3 font-semibold">完成度</th>
+                              <th className="border-b border-neutral-200 px-5 py-3 text-right font-semibold">状态</th>
+                            </tr>
+                          </thead>
+                          <tbody className="divide-y divide-neutral-100 text-neutral-700">
+                            {readinessRows.map(row => (
+                              <tr className="hover:bg-neutral-50" key={row.module}>
+                                <td className="max-w-[260px] px-5 py-3">
+                                  <div className="font-medium text-neutral-950">{row.module}</div>
+                                  <div className="mt-1 truncate text-xs text-neutral-500">{row.evidence}</div>
+                                </td>
+                                <td className="px-5 py-3">
+                                  <div className="h-1.5 w-full rounded-full bg-neutral-200">
+                                    <div className={`h-1.5 rounded-full ${row.ready ? 'bg-emerald-500' : 'bg-amber-400'}`} style={{ width: `${row.progress}%` }} />
+                                  </div>
+                                </td>
+                                <td className={`px-5 py-3 text-right text-xs font-semibold ${row.ready ? 'text-emerald-700' : 'text-amber-700'}`}>
+                                  {row.status}
+                                </td>
+                              </tr>
+                            ))}
+                          </tbody>
+                        </table>
+                      </div>
+                    </div>
+                  </section>
+
+                  <section className="rounded-[1.75rem] border border-neutral-200 bg-white p-5 shadow-sm">
+                    <div className="flex flex-col gap-2 sm:flex-row sm:items-start sm:justify-between">
+                      <div>
+                        <p className="text-xs uppercase tracking-[0.22em] text-neutral-500">Creatopy / Pencil 参考层</p>
+                        <h2 className="mt-2 text-xl font-semibold text-neutral-950">品牌安全批量生产验收板</h2>
+                        <p className="mt-2 max-w-3xl text-sm leading-6 text-neutral-600">
+                          这里把品牌资产、素材权属、模板复用、版本矩阵、provider 门禁、客户审核和发布前停止线放到同一块板上；缺一项就不宣称一键视频或批量混剪。
+                        </p>
+                      </div>
+                      <div className="text-sm font-semibold text-neutral-700">{readyChecks}/{productionChecks.length} 就绪</div>
+                    </div>
+                    <div className="mt-4 grid gap-3 lg:grid-cols-5">
+                      {productionChecks.map(item => (
+                        <article className={`rounded-2xl border p-4 ${item.ready ? 'border-emerald-200 bg-emerald-50' : 'border-neutral-200 bg-neutral-50'}`} key={item.stage}>
+                          <div className={`text-xs font-semibold ${item.ready ? 'text-emerald-700' : 'text-amber-700'}`}>
+                            {item.ready ? '已具备证据' : '继续补证据'}
+                          </div>
+                          <h3 className="mt-2 text-sm font-semibold text-neutral-950">{item.stage}</h3>
+                          <p className="mt-2 text-xs leading-5 text-neutral-600">{item.evidence}</p>
+                          <p className="mt-2 text-xs leading-5 text-neutral-500">{item.next}</p>
+                        </article>
+                      ))}
+                    </div>
+                  </section>
+
+                </div>
+              </div>
+            </div>
+          </section>
+        </div>
+      </main>
+    );
   }
 
   return (

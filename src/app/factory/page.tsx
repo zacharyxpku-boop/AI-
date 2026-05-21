@@ -1,5 +1,6 @@
 import type { Metadata } from 'next';
 import Link from 'next/link';
+import { FactoryFriendTrialExperience } from '@/components/FactoryFriendTrialExperience';
 import { ListingFactoryConsole } from '@/components/marketing/ListingFactorySections';
 import {
   buildFactoryMobileCapabilities,
@@ -30,6 +31,53 @@ export default async function FactoryPage({
   const selectedVariant = factoryUiVariants[0];
   const factoryReadinessSlices = buildFactoryReadinessSlices(readinessReport);
   const mobileCapabilityStrips = buildFactoryMobileCapabilities(readinessReport);
+
+  if (selectedVariantId === 'friend_trial') {
+    const operatingLinks = [
+      { label: '第 1 步', title: '选择今天主推的卖点', href: '/factory/creative?variant=friend_trial', value: '先确认角度' },
+      { label: '第 2 步', title: '补齐商品图和授权', href: '/factory/create?variant=friend_trial', value: '避免素材不可用' },
+      { label: '第 3 步', title: '生成内容草稿', href: '/factory/video?variant=friend_trial', value: '客户先审核' },
+      { label: '第 4 步', title: '安排发布渠道', href: '/factory/cast?variant=friend_trial', value: '留下发布证明' },
+      { label: '第 5 步', title: '交给销售跟进', href: '/factory/manage?variant=friend_trial', value: '记录负责人' },
+    ];
+
+    return (
+      <FactoryFriendTrialExperience
+        active="overview"
+        title="从一个商品开始，生成可审核的内容任务"
+        subtitle="客户先录入商品和目标渠道，系统给出卖点、素材、内容、发布和销售跟进的下一步。"
+        metrics={[
+          { label: '商品资料', value: '待确认', detail: '客户可编辑', tone: 'slate' },
+          { label: '内容计划', value: '待生成', detail: '先审核后发布', tone: 'emerald' },
+          { label: '销售跟进', value: '待分配', detail: '不虚构线索', tone: 'amber' },
+        ]}
+        funnel={[
+          { label: '灵感', value: 86 },
+          { label: '素材', value: 74 },
+          { label: '剪辑', value: 66 },
+          { label: '分发', value: 58 },
+          { label: '成交', value: 42 },
+        ]}
+        actions={[
+          { role: '客户', title: '先填商品', value: '确认商品、目标和渠道', href: '/factory?variant=friend_trial' },
+          { role: '运营', title: '处理内容任务', value: '从卖点和素材开始', href: '/factory/creative?variant=friend_trial' },
+          { role: '销售', title: '接收跟进事项', value: '只接真实反馈和客户确认', href: '/factory/manage?variant=friend_trial' },
+        ]}
+        nextHref="/factory/creative?variant=friend_trial"
+        nextLabel="选择卖点"
+      >
+        <section className="grid gap-4 md:grid-cols-2 xl:grid-cols-5">
+          {operatingLinks.map(item => (
+            <Link className="group rounded-2xl border border-stone-200 bg-white p-4 shadow-sm transition hover:-translate-y-0.5 hover:border-stone-300 hover:shadow-lg" href={item.href} key={item.href}>
+              <div className="text-xs font-medium text-stone-500">{item.label}</div>
+              <h2 className="mt-2 text-base font-semibold text-stone-950">{item.title}</h2>
+              <p className="mt-4 rounded-xl bg-stone-50 px-3 py-2 text-sm font-medium text-stone-600">{item.value}</p>
+            </Link>
+          ))}
+        </section>
+      </FactoryFriendTrialExperience>
+    );
+  }
 
   return (
     <main>

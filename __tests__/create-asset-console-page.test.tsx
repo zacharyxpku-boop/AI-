@@ -87,10 +87,13 @@ describe('create asset console page', () => {
     expect(partnerHtml).toContain('真实 provider 和企业云资产接入验收');
     expect(partnerHtml).toContain('一键视频、智能混剪和批量生成');
 
-    expect(friendHtml).toContain('朋友试用视角');
-    expect(friendHtml).toContain('朋友试用 Create 路径');
-    expect(friendHtml).toContain('朋友只看三项');
-    expect(friendHtml).toContain('/factory/create?projectId=friend-create&amp;variant=operator');
+    expect(friendHtml).toContain('Wenai 商品增长工作台');
+    expect(friendHtml).toContain('把商品资料变成内容素材');
+    expect(friendHtml).toContain('创建一个商品增长任务');
+    expect(friendHtml).toContain('Asset Builder');
+    expect(friendHtml).toContain('新增内容资产');
+    expect(friendHtml).toContain('资产状态');
+    expect(friendHtml).toContain('/factory/video?variant=friend_trial');
   });
 
   it('builds role-specific Create playbooks from asset evidence', () => {

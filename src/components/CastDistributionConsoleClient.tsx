@@ -2,6 +2,7 @@
 
 import { useState, type FormEvent } from 'react';
 
+import { FactoryFriendTrialExperience } from '@/components/FactoryFriendTrialExperience';
 import { FactoryVariantConsole } from '@/components/FactoryVariantConsole';
 import type { ChannelAccountSnapshot } from '@/lib/channel-account-ledger';
 import type { FactoryUiVariantId } from '@/lib/factory-readiness-view';
@@ -429,6 +430,505 @@ export function CastDistributionConsoleClient({
     setError('');
     setNotice('已写入账号矩阵和广告 campaign ledger，Cast readiness 已刷新。');
     setSnapshot(data.snapshot);
+  }
+
+  if ((selectedVariantId as FactoryUiVariantId) === 'friend_trial') {
+    return (
+      <FactoryFriendTrialExperience
+        active="cast"
+        title="发到平台，并留下证明"
+        subtitle="把内容排到抖音、小红书、视频号等渠道，发布链接、截图和状态都能给客户看。"
+        metrics={[
+          { label: '发布渠道', value: '待确认', detail: '账号/排期', tone: 'emerald' },
+          { label: '发布动作', value: '待安排', detail: '先审核后发布', tone: 'slate' },
+          { label: '发布证明', value: '待回填', detail: '链接/截图', tone: 'amber' },
+        ]}
+        funnel={[
+          { label: '账号', value: 82 },
+          { label: '排期', value: 74 },
+          { label: '发布', value: 62 },
+          { label: '证明', value: 54 },
+          { label: '回收', value: 42 },
+        ]}
+        actions={[
+          { role: '运营', title: '安排发布', value: '选择渠道、排期和负责人', href: '#cast-schedule' },
+          { role: '客户', title: '查看证明', value: '发布后补链接或截图，客户能追溯', href: '#cast-proof' },
+          { role: '销售', title: '进入跟进', value: '把真实反馈交给负责人处理', href: '/factory/manage?variant=friend_trial' },
+        ]}
+        nextHref="/factory/manage?variant=friend_trial"
+        nextLabel="去看效果"
+      >
+        <section className="grid gap-6 xl:grid-cols-[0.9fr_1.1fr]">
+          <form id="cast-schedule" onSubmit={seedMatrix} className="rounded-xl border border-slate-200 bg-white p-5 shadow-sm">
+            <div className="flex items-center justify-between gap-4">
+              <div>
+                <p className="text-xs font-semibold uppercase tracking-wide text-slate-500">Channel Matrix</p>
+                <h2 className="mt-1 text-lg font-semibold text-slate-950">新增发布账号</h2>
+              </div>
+              <span className="rounded-full bg-emerald-50 px-3 py-1 text-xs font-medium text-emerald-700">可排期</span>
+            </div>
+            <div className="mt-5 grid gap-3 sm:grid-cols-2">
+              {[
+                ['项目', projectId, setProjectId],
+                ['平台', platform, setPlatform],
+                ['账号', handle, setHandle],
+                ['活动', campaignName, setCampaignName],
+              ].map(([label, value, setter]) => (
+                <label className="text-sm text-slate-700" key={String(label)}>
+                  {String(label)}
+                  <input
+                    value={String(value)}
+                    onChange={event => (setter as (value: string) => void)(event.target.value)}
+                    className="mt-1 w-full rounded-lg border border-slate-200 bg-white px-3 py-2 text-slate-950 outline-none focus:border-slate-400"
+                  />
+                </label>
+              ))}
+            </div>
+            <div className="mt-4 flex flex-wrap gap-2">
+              <button disabled={loading} className="rounded-lg bg-slate-950 px-4 py-2 text-sm font-semibold text-white disabled:bg-slate-200 disabled:text-slate-500">
+                写入账号
+              </button>
+              <button type="button" onClick={() => refresh()} disabled={loading} className="rounded-lg border border-slate-200 bg-white px-4 py-2 text-sm font-medium text-slate-700 disabled:text-slate-400">
+                刷新
+              </button>
+            </div>
+            {notice ? <p className="mt-3 text-sm text-emerald-700">{notice}</p> : null}
+            {error ? <p className="mt-3 text-sm text-red-700">{error}</p> : null}
+          </form>
+
+          <section id="cast-proof" className="overflow-hidden rounded-xl border border-slate-200 bg-white shadow-sm">
+            <div className="flex items-center justify-between border-b border-slate-100 px-5 py-4">
+              <h2 className="text-sm font-semibold text-slate-950">发布链路</h2>
+              <span className="text-xs font-medium text-slate-500">链接/截图</span>
+            </div>
+            <div className="grid gap-3 p-5 sm:grid-cols-2">
+              {manualReceiptChecks.slice(0, 4).map(item => (
+                <article className="rounded-xl border border-slate-200 bg-slate-50 p-4" key={item.gate}>
+                  <div className={`text-xs font-semibold ${item.ready ? 'text-emerald-700' : 'text-amber-700'}`}>{item.ready ? '可用' : '待补'}</div>
+                  <h3 className="mt-2 text-sm font-semibold text-slate-950">{item.gate.replace('门禁', '')}</h3>
+                  <p className="mt-2 text-xs text-slate-500">{item.evidence}</p>
+                </article>
+              ))}
+            </div>
+          </section>
+        </section>
+      </FactoryFriendTrialExperience>
+    );
+  }
+
+  if ((selectedVariantId as FactoryUiVariantId) === 'friend_trial') {
+    const receiptReadyCount = manualReceiptChecks.filter(item => item.ready).length;
+    const adReadyCount = adGuardrails.filter(item => item.ready).length;
+    const castLogs = [
+      {
+        time: '14:20:11',
+        level: 'INFO',
+        text: `项目 ${projectId} 已索引 ${snapshot?.accountCount || 0} 个渠道账号，健康账号 ${snapshot?.healthyAccountCount || 0} 个。`,
+      },
+      {
+        time: '14:16:32',
+        level: (snapshot?.adEvidenceCount || 0) > 0 ? 'INFO' : 'WARN',
+        text: `广告 campaign ${snapshot?.adCampaignCount || 0} 条，平台证据 ${snapshot?.adEvidenceCount || 0} 条。`,
+      },
+      {
+        time: '14:09:48',
+        level: 'WARN',
+        text: `OAuth / 广告账户 / analytics sync 仍是外部门禁；当前只展示 manual-ready 和证据回填。`,
+      },
+      {
+        time: '14:02:17',
+        level: gaps.length ? 'ERR' : 'INFO',
+        text: gaps.length ? `仍有 ${gaps.length} 个 Cast 阻断项需要补齐。` : '内部 Cast 账本无硬阻断，下一步进入外部授权验收。',
+      },
+    ];
+    const externalGates = [
+      { title: '平台 OAuth', detail: '抖音 / 小红书 / 微信等平台授权未配置前，不执行外部自动发布。', blocked: true },
+      { title: '发布 API 网关', detail: '缺少平台 post/campaign id、失败码和回执同步能力。', blocked: true },
+      { title: '广告账户授权', detail: `广告 campaign ${snapshot?.adCampaignCount || 0} 条，真实广告账户仍需外部授权。`, blocked: true },
+      { title: '发布证据回传', detail: `平台证据 ${snapshot?.adEvidenceCount || 0} 条；无证据时只允许 manual-ready。`, blocked: (snapshot?.adEvidenceCount || 0) === 0 },
+      { title: 'Analytics Sync', detail: `表现回流 ${snapshot?.measuredAdCampaignCount || 0} 条；未接通前不宣称自动优化。`, blocked: (snapshot?.measuredAdCampaignCount || 0) === 0 },
+    ];
+    const dispatchRows = [
+      { id: 'PLAN', channel: platform || 'manual channel', slot: `${snapshot?.availableSlotCount || 0} slots`, evidence: `${snapshot?.adEvidenceCount || 0} evidence URLs`, status: (snapshot?.availableSlotCount || 0) > 0 ? '内部可排期' : '待补槽位' },
+      { id: 'ACCT', channel: '账号矩阵', slot: `${snapshot?.healthyAccountCount || 0}/${snapshot?.accountCount || 0} healthy`, evidence: `${snapshot?.connectedAccountCount || 0} connected`, status: (snapshot?.healthyAccountCount || 0) > 0 ? '账号可用' : '待补账号' },
+      { id: 'AD', channel: '广告 campaign', slot: money(snapshot?.adBudgetCents || 0), evidence: `${snapshot?.adEvidenceCount || 0} proof`, status: (snapshot?.adEvidenceCount || 0) > 0 ? '有平台证据' : '证据缺失' },
+      { id: 'SYNC', channel: '效果回流', slot: `${snapshot?.measuredAdCampaignCount || 0} measured`, evidence: 'analytics gated', status: (snapshot?.measuredAdCampaignCount || 0) > 0 ? '已回流' : '等待回流' },
+    ];
+    const readinessRows = [
+      { module: '计划生成', progress: snapshot?.adCampaignCount ? 100 : 60, status: snapshot?.adCampaignCount ? '内部可生成' : '待写入 campaign', ready: (snapshot?.adCampaignCount || 0) > 0 },
+      { module: '素材匹配', progress: snapshot?.accountCount ? 100 : 55, status: snapshot?.accountCount ? '映射规则通过' : '待补账号矩阵', ready: (snapshot?.accountCount || 0) > 0 },
+      { module: '渠道授权', progress: 25, status: '缺 OAuth', ready: false },
+      { module: '发布证据', progress: snapshot?.adEvidenceCount ? 100 : 20, status: snapshot?.adEvidenceCount ? '有回执' : '依赖外部发布', ready: (snapshot?.adEvidenceCount || 0) > 0 },
+      { module: '效果回流', progress: snapshot?.measuredAdCampaignCount ? 100 : 20, status: snapshot?.measuredAdCampaignCount ? '已回流' : '依赖 Analytics Sync', ready: (snapshot?.measuredAdCampaignCount || 0) > 0 },
+    ];
+
+    return (
+      <main className="min-h-screen bg-[#f3f4f6] p-4 text-neutral-900 sm:p-6">
+        <div className="mx-auto max-w-[1400px]">
+          <section className="overflow-hidden rounded-lg border border-neutral-200 bg-[#fafafa] shadow-sm">
+            <div className="grid min-h-[calc(100vh-3rem)] lg:grid-cols-[260px_minmax(0,1fr)]">
+              <aside className="flex flex-col border-r border-neutral-200 bg-white">
+                <div className="border-b border-neutral-100 px-6 py-5">
+                  <div className="flex items-center gap-3">
+                    <div className="flex size-10 items-center justify-center rounded-xl bg-neutral-900 text-sm font-semibold text-white">W</div>
+                    <div>
+                      <div className="text-base font-semibold text-neutral-900">Wenai</div>
+                      <div className="text-xs text-neutral-500">分发运营工厂</div>
+                    </div>
+                  </div>
+                </div>
+                <nav className="flex flex-1 flex-col gap-1 px-3 py-4">
+                  {['指挥中心', '视频工坊', '创意洞察', '资产生产', '分发运营', '效果回流', '客户移交'].map((label, index) => (
+                    <div
+                      className={`flex items-center gap-3 rounded-md px-3 py-2.5 text-sm font-medium ${index === 4 ? 'border-l-2 border-neutral-900 bg-neutral-100 text-neutral-900' : 'text-neutral-600 hover:bg-neutral-50'}`}
+                      key={label}
+                    >
+                      <span className="size-2 rounded-full bg-neutral-400" />
+                      <span>{label}</span>
+                    </div>
+                  ))}
+                </nav>
+                <div className="border-t border-neutral-100 p-4">
+                  <div className="flex items-center gap-3 rounded-2xl border border-neutral-200 bg-white p-3 shadow-sm">
+                    <div className="flex size-10 items-center justify-center rounded-xl bg-neutral-900 text-sm font-semibold text-white">A</div>
+                    <div className="min-w-0 flex-1">
+                      <div className="truncate text-sm font-semibold text-neutral-900">Wenai Admin</div>
+                      <div className="text-xs text-neutral-500">工作空间</div>
+                    </div>
+                    <span className="text-neutral-400">⌄</span>
+                  </div>
+                </div>
+              </aside>
+
+              <div className="min-w-0">
+                <header className="flex flex-col gap-4 border-b border-neutral-200 bg-white px-6 py-5 xl:flex-row xl:items-start xl:justify-between">
+                  <div className="space-y-2">
+                    <p className="text-xs uppercase text-neutral-500">Cast Distribution Variant</p>
+                    <h2 className="text-balance text-3xl font-semibold text-neutral-950 sm:text-4xl">朋友试用 Cast 路径</h2>
+                    <p className="max-w-3xl text-pretty text-sm leading-6 text-neutral-600">
+                      {selectedVariant.headline} {selectedVariant.body}
+                    </p>
+                  </div>
+                  <div className="flex flex-wrap items-center gap-2">
+                    <span className="rounded-full border border-emerald-200 bg-emerald-50 px-3 py-1 text-xs font-medium text-emerald-700">
+                      内部排期可验证
+                    </span>
+                    <span className="rounded-full border border-amber-200 bg-amber-50 px-3 py-1 text-xs font-medium text-amber-700">
+                      试用环境 / 受限模式
+                    </span>
+                    <span className="rounded-full border border-neutral-200 bg-neutral-50 px-3 py-1 text-xs font-medium text-neutral-700">
+                      外部门禁 {externalGates.filter(gate => gate.blocked).length}/5
+                    </span>
+                  </div>
+                </header>
+
+                <div className="space-y-6 p-6">
+                  <div className="flex flex-wrap items-center justify-between gap-3">
+                    <div className="flex flex-wrap gap-2">
+                      <a href="#matrix-seed" className="inline-flex items-center rounded-md bg-neutral-950 px-4 py-2 text-sm font-semibold text-white shadow-sm hover:bg-neutral-800">补账号矩阵</a>
+                      <a href="#dispatch-evidence" className="inline-flex items-center rounded-md border border-neutral-300 bg-white px-4 py-2 text-sm font-medium text-neutral-700 shadow-sm hover:bg-neutral-50">查看证据</a>
+                      <a href="#cast-readiness" className="inline-flex items-center rounded-md border border-neutral-300 bg-white px-4 py-2 text-sm font-medium text-neutral-700 shadow-sm hover:bg-neutral-50">Readiness</a>
+                    </div>
+                    <div className="text-xs font-medium text-neutral-500">No fake publish · No fake OAuth · Evidence first</div>
+                  </div>
+
+                  <section className="rounded-lg border border-sky-100 bg-sky-50 p-4 text-sm leading-6 text-sky-800">
+                    <span className="font-semibold">内部运营骨架已就绪。</span>
+                    当前只提供分发计划生成、账号矩阵、素材排期和证据回填；平台 OAuth、真实发布 API、广告账户和 analytics sync 未配置前，不执行外部自动发布。
+                  </section>
+
+                  <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-5">
+                    {[
+                      { label: '生成计划数', value: String(snapshot?.adCampaignCount || 0), detail: `campaign ledger · ${snapshot?.scheduledCount || 0} 已排期`, tone: 'neutral' },
+                      { label: '就绪分发', value: String(snapshot?.availableSlotCount || 0), detail: `健康账号 ${snapshot?.healthyAccountCount || 0}`, tone: 'emerald' },
+                      { label: '已发布带证据', value: String(snapshot?.adEvidenceCount || 0), detail: '等待真实平台回执', tone: 'neutral' },
+                      { label: '证据缺失', value: String(Math.max((snapshot?.adCampaignCount || 0) - (snapshot?.adEvidenceCount || 0), 0)), detail: '无证据不标记已发布', tone: 'amber' },
+                      { label: '效果回流', value: String(snapshot?.measuredAdCampaignCount || 0), detail: '依赖 analytics sync', tone: 'rose' },
+                    ].map(card => (
+                      <article className={`rounded-lg border bg-white p-4 shadow-sm ${card.tone === 'amber' ? 'border-amber-200' : card.tone === 'rose' ? 'border-rose-200' : 'border-neutral-200'}`} key={card.label}>
+                        <div className="text-xs font-semibold uppercase text-neutral-500">{card.label}</div>
+                        <div className={`mt-3 text-3xl font-semibold tabular-nums ${card.tone === 'amber' ? 'text-amber-700' : card.tone === 'rose' ? 'text-rose-700' : 'text-neutral-950'}`}>{card.value}</div>
+                        <p className="mt-2 text-sm leading-5 text-neutral-600">{card.detail}</p>
+                      </article>
+                    ))}
+                  </div>
+
+                  <div className="grid gap-6 xl:grid-cols-[minmax(0,1.05fr)_minmax(360px,0.95fr)]">
+                    <section className="self-start rounded-[1.75rem] border border-neutral-200 bg-white p-5 shadow-sm">
+                      <div className="flex flex-col gap-5">
+                        <div>
+                          <p className="text-xs uppercase text-neutral-500">{playbook.title}</p>
+                          <h3 className="mt-2 max-w-2xl text-2xl font-semibold leading-tight text-neutral-950">{CAST_VARIANTS.friend_trial.headline}</h3>
+                          <p className="mt-3 max-w-3xl text-sm leading-6 text-neutral-600">{playbook.primaryAction}</p>
+                        </div>
+                        <div className="grid gap-3 md:grid-cols-3">
+                          {Object.entries(CAST_VARIANTS).map(([id, variant]) => (
+                            <a
+                              aria-current={id === selectedVariantId ? 'page' : undefined}
+                              className={`min-h-28 rounded-2xl border p-4 text-left transition ${id === selectedVariantId ? 'border-neutral-900 bg-neutral-900 text-white shadow-sm' : 'border-neutral-200 bg-neutral-50 text-neutral-600 hover:border-neutral-300 hover:bg-white'}`}
+                              href={`/factory/cast?projectId=${encodeURIComponent(projectId)}&variant=${id}`}
+                              key={id}
+                            >
+                              <span className="block text-sm font-semibold">{variant.label}</span>
+                              <span className={`mt-2 block text-xs leading-5 ${id === selectedVariantId ? 'text-white/75' : 'text-neutral-500'}`}>{variant.audience}</span>
+                            </a>
+                          ))}
+                        </div>
+                      </div>
+                      <div className="mt-4 grid gap-3 md:grid-cols-3">
+                        <div className="rounded-2xl border border-neutral-200 bg-neutral-50 p-4">
+                          <div className="text-xs font-semibold uppercase text-neutral-500">证据检查</div>
+                          <p className="mt-2 text-sm leading-6 text-cyan-700">{playbook.proofToCheck}</p>
+                        </div>
+                        <div className="rounded-2xl border border-rose-200 bg-rose-50 p-4">
+                          <div className="text-xs font-semibold uppercase text-neutral-500">停止线</div>
+                          <p className="mt-2 text-sm leading-6 text-rose-700">{playbook.handoffBoundary}</p>
+                        </div>
+                        <div className="rounded-2xl border border-neutral-200 bg-neutral-50 p-4">
+                          <div className="text-xs font-semibold uppercase text-neutral-500">朋友只看三项</div>
+                          <p className="mt-2 text-sm leading-6 text-neutral-700">账号是否可用、是否有可发布排期、是否有平台回执或表现回流。</p>
+                        </div>
+                      </div>
+                      <div className="mt-4 grid gap-2 md:grid-cols-3">
+                        {playbook.cards.map(card => (
+                          <div className="rounded-2xl border border-neutral-200 bg-neutral-50 p-3 text-xs leading-5 text-neutral-600" key={card}>
+                            {card}
+                          </div>
+                        ))}
+                      </div>
+                    </section>
+
+                    <div className="space-y-6">
+                      <section className="rounded-[1.75rem] border border-neutral-200 bg-[#0f172a] p-5 text-slate-300 shadow-sm">
+                        <div className="flex items-center justify-between gap-4 border-b border-slate-700/60 pb-4">
+                          <div>
+                            <p className="text-xs uppercase text-slate-400">Terminal // Distribution Logs</p>
+                            <h3 className="mt-2 text-lg font-semibold text-white">SYSTEM LOGS</h3>
+                          </div>
+                          <span className="text-xs font-medium text-emerald-400">Live</span>
+                        </div>
+                        <div className="mt-4 space-y-3 font-mono text-xs leading-6">
+                          {castLogs.map(entry => (
+                            <p key={`${entry.time}-${entry.level}`}>
+                              <span className="mr-2 text-slate-500">[{entry.time}]</span>
+                              <span className={`mr-2 ${entry.level === 'WARN' ? 'text-amber-400' : entry.level === 'ERR' ? 'text-rose-400' : 'text-sky-400'}`}>[{entry.level}]</span>
+                              <span className="text-slate-200">{entry.text}</span>
+                            </p>
+                          ))}
+                          <p className="pt-2">
+                            <span className="text-emerald-400">cast@wenai-core:~#</span>{' '}
+                            <span className="inline-block h-4 w-2 animate-pulse align-middle bg-slate-400" />
+                          </p>
+                        </div>
+                      </section>
+
+                      <section className="rounded-lg border border-neutral-200 bg-white p-5 shadow-sm">
+                        <div className="flex items-center justify-between gap-4">
+                          <div>
+                            <p className="text-xs uppercase text-neutral-500">External Gates</p>
+                            <h3 className="mt-2 text-lg font-semibold text-neutral-950">外部门禁清单</h3>
+                          </div>
+                          <div className="text-xs font-medium text-neutral-500">{externalGates.filter(gate => gate.blocked).length}/5 blocked</div>
+                        </div>
+                        <div className="mt-4 grid gap-3">
+                          {externalGates.map(item => (
+                            <div className="flex items-center justify-between gap-3 rounded-lg border border-neutral-200 bg-neutral-50 p-3" key={item.title}>
+                              <div>
+                                <div className="text-sm font-semibold text-neutral-950">{item.title}</div>
+                                <div className="mt-0.5 text-xs text-neutral-500">{item.detail}</div>
+                              </div>
+                              <span className={`shrink-0 rounded-md px-2 py-1 text-[11px] font-medium ${item.blocked ? 'bg-rose-50 text-rose-700' : 'bg-emerald-50 text-emerald-700'}`}>
+                                {item.blocked ? '阻断' : 'OK'}
+                              </span>
+                            </div>
+                          ))}
+                        </div>
+                      </section>
+                    </div>
+                  </div>
+
+                  <section id="dispatch-evidence" className="overflow-hidden rounded-lg border border-neutral-200 bg-white shadow-sm">
+                    <div className="flex items-center justify-between border-b border-neutral-100 px-5 py-4">
+                      <div>
+                        <p className="text-xs font-semibold uppercase text-neutral-500">Dispatch Evidence</p>
+                        <h2 className="mt-1 text-sm font-semibold text-neutral-950">分发计划验证记录</h2>
+                      </div>
+                      <span className="text-xs font-medium text-neutral-500">{snapshot?.adEvidenceCount || 0} evidence</span>
+                    </div>
+                    <div className="overflow-x-auto">
+                      <table className="w-full text-left text-sm">
+                        <thead className="bg-neutral-50 text-xs uppercase text-neutral-500">
+                          <tr>
+                            <th className="border-b border-neutral-200 px-5 py-3 font-semibold">计划 ID</th>
+                            <th className="border-b border-neutral-200 px-5 py-3 font-semibold">目标渠道</th>
+                            <th className="border-b border-neutral-200 px-5 py-3 font-semibold">排期/预算</th>
+                            <th className="border-b border-neutral-200 px-5 py-3 font-semibold">发布证据</th>
+                            <th className="border-b border-neutral-200 px-5 py-3 text-right font-semibold">状态</th>
+                          </tr>
+                        </thead>
+                        <tbody className="divide-y divide-neutral-100 text-neutral-700">
+                          {dispatchRows.map(row => (
+                            <tr className="hover:bg-neutral-50" key={row.id}>
+                              <td className="px-5 py-3 font-mono text-xs text-neutral-950">{row.id}</td>
+                              <td className="px-5 py-3">{row.channel}</td>
+                              <td className="px-5 py-3 text-neutral-500">{row.slot}</td>
+                              <td className="px-5 py-3 text-neutral-500">{row.evidence}</td>
+                              <td className="px-5 py-3 text-right">
+                                <span className={`inline-flex rounded-md border px-2 py-1 text-[11px] font-medium ${row.status.includes('缺') || row.status.includes('待') || row.status.includes('等待') ? 'border-amber-200 bg-amber-50 text-amber-700' : 'border-emerald-200 bg-emerald-50 text-emerald-700'}`}>
+                                  {row.status}
+                                </span>
+                              </td>
+                            </tr>
+                          ))}
+                        </tbody>
+                      </table>
+                    </div>
+                  </section>
+
+                  <section id="cast-readiness" className="rounded-lg border border-neutral-200 bg-white p-5 shadow-sm">
+                    <div className="flex flex-col gap-2 sm:flex-row sm:items-start sm:justify-between">
+                      <div>
+                        <p className="text-xs uppercase tracking-[0.22em] text-neutral-500">Readiness Matrix</p>
+                        <h2 className="mt-2 text-xl font-semibold text-neutral-950">模块准备度评估</h2>
+                      </div>
+                      <div className="text-sm font-semibold text-neutral-700">{readinessRows.filter(item => item.ready).length}/{readinessRows.length} 就绪</div>
+                    </div>
+                    <div className="mt-4 overflow-hidden rounded-lg border border-neutral-200">
+                      <div className="grid grid-cols-[1fr_1fr_0.6fr] border-b border-neutral-200 bg-neutral-50 px-4 py-3 text-xs font-semibold uppercase text-neutral-500">
+                        <div>模块</div>
+                        <div>完成度</div>
+                        <div className="text-right">状态</div>
+                      </div>
+                      {readinessRows.map(item => (
+                        <div className="grid grid-cols-[1fr_1fr_0.6fr] border-b border-neutral-100 px-4 py-4 text-sm last:border-b-0" key={item.module}>
+                          <div className="font-medium text-neutral-950">{item.module}</div>
+                          <div className="flex items-center gap-3">
+                            <div className="h-1.5 w-full rounded-full bg-neutral-200">
+                              <div className={`h-1.5 rounded-full ${item.ready ? 'bg-emerald-500' : 'bg-amber-400'}`} style={{ width: `${item.progress}%` }} />
+                            </div>
+                          </div>
+                          <div className={`text-right text-xs font-semibold ${item.ready ? 'text-emerald-700' : 'text-amber-700'}`}>{item.status}</div>
+                        </div>
+                      ))}
+                    </div>
+                  </section>
+
+                  <section className="rounded-[1.75rem] border border-neutral-200 bg-white p-5 shadow-sm">
+                    <div className="flex flex-col gap-2 sm:flex-row sm:items-start sm:justify-between">
+                      <div>
+                        <p className="text-xs uppercase tracking-[0.22em] text-neutral-500">Manual Publish Receipt Board</p>
+                        <h2 className="mt-2 text-xl font-semibold text-neutral-950">人工发布回执与矩阵频控验收板</h2>
+                        <p className="mt-2 max-w-3xl text-sm leading-6 text-neutral-600">
+                          没接 OAuth 时，Cast 仍需要账号健康、频控余量、去重排期、人工发布证据和表现回流；没有证据时只允许 manual-ready。
+                        </p>
+                      </div>
+                      <div className="text-sm font-semibold text-neutral-700">{receiptReadyCount}/{manualReceiptChecks.length} gates</div>
+                    </div>
+                    <div className="mt-4 grid gap-3 lg:grid-cols-5">
+                      {manualReceiptChecks.map(item => (
+                        <article className={`rounded-2xl border p-4 ${item.ready ? 'border-emerald-200 bg-emerald-50' : 'border-neutral-200 bg-neutral-50'}`} key={item.gate}>
+                          <div className={`text-xs font-semibold ${item.ready ? 'text-emerald-700' : 'text-amber-700'}`}>
+                            {item.ready ? '已有证据' : '继续补证据'}
+                          </div>
+                          <h3 className="mt-2 text-sm font-semibold text-neutral-950">{item.gate}</h3>
+                          <p className="mt-2 text-xs leading-5 text-neutral-600">{item.evidence}</p>
+                          <p className="mt-2 text-xs leading-5 text-cyan-700">{item.operatorAction}</p>
+                          <p className="mt-2 text-xs leading-5 text-amber-700">{item.externalGate}</p>
+                        </article>
+                      ))}
+                    </div>
+                  </section>
+
+                  <section className="grid gap-6 lg:grid-cols-[0.8fr_1.2fr]">
+                    <form id="matrix-seed" onSubmit={seedMatrix} className="rounded-[1.75rem] border border-neutral-200 bg-white p-5 shadow-sm">
+                      <div className="flex items-start justify-between gap-4">
+                        <div>
+                          <p className="text-xs uppercase text-neutral-500">Matrix Seed</p>
+                          <h2 className="mt-2 text-xl font-semibold text-neutral-950">补一个可验证账号矩阵</h2>
+                          <p className="mt-2 text-sm leading-6 text-neutral-600">
+                            一次写入账号矩阵和广告 campaign ledger；没有平台证据 URL 时保持 ready，不伪装 active。
+                          </p>
+                        </div>
+                        <span className="rounded-full border border-amber-200 bg-amber-50 px-3 py-1 text-xs font-medium text-amber-700">manual-ready</span>
+                      </div>
+                      <div className="mt-5 grid gap-3">
+                        <label className="text-sm text-neutral-700">
+                          项目
+                          <input value={projectId} onChange={event => setProjectId(event.target.value)} className="mt-1 w-full rounded-xl border border-neutral-200 bg-white px-3 py-2 text-neutral-950 outline-none focus:border-neutral-400" />
+                        </label>
+                        <label className="text-sm text-neutral-700">
+                          平台
+                          <input value={platform} onChange={event => setPlatform(event.target.value)} className="mt-1 w-full rounded-xl border border-neutral-200 bg-white px-3 py-2 text-neutral-950 outline-none focus:border-neutral-400" />
+                        </label>
+                        <label className="text-sm text-neutral-700">
+                          账号
+                          <input value={handle} onChange={event => setHandle(event.target.value)} className="mt-1 w-full rounded-xl border border-neutral-200 bg-white px-3 py-2 text-neutral-950 outline-none focus:border-neutral-400" />
+                        </label>
+                        <div className="grid gap-3 sm:grid-cols-2">
+                          <label className="text-sm text-neutral-700">
+                            日发布上限
+                            <input value={dailyPublishLimit} onChange={event => setDailyPublishLimit(event.target.value)} className="mt-1 w-full rounded-xl border border-neutral-200 bg-white px-3 py-2 text-neutral-950 outline-none focus:border-neutral-400" />
+                          </label>
+                          <label className="text-sm text-neutral-700">
+                            已排期数量
+                            <input value={scheduledCount} onChange={event => setScheduledCount(event.target.value)} className="mt-1 w-full rounded-xl border border-neutral-200 bg-white px-3 py-2 text-neutral-950 outline-none focus:border-neutral-400" />
+                          </label>
+                        </div>
+                        <label className="text-sm text-neutral-700">
+                          Campaign 名称
+                          <input value={campaignName} onChange={event => setCampaignName(event.target.value)} className="mt-1 w-full rounded-xl border border-neutral-200 bg-white px-3 py-2 text-neutral-950 outline-none focus:border-neutral-400" />
+                        </label>
+                        <label className="text-sm text-neutral-700">
+                          广告预算（分）
+                          <input value={budgetCents} onChange={event => setBudgetCents(event.target.value)} className="mt-1 w-full rounded-xl border border-neutral-200 bg-white px-3 py-2 text-neutral-950 outline-none focus:border-neutral-400" />
+                        </label>
+                        <label className="text-sm text-neutral-700">
+                          平台证据 URL
+                          <input value={evidenceUrl} onChange={event => setEvidenceUrl(event.target.value)} className="mt-1 w-full rounded-xl border border-neutral-200 bg-white px-3 py-2 text-neutral-950 outline-none focus:border-neutral-400" />
+                        </label>
+                      </div>
+                      <div className="mt-5 grid gap-2">
+                        <button disabled={loading} className="rounded-xl bg-neutral-950 px-4 py-2 text-sm font-semibold text-white disabled:bg-neutral-200 disabled:text-neutral-500">
+                          写入矩阵账本
+                        </button>
+                        <button type="button" onClick={() => refresh()} disabled={loading} className="rounded-xl border border-neutral-200 bg-white px-4 py-2 text-sm font-medium text-neutral-700 disabled:text-neutral-400">
+                          刷新 Cast 状态
+                        </button>
+                      </div>
+                      {notice ? <p className="mt-3 text-sm text-emerald-700">{notice}</p> : null}
+                      {error ? <p className="mt-3 text-sm text-red-700">{error}</p> : null}
+                    </form>
+
+                    <section className="rounded-[1.75rem] border border-neutral-200 bg-white p-5 shadow-sm">
+                      <div className="flex items-center justify-between gap-4">
+                        <div>
+                          <p className="text-xs uppercase text-neutral-500">Ad Delivery Guardrails</p>
+                          <h2 className="mt-2 text-xl font-semibold text-neutral-950">广告投放止损与放量门禁</h2>
+                        </div>
+                        <div className="text-sm font-semibold text-neutral-700">{adReadyCount}/{adGuardrails.length} gates</div>
+                      </div>
+                      <div className="mt-4 grid gap-3">
+                        {adGuardrails.map(item => (
+                          <article className={`rounded-2xl border p-4 ${item.ready ? 'border-emerald-200 bg-emerald-50' : 'border-neutral-200 bg-neutral-50'}`} key={item.rule}>
+                            <div className={`text-xs font-semibold ${item.ready ? 'text-emerald-700' : 'text-amber-700'}`}>
+                              {item.ready ? '门禁有证据' : '继续补门禁'}
+                            </div>
+                            <h3 className="mt-2 text-sm font-semibold text-neutral-950">{item.rule}</h3>
+                            <p className="mt-2 text-xs leading-5 text-neutral-600">{item.evidence}</p>
+                            <p className="mt-2 text-xs leading-5 text-cyan-700">{item.operatorAction}</p>
+                            <p className="mt-2 text-xs leading-5 text-amber-700">{item.stopLine}</p>
+                          </article>
+                        ))}
+                      </div>
+                    </section>
+                  </section>
+                </div>
+              </div>
+            </div>
+          </section>
+        </div>
+      </main>
+    );
   }
 
   return (

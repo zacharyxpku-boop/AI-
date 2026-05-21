@@ -2,6 +2,7 @@
 
 import { useState, type FormEvent } from 'react';
 
+import { FactoryFriendTrialExperience } from '@/components/FactoryFriendTrialExperience';
 import { FactoryVariantConsole } from '@/components/FactoryVariantConsole';
 import type { FactoryUiVariantId } from '@/lib/factory-readiness-view';
 import type { OneClickVideoOperationResult, VideoProductionQueue } from '@/lib/industrial-video-workflow';
@@ -152,6 +153,332 @@ function operationClosureCards(operation: OneClickVideoOperationResult) {
     title: '禁止伪规模',
     body: '91M+ / 42M+ 只作竞品对标，未有审计账本前不能作为 Wenai 自有指标展示。',
   }];
+}
+
+function TrialQueueMetricCard({
+  label,
+  value,
+  detail,
+  tone = 'neutral',
+}: {
+  label: string;
+  value: string;
+  detail: string;
+  tone?: 'neutral' | 'success' | 'warning' | 'danger';
+}) {
+  const toneClass = tone === 'success'
+    ? 'border-emerald-200 bg-emerald-50 text-emerald-900'
+    : tone === 'warning'
+      ? 'border-amber-200 bg-amber-50 text-amber-900'
+      : tone === 'danger'
+        ? 'border-rose-200 bg-rose-50 text-rose-900'
+        : 'border-neutral-200 bg-white text-neutral-900';
+
+  return (
+    <article className={`rounded-2xl border p-4 shadow-sm ${toneClass}`}>
+      <div className="flex items-start justify-between gap-3">
+        <div className="text-xs font-semibold uppercase text-neutral-500">{label}</div>
+        <span className="rounded-full border border-neutral-200 bg-white px-2 py-0.5 text-[11px] text-neutral-500">live</span>
+      </div>
+      <div className="mt-3 text-3xl font-semibold tabular-nums">{value}</div>
+      <p className="mt-2 text-pretty text-sm leading-5 text-neutral-600">{detail}</p>
+    </article>
+  );
+}
+
+function FriendTrialProductionConsole({
+  queue,
+  trialReadiness,
+  providerReadyRatio,
+  cutReadiness,
+  providerSandboxChecks,
+  cutOperatingChecks,
+}: {
+  queue: VideoProductionQueue | null;
+  trialReadiness: ReturnType<typeof friendTrialReadiness>;
+  providerReadyRatio: string;
+  cutReadiness: ReturnType<typeof commercialCutReadiness>;
+  providerSandboxChecks: VideoProviderSandboxCheck[];
+  cutOperatingChecks: CutOperatingCheck[];
+}) {
+  const items = queue?.items || [];
+  const blockedGates = providerSandboxChecks.filter(check => !check.ready);
+  const latestLogs = [
+    {
+      time: '14:32:05',
+      level: 'INFO',
+      text: queue
+        ? `素材库已索引 ${queue.itemCount} 个视频任务，项目 ${queue.projectId} 保持可追踪。`
+        : '视频队列正在加载，等待项目任务与证据落库。',
+    },
+    {
+      time: '14:28:12',
+      level: 'WARN',
+      text: blockedGates.length
+        ? `外部门禁仍未接通：${blockedGates.map(check => check.gate).slice(0, 2).join(' · ')}。`
+        : '外部门禁已达到当前队列所需的最小可运行状态。',
+    },
+    {
+      time: '14:15:33',
+      level: 'INFO',
+      text: `客户审核链接 ${queue?.clientReviewCount || 0} 条，表现回流 ${queue?.measuredCount || 0} 条。`,
+    },
+    {
+      time: '14:02:01',
+      level: 'ERR',
+      text: queue && queue.blockedCount > 0
+        ? `仍有 ${queue.blockedCount} 个阻断任务停留在手工交接或 provider 阶段。`
+        : '当前队列没有新增阻断项。',
+    },
+  ];
+
+  const blockerCards = [
+    {
+      label: '视频服务商',
+      detail: '缺少剪映 / HeyGen 等真实执行接入时，队列只保留交接与审核证据。',
+      state: providerSandboxChecks[0]?.ready ? 'ready' : 'blocked',
+    },
+    {
+      label: '平台授权',
+      detail: '抖音 / 小红书 / 微信的 OAuth、广告账户和自动发布仍需外部材料。',
+      state: providerSandboxChecks[1]?.ready ? 'ready' : 'blocked',
+    },
+    {
+      label: '数据同步',
+      detail: '发布证据与表现回流必须接入平台同步或人工回填，不能假装自动化。',
+      state: providerSandboxChecks[4]?.ready ? 'ready' : 'blocked',
+    },
+    {
+      label: '商用 Cut',
+      detail: `当前 Cut 评分 ${cutReadiness.score}，仍需继续补齐成片、审核与回流证据。`,
+      state: cutReadiness.verdict === '可进入商用 Cut 验收' ? 'ready' : 'warning',
+    },
+  ];
+
+  return (
+    <section className="overflow-hidden rounded-[2rem] border border-neutral-200 bg-[#fafafa] text-neutral-900 shadow-sm">
+      <div className="grid min-h-[920px] lg:grid-cols-[260px_minmax(0,1fr)]">
+        <aside className="flex flex-col border-r border-neutral-200 bg-white">
+          <div className="border-b border-neutral-100 px-6 py-5">
+            <div className="flex items-center gap-3">
+              <div className="flex size-10 items-center justify-center rounded-xl bg-neutral-900 text-sm font-semibold text-white">W</div>
+              <div>
+                <div className="text-base font-semibold text-neutral-900">Wenai</div>
+                <div className="text-xs text-neutral-500">视频生产工厂</div>
+              </div>
+            </div>
+          </div>
+
+          <nav className="flex flex-1 flex-col gap-1 px-3 py-4">
+            {['指挥中心', '视频工坊', '创意洞察', '分发运营', '效果回流', '客户移交'].map((label, index) => (
+              <div
+                className={`flex items-center gap-3 rounded-xl px-3 py-2.5 text-sm font-medium ${index === 0 ? 'border-l-2 border-neutral-900 bg-neutral-50 text-neutral-900' : 'text-neutral-600 hover:bg-neutral-50'}`}
+                key={label}
+              >
+                <span className="size-2 rounded-full bg-neutral-400" />
+                <span>{label}</span>
+              </div>
+            ))}
+          </nav>
+
+          <div className="border-t border-neutral-100 p-4">
+            <div className="flex items-center gap-3 rounded-2xl border border-neutral-200 bg-white p-3 shadow-sm">
+              <div className="flex size-10 items-center justify-center rounded-xl bg-neutral-900 text-sm font-semibold text-white">A</div>
+              <div className="min-w-0 flex-1">
+                <div className="truncate text-sm font-semibold text-neutral-900">Wenai Admin</div>
+                <div className="text-xs text-neutral-500">工作空间</div>
+              </div>
+              <span className="text-neutral-400">⌄</span>
+            </div>
+          </div>
+        </aside>
+
+        <div className="min-w-0">
+          <header className="flex flex-col gap-4 border-b border-neutral-200 bg-white px-6 py-5 xl:flex-row xl:items-start xl:justify-between">
+            <div className="space-y-2">
+              <p className="text-xs uppercase text-neutral-500">Wenai 视频生产总控台</p>
+              <h2 className="text-balance text-3xl font-semibold text-neutral-950 sm:text-4xl">视频生产队列</h2>
+              <p className="max-w-3xl text-pretty text-sm leading-6 text-neutral-600">
+                从创意洞察、素材库、视频生产到分发计划、表现回流和 CRM 交接的可验证工作流。
+              </p>
+            </div>
+            <div className="flex flex-wrap items-center gap-2">
+              <span className="rounded-full border border-emerald-200 bg-emerald-50 px-3 py-1 text-xs font-medium text-emerald-700">
+                内部链路已验证
+              </span>
+              <span className="rounded-full border border-amber-200 bg-amber-50 px-3 py-1 text-xs font-medium text-amber-700">
+                外部门禁 {blockedGates.length ? `${blockedGates.length} 项待配置` : '已收敛'}
+              </span>
+              <span className="rounded-full border border-neutral-200 bg-neutral-50 px-3 py-1 text-xs font-medium text-neutral-700">
+                {providerReadyRatio} 供应商就绪
+              </span>
+            </div>
+          </header>
+
+          <div className="space-y-6 p-6">
+            <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-4">
+              <TrialQueueMetricCard
+                detail={queue ? `项目 ${queue.projectId} · ${queue.items.length} 条生产任务` : '等待队列加载'}
+                label="队列任务"
+                value={String(queue?.itemCount || 0)}
+              />
+              <TrialQueueMetricCard
+                detail={`Provider ready ${providerReadyRatio}`}
+                label="供应商就绪"
+                tone={queue && queue.providerReadyCount === queue.itemCount ? 'success' : 'warning'}
+                value={providerReadyRatio}
+              />
+              <TrialQueueMetricCard
+                detail="免登录 review 门户与客户反馈写回"
+                label="审核链接"
+                tone={queue && queue.clientReviewCount > 0 ? 'success' : 'warning'}
+                value={String(queue?.clientReviewCount || 0)}
+              />
+              <TrialQueueMetricCard
+                detail="发布证据与表现回流进入下一轮创意"
+                label="表现回流"
+                tone={queue && queue.measuredCount > 0 ? 'success' : 'warning'}
+                value={String(queue?.measuredCount || 0)}
+              />
+            </div>
+
+            <div className="grid gap-6 xl:grid-cols-[minmax(0,1.2fr)_minmax(360px,0.8fr)]">
+              <section className="rounded-[1.75rem] border border-neutral-200 bg-white p-5 shadow-sm">
+                <div className="flex items-center justify-between gap-4">
+                  <div>
+                    <p className="text-xs uppercase text-neutral-500">Queue evidence</p>
+                    <h3 className="mt-2 text-xl font-semibold text-neutral-950">视频任务与交接证据</h3>
+                  </div>
+                  <div className="rounded-full border border-neutral-200 bg-neutral-50 px-3 py-1 text-xs font-medium text-neutral-700">
+                    {queue?.itemCount || 0} items
+                  </div>
+                </div>
+
+                <div className="mt-4 overflow-hidden rounded-2xl border border-neutral-200">
+                  <div className="grid grid-cols-12 border-b border-neutral-200 bg-neutral-50 px-4 py-3 text-xs font-semibold uppercase text-neutral-500">
+                    <div className="col-span-4">任务</div>
+                    <div className="col-span-2">阶段</div>
+                    <div className="col-span-2">优先级</div>
+                    <div className="col-span-2">渠道</div>
+                    <div className="col-span-2 text-right">下一步</div>
+                  </div>
+                  <div className="divide-y divide-neutral-200 bg-white">
+                    {items.length ? items.slice(0, 5).map(item => (
+                      <div className="grid grid-cols-12 gap-3 px-4 py-4" key={item.assetId}>
+                        <div className="col-span-4 min-w-0">
+                          <div className="truncate text-sm font-semibold text-neutral-950">{displayVideoTitle(item.title)}</div>
+                          <div className="mt-1 truncate text-xs text-neutral-500">{item.assetId}</div>
+                        </div>
+                        <div className="col-span-2 text-sm text-neutral-700">{stageLabel(item.stage)}</div>
+                        <div className="col-span-2 text-sm text-neutral-700">{priorityLabel(item.priority)}</div>
+                        <div className="col-span-2 text-sm text-neutral-700">{item.channels.slice(0, 2).join(' / ') || '未配置'}</div>
+                        <div className="col-span-2 text-right text-xs leading-5 text-neutral-500">{item.nextActions[0] || '等待下一步'}</div>
+                      </div>
+                    )) : (
+                      <div className="px-4 py-8 text-sm text-neutral-500">队列为空，先创建视频工作流再写入成片和审核。</div>
+                    )}
+                  </div>
+                </div>
+
+                <div className="mt-5 grid gap-3 md:grid-cols-2">
+                  <div className="rounded-2xl border border-neutral-200 bg-neutral-50 p-4">
+                    <div className="text-xs font-semibold uppercase text-neutral-500">Friend trial gate</div>
+                    <p className="mt-2 text-sm leading-6 text-neutral-700">{trialReadiness.nextAction}</p>
+                  </div>
+                  <div className="rounded-2xl border border-neutral-200 bg-neutral-50 p-4">
+                    <div className="text-xs font-semibold uppercase text-neutral-500">Commercial cut score</div>
+                    <p className="mt-2 text-sm leading-6 text-neutral-700">
+                      {cutReadiness.verdict}，score {cutReadiness.score}。
+                    </p>
+                  </div>
+                </div>
+              </section>
+
+              <div className="space-y-6">
+                <section className="overflow-hidden rounded-lg border border-neutral-200 bg-white p-5 shadow-sm">
+                  <div className="flex items-center justify-between gap-4 border-b border-neutral-200 pb-4">
+                    <div>
+                      <p className="text-xs uppercase tracking-[0.18em] text-neutral-500">Terminal // Production Logs</p>
+                      <h3 className="mt-2 text-lg font-semibold text-neutral-950">系统门禁日志</h3>
+                    </div>
+                    <span className="rounded-full border border-emerald-200 bg-emerald-50 px-2.5 py-1 text-xs font-medium text-emerald-700">Live</span>
+                  </div>
+                  <div className="mt-4 space-y-2 rounded-lg border border-neutral-200 bg-neutral-50 p-3 font-mono text-xs leading-6 text-neutral-700">
+                    {latestLogs.map(entry => (
+                      <p className="rounded-md bg-white px-3 py-2 shadow-[0_1px_0_rgba(15,23,42,0.04)]" key={`${entry.time}-${entry.level}`}>
+                        <span className="mr-2 text-neutral-400">[{entry.time}]</span>
+                        <span className={`mr-2 rounded px-1.5 py-0.5 ${entry.level === 'WARN' ? 'bg-amber-50 text-amber-700' : entry.level === 'ERR' ? 'bg-rose-50 text-rose-700' : 'bg-sky-50 text-sky-700'}`}>[{entry.level}]</span>
+                        <span>{entry.text}</span>
+                      </p>
+                    ))}
+                    <p className="px-3 pt-2">
+                      <span className="text-emerald-700">readiness@wenai-core:~#</span>{' '}
+                      <span className="inline-block h-4 w-2 animate-pulse align-middle bg-neutral-500" />
+                    </p>
+                  </div>
+                </section>
+
+                <section className="rounded-lg border border-neutral-200 bg-white p-5 shadow-sm">
+                  <div className="flex items-center justify-between gap-4">
+                    <div>
+                      <p className="text-xs uppercase text-neutral-500">Blockers</p>
+                      <h3 className="mt-2 text-lg font-semibold text-neutral-950">关键外部门禁</h3>
+                    </div>
+                    <div className="text-xs font-medium text-neutral-500">
+                      {providerSandboxChecks.filter(check => check.ready).length}/{providerSandboxChecks.length} ready
+                    </div>
+                  </div>
+                  <div className="mt-4 grid gap-3">
+                    {blockerCards.map(card => (
+                      <article className="rounded-lg border border-neutral-200 bg-neutral-50 p-4" key={card.label}>
+                        <div className="flex items-start justify-between gap-3">
+                          <h4 className="text-sm font-semibold text-neutral-950">{card.label}</h4>
+                          <span className={`rounded-full border px-2 py-1 text-[11px] font-medium ${card.state === 'ready' ? 'border-emerald-200 bg-emerald-50 text-emerald-700' : card.state === 'warning' ? 'border-amber-200 bg-amber-50 text-amber-700' : 'border-rose-200 bg-rose-50 text-rose-700'}`}>
+                            {card.state === 'ready' ? '就绪' : card.state === 'warning' ? '观察中' : '阻断'}
+                          </span>
+                        </div>
+                        <p className="mt-2 text-sm leading-6 text-neutral-600">{card.detail}</p>
+                      </article>
+                    ))}
+                  </div>
+                </section>
+              </div>
+            </div>
+
+            <section className="rounded-lg border border-neutral-200 bg-white p-5 shadow-sm">
+              <div className="flex items-center justify-between gap-4">
+                <div>
+                  <p className="text-xs uppercase text-neutral-500">Readiness matrix</p>
+                  <h3 className="mt-2 text-lg font-semibold text-neutral-950">模块准备度评估</h3>
+                </div>
+                <div className="text-xs font-medium text-neutral-500">
+                  已验证 {cutOperatingChecks.filter(check => check.status === 'ready').length}/{cutOperatingChecks.length}
+                </div>
+              </div>
+              <div className="mt-4 overflow-hidden rounded-2xl border border-neutral-200">
+                <div className="grid grid-cols-12 border-b border-neutral-200 bg-neutral-50 px-4 py-3 text-xs font-semibold uppercase text-neutral-500">
+                  <div className="col-span-4">模块</div>
+                  <div className="col-span-2">状态</div>
+                  <div className="col-span-3">证据</div>
+                  <div className="col-span-3 text-right">门禁</div>
+                </div>
+                <div className="divide-y divide-neutral-200">
+                  {cutOperatingChecks.map(check => (
+                    <div className="grid grid-cols-12 gap-3 px-4 py-4" key={check.label}>
+                      <div className="col-span-4 text-sm font-semibold text-neutral-950">{check.label}</div>
+                      <div className="col-span-2 text-sm text-neutral-700">{check.status === 'ready' ? '就绪' : '阻断'}</div>
+                      <div className="col-span-3 text-sm leading-6 text-neutral-600">{check.evidence}</div>
+                      <div className="col-span-3 text-right text-sm leading-6 text-neutral-600">{check.externalGate}</div>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            </section>
+          </div>
+        </div>
+      </div>
+    </section>
+  );
 }
 
 function manualTrialRunbook(item: VideoProductionQueue['items'][number]) {
@@ -740,6 +1067,351 @@ export function VideoProductionQueueClient({
   const cutOperatingChecks = buildCutOperatingChecks(queue);
   const providerSandboxChecks = buildVideoProviderSandboxChecks(queue);
   const variantPlaybook = buildVideoFactoryVariantPlaybook(queue, selectedVariantId);
+  const isFriendTrialVariant = selectedVariantId === 'friend_trial';
+
+  if (selectedVariantId === 'friend_trial') {
+    const videoCards = items.length ? items.slice(0, 4).map(item => ({
+      id: item.assetId,
+      title: item.title,
+      status: item.stage,
+      versions: item.remixPlan.length,
+      dispatches: item.dispatchCount,
+    })) : [
+      { id: 'video_01', title: '主推商品', status: 'ready', versions: 2, dispatches: 2 },
+      { id: 'video_02', title: '场景卖点', status: 'review', versions: 1, dispatches: 1 },
+      { id: 'video_03', title: '活动版本', status: 'draft', versions: 1, dispatches: 1 },
+      { id: 'video_04', title: '复盘版本', status: 'measured', versions: 1, dispatches: 3 },
+    ];
+
+    return (
+      <FactoryFriendTrialExperience
+        active="video"
+        title="一组卖点生成多条内容"
+        subtitle="同一套商品素材，拆成短视频、图文脚本、口播和不同平台版本。"
+        metrics={[
+          { label: '内容草稿', value: '待生成', detail: '短视频/图文', tone: 'slate' },
+          { label: '客户审核', value: '待确认', detail: '审核后发布', tone: 'emerald' },
+          { label: '发布回收', value: '待回填', detail: '不虚构效果', tone: 'amber' },
+        ]}
+        funnel={[
+          { label: '素材', value: 84 },
+          { label: '脚本', value: 76 },
+          { label: '成片', value: 64 },
+          { label: '审核', value: 52 },
+          { label: '发布', value: 40 },
+        ]}
+        actions={[
+          { role: '运营', title: '生成草稿', value: '先产出可审核的标题、口播和画面建议', href: '#video-create' },
+          { role: '客户', title: '审核内容', value: '客户确认后再进入发布安排', href: '#video-board' },
+          { role: '运营', title: '进入发布', value: '只发布已确认的内容版本', href: '/factory/cast?variant=friend_trial' },
+        ]}
+        nextHref="/factory/cast?variant=friend_trial"
+        nextLabel="去多平台发"
+      >
+        <section className="grid gap-6 xl:grid-cols-[0.9fr_1.1fr]">
+          <form id="video-create" onSubmit={createWorkflow} className="rounded-xl border border-slate-200 bg-white p-5 shadow-sm">
+            <div className="flex items-center justify-between gap-4">
+              <div>
+                <p className="text-xs font-semibold uppercase tracking-wide text-slate-500">Video Batch</p>
+                <h2 className="mt-1 text-lg font-semibold text-slate-950">新增批量剪辑任务</h2>
+              </div>
+              <span className="rounded-full bg-slate-100 px-3 py-1 text-xs font-medium text-slate-600">{providerReadyRatio} 可生产</span>
+            </div>
+            <div className="mt-5 grid gap-3 sm:grid-cols-2">
+              {[
+                ['项目', projectId, setProjectId],
+                ['商品', productName, setProductName],
+                ['类目', category, setCategory],
+                ['平台', platforms, setPlatforms],
+                ['参考', reference, setReference],
+                ['素材', productAsset, setProductAsset],
+              ].map(([label, value, setter]) => (
+                <label className="text-sm text-slate-700" key={String(label)}>
+                  {String(label)}
+                  <input
+                    value={String(value)}
+                    onChange={event => (setter as (value: string) => void)(event.target.value)}
+                    className="mt-1 w-full rounded-lg border border-slate-200 bg-white px-3 py-2 text-slate-950 outline-none focus:border-slate-400"
+                  />
+                </label>
+              ))}
+            </div>
+            <div className="mt-4 flex flex-wrap gap-2">
+              <button disabled={loading} className="rounded-lg bg-slate-950 px-4 py-2 text-sm font-semibold text-white disabled:bg-slate-200 disabled:text-slate-500">
+                创建任务
+              </button>
+              <button type="button" onClick={() => refreshQueue()} disabled={loading} className="rounded-lg border border-slate-200 bg-white px-4 py-2 text-sm font-medium text-slate-700 disabled:text-slate-400">
+                刷新
+              </button>
+            </div>
+            {notice ? <p className="mt-3 text-sm text-emerald-700">{notice}</p> : null}
+            {error ? <p className="mt-3 text-sm text-red-700">{error}</p> : null}
+          </form>
+
+          <section id="video-board" className="overflow-hidden rounded-xl border border-slate-200 bg-white shadow-sm">
+            <div className="flex items-center justify-between border-b border-slate-100 px-5 py-4">
+              <h2 className="text-sm font-semibold text-slate-950">生产队列</h2>
+              <span className="text-xs font-medium text-slate-500">{items.length ? '已有任务' : '等待创建'}</span>
+            </div>
+            <div className="grid gap-3 p-5 sm:grid-cols-2">
+              {videoCards.map(item => (
+                <article className="rounded-xl border border-slate-200 bg-slate-50 p-4" key={item.id}>
+                  <div className="flex items-center justify-between gap-3">
+                    <h3 className="truncate text-sm font-semibold text-slate-950">{item.title}</h3>
+                    <span className="rounded-full bg-white px-2 py-1 text-[11px] font-medium text-slate-500">{item.status}</span>
+                  </div>
+                  <p className="mt-2 text-xs text-slate-500">{item.versions} 版本 · {item.dispatches} 分发</p>
+                </article>
+              ))}
+            </div>
+          </section>
+        </section>
+      </FactoryFriendTrialExperience>
+    );
+  }
+
+  const friendTrialVariantBoard = (
+    <section className="rounded-[2rem] border border-neutral-200 bg-white p-5 shadow-sm">
+      <div className="flex flex-col gap-4 lg:flex-row lg:items-start lg:justify-between">
+        <div>
+          <p className="text-xs uppercase tracking-[0.22em] text-neutral-500">{variantPlaybook.title}</p>
+          <h2 className="mt-2 text-2xl font-semibold text-neutral-950">{selectedVariant.headline}</h2>
+          <p className="mt-3 max-w-3xl text-sm leading-6 text-neutral-600">
+            {selectedVariant.body}
+          </p>
+        </div>
+        <div className="grid gap-2 sm:grid-cols-3 lg:w-[520px]">
+          {Object.values(VIDEO_FACTORY_UI_VARIANTS).map(variant => (
+            <a
+              aria-current={variant === selectedVariant ? 'page' : undefined}
+              className={`rounded-2xl border p-3 text-left transition ${variant === selectedVariant ? 'border-neutral-900 bg-neutral-900 text-white shadow-sm' : 'border-neutral-200 bg-neutral-50 text-neutral-600 hover:border-neutral-300 hover:bg-white'}`}
+              href={`/factory/video?projectId=${encodeURIComponent(projectId || queue?.projectId || 'default-project')}&variant=${variant === selectedVariant ? selectedVariantId : variant.label === '运营视角' ? 'operator' : variant.label === '朋友试用视角' ? 'friend_trial' : 'partner'}`}
+              key={variant.label}
+            >
+              <span className="block text-sm font-semibold">{variant.label}</span>
+              <span className="mt-1 block text-[11px] leading-4">{variant.audience}</span>
+            </a>
+          ))}
+        </div>
+      </div>
+      <div className="mt-4 grid gap-3 md:grid-cols-[1fr_1fr_0.8fr]">
+        <div className="rounded-2xl border border-neutral-200 bg-neutral-50 p-4 text-sm leading-6 text-neutral-700">
+          <div className="text-xs font-semibold uppercase text-neutral-500">第一动作</div>
+          <p className="mt-2">{selectedVariant.firstAction}</p>
+        </div>
+        <div className="rounded-2xl border border-neutral-200 bg-white p-4 text-sm leading-6 text-cyan-700">
+          <div className="text-xs font-semibold uppercase text-neutral-500">证据检查</div>
+          <p className="mt-2">{selectedVariant.proof}</p>
+        </div>
+        <div className="rounded-2xl border border-rose-200 bg-rose-50 p-4 text-sm leading-6 text-rose-700">
+          <div className="text-xs font-semibold uppercase text-neutral-500">停止线</div>
+          <p className="mt-2">{selectedVariant.stopLine}</p>
+        </div>
+      </div>
+      <div className="mt-4 grid gap-2 md:grid-cols-4">
+        {variantPlaybook.cards.map(card => (
+          <div className="rounded-2xl border border-neutral-200 bg-neutral-50 p-3 text-xs leading-5 text-neutral-600" key={card}>
+            {card}
+          </div>
+        ))}
+      </div>
+      <div className="mt-4 rounded-2xl border border-neutral-200 bg-neutral-50 p-4 text-sm text-neutral-600">
+        <span className="font-semibold text-neutral-950">{selectedVariant.reference.split('；')[0]}</span>
+      </div>
+    </section>
+  );
+  const friendTrialEvidenceStack = (
+    <>
+      <section className="rounded-[2rem] border border-neutral-200 bg-white p-5 shadow-sm">
+        <div className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
+          <div>
+            <p className="text-xs uppercase tracking-[0.22em] text-neutral-500">Friend Trial Readiness</p>
+            <h2 className="mt-2 text-xl font-semibold text-neutral-950">朋友试用放行判断</h2>
+            <p className="mt-2 max-w-3xl text-sm leading-6 text-neutral-600">
+              这张卡不看“页面是否好看”，只看非技术用户能不能从视频任务进入客户审核并完成反馈或批准。
+            </p>
+          </div>
+          <span className={`w-fit rounded-full border px-3 py-1 text-xs ${trialReadiness.firstReviewLink ? 'border-emerald-200 bg-emerald-50 text-emerald-700' : 'border-amber-200 bg-amber-50 text-amber-700'}`}>
+            {trialReadiness.verdict}
+          </span>
+        </div>
+        <div className="mt-4 grid gap-3 md:grid-cols-3">
+          <div className="rounded-2xl border border-neutral-200 bg-neutral-50 p-4">
+            <div className="text-xs font-semibold uppercase text-neutral-500">试用证据</div>
+            <div className="mt-2 space-y-1">
+              {trialReadiness.evidence.map(item => (
+                <div className="text-xs leading-5 text-neutral-600" key={item}>{item}</div>
+              ))}
+            </div>
+          </div>
+          <div className="rounded-2xl border border-neutral-200 bg-neutral-50 p-4">
+            <div className="text-xs font-semibold uppercase text-neutral-500">可发入口</div>
+            {trialReadiness.firstReviewLink ? (
+              <a className="mt-2 block truncate text-xs leading-5 text-cyan-700 underline-offset-4 hover:underline" href={trialReadiness.firstReviewLink}>
+                {trialReadiness.firstReviewLink}
+              </a>
+            ) : (
+              <p className="mt-2 text-xs leading-5 text-amber-700">先写入成片 URL，并生成客户审核链接。</p>
+            )}
+          </div>
+          <div className="rounded-2xl border border-neutral-200 bg-neutral-50 p-4">
+            <div className="text-xs font-semibold uppercase text-neutral-500">停止线</div>
+            <p className="mt-2 text-xs leading-5 text-amber-700">{trialReadiness.stopLine}</p>
+            <p className="mt-2 text-xs leading-5 text-cyan-700">内部下一步：{trialReadiness.nextAction}</p>
+          </div>
+        </div>
+      </section>
+
+      <section className="rounded-[2rem] border border-neutral-200 bg-white p-5 shadow-sm">
+        <div className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
+          <div>
+            <p className="text-xs uppercase tracking-[0.22em] text-neutral-500">Commercial Cut Readiness</p>
+            <h2 className="mt-2 text-xl font-semibold text-neutral-950">商用 Cut 放行门禁</h2>
+            <p className="mt-2 max-w-3xl text-sm leading-6 text-neutral-600">
+              这层只判断视频工厂是否已经能进入真实商用验收：provider 完成回调、成片资产、客户审核、客户批准、发布或表现回流必须全部有证据。
+            </p>
+          </div>
+          <div className="flex w-fit flex-col items-start gap-2 rounded-2xl border border-neutral-200 bg-neutral-50 px-3 py-2 text-xs">
+            <span className={cutReadiness.verdict === '可进入商用 Cut 验收' ? 'text-emerald-700' : 'text-amber-700'}>
+              {cutReadiness.verdict}
+            </span>
+            <span className="text-neutral-500">score {cutReadiness.score}</span>
+          </div>
+        </div>
+        <div className="mt-4 grid gap-3 md:grid-cols-5">
+          {cutReadiness.gates.map(gate => (
+            <div
+              className={`rounded-2xl border p-3 ${gate.ok ? 'border-emerald-200 bg-emerald-50' : 'border-neutral-200 bg-neutral-50'}`}
+              key={gate.label}
+            >
+              <div className={gate.ok ? 'text-xs font-semibold text-emerald-700' : 'text-xs font-semibold text-neutral-700'}>
+                {gate.label}
+              </div>
+              <p className="mt-2 text-xs leading-5 text-neutral-600">{gate.detail}</p>
+            </div>
+          ))}
+        </div>
+        <div className="mt-4 grid gap-3 md:grid-cols-2">
+          <div className="rounded-2xl border border-amber-200 bg-amber-50 p-3">
+            <div className="text-xs font-semibold text-amber-700">商用风险</div>
+            <p className="mt-2 text-xs leading-5 text-amber-700/80">{cutReadiness.risk}</p>
+          </div>
+          <div className="rounded-2xl border border-rose-200 bg-rose-50 p-3">
+            <div className="text-xs font-semibold text-rose-700">停止线</div>
+            <p className="mt-2 text-xs leading-5 text-rose-700/80">{cutReadiness.stopLine}</p>
+          </div>
+        </div>
+      </section>
+
+      <section className="rounded-[2rem] border border-neutral-200 bg-white p-5 shadow-sm">
+        <div className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
+          <div>
+            <p className="text-xs uppercase tracking-[0.22em] text-neutral-500">Provider Sandbox Contract</p>
+            <h2 className="mt-2 text-xl font-semibold text-neutral-950">视频 provider 沙盒接入合约</h2>
+            <p className="mt-2 max-w-3xl text-sm leading-6 text-neutral-600">
+              这层不配置真实密钥，也不伪装自动成片。它把接入视频 provider 前必须验证的提交、回调、失败恢复、成片入库和客户验收拆成沙盒门禁，等外部材料齐后直接对照验收。
+            </p>
+          </div>
+          <div className="w-fit rounded-2xl border border-neutral-200 bg-neutral-50 px-3 py-2 text-xs text-neutral-700">
+            ready {providerSandboxChecks.filter(check => check.ready).length}/{providerSandboxChecks.length}
+          </div>
+        </div>
+        <div className="mt-4 grid gap-3 lg:grid-cols-5">
+          {providerSandboxChecks.map(check => (
+            <article
+              className={`rounded-2xl border p-3 ${check.ready ? 'border-emerald-200 bg-emerald-50' : 'border-neutral-200 bg-neutral-50'}`}
+              key={check.gate}
+            >
+              <div className={`text-sm font-semibold ${check.ready ? 'text-emerald-700' : 'text-neutral-900'}`}>{check.gate}</div>
+              <p className="mt-2 text-xs leading-5 text-neutral-600">证据：{check.evidence}</p>
+              <p className="mt-2 text-xs leading-5 text-cyan-700">内部推进：{check.internalMove}</p>
+              <p className="mt-2 text-xs leading-5 text-amber-700">外部门禁：{check.externalGate}</p>
+            </article>
+          ))}
+        </div>
+      </section>
+
+      <section className="rounded-[2rem] border border-neutral-200 bg-white p-5 shadow-sm">
+        <div className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
+          <div>
+            <p className="text-xs uppercase tracking-[0.22em] text-neutral-500">Cut Operating Checks</p>
+            <h2 className="mt-2 text-xl font-semibold text-neutral-950">视频工厂商用品质验收板</h2>
+            <p className="mt-2 max-w-3xl text-sm leading-6 text-neutral-600">
+              对照筷子科技、Hookshot、Creatify、Pencil、VidMob 这一类平台，Cut 不能只看“有没有按钮”，而要逐项检查 AI 视频解析、智能混剪、一键视频、provider 执行、成片审核和表现回流是否真的闭环。
+            </p>
+          </div>
+          <div className="w-fit rounded-2xl border border-neutral-200 bg-neutral-50 px-3 py-2 text-xs text-neutral-700">
+            ready {cutOperatingChecks.filter(check => check.status === 'ready').length}/{cutOperatingChecks.length}
+          </div>
+        </div>
+        <div className="mt-4 grid gap-3 md:grid-cols-2 xl:grid-cols-3">
+          {cutOperatingChecks.map(check => (
+            <article
+              className={`rounded-2xl border p-4 ${check.status === 'ready' ? 'border-emerald-200 bg-emerald-50' : 'border-neutral-200 bg-neutral-50'}`}
+              key={check.label}
+            >
+              <div className="flex items-start justify-between gap-3">
+                <h3 className="text-sm font-semibold text-neutral-950">{check.label}</h3>
+                <span className={`shrink-0 rounded-full border px-2 py-1 text-[11px] ${check.status === 'ready' ? 'border-emerald-200 bg-white text-emerald-700' : 'border-amber-200 bg-white text-amber-700'}`}>
+                  {check.status === 'ready' ? '内部已具备' : '仍有阻断'}
+                </span>
+              </div>
+              <p className="mt-2 text-xs leading-5 text-neutral-600">证据：{check.evidence}</p>
+              <p className="mt-2 text-xs leading-5 text-cyan-700">内部推进：{check.internalMove}</p>
+              <p className="mt-2 text-xs leading-5 text-amber-700">外部门禁：{check.externalGate}</p>
+            </article>
+          ))}
+        </div>
+      </section>
+
+      <section className="rounded-[2rem] border border-neutral-200 bg-white p-5 shadow-sm">
+        <div className="flex flex-col gap-2 sm:flex-row sm:items-start sm:justify-between">
+          <div>
+            <p className="text-xs uppercase tracking-[0.22em] text-neutral-500">Cut / One-click Video Board</p>
+            <h2 className="mt-2 text-xl font-semibold text-neutral-950">从 Hook 结构库到智能混剪包</h2>
+          </div>
+          <div className="max-w-sm text-xs leading-5 text-neutral-600">
+            这层承接创意工厂，不把“创建任务”说成“自动成片”。只有 provider、素材授权、平台账号和回流都接上，才进入真实规模化视频工厂。
+          </div>
+        </div>
+        <div className="mt-4 grid gap-3 lg:grid-cols-3">
+          {MIXCUT_OPERATION_BOARD.map(item => (
+            <article className="rounded-2xl border border-neutral-200 bg-neutral-50 p-4" key={item.title}>
+              <div className="text-sm font-semibold text-neutral-950">{item.title}</div>
+              <div className="mt-2 text-xs leading-5 text-neutral-600">输入：{item.input}</div>
+              <div className="mt-2 text-xs leading-5 text-cyan-700">动作：{item.action}</div>
+              <div className="mt-2 text-xs leading-5 text-amber-700">门禁：{item.gate}</div>
+            </article>
+          ))}
+        </div>
+      </section>
+
+      <section className="rounded-[2rem] border border-neutral-200 bg-white p-5 shadow-sm">
+        <div className="flex flex-col gap-2 sm:flex-row sm:items-start sm:justify-between">
+          <div>
+            <p className="text-xs uppercase tracking-[0.22em] text-neutral-500">Cut Production Line</p>
+            <h2 className="mt-2 text-xl font-semibold text-neutral-950">从视频解析到分发回流的一条成片生产线</h2>
+          </div>
+          <p className="max-w-md text-xs leading-5 text-neutral-600">
+            这层承接 Clico 的视频任务体验，也对齐筷子式批量混剪和一键视频。Wenai 先把任务、证据、审核、返修和回流做成可验收闭环；外部 provider 接入前，不把计划页包装成真实自动成片。
+          </p>
+        </div>
+        <div className="mt-4 grid gap-3 xl:grid-cols-5">
+          {CUT_PRODUCTION_LINE.map(item => (
+            <article className="rounded-2xl border border-neutral-200 bg-neutral-50 p-4" key={item.stage}>
+              <div className="text-sm font-semibold text-neutral-950">{item.stage}</div>
+              <div className="mt-3 space-y-2 text-xs leading-5">
+                <p className="text-neutral-600"><span className="text-neutral-900">输入：</span>{item.input}</p>
+                <p className="text-cyan-700"><span className="text-neutral-900">输出：</span>{item.output}</p>
+                <p className="text-neutral-500"><span className="text-neutral-900">内部：</span>{item.internal}</p>
+                <p className="text-amber-700"><span className="text-neutral-900">外部：</span>{item.external}</p>
+              </div>
+            </article>
+          ))}
+        </div>
+      </section>
+    </>
+  );
 
   async function ingestProductionResult(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
@@ -785,17 +1457,287 @@ export function VideoProductionQueueClient({
     await refreshQueue(projectId || queue?.projectId || 'default-project', false);
   }
 
+  const friendTrialOperationTools = (
+    <section className="rounded-[1.75rem] border border-neutral-200 bg-white p-5 shadow-sm">
+      <div className="mb-4 flex flex-col gap-3 border-b border-neutral-200 pb-4 lg:flex-row lg:items-start lg:justify-between">
+        <div>
+          <p className="text-xs font-semibold uppercase tracking-[0.18em] text-neutral-500">Production operations</p>
+          <h2 className="mt-2 text-xl font-semibold text-neutral-950">视频生产操作台</h2>
+          <p className="mt-2 max-h-10 max-w-2xl overflow-hidden text-sm leading-5 text-neutral-600">
+            创建视频工作流、回灌成片、生成审核入口和查看队列动作包都在同一张可验证工作台内完成。
+          </p>
+        </div>
+        <div className="grid gap-2 text-xs text-neutral-600 sm:grid-cols-3 lg:w-[480px]">
+          <div className="rounded-md border border-neutral-200 bg-neutral-50 px-3 py-2">
+            <span className="block font-semibold text-neutral-950">{queue?.itemCount || 0}</span>
+            队列任务
+          </div>
+          <div className="rounded-md border border-neutral-200 bg-neutral-50 px-3 py-2">
+            <span className="block font-semibold text-neutral-950">{queue?.resultAssetCount || 0}</span>
+            成片回灌
+          </div>
+          <div className="rounded-md border border-neutral-200 bg-neutral-50 px-3 py-2">
+            <span className="block font-semibold text-neutral-950">{queue?.clientReviewCount || 0}</span>
+            审核入口
+          </div>
+        </div>
+      </div>
+
+      <div className="grid gap-6 lg:grid-cols-[0.75fr_1.25fr]">
+      <div className="space-y-5">
+        <form className="rounded-lg border border-neutral-200 bg-neutral-50 p-5" onSubmit={createWorkflow}>
+          <div className="flex items-start justify-between gap-4">
+            <div>
+              <p className="text-xs font-semibold uppercase text-neutral-500">Create workflow</p>
+              <h2 className="mt-2 text-lg font-semibold text-neutral-950">创建视频工作流</h2>
+              <p className="mt-2 text-sm leading-6 text-neutral-600">
+                只创建可交接的生产任务、分发计划和执行记录；provider 未配置时不会宣称自动成片。
+              </p>
+            </div>
+            <span className="rounded-full border border-amber-200 bg-amber-50 px-3 py-1 text-xs font-medium text-amber-700">
+              provider-gated
+            </span>
+          </div>
+          <div className="mt-5 grid gap-3">
+            <input className="rounded-xl border border-neutral-200 bg-white px-3 py-2 text-sm text-neutral-950 outline-none focus:border-neutral-400" value={projectId} onChange={event => setProjectId(event.target.value)} placeholder="项目 ID" />
+            <input className="rounded-xl border border-neutral-200 bg-white px-3 py-2 text-sm text-neutral-950 outline-none focus:border-neutral-400" value={productName} onChange={event => setProductName(event.target.value)} placeholder="产品名" required />
+            <input className="rounded-xl border border-neutral-200 bg-white px-3 py-2 text-sm text-neutral-950 outline-none focus:border-neutral-400" value={category} onChange={event => setCategory(event.target.value)} placeholder="类目" />
+            <input className="rounded-xl border border-neutral-200 bg-white px-3 py-2 text-sm text-neutral-950 outline-none focus:border-neutral-400" value={platforms} onChange={event => setPlatforms(event.target.value)} placeholder="平台，用逗号分隔" />
+            <input className="rounded-xl border border-neutral-200 bg-white px-3 py-2 text-sm text-neutral-950 outline-none focus:border-neutral-400" value={reference} onChange={event => setReference(event.target.value)} placeholder="参考视频 URL" />
+            <input className="rounded-xl border border-neutral-200 bg-white px-3 py-2 text-sm text-neutral-950 outline-none focus:border-neutral-400" value={productAsset} onChange={event => setProductAsset(event.target.value)} placeholder="产品素材 URL" />
+            <label className="flex items-center gap-2 text-sm text-neutral-700">
+              <input type="checkbox" checked={providerConfigured} onChange={event => setProviderConfigured(event.target.checked)} />
+              供应商已配置
+            </label>
+            <label className="flex items-center gap-2 text-sm text-neutral-700">
+              <input type="checkbox" checked={legalConsent} onChange={event => setLegalConsent(event.target.checked)} />
+              已获得素材与生成授权
+            </label>
+            <button disabled={loading} className="rounded-md bg-neutral-950 px-4 py-2 text-sm font-semibold text-white disabled:bg-neutral-200 disabled:text-neutral-500" type="submit">
+              创建任务并写入分发队列
+            </button>
+            <button disabled={loading} className="rounded-md border border-neutral-200 bg-white px-4 py-2 text-sm font-medium text-neutral-700 disabled:text-neutral-400" type="button" onClick={() => void refreshQueue()}>
+              刷新队列
+            </button>
+          </div>
+        </form>
+
+        <form className="rounded-lg border border-neutral-200 bg-white p-5" onSubmit={ingestProductionResult}>
+          <div className="flex items-start justify-between gap-4">
+            <div>
+              <p className="text-xs font-semibold uppercase text-neutral-500">Ingest result</p>
+              <h2 className="mt-2 text-lg font-semibold text-neutral-950">回灌成片并生成审核链接</h2>
+              <p className="mt-2 text-sm leading-6 text-neutral-600">
+                供应商或剪辑师完成后，把真实成片 URL 写回生产链路，系统再创建客户审核门户。
+              </p>
+            </div>
+            <span className="rounded-full border border-emerald-200 bg-emerald-50 px-3 py-1 text-xs font-medium text-emerald-700">
+              review-ready
+            </span>
+          </div>
+          <div className="mt-5 grid gap-3">
+            <select className="rounded-xl border border-neutral-200 bg-white px-3 py-2 text-sm text-neutral-950 outline-none focus:border-neutral-400" value={resultTarget?.assetId || ''} onChange={event => setResultAssetId(event.target.value)}>
+              {items.length ? items.map(item => (
+                <option value={item.assetId} key={item.assetId}>{displayVideoTitle(item.title)}</option>
+              )) : <option value="">请先创建视频任务</option>}
+            </select>
+            <input className="rounded-xl border border-neutral-200 bg-white px-3 py-2 text-sm text-neutral-950 outline-none focus:border-neutral-400" value={resultTaskId} onChange={event => setResultTaskId(event.target.value)} placeholder="生产任务编号或剪辑批次号" />
+            <input className="rounded-xl border border-neutral-200 bg-white px-3 py-2 text-sm text-neutral-950 outline-none focus:border-neutral-400" value={resultChannel} onChange={event => setResultChannel(event.target.value)} placeholder="渠道，默认使用任务首个渠道" />
+            <textarea className="min-h-24 rounded-xl border border-neutral-200 bg-white px-3 py-2 text-sm text-neutral-950 outline-none focus:border-neutral-400" value={resultUrls} onChange={event => setResultUrls(event.target.value)} placeholder="成片 URL，可一行一个或用逗号分隔" />
+            <button disabled={loading || !items.length} className="rounded-md bg-neutral-950 px-4 py-2 text-sm font-semibold text-white disabled:bg-neutral-200 disabled:text-neutral-500" type="submit">
+              写入成片并创建客户审核
+            </button>
+          </div>
+        </form>
+      </div>
+
+      <div className="self-start rounded-lg border border-neutral-200 bg-neutral-50 p-5">
+        <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+          <div>
+            <p className="text-xs font-semibold uppercase text-neutral-500">Queue operations</p>
+            <h2 className="mt-2 text-lg font-semibold text-neutral-950">队列状态</h2>
+          </div>
+          <div className="text-xs text-neutral-500">
+            {queue ? `${queue.itemCount} 个任务 · 供应商就绪 ${providerReadyRatio} · 结果 ${queue.resultAssetCount} · 审核 ${queue.clientReviewCount} · 已批准 ${queue.approvedDeliverableCount}` : '正在加载 · 供应商就绪 0/0'}
+          </div>
+        </div>
+        <p className="mt-3 max-h-10 overflow-hidden text-sm leading-5 text-neutral-600">
+          运营动作包会把阶段、优先级、服务时限、下一步接口路径、请求方式和请求内容汇总出来，方便手工执行或后续接自动化队列。
+        </p>
+        <div className="mt-4 grid gap-2 text-sm text-neutral-700 sm:grid-cols-4">
+          <div className="rounded-md border border-neutral-200 bg-white px-3 py-2">仅交接：{queue?.handoffOnlyCount || 0}</div>
+          <div className="rounded-md border border-neutral-200 bg-white px-3 py-2">阻塞：{queue?.blockedCount || 0}</div>
+          <div className="rounded-md border border-neutral-200 bg-white px-3 py-2">已回流：{queue?.measuredCount || 0}</div>
+          <div className="rounded-md border border-neutral-200 bg-white px-3 py-2">闭环：{queue?.averageLoopCompletionScore || 0}/100</div>
+        </div>
+        <div className="mt-5 space-y-4">
+          {items.length ? items.map(item => (
+            <article className="rounded-lg border border-neutral-200 bg-white p-4 shadow-sm" key={item.assetId}>
+              <div className="flex flex-col gap-2 sm:flex-row sm:items-start sm:justify-between">
+                <div>
+                  <div className="text-sm font-semibold text-neutral-950">{displayVideoTitle(item.title)}</div>
+                  <div className="mt-1 text-xs text-neutral-500">{item.assetId}</div>
+                </div>
+                <span className={`w-fit rounded-full border px-2 py-1 text-xs ${item.mode === 'provider_ready' ? 'border-emerald-200 bg-emerald-50 text-emerald-700' : 'border-amber-200 bg-amber-50 text-amber-700'}`}>
+                  {modeLabel(item.mode)}
+                </span>
+              </div>
+              <dl className="mt-4 grid gap-2 text-sm text-neutral-700 sm:grid-cols-4">
+                <div><dt className="text-xs text-neutral-400">阶段</dt><dd>{stageLabel(item.stage)}</dd></div>
+                <div><dt className="text-xs text-neutral-400">优先级</dt><dd>{priorityLabel(item.priority)}</dd></div>
+                <div><dt className="text-xs text-neutral-400">SLA</dt><dd>{item.slaHoursRemaining} 小时</dd></div>
+                <div><dt className="text-xs text-neutral-400">计划</dt><dd>{item.planCount}</dd></div>
+                <div><dt className="text-xs text-neutral-400">分发</dt><dd>{item.dispatchCount}</dd></div>
+                <div><dt className="text-xs text-neutral-400">待手工交接</dt><dd>{item.manualReadyDispatchCount}</dd></div>
+                <div><dt className="text-xs text-neutral-400">已回流</dt><dd>{item.measuredDispatchCount}</dd></div>
+                <div><dt className="text-xs text-neutral-400">结果</dt><dd>{item.resultAssetCount}</dd></div>
+                <div><dt className="text-xs text-neutral-400">审核</dt><dd>{item.clientReviewAssetCount}</dd></div>
+                <div><dt className="text-xs text-neutral-400">已批准</dt><dd>{item.approvedDeliverableCount}</dd></div>
+                <div><dt className="text-xs text-neutral-400">返修</dt><dd>{item.revisionRequestedCount}</dd></div>
+                <div><dt className="text-xs text-neutral-400">闭环分</dt><dd>{item.loopCompletionScore}/100</dd></div>
+              </dl>
+              <div className="mt-4 rounded-lg border border-neutral-200 bg-neutral-50 p-3">
+                <div className="text-xs font-semibold uppercase text-neutral-500">生产交接包</div>
+                <div className="mt-1 text-sm text-neutral-600">{readableHandoffSummary(item.handoffPacket.summary)}</div>
+                {item.handoffPacket.reviewPortalUrls.length ? (
+                  <div className="mt-2 space-y-1">
+                    {item.handoffPacket.reviewPortalUrls.map(url => (
+                      <a className="block truncate text-xs text-emerald-700 underline-offset-4 hover:underline" href={reviewUrlWithVariant(url, selectedVariantId)} key={url}>客户审核门户：{reviewUrlWithVariant(url, selectedVariantId)}</a>
+                    ))}
+                  </div>
+                ) : null}
+                {item.handoffPacket.missingEvidence.length ? (
+                  <div className="mt-2 space-y-1">
+                    {item.handoffPacket.missingEvidence.slice(0, 4).map(item => <div className="text-xs text-amber-700" key={item}>缺证据：{queueText(item)}</div>)}
+                  </div>
+                ) : <div className="mt-2 text-xs text-emerald-700">交接证据已覆盖计划、执行、成片、审核、批准和表现回流。</div>}
+              </div>
+              <div className="mt-3 text-xs text-neutral-500">渠道：{item.channels.join(', ') || '-'}</div>
+              <div className="mt-4 rounded-lg border border-sky-200 bg-sky-50 p-3">
+                <div className="flex flex-col gap-1 sm:flex-row sm:items-start sm:justify-between">
+                  <div>
+                    <div className="text-xs font-semibold uppercase text-sky-800">视频生产护照</div>
+                    <div className="mt-1 text-xs leading-5 text-sky-700">把智能混剪和一键视频拆成可验收门禁</div>
+                  </div>
+                  <div className="text-xs leading-5 text-sky-700">
+                    没有成片、客户批准和回流证据前，不把任务队列说成真实视频工厂。
+                  </div>
+                </div>
+                <div className="mt-3 grid gap-2 md:grid-cols-5">
+                  {buildVideoProductionPassport(item).map(gate => (
+                    <div className={`rounded-md border px-3 py-2 ${productionPassportClass(gate.tone)}`} key={gate.title}>
+                      <div className="text-xs opacity-65">{gate.title}</div>
+                      <div className="mt-1 text-sm font-semibold">{gate.value}</div>
+                      <div className="mt-1 text-xs leading-5 opacity-75">{gate.detail}</div>
+                    </div>
+                  ))}
+                </div>
+              </div>
+              {item.remixPlan.length ? (
+                <div className="mt-4 rounded-lg border border-neutral-200 bg-neutral-50 p-3">
+                  <div className="text-xs font-semibold uppercase text-neutral-500">智能混剪计划</div>
+                  <div className="mt-2 space-y-3">
+                    {item.remixPlan.slice(0, 3).map(variant => (
+                      <div className="border-b border-neutral-200 pb-2 text-xs text-neutral-600 last:border-b-0 last:pb-0" key={variant.id}>
+                        <div className="flex flex-col gap-1 sm:flex-row sm:items-start sm:justify-between">
+                          <div className="font-semibold text-neutral-950">{variant.label}</div>
+                          <span className="w-fit rounded-full border border-emerald-200 bg-emerald-50 px-2 py-1 text-emerald-700">{remixSourceLabel(variant.source)}</span>
+                        </div>
+                        <div className="mt-1">钩子：{variant.hook}</div>
+                        <div className="mt-1 text-neutral-500">剪辑：{variant.cutPlan.slice(0, 3).join(' / ')}</div>
+                        <div className="mt-1 text-amber-700">边界：{variant.riskBoundary}</div>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              ) : null}
+              <div className="mt-4 rounded-lg border border-sky-200 bg-sky-50 p-3">
+                <div className="flex flex-col gap-1 sm:flex-row sm:items-start sm:justify-between">
+                  <div className="text-xs font-semibold uppercase text-sky-800">人工成片试跑 Runbook</div>
+                  <div className="text-xs leading-5 text-sky-700">不等 provider，也能把 Clico 式交付链路跑完</div>
+                </div>
+                <div className="mt-3 grid gap-2 md:grid-cols-5">
+                  {manualTrialRunbook(item).map(step => (
+                    <div className="rounded-md border border-sky-100 bg-white px-3 py-2" key={step.title}>
+                      <div className="text-xs font-semibold text-neutral-950">{step.title}</div>
+                      <div className="mt-1 w-fit rounded-full border border-sky-200 bg-sky-50 px-2 py-0.5 text-[11px] text-sky-700">{step.state}</div>
+                      <div className="mt-2 text-xs leading-5 text-neutral-600">{step.detail}</div>
+                    </div>
+                  ))}
+                </div>
+              </div>
+              {item.reviewLinks.length ? (
+                <div className="mt-4 rounded-lg border border-emerald-200 bg-emerald-50 p-3">
+                  <div className="text-xs font-semibold uppercase text-emerald-800">客户试用出口</div>
+                  <p className="mt-1 text-xs leading-5 text-emerald-700">
+                    把下面链接发给客户或朋友；当前会进入 {selectedVariant.label}，客户只需要预览、反馈或批准。
+                  </p>
+                  <div className="mt-2 space-y-1">
+                    {item.reviewLinks.map(link => (
+                      <a className="block truncate text-xs text-emerald-700 underline-offset-4 hover:underline" href={reviewUrlWithVariant(`/review/${link.token}`, selectedVariantId)} key={link.token}>
+                        审核：{link.assetTitle} / {link.status} / {reviewUrlWithVariant(`/review/${link.token}`, selectedVariantId)}
+                      </a>
+                    ))}
+                  </div>
+                </div>
+              ) : null}
+              {item.runbookActions.length ? (
+                <div className="mt-4 border-t border-neutral-200 pt-3">
+                  <div className="text-xs font-semibold uppercase text-neutral-500">运营动作包</div>
+                  <div className="mt-2 space-y-1">
+                    {item.runbookActions.map(action => (
+                      <div className="text-xs text-neutral-600" key={action.id}>
+                        {action.label} · 请求方式 {action.method} · 接口路径 {action.endpoint}
+                        <div className="mt-1 truncate text-neutral-400">请求内容：{readablePayload(action.payload)}</div>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              ) : null}
+            </article>
+          )) : (
+            <div className="rounded-lg border border-neutral-200 bg-white px-4 py-8 text-sm text-neutral-500">
+              当前项目还没有视频生产任务。创建任务后，系统会自动生成生产交接资产、分发计划和执行记录。
+            </div>
+          )}
+        </div>
+      </div>
+      </div>
+    </section>
+  );
+
   return (
-    <main className="min-h-screen bg-[#0d1014] text-[#f4efe7]">
+    <main className={isFriendTrialVariant ? 'min-h-screen bg-[#f3f4f6] text-neutral-900' : 'min-h-screen bg-[#0d1014] text-[#f4efe7]'}>
       <section className="mx-auto flex w-full max-w-6xl flex-col gap-8 px-5 py-10 sm:px-8">
-        <header className="border-b border-white/10 pb-6">
-          <p className="text-xs uppercase tracking-[0.24em] text-amber-200">Wenai 视频工厂</p>
+        <header className={isFriendTrialVariant ? 'border-b border-neutral-200 pb-6' : 'border-b border-white/10 pb-6'}>
+          <p className={isFriendTrialVariant ? 'text-xs uppercase text-neutral-500' : 'text-xs uppercase tracking-[0.24em] text-amber-200'}>Wenai 视频工厂</p>
           <h1 className="mt-3 max-w-4xl text-3xl font-semibold leading-tight sm:text-5xl">视频生产队列</h1>
-          <p className="mt-4 max-w-3xl text-sm leading-6 text-white/65">
+          <p className={isFriendTrialVariant ? 'mt-4 max-w-3xl text-sm leading-6 text-neutral-600' : 'mt-4 max-w-3xl text-sm leading-6 text-white/65'}>
             把商品 brief、参考视频、产品素材、AI 视频分析、智能混剪、供应商门禁、分发计划和执行记录统一到一条队列里。没有真实供应商授权时，任务保持仅交接，不伪装自动生成。
           </p>
         </header>
 
+        {isFriendTrialVariant ? (
+          <FriendTrialProductionConsole
+            cutOperatingChecks={cutOperatingChecks}
+            cutReadiness={cutReadiness}
+            providerReadyRatio={providerReadyRatio}
+            providerSandboxChecks={providerSandboxChecks}
+            queue={queue}
+            trialReadiness={trialReadiness}
+          />
+        ) : null}
+
+        {isFriendTrialVariant ? (
+          <>
+            {friendTrialVariantBoard}
+            {friendTrialOperationTools}
+            {friendTrialEvidenceStack}
+            {error ? <div className="rounded-2xl border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-700">{error}</div> : null}
+            {notice ? <div className="rounded-2xl border border-emerald-200 bg-emerald-50 px-4 py-3 text-sm text-emerald-700">{notice}</div> : null}
+          </>
+        ) : (
+          <>
         <FactoryVariantConsole
           accent="cyan"
           basePath="/factory/video"
@@ -1289,6 +2231,8 @@ export function VideoProductionQueueClient({
             </div>
           </div>
         </section>
+          </>
+        )}
       </section>
     </main>
   );

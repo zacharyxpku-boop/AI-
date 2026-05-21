@@ -98,10 +98,13 @@ describe('cast distribution console page', () => {
     expect(partnerHtml).toContain('91M+ creative output、42M+ video distribution');
     expect(partnerHtml).toContain('OAuth、广告账户授权、自动发布 API 和 analytics sync');
 
-    expect(friendHtml).toContain('朋友试用视角');
-    expect(friendHtml).toContain('朋友试用 Cast 路径');
-    expect(friendHtml).toContain('朋友只看三项');
-    expect(friendHtml).toContain('/factory/cast?projectId=friend-cast&amp;variant=operator');
+    expect(friendHtml).toContain('Wenai 商品增长工作台');
+    expect(friendHtml).toContain('发到平台，并留下证明');
+    expect(friendHtml).toContain('创建一个商品增长任务');
+    expect(friendHtml).toContain('Channel Matrix');
+    expect(friendHtml).toContain('新增发布账号');
+    expect(friendHtml).toContain('发布链路');
+    expect(friendHtml).toContain('/factory/manage?variant=friend_trial');
   });
 
   it('builds role-specific Cast playbooks from account and ad evidence', () => {

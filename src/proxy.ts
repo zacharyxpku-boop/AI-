@@ -29,6 +29,7 @@ const PUBLIC_PAGE_PREFIXES = [
   '/dashboard',
   '/factory',
   '/report',
+  '/status',
   '/cases',
   '/settings/kuaizi',
   '/unsubscribed',
@@ -39,11 +40,18 @@ const PUBLIC_API_PREFIXES = [
   '/api/industrial-chain/review/',
 ];
 
+const PUBLIC_READONLY_API_PATHS = new Set([
+  '/api/readiness',
+  '/api/industrial-chain/action-queue',
+  '/api/asset-permissions',
+]);
+
 export async function proxy(request: NextRequest) {
   const { pathname } = request.nextUrl;
 
   if (
     PUBLIC_EXACT_PATHS.has(pathname) ||
+    (request.method === 'GET' && PUBLIC_READONLY_API_PATHS.has(pathname)) ||
     PUBLIC_API_PREFIXES.some(prefix => pathname.startsWith(prefix)) ||
     pathname.startsWith('/_next') ||
     pathname.startsWith('/favicon')
@@ -63,7 +71,6 @@ export async function proxy(request: NextRequest) {
       pathname === '/poc' ||
       pathname === '/tools' ||
       pathname === '/docs' ||
-      pathname === '/status' ||
       pathname === '/roadmap' ||
       pathname === '/enterprise' ||
       pathname === '/inquire' ||
