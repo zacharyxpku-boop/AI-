@@ -1,13 +1,10 @@
 import type { NextConfig } from "next";
 
 const nextConfig: NextConfig = {
-  // Include config files in serverless function bundles
+  // Include runtime config files in server traces. Keep the route glob simple
+  // because Vercel's Next adapter rewrites this config during deployment.
   outputFileTracingIncludes: {
-    '/api/**': ['./src/config/**/*.json'],
-    '/': ['./src/config/**/*.json'],
-    '/modules/**': ['./src/config/**/*.json'],
-    '/login': ['./src/config/**/*.json'],
-    '/settings': ['./src/config/**/*.json'],
+    '/*': ['src/config/**/*.json'],
   },
   async headers() {
     return [
