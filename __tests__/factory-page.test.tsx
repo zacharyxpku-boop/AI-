@@ -11,7 +11,7 @@ describe('factory page', () => {
     const html = renderToStaticMarkup(page);
 
     expect(html).toContain('/factory/creative?variant=friend_trial');
-    expect(html).toContain('Next Step');
-    expect(html).toContain('打开流程入口');
+    expect(html).toContain('进入下一步');
+    expect(html).toContain('点击后是真的进入下一站');
   });
 });
