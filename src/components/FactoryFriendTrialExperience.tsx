@@ -80,12 +80,14 @@ export function FactoryFriendTrialExperience({
   subtitle,
   eyebrow = '客户可试用工作台',
   badge = '样例工作区',
+  metrics,
   actions,
   nextHref,
   nextLabel = '继续下一步',
   children,
 }: FactoryFriendTrialExperienceProps) {
   const activeIndex = Math.max(0, NAV.findIndex(item => item.id === active));
+  const primaryActionHref = nextHref ?? NAV[Math.min(activeIndex + 1, NAV.length - 1)].href;
 
   return (
     <main className="h-screen w-full overflow-hidden bg-[#f5f6f3] text-stone-950 antialiased">
@@ -183,6 +185,25 @@ export function FactoryFriendTrialExperience({
                                 <input className="mt-1 w-full bg-transparent text-sm font-semibold text-stone-950 outline-none" defaultValue={item.value} />
                               </label>
                             ))}
+                          </div>
+                          <div className="mt-4 grid gap-3 lg:grid-cols-[minmax(0,1fr)_220px]">
+                            <div className="grid gap-3 md:grid-cols-3">
+                              {metrics.map(item => (
+                                <div className="rounded-xl border border-stone-200 bg-white px-3 py-3" key={item.label}>
+                                  <div className="text-[11px] font-medium text-stone-500">{item.label}</div>
+                                  <div className="mt-1 text-sm font-semibold text-stone-950">{item.value}</div>
+                                  {item.detail ? <p className="mt-2 text-xs leading-5 text-stone-500">{item.detail}</p> : null}
+                                </div>
+                              ))}
+                            </div>
+                            <Link className="flex min-h-[120px] flex-col justify-between rounded-2xl border border-emerald-200 bg-emerald-50 px-4 py-3 text-stone-950 transition hover:border-emerald-300 hover:bg-emerald-100/70" href={primaryActionHref}>
+                              <div>
+                                <div className="text-[11px] font-semibold uppercase tracking-[0.16em] text-emerald-700">Next Step</div>
+                                <div className="mt-2 text-base font-semibold">{nextLabel}</div>
+                                <p className="mt-2 text-xs leading-5 text-stone-600">先确认当前商品任务状态，再进入下一步，不用靠口头解释继续试用。</p>
+                              </div>
+                              <span className="mt-3 text-sm font-semibold text-emerald-700">打开流程入口</span>
+                            </Link>
                           </div>
                         </div>
                       </div>
