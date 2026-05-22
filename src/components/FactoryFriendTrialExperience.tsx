@@ -208,6 +208,29 @@ export function FactoryFriendTrialExperience({
             </div>
           </header>
 
+          <nav className="shrink-0 overflow-x-auto border-b border-stone-200 bg-white px-4 py-3 xl:hidden" aria-label="商品增长步骤">
+            <div className="flex min-w-max gap-2">
+              {NAV.map((item, index) => (
+                <Link
+                  aria-current={item.id === active ? 'page' : undefined}
+                  className={`flex min-w-[132px] items-center gap-2 rounded-2xl border px-3 py-2 text-sm ${
+                    item.id === active ? 'border-stone-950 bg-stone-950 text-white' : 'border-stone-200 bg-white text-stone-700'
+                  }`}
+                  href={item.href}
+                  key={item.id}
+                >
+                  <span className={`flex size-7 shrink-0 items-center justify-center rounded-xl text-xs font-semibold ${item.id === active ? 'bg-white text-stone-950' : 'bg-stone-100 text-stone-500'}`}>
+                    {index + 1}
+                  </span>
+                  <span className="min-w-0">
+                    <span className="block truncate font-semibold">{item.label}</span>
+                    <span className={`block truncate text-xs ${item.id === active ? 'text-white/65' : 'text-stone-400'}`}>{item.hint}</span>
+                  </span>
+                </Link>
+              ))}
+            </div>
+          </nav>
+
           <div className="flex-1 overflow-y-auto px-4 py-5 md:px-6 xl:px-8">
             <div className="mx-auto max-w-[1440px] space-y-5 pb-10">
               <section className="grid items-start gap-5 xl:grid-cols-[minmax(0,1fr)_360px]">
