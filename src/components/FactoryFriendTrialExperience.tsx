@@ -4,6 +4,7 @@ import type { ReactNode } from 'react';
 import { FactoryCommandCenter } from './FactoryCommandCenter';
 import { FactoryCurrentTaskPanel } from './FactoryCurrentTaskPanel';
 import { FactoryHeroCommandPanel } from './FactoryHeroCommandPanel';
+import { FactoryProductTaskPanel } from './FactoryProductTaskPanel';
 import { FactoryRecentProjectsPanel } from './FactoryRecentProjectsPanel';
 import { FactoryToolLauncherPanel } from './FactoryToolLauncherPanel';
 import { FactoryWorkbenchAssistant } from './FactoryWorkbenchAssistant';
@@ -328,54 +329,14 @@ export function FactoryFriendTrialExperience({
               <FactoryWorkbenchInteractionPanel />
 
               <section className="grid gap-5 xl:grid-cols-[minmax(0,0.92fr)_minmax(0,1.08fr)]">
-                <div className="rounded-xl border border-slate-200 bg-white p-5 shadow-sm">
-                  <div className="flex flex-col gap-4 md:flex-row md:items-start md:justify-between">
-                    <div>
-                      <div className="text-xs font-bold uppercase tracking-wide text-slate-400">商品任务</div>
-                      <div className="mt-1 text-sm font-black text-indigo-600">创建一个商品增长任务</div>
-                      <h3 className="mt-1 text-2xl font-black text-slate-950">{title}</h3>
-                      <p className="mt-2 max-w-xl text-sm leading-6 text-slate-500">{activeStep.job}</p>
-                    </div>
-                    <Link className="inline-flex min-h-11 items-center justify-center rounded-lg bg-indigo-600 px-5 text-sm font-black text-white shadow-sm transition hover:bg-indigo-700" href={primaryActionHref}>
-                      {nextLabel}
-                    </Link>
-                  </div>
-
-                  <div className="mt-5 grid gap-3 md:grid-cols-3">
-                    {[
-                      ['商品', '伸缩抽屉收纳盒'],
-                      ['目标', '拿到客户咨询线索'],
-                      ['渠道', '小红书 / 抖音'],
-                    ].map(([label, value]) => (
-                      <label className="block rounded-lg border border-slate-200 bg-slate-50 px-4 py-3" key={label}>
-                        <span className="text-xs font-bold text-slate-400">{label}</span>
-                        <input className="mt-1 w-full bg-transparent text-base font-black text-slate-950 outline-none" defaultValue={value} />
-                      </label>
-                    ))}
-                  </div>
-
-                  <div className="mt-5 grid gap-3 md:grid-cols-3">
-                    {metrics.map(item => (
-                      <div className={`rounded-lg border p-4 ${metricTone[item.tone ?? 'slate']}`} key={item.label}>
-                        <div className="text-xs font-bold opacity-70">{item.label}</div>
-                        <div className="mt-1 text-lg font-black">{item.value}</div>
-                        {item.detail ? <p className="mt-2 text-xs leading-5 opacity-75">{item.detail}</p> : null}
-                      </div>
-                    ))}
-                  </div>
-
-                  <div className="mt-5 rounded-lg border border-amber-200 bg-amber-50 p-4">
-                    <div className="text-xs font-black text-amber-700">推进前先确认</div>
-                    <ul className="mt-3 space-y-2 text-sm leading-6 text-amber-900">
-                      {TASK_READINESS.map(item => (
-                        <li className="flex gap-2" key={item}>
-                          <span className="mt-2 h-1.5 w-1.5 flex-none rounded-full bg-amber-500" />
-                          <span>{item}</span>
-                        </li>
-                      ))}
-                    </ul>
-                  </div>
-                </div>
+                <FactoryProductTaskPanel
+                  job={activeStep.job}
+                  metrics={metrics}
+                  nextHref={primaryActionHref}
+                  nextLabel={nextLabel}
+                  readiness={TASK_READINESS}
+                  title={title}
+                />
 
                 <div className="rounded-xl border border-slate-200 bg-white p-5 shadow-sm">
                   <div className="flex items-center justify-between gap-3">

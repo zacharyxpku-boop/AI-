@@ -28,6 +28,8 @@ describe('factory page', () => {
     expect(html).toContain('Recent Workspace');
     expect(html).toContain('Workspace Detail');
     expect(html).toContain('打开这个工程');
+    expect(html).toContain('任务摘要');
+    expect(html).toContain('保存任务');
     expect(html).toContain('任务完成度');
     expect(html).toContain('商品和目标渠道已确认');
     expect(html).toContain('打开这个工作流');
