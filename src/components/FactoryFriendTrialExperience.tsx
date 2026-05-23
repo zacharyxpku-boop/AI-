@@ -1,6 +1,7 @@
 import Link from 'next/link';
 import type { ReactNode } from 'react';
 
+import { FactoryHeroCommandPanel } from './FactoryHeroCommandPanel';
 import { FactoryRecentProjectsPanel } from './FactoryRecentProjectsPanel';
 import { FactoryToolLauncherPanel } from './FactoryToolLauncherPanel';
 import { FactoryWorkbenchAssistant } from './FactoryWorkbenchAssistant';
@@ -309,18 +310,7 @@ export function FactoryFriendTrialExperience({
                   <div className="mx-auto max-w-4xl text-center">
                     <h2 className="text-3xl font-black leading-tight tracking-tight text-slate-950 md:text-[34px]">Hi, what will we create today?</h2>
                     <p className="mx-auto mt-3 max-w-2xl text-sm leading-6 text-slate-500">{subtitle || title}</p>
-                    <div className="mx-auto mt-7 inline-flex rounded-full bg-white p-1 shadow-sm ring-1 ring-slate-200">
-                      <span className="rounded-full bg-white px-8 py-3 text-sm font-black text-slate-950 shadow-sm ring-1 ring-slate-100">AI工具</span>
-                      <span className="px-8 py-3 text-sm font-bold text-slate-500">小W</span>
-                    </div>
-                  </div>
-
-                  <div className="mx-auto mt-6 flex max-w-3xl flex-wrap items-center justify-center gap-2">
-                    {['脚本', '影棚', '复刻', '配音', '分发'].map(item => (
-                      <Link className="rounded-full border border-slate-200 bg-white/80 px-3 py-1.5 text-xs font-bold text-slate-600 shadow-sm transition hover:border-indigo-200 hover:text-indigo-700" href={primaryActionHref} key={item}>
-                        {item}
-                      </Link>
-                    ))}
+                    <FactoryHeroCommandPanel primaryActionHref={primaryActionHref} />
                   </div>
 
                   <FactoryToolLauncherPanel primaryActionHref={primaryActionHref} tools={WORKBENCH_TOOLS} />
