@@ -12,7 +12,7 @@ type CommandItem = {
 
 const COMMANDS: CommandItem[] = [
   { title: '新建商品工程', desc: '从商品、渠道和负责人开始', href: '/factory?variant=friend_trial', group: '工程' },
-  { title: '生成脚本', desc: '标题、口播、图文草稿', href: '/factory/creative?variant=friend_trial', group: 'AI工具' },
+  { title: '生成脚本', desc: '标题、口播、图文草稿', href: '/factory/creative?variant=friend_trial', group: 'AI 工具' },
   { title: '上传素材', desc: '商品图、视频片段、授权说明', href: '/factory/create?variant=friend_trial', group: '素材' },
   { title: '批量合成', desc: '短视频、图文、多版本内容', href: '/factory/video?variant=friend_trial', group: '生产' },
   { title: '发布排期', desc: '渠道、发布时间、发布证明', href: '/factory/cast?variant=friend_trial', group: '分发' },

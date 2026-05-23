@@ -32,10 +32,10 @@ export function FactoryWorkbenchAssistant({ primaryActionHref }: { primaryAction
             <div className="flex items-center justify-between gap-3">
               <div>
                 <div className="text-xs font-bold uppercase tracking-[0.2em] text-white/50">Assistant</div>
-                <h3 className="mt-1 text-base font-black">小W 工作助手</h3>
+                <h3 className="mt-1 text-base font-black">小 W 工作助手</h3>
               </div>
               <button
-                aria-label="关闭小W助手"
+                aria-label="关闭小 W 助手"
                 className="flex size-8 items-center justify-center rounded-full bg-white/10 text-sm font-black text-white transition hover:bg-white/20"
                 onClick={() => setOpen(false)}
                 type="button"
@@ -46,7 +46,7 @@ export function FactoryWorkbenchAssistant({ primaryActionHref }: { primaryAction
           </div>
           <div className="space-y-3 p-4">
             <div className="rounded-xl bg-slate-50 p-3 text-sm leading-6 text-slate-700">
-              我会按“商品资料 → 内容生成 → 发布证据 → 销售移交”的顺序带客户走，不展示虚构效果数字。
+              我会按“商品资料 → 内容生产 → 发布证据 → 销售移交”的顺序带客户推进，只展示真实状态和可执行动作。
             </div>
             <div className="grid gap-2">
               {ASSISTANT_ACTIONS.map(action => (
@@ -74,12 +74,12 @@ export function FactoryWorkbenchAssistant({ primaryActionHref }: { primaryAction
           onClick={() => setOpen(true)}
           type="button"
         >
-          小W 在线 · 点我打开下一步助手
+          小 W 在线 · 点我打开下一步助手
         </button>
       )}
 
       <button
-        aria-label="打开小W助手"
+        aria-label="打开小 W 助手"
         className="flex size-14 items-center justify-center rounded-full bg-gradient-to-br from-indigo-500 via-pink-500 to-cyan-400 text-lg font-black text-white shadow-xl ring-4 ring-white transition hover:scale-105"
         onClick={() => setOpen(value => !value)}
         type="button"

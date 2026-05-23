@@ -49,21 +49,21 @@ export type FactoryFriendTrialExperienceProps = {
 };
 
 const NAV = [
-  { id: 'overview', label: '开始工作', hint: '选择今天任务', href: '/factory?variant=friend_trial', icon: '⌂' },
-  { id: 'creative', label: '编写灵感', hint: '卖点和脚本', href: '/factory/creative?variant=friend_trial', icon: '✎' },
-  { id: 'create', label: '素材生产', hint: '商品图和授权', href: '/factory/create?variant=friend_trial', icon: '✦' },
-  { id: 'video', label: '合成量产', hint: '短视频和图文', href: '/factory/video?variant=friend_trial', icon: '▶' },
-  { id: 'cast', label: '投放分发', hint: '渠道和证据', href: '/factory/cast?variant=friend_trial', icon: '↗' },
-  { id: 'manage', label: '客户移交', hint: '跟进和交付', href: '/factory/manage?variant=friend_trial', icon: '✓' },
+  { id: 'overview', label: '开始工作', hint: '选择今天任务', href: '/factory?variant=friend_trial', icon: '01' },
+  { id: 'creative', label: '编写灵感', hint: '卖点和脚本', href: '/factory/creative?variant=friend_trial', icon: '02' },
+  { id: 'create', label: '素材生产', hint: '商品图和授权', href: '/factory/create?variant=friend_trial', icon: '03' },
+  { id: 'video', label: '合成量产', hint: '短视频和图文', href: '/factory/video?variant=friend_trial', icon: '04' },
+  { id: 'cast', label: '投放分发', hint: '渠道和证据', href: '/factory/cast?variant=friend_trial', icon: '05' },
+  { id: 'manage', label: '客户移交', hint: '跟进和交付', href: '/factory/manage?variant=friend_trial', icon: '06' },
 ] as const;
 
 const SERVICE_NAV = [
-  { label: '素材云盘', href: '/factory/create?variant=friend_trial', icon: '◫' },
-  { label: '手机协同', href: '/factory/create?variant=friend_trial', icon: '▣' },
-  { label: '直播切片', href: '/factory/video?variant=friend_trial', icon: '◉' },
-  { label: '创意洞察', href: '/factory/manage?variant=friend_trial', icon: '◇' },
-  { label: '视频翻译', href: '/factory/video?variant=friend_trial', icon: '◎' },
-  { label: '评论管理', href: '/factory/manage?variant=friend_trial', icon: '◌' },
+  { label: '素材云盘', href: '/factory/create?variant=friend_trial', icon: 'CD' },
+  { label: '手机协同', href: '/factory/create?variant=friend_trial', icon: 'PH' },
+  { label: '直播切片', href: '/factory/video?variant=friend_trial', icon: 'LV' },
+  { label: '创意洞察', href: '/factory/manage?variant=friend_trial', icon: 'IN' },
+  { label: '视频翻译', href: '/factory/video?variant=friend_trial', icon: 'TR' },
+  { label: '评论管理', href: '/factory/manage?variant=friend_trial', icon: 'CM' },
 ];
 
 const STEP_COPY: Record<FactoryFriendTrialExperienceProps['active'], {
@@ -76,56 +76,56 @@ const STEP_COPY: Record<FactoryFriendTrialExperienceProps['active'], {
   progress: string;
 }> = {
   overview: {
-    question: '今天先做哪一个商品?',
-    job: '把商品、目标人群、渠道和负责人先确定下来, 再进入卖点、素材、内容、发布和客户跟进。',
+    question: '今天先做哪一个商品？',
+    job: '把商品、目标人群、渠道和负责人先确定下来，再进入卖点、素材、内容、发布和客户跟进。',
     output: '商品任务卡、主推渠道、下一步操作入口。',
-    proof: '演示空间只展示流程样例, 不伪造真实店铺、广告账户或发布结果。',
-    owner: '客户填写, 运营确认',
+    proof: '演示空间只展示流程样例，不伪造真实店铺、广告账户或发布结果。',
+    owner: '客户填写，运营确认',
     next: '进入卖点选择',
     progress: '1/6',
   },
   creative: {
-    question: '这件商品凭什么被记住?',
+    question: '这件商品凭什么被记住？',
     job: '从场景、痛点、竞品和评论里收敛一个可拍、可讲、可审核的主卖点。',
     output: '主卖点、禁用表达、脚本方向、内容角度。',
-    proof: '只沉淀内容假设, 不承诺爆款和真实转化。',
-    owner: '运营处理, 客户确认',
+    proof: '只沉淀内容假设，不承诺爆款和真实转化。',
+    owner: '运营处理，客户确认',
     next: '补齐素材资料',
     progress: '2/6',
   },
   create: {
-    question: '素材够不够直接生产?',
-    job: '整理商品图、视频片段、授权、口播资料和品牌禁区, 避免生成内容时缺关键信息。',
+    question: '素材够不够直接生产？',
+    job: '整理商品图、视频片段、授权、口播资料和品牌禁区，避免生成内容时缺关键资料。',
     output: '素材云盘、授权边界、生产约束。',
     proof: '没有授权的素材不会标记为可发布。',
-    owner: '客户补资料, 运营验收',
+    owner: '客户补资料，运营验收',
     next: '生成内容版本',
     progress: '3/6',
   },
   video: {
-    question: '同一套素材能产出哪些版本?',
-    job: '把卖点拆成标题、口播、图文脚本和短视频版本, 先给客户审核再进入分发。',
+    question: '同一套素材能产出哪些版本？',
+    job: '把卖点拆成标题、口播、图文脚本和短视频版本，先给客户审核再进入分发。',
     output: '内容草稿、平台版本、审核待办。',
-    proof: '当前展示内容生产流程, 不冒充真实发布或真实效果。',
-    owner: '运营生成, 客户审核',
+    proof: '当前展示内容生产流程，不冒充真实发布或真实效果。',
+    owner: '运营生成，客户审核',
     next: '安排发布渠道',
     progress: '4/6',
   },
   cast: {
-    question: '发到哪里, 证据留在哪里?',
-    job: '安排小红书、抖音、视频号等渠道, 记录发布时间、发布链接、截图和负责人。',
+    question: '发到哪里，证据留在哪里？',
+    job: '安排小红书、抖音、视频号等渠道，记录发布时间、发布链接、截图和负责人。',
     output: '发布计划、证据清单、风险门禁。',
-    proof: '未接真实平台授权前, 只做计划和手动证据管理。',
-    owner: '运营排期, 客户可看',
+    proof: '未接真实平台授权前，只做计划和手动证据管理。',
+    owner: '运营排期，客户可看',
     next: '查看销售跟进',
     progress: '5/6',
   },
   manage: {
-    question: '销售下一步怎么跟?',
-    job: '把客户反馈、发布证明、表现表和负责人整理成可执行清单, 交给销售继续推进。',
+    question: '销售下一步怎么跟？',
+    job: '把客户反馈、发布证明、表现表和负责人整理成可执行清单，交给销售继续推进。',
     output: '线索回收表、跟进行动、客户确认记录。',
-    proof: '不展示虚构增长数字, 只保留真实反馈和可分配任务。',
-    owner: '销售接手, 运营留档',
+    proof: '不展示虚构增长数字，只保留真实反馈和可分配任务。',
+    owner: '销售接手，运营留档',
     next: '回到开始工作',
     progress: '6/6',
   },
@@ -134,9 +134,9 @@ const STEP_COPY: Record<FactoryFriendTrialExperienceProps['active'], {
 const WORKBENCH_TOOLS = [
   { title: '编写脚本', desc: '开场、卖点、口播、CTA', href: '/factory/creative?variant=friend_trial', badge: '01', accent: 'from-indigo-400 to-blue-500' },
   { title: 'AI 影棚', desc: '商品图、场景图、卖点图', href: '/factory/create?variant=friend_trial', badge: 'New', accent: 'from-cyan-400 to-sky-500' },
-  { title: 'AI 复刻', desc: '参考结构, 生成自有版本', href: '/factory/video?variant=friend_trial', badge: '02', accent: 'from-fuchsia-400 to-purple-500' },
+  { title: 'AI 复刻', desc: '参考结构，生成自有版本', href: '/factory/video?variant=friend_trial', badge: '02', accent: 'from-fuchsia-400 to-purple-500' },
   { title: '批量合成', desc: '替换商品、画面和标题', href: '/factory/video?variant=friend_trial', badge: '03', accent: 'from-amber-400 to-orange-500' },
-  { title: '多语言配音', desc: '面向跨境渠道的脚本', href: '/factory/video?variant=friend_trial', badge: '04', accent: 'from-teal-400 to-emerald-500' },
+  { title: '多语配音', desc: '面向跨境渠道的脚本', href: '/factory/video?variant=friend_trial', badge: '04', accent: 'from-teal-400 to-emerald-500' },
   { title: '投放分发', desc: '排期、证据、负责人', href: '/factory/cast?variant=friend_trial', badge: '05', accent: 'from-slate-700 to-slate-950' },
   { title: '创意洞察', desc: '只记录真实反馈', href: '/factory/manage?variant=friend_trial', badge: '06', accent: 'from-rose-400 to-pink-500' },
 ];
@@ -153,9 +153,9 @@ const RECENT_PROJECTS = [
 const RECENT_FILTERS = ['全部', '素材', '工程', '成片', '视频', '图片', '音频'];
 
 const TASK_READINESS = [
-  '锁定 1 个商品和 1 个主渠道, 客户能看懂今天到底推进什么。',
-  '素材、授权或口播资料缺失时, 先补资料再生成内容。',
-  '销售只接真实确认、发布证明和客户反馈, 不接虚构效果数字。',
+  '锁定 1 个商品和 1 个主渠道，客户能看懂今天到底推进什么。',
+  '素材、授权或口播资料缺失时，先补资料再生成内容。',
+  '销售只接真实确认、发布证明和客户反馈，不接虚构效果数字。',
 ];
 
 const metricTone: Record<Tone, string> = {
@@ -207,7 +207,7 @@ export function FactoryFriendTrialExperience({
 
           <nav className="flex-1 overflow-y-auto px-3 pb-4">
             <Link href="/factory?variant=friend_trial" className={`mb-5 flex items-center gap-3 rounded-lg px-3 py-3 text-sm font-black shadow-sm ${active === 'overview' ? 'bg-white text-slate-950' : 'text-slate-700 hover:bg-white/70'}`}>
-              <span className="flex size-8 items-center justify-center rounded-md bg-slate-950 text-white">⌂</span>
+              <span className="flex size-8 items-center justify-center rounded-md bg-slate-950 text-white">01</span>
               开始工作
             </Link>
 
@@ -230,7 +230,7 @@ export function FactoryFriendTrialExperience({
             <div className="space-y-1">
               {SERVICE_NAV.map(item => (
                 <Link className="flex items-center gap-3 rounded-lg px-3 py-2.5 text-sm font-bold text-slate-600 transition-colors hover:bg-white/70 hover:text-slate-950" href={item.href} key={item.label}>
-                  <span className="flex size-7 items-center justify-center rounded-md bg-white text-xs text-slate-500">{item.icon}</span>
+                  <span className="flex size-7 items-center justify-center rounded-md bg-white text-[10px] font-black text-slate-500">{item.icon}</span>
                   <span className="min-w-0 flex-1 truncate">{item.label}</span>
                 </Link>
               ))}
@@ -264,8 +264,11 @@ export function FactoryFriendTrialExperience({
                   <span className="rounded-md bg-slate-100 px-2 py-1 text-xs font-bold text-slate-600 ring-1 ring-inset ring-slate-200">{badge}</span>
                   <span className="rounded-md bg-emerald-50 px-2 py-1 text-xs font-bold text-emerald-700 ring-1 ring-inset ring-emerald-200">{activeStep.progress}</span>
                 </div>
-                <p className="mt-1 max-w-3xl text-sm leading-6 text-slate-500">从商品任务开始, 串起脚本、素材、合成、分发和客户移交。客户打开后按卡片推进, 不需要理解后台术语。</p>
-                <p className="sr-only">一眼看懂：这套内容怎么帮商品拿到线索</p>
+                <p className="mt-1 max-w-3xl text-sm leading-6 text-slate-500">
+                  从商品任务开始，串起脚本、素材、合成、分发和客户移交。客户打开后按卡片推进，不需要理解后台术语。
+                </p>
+                <p className="mt-1 text-xs font-bold text-indigo-600">一眼看懂：这套内容怎么帮商品拿到线索</p>
+                <p className="sr-only">{eyebrow}</p>
               </div>
               <FactoryCommandCenter nextHref={primaryActionHref} nextLabel={nextLabel} />
             </div>
@@ -390,7 +393,7 @@ export function FactoryFriendTrialExperience({
                   <div className="flex flex-col gap-2 md:flex-row md:items-end md:justify-between">
                     <div>
                       <div className="text-xs font-bold uppercase tracking-wide text-slate-400">流程准备度</div>
-                      <h3 className="mt-1 text-xl font-black text-slate-950">只展示准备度, 不伪造效果数字</h3>
+                      <h3 className="mt-1 text-xl font-black text-slate-950">只展示准备度，不伪造效果数字</h3>
                     </div>
                     <span className="text-sm text-slate-500">客户可用它判断下一步卡在哪里</span>
                   </div>

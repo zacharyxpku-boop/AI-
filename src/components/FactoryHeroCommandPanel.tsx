@@ -13,27 +13,27 @@ const COMMANDS: HeroCommand[] = [
   {
     label: '脚本',
     href: '/factory/creative?variant=friend_trial',
-    prompt: '把商品卖点拆成标题、口播和图文草稿。',
+    prompt: '把商品卖点拆成标题、口播、图文草稿和行动引导，先审核再进入生产。',
   },
   {
     label: '影棚',
     href: '/factory/create?variant=friend_trial',
-    prompt: '整理商品图、场景图、授权和素材限制。',
+    prompt: '整理商品图、场景图、授权说明和素材限制，避免内容生产时缺关键资料。',
   },
   {
     label: '复刻',
     href: '/factory/video?variant=friend_trial',
-    prompt: '参考内容结构，生成 Wenai 自有版本。',
+    prompt: '参考内容结构，生成 Wenai 自有版本，不复制第三方品牌、素材或专有表达。',
   },
   {
     label: '配音',
     href: '/factory/video?variant=friend_trial',
-    prompt: '把脚本切成可录制的短视频口播。',
+    prompt: '把脚本切成可录制的短视频口播段落，适配不同平台节奏。',
   },
   {
     label: '分发',
     href: '/factory/cast?variant=friend_trial',
-    prompt: '安排渠道、发布时间和发布证明。',
+    prompt: '安排渠道、发布时间、发布证据和负责人，让客户看到真实推进状态。',
   },
 ];
 
@@ -50,14 +50,14 @@ export function FactoryHeroCommandPanel({ primaryActionHref }: { primaryActionHr
             onClick={() => setMode('tools')}
             type="button"
           >
-            AI工具
+            AI 工具
           </button>
           <button
             className={`rounded-full px-6 py-2.5 text-sm font-black transition ${mode === 'assistant' ? 'bg-white text-slate-950 shadow-sm' : 'text-slate-500'}`}
             onClick={() => setMode('assistant')}
             type="button"
           >
-            小W
+            小 W
           </button>
         </div>
         <Link
@@ -92,7 +92,7 @@ export function FactoryHeroCommandPanel({ primaryActionHref }: { primaryActionHr
         </div>
       ) : (
         <div className="mt-4 rounded-xl bg-indigo-50 px-4 py-3 text-sm font-bold leading-6 text-indigo-900">
-          小W 会按“商品资料 → 内容生成 → 发布证据 → 销售移交”的顺序带客户完成下一步。
+          小 W 会按“商品资料 → 内容生产 → 发布证据 → 销售移交”的顺序带客户推进，不展示虚构效果数字。
         </div>
       )}
     </div>

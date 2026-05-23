@@ -56,7 +56,7 @@ const QUICK_ACTIONS: QuickAction[] = [
     desc: '设置渠道、发布时间、发布证据和负责人，让客户看到真实进度。',
     href: '/factory/cast?variant=friend_trial',
     meta: '渠道 / 链接 / 截图',
-    owner: '投放负责人',
+    owner: '分发负责人',
     accent: 'from-amber-500 to-orange-500',
   },
   {
