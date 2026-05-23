@@ -2,6 +2,7 @@ import Link from 'next/link';
 import type { ReactNode } from 'react';
 
 import { FactoryRecentProjectsPanel } from './FactoryRecentProjectsPanel';
+import { FactoryToolLauncherPanel } from './FactoryToolLauncherPanel';
 import { FactoryWorkbenchAssistant } from './FactoryWorkbenchAssistant';
 import { FactoryWorkbenchInteractionPanel } from './FactoryWorkbenchInteractionPanel';
 
@@ -322,21 +323,7 @@ export function FactoryFriendTrialExperience({
                     ))}
                   </div>
 
-                  <div className="mt-10 grid gap-4 sm:grid-cols-2 lg:grid-cols-4 2xl:grid-cols-7">
-                    {WORKBENCH_TOOLS.map(tool => (
-                      <Link className="group flex min-h-[156px] flex-col justify-between rounded-xl border border-slate-200 bg-white/88 p-4 shadow-sm backdrop-blur transition hover:-translate-y-1 hover:border-indigo-200 hover:shadow-md" href={tool.href} key={tool.title}>
-                        <div>
-                          <div className={`relative h-20 overflow-hidden rounded-xl bg-gradient-to-br ${tool.accent}`}>
-                            <div className="absolute left-3 top-3 rounded-full bg-white/90 px-2 py-1 text-[11px] font-black text-slate-700">{tool.badge}</div>
-                            <div className="absolute bottom-3 right-3 flex size-8 items-center justify-center rounded-full bg-white/90 text-sm font-black text-slate-950">+</div>
-                          </div>
-                          <h3 className="mt-3 text-base font-black text-slate-950">{tool.title}</h3>
-                          <p className="mt-1 text-xs leading-5 text-slate-500">{tool.desc}</p>
-                        </div>
-                        <div className="mt-4 text-xs font-black text-indigo-600 group-hover:text-indigo-800">打开模块 →</div>
-                      </Link>
-                    ))}
-                  </div>
+                  <FactoryToolLauncherPanel primaryActionHref={primaryActionHref} tools={WORKBENCH_TOOLS} />
                 </div>
               </section>
 
