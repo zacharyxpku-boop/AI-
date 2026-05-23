@@ -13,12 +13,13 @@ describe('factory page', () => {
     expect(html).toContain('/factory/creative?variant=friend_trial');
     expect(html).toContain('/factory/create?variant=friend_trial');
     expect(html).toContain('/factory/video?variant=friend_trial');
+    expect(html).toContain('/factory/manage?variant=friend_trial');
     expect(html).toContain('AI 电商内容工作台');
     expect(html).toContain('Hi, what will we create today?');
-    expect(html).toContain('AI工具');
-    expect(html).toContain('素材云盘');
-    expect(html).toContain('批量合成');
-    expect(html).toContain('客户看得懂的生产记录');
-    expect(html).toContain('推进前先确认');
+    expect(html).toContain('内容审核');
+    expect(html).toContain('发布证明');
+    expect(html).toContain('销售跟进');
+    expect(html).toContain('只把真实反馈、客户确认和负责人交给销售继续谈。');
+    expect(html).not.toContain('86%');
   });
 });

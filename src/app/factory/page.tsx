@@ -1,5 +1,6 @@
 import type { Metadata } from 'next';
 import Link from 'next/link';
+
 import { FactoryFriendTrialExperience } from '@/components/FactoryFriendTrialExperience';
 import { ListingFactoryConsole } from '@/components/marketing/ListingFactorySections';
 import {
@@ -15,7 +16,7 @@ import { buildReadinessInput } from '@/lib/readiness-input';
 
 export const metadata: Metadata = {
   title: '内容工厂控制台 | Wenai Listing Factory',
-  description: '集中查看 SKU 上新进度、品牌禁区、批量 Brief、内容任务和客户交付状态。',
+  description: '集中查看 SKU 上新进度、品牌边界、批量 Brief、内容任务和客户交付状态。',
 };
 
 export default async function FactoryPage({
@@ -51,12 +52,12 @@ export default async function FactoryPage({
           { label: '内容计划', value: '待生成', detail: '先审核后发布', tone: 'emerald' },
           { label: '销售跟进', value: '待分配', detail: '不虚构线索', tone: 'amber' },
         ]}
-        funnel={[
-          { label: '灵感', value: 86 },
-          { label: '素材', value: 74 },
-          { label: '剪辑', value: 66 },
-          { label: '分发', value: 58 },
-          { label: '成交', value: 42 },
+        readiness={[
+          { label: '商品与目标', value: '已锁定 1 个 SKU', detail: '客户先确认今天主推什么，再进入卖点和内容生产。', tone: 'sky' },
+          { label: '素材与授权', value: '待补齐', detail: '缺图、缺授权或缺口播资料时，先补资料再生成内容。', tone: 'amber' },
+          { label: '内容审核', value: '先出草稿', detail: '短视频和图文先给客户审核，不直接假装已经发布。', tone: 'emerald' },
+          { label: '发布证明', value: '待回填', detail: '渠道链接、截图和负责人要回写，不能只停在任务卡。', tone: 'slate' },
+          { label: '销售跟进', value: '可交接', detail: '只把真实反馈、客户确认和负责人交给销售继续谈。', tone: 'emerald' },
         ]}
         actions={[
           { role: '客户', title: '先填商品', value: '确认商品、目标和渠道', href: '/factory?variant=friend_trial' },
@@ -68,7 +69,11 @@ export default async function FactoryPage({
       >
         <section className="grid gap-4 md:grid-cols-2 xl:grid-cols-5">
           {operatingLinks.map(item => (
-            <Link className="group rounded-2xl border border-stone-200 bg-white p-4 shadow-sm transition hover:-translate-y-0.5 hover:border-stone-300 hover:shadow-lg" href={item.href} key={item.href}>
+            <Link
+              className="group rounded-2xl border border-stone-200 bg-white p-4 shadow-sm transition hover:-translate-y-0.5 hover:border-stone-300 hover:shadow-lg"
+              href={item.href}
+              key={item.href}
+            >
               <div className="text-xs font-medium text-stone-500">{item.label}</div>
               <h2 className="mt-2 text-base font-semibold text-stone-950">{item.title}</h2>
               <p className="mt-4 rounded-xl bg-stone-50 px-3 py-2 text-sm font-medium text-stone-600">{item.value}</p>
@@ -90,7 +95,7 @@ export default async function FactoryPage({
                 从 SKU 上新到创意、视频、分发、审核和回流的一张工作台
               </h1>
               <p className="mt-4 max-w-3xl text-[14px] leading-7 text-white/70">
-                这里是最终产品形态入口：筷子科技给出全链路工业化参照，Hookshot / Hookly 给出 hook 和 UGC 广告结构参照，Wenai 的目标是把它们收成可验收、可交接、可复盘的电商增长系统。
+                这里是最终产品形态入口：伙伴工具给出全链路工业化参照，Wenai 的目标是把它们收敛成可验收、可交接、可复盘的电商增长系统。
               </p>
             </div>
             <div className="rounded-md border border-amber-300/25 bg-amber-300/10 p-4 text-[13px] leading-6 text-amber-50">
@@ -105,7 +110,7 @@ export default async function FactoryPage({
                 <h2 className="mt-1 text-2xl font-black">同一套工厂，按对象切三种视角</h2>
               </div>
               <p className="max-w-xl text-[12px] leading-6 text-white/60">
-                Variant 不是换颜色，而是决定用户先看到什么、能做什么、哪些能力必须被明确挡住。先把三种视角跑通，再继续加厚创意、视频、分发和管理页面。
+                Variant 不是换颜色，而是决定用户先看到什么、能做什么、哪些能力必须被明确拦住。先把三种视角跑通，再继续加厚创意、视频、分发和管理页面。
               </p>
             </div>
             <div className="mt-4 grid gap-3 lg:grid-cols-3">

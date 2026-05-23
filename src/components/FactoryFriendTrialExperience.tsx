@@ -10,9 +10,11 @@ export type FactoryFriendMetric = {
   tone?: Tone;
 };
 
-export type FactoryFriendStage = {
+export type FactoryFriendReadiness = {
   label: string;
-  value: number;
+  value: string;
+  detail: string;
+  tone?: Tone;
 };
 
 export type FactoryFriendAction = {
@@ -29,7 +31,8 @@ export type FactoryFriendTrialExperienceProps = {
   eyebrow?: string;
   badge?: string;
   metrics: FactoryFriendMetric[];
-  funnel: FactoryFriendStage[];
+  readiness?: FactoryFriendReadiness[];
+  funnel?: Array<{ label: string; value: number }>;
   actions: FactoryFriendAction[];
   nextHref?: string;
   nextLabel?: string;
@@ -138,6 +141,8 @@ const RECENT_PROJECTS = [
   { title: '美容仪测评脚本', type: '口播', status: '待改稿', tone: 'bg-slate-100 text-slate-600 ring-slate-200' },
 ];
 
+const RECENT_FILTERS = ['全部', '素材', '工程', '成片', '视频', '图片', '音频'];
+
 const TASK_READINESS = [
   '锁定 1 个商品和 1 个主渠道, 客户能看懂今天到底推进什么。',
   '素材、授权或口播资料缺失时, 先补资料再生成内容。',
@@ -166,7 +171,8 @@ export function FactoryFriendTrialExperience({
   eyebrow = '客户可试用工作台',
   badge = '演示空间',
   metrics,
-  funnel,
+  readiness = [],
+  funnel = [],
   actions,
   nextHref,
   nextLabel = '继续下一步',
@@ -176,6 +182,14 @@ export function FactoryFriendTrialExperience({
   const activeStep = STEP_COPY[active];
   const primaryActionHref = nextHref ?? NAV[Math.min(activeIndex + 1, NAV.length - 1)].href;
   const progressWidth = `${Math.min(100, Math.max(12, ((activeIndex + 1) / NAV.length) * 100))}%`;
+  const proofCards = readiness.length
+    ? readiness
+    : funnel.map(item => ({
+        label: item.label,
+        value: `${item.value}%`,
+        detail: '只展示当前准备度，不代表真实发布结果或转化率。',
+        tone: 'slate' as const,
+      }));
 
   return (
     <main className="h-dvh w-full overflow-hidden bg-[#f7f9ff] text-slate-950 antialiased">
@@ -296,6 +310,14 @@ export function FactoryFriendTrialExperience({
                     </div>
                   </div>
 
+                  <div className="mx-auto mt-6 flex max-w-3xl flex-wrap items-center justify-center gap-2">
+                    {['脚本', '影棚', '复刻', '配音', '分发'].map(item => (
+                      <Link className="rounded-full border border-slate-200 bg-white/80 px-3 py-1.5 text-xs font-bold text-slate-600 shadow-sm transition hover:border-indigo-200 hover:text-indigo-700" href={primaryActionHref} key={item}>
+                        {item}
+                      </Link>
+                    ))}
+                  </div>
+
                   <div className="mt-10 grid gap-4 sm:grid-cols-2 lg:grid-cols-4 2xl:grid-cols-7">
                     {WORKBENCH_TOOLS.map(tool => (
                       <Link className="group flex min-h-[156px] flex-col justify-between rounded-xl border border-slate-200 bg-white/88 p-4 shadow-sm backdrop-blur transition hover:-translate-y-1 hover:border-indigo-200 hover:shadow-md" href={tool.href} key={tool.title}>
@@ -321,9 +343,25 @@ export function FactoryFriendTrialExperience({
                       <div className="text-xs font-bold uppercase tracking-wide text-slate-400">最近工程</div>
                       <h3 className="mt-1 text-2xl font-black text-slate-950">客户看得懂的生产记录</h3>
                     </div>
-                    <Link className="rounded-lg border border-slate-200 px-4 py-2 text-sm font-black text-slate-700 transition hover:bg-slate-50" href={primaryActionHref}>
-                      {activeStep.next}
-                    </Link>
+                    <div className="flex items-center gap-2">
+                      <Link className="rounded-lg border border-slate-200 px-4 py-2 text-sm font-black text-slate-700 transition hover:bg-slate-50" href="/factory/create?variant=friend_trial">上传素材</Link>
+                      <Link className="rounded-lg bg-slate-950 px-4 py-2 text-sm font-black text-white transition hover:bg-slate-800" href={primaryActionHref}>{activeStep.next}</Link>
+                    </div>
+                  </div>
+
+                  <div className="mt-5 flex flex-col gap-3 border-b border-slate-100 pb-4 lg:flex-row lg:items-center lg:justify-between">
+                    <div className="flex flex-wrap gap-2">
+                      {RECENT_FILTERS.map((item, index) => (
+                        <Link className={`rounded-full px-3 py-1.5 text-xs font-black transition ${index === 0 ? 'bg-indigo-600 text-white' : 'bg-slate-100 text-slate-600 hover:bg-slate-200'}`} href={primaryActionHref} key={item}>
+                          {item}
+                        </Link>
+                      ))}
+                    </div>
+                    <div className="flex flex-wrap gap-2">
+                      <div className="rounded-lg border border-slate-200 bg-white px-3 py-2 text-xs font-bold text-slate-400">开始日期 ~ 结束日期</div>
+                      <div className="min-w-[180px] rounded-lg border border-slate-200 bg-white px-3 py-2 text-xs font-bold text-slate-400">输入关键词...</div>
+                      <Link className="rounded-lg border border-slate-200 bg-white px-3 py-2 text-xs font-black text-slate-700" href={primaryActionHref}>全部类型</Link>
+                    </div>
                   </div>
 
                   <div className="mt-5 grid gap-4 sm:grid-cols-2 xl:grid-cols-3">
@@ -473,7 +511,7 @@ export function FactoryFriendTrialExperience({
                 ))}
               </section>
 
-              {funnel.length ? (
+              {proofCards.length ? (
                 <section className="rounded-xl border border-slate-200 bg-white p-5 shadow-sm">
                   <div className="flex flex-col gap-2 md:flex-row md:items-end md:justify-between">
                     <div>
@@ -483,15 +521,11 @@ export function FactoryFriendTrialExperience({
                     <span className="text-sm text-slate-500">客户可用它判断下一步卡在哪里</span>
                   </div>
                   <div className="mt-5 grid gap-3 md:grid-cols-5">
-                    {funnel.map(item => (
-                      <div className="rounded-lg border border-slate-200 bg-slate-50 p-4" key={item.label}>
-                        <div className="flex items-center justify-between gap-3">
-                          <span className="truncate text-sm font-black text-slate-950">{item.label}</span>
-                          <span className="text-sm font-black tabular-nums text-slate-500">{item.value}%</span>
-                        </div>
-                        <div className="mt-3">
-                          <ProgressBar value={`${Math.min(100, Math.max(0, item.value))}%`} />
-                        </div>
+                    {proofCards.map(item => (
+                      <div className={`rounded-lg border p-4 ${metricTone[item.tone ?? 'slate']}`} key={item.label}>
+                        <div className="text-xs font-bold opacity-70">{item.label}</div>
+                        <div className="mt-1 text-lg font-black">{item.value}</div>
+                        <p className="mt-2 text-xs leading-5 opacity-75">{item.detail}</p>
                       </div>
                     ))}
                   </div>
@@ -502,6 +536,17 @@ export function FactoryFriendTrialExperience({
             </div>
           </div>
         </section>
+      </div>
+      <div className="pointer-events-none fixed bottom-5 right-5 z-30 hidden items-end gap-3 md:flex">
+        <div className="rounded-2xl border border-slate-200 bg-white/95 px-4 py-3 text-sm font-bold text-slate-700 shadow-xl backdrop-blur">
+          小W 在线 · 可继续创建脚本、上传素材或生成发布清单
+        </div>
+        <Link className="pointer-events-auto flex size-14 items-center justify-center rounded-full bg-gradient-to-br from-indigo-500 via-pink-500 to-cyan-400 text-lg font-black text-white shadow-xl ring-4 ring-white" href={primaryActionHref}>
+          W
+        </Link>
+        <Link className="pointer-events-auto flex size-11 items-center justify-center rounded-full bg-slate-950 text-sm font-black text-white shadow-xl" href="/settings/kuaizi">
+          ?
+        </Link>
       </div>
     </main>
   );
