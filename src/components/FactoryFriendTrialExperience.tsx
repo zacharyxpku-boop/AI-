@@ -1,6 +1,8 @@
 import Link from 'next/link';
 import type { ReactNode } from 'react';
 
+import { FactoryWorkbenchInteractionPanel } from './FactoryWorkbenchInteractionPanel';
+
 type Tone = 'slate' | 'emerald' | 'amber' | 'sky';
 
 export type FactoryFriendMetric = {
@@ -413,6 +415,8 @@ export function FactoryFriendTrialExperience({
                   </Link>
                 </aside>
               </section>
+
+              <FactoryWorkbenchInteractionPanel />
 
               <section className="grid gap-5 xl:grid-cols-[minmax(0,0.92fr)_minmax(0,1.08fr)]">
                 <div className="rounded-xl border border-slate-200 bg-white p-5 shadow-sm">
