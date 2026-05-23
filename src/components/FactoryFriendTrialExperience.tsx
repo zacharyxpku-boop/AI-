@@ -1,6 +1,7 @@
 import Link from 'next/link';
 import type { ReactNode } from 'react';
 
+import { FactoryCurrentTaskPanel } from './FactoryCurrentTaskPanel';
 import { FactoryHeroCommandPanel } from './FactoryHeroCommandPanel';
 import { FactoryRecentProjectsPanel } from './FactoryRecentProjectsPanel';
 import { FactoryToolLauncherPanel } from './FactoryToolLauncherPanel';
@@ -162,14 +163,6 @@ const metricTone: Record<Tone, string> = {
   sky: 'border-sky-200 bg-sky-50 text-sky-900',
 };
 
-function ProgressBar({ value }: { value: string }) {
-  return (
-    <div className="h-1.5 overflow-hidden rounded-full bg-slate-100">
-      <div className="h-full rounded-full bg-gradient-to-r from-indigo-500 via-sky-500 to-emerald-500" style={{ width: value }} />
-    </div>
-  );
-}
-
 export function FactoryFriendTrialExperience({
   active,
   title,
@@ -187,7 +180,6 @@ export function FactoryFriendTrialExperience({
   const activeIndex = Math.max(0, NAV.findIndex(item => item.id === active));
   const activeStep = STEP_COPY[active];
   const primaryActionHref = nextHref ?? NAV[Math.min(activeIndex + 1, NAV.length - 1)].href;
-  const progressWidth = `${Math.min(100, Math.max(12, ((activeIndex + 1) / NAV.length) * 100))}%`;
   const proofCards = readiness.length
     ? readiness
     : funnel.map(item => ({
@@ -325,38 +317,16 @@ export function FactoryFriendTrialExperience({
                   projects={RECENT_PROJECTS}
                 />
 
-                <aside className="rounded-xl border border-slate-200 bg-white p-5 shadow-sm">
-                  <div className="flex items-start justify-between gap-3">
-                    <div>
-                      <div className="text-xs font-bold uppercase tracking-wide text-slate-400">Current task</div>
-                      <h3 className="mt-1 text-xl font-black text-slate-950">{activeStep.question}</h3>
-                    </div>
-                    <span className="rounded-full bg-slate-100 px-2.5 py-1 text-xs font-black text-slate-600">{activeStep.progress}</span>
-                  </div>
-                  <div className="mt-5">
-                    <ProgressBar value={progressWidth} />
-                  </div>
-                  <p className="mt-5 text-sm leading-6 text-slate-600">{activeStep.job}</p>
-
-                  <div className="mt-5 divide-y divide-slate-100 rounded-lg border border-slate-200">
-                    <div className="p-3">
-                      <div className="text-xs font-bold text-slate-400">本步输出</div>
-                      <p className="mt-1 text-sm font-bold leading-5 text-slate-900">{activeStep.output}</p>
-                    </div>
-                    <div className="p-3">
-                      <div className="text-xs font-bold text-slate-400">负责人</div>
-                      <p className="mt-1 text-sm font-bold text-slate-900">{activeStep.owner}</p>
-                    </div>
-                    <div className="bg-amber-50 p-3">
-                      <div className="text-xs font-bold text-amber-700">边界说明</div>
-                      <p className="mt-1 text-sm leading-5 text-amber-900">{activeStep.proof}</p>
-                    </div>
-                  </div>
-
-                  <Link className="mt-5 flex min-h-11 items-center justify-center rounded-lg bg-slate-950 px-4 text-sm font-black text-white shadow-sm transition hover:bg-slate-800" href={primaryActionHref}>
-                    {activeStep.next}
-                  </Link>
-                </aside>
+                <FactoryCurrentTaskPanel
+                  job={activeStep.job}
+                  nextHref={primaryActionHref}
+                  nextLabel={activeStep.next}
+                  output={activeStep.output}
+                  owner={activeStep.owner}
+                  progress={activeStep.progress}
+                  proof={activeStep.proof}
+                  question={activeStep.question}
+                />
               </section>
 
               <FactoryWorkbenchInteractionPanel />
