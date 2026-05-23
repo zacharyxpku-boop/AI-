@@ -1,6 +1,7 @@
 import Link from 'next/link';
 import type { ReactNode } from 'react';
 
+import { FactoryCommandCenter } from './FactoryCommandCenter';
 import { FactoryCurrentTaskPanel } from './FactoryCurrentTaskPanel';
 import { FactoryHeroCommandPanel } from './FactoryHeroCommandPanel';
 import { FactoryRecentProjectsPanel } from './FactoryRecentProjectsPanel';
@@ -265,12 +266,7 @@ export function FactoryFriendTrialExperience({
                 <p className="mt-1 max-w-3xl text-sm leading-6 text-slate-500">从商品任务开始, 串起脚本、素材、合成、分发和客户移交。客户打开后按卡片推进, 不需要理解后台术语。</p>
                 <p className="sr-only">一眼看懂：这套内容怎么帮商品拿到线索</p>
               </div>
-              <div className="flex shrink-0 items-center gap-2 overflow-x-auto">
-                <span className="rounded-full border border-amber-200 bg-amber-50 px-3 py-2 text-xs font-bold text-amber-800">样例空间 · 不展示虚假效果</span>
-                <Link className="rounded-full bg-slate-950 px-5 py-2 text-sm font-bold text-white shadow-sm transition hover:bg-slate-800" href={primaryActionHref}>
-                  {nextLabel}
-                </Link>
-              </div>
+              <FactoryCommandCenter nextHref={primaryActionHref} nextLabel={nextLabel} />
             </div>
           </header>
 
