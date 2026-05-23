@@ -1,6 +1,7 @@
 import Link from 'next/link';
 import type { ReactNode } from 'react';
 
+import { FactoryRecentProjectsPanel } from './FactoryRecentProjectsPanel';
 import { FactoryWorkbenchAssistant } from './FactoryWorkbenchAssistant';
 import { FactoryWorkbenchInteractionPanel } from './FactoryWorkbenchInteractionPanel';
 
@@ -340,48 +341,12 @@ export function FactoryFriendTrialExperience({
               </section>
 
               <section className="grid gap-5 xl:grid-cols-[minmax(0,1fr)_360px]">
-                <div className="rounded-xl border border-slate-200 bg-white p-5 shadow-sm">
-                  <div className="flex items-center justify-between gap-3">
-                    <div>
-                      <div className="text-xs font-bold uppercase tracking-wide text-slate-400">最近工程</div>
-                      <h3 className="mt-1 text-2xl font-black text-slate-950">客户看得懂的生产记录</h3>
-                    </div>
-                    <div className="flex items-center gap-2">
-                      <Link className="rounded-lg border border-slate-200 px-4 py-2 text-sm font-black text-slate-700 transition hover:bg-slate-50" href="/factory/create?variant=friend_trial">上传素材</Link>
-                      <Link className="rounded-lg bg-slate-950 px-4 py-2 text-sm font-black text-white transition hover:bg-slate-800" href={primaryActionHref}>{activeStep.next}</Link>
-                    </div>
-                  </div>
-
-                  <div className="mt-5 flex flex-col gap-3 border-b border-slate-100 pb-4 lg:flex-row lg:items-center lg:justify-between">
-                    <div className="flex flex-wrap gap-2">
-                      {RECENT_FILTERS.map((item, index) => (
-                        <Link className={`rounded-full px-3 py-1.5 text-xs font-black transition ${index === 0 ? 'bg-indigo-600 text-white' : 'bg-slate-100 text-slate-600 hover:bg-slate-200'}`} href={primaryActionHref} key={item}>
-                          {item}
-                        </Link>
-                      ))}
-                    </div>
-                    <div className="flex flex-wrap gap-2">
-                      <div className="rounded-lg border border-slate-200 bg-white px-3 py-2 text-xs font-bold text-slate-400">开始日期 ~ 结束日期</div>
-                      <div className="min-w-[180px] rounded-lg border border-slate-200 bg-white px-3 py-2 text-xs font-bold text-slate-400">输入关键词...</div>
-                      <Link className="rounded-lg border border-slate-200 bg-white px-3 py-2 text-xs font-black text-slate-700" href={primaryActionHref}>全部类型</Link>
-                    </div>
-                  </div>
-
-                  <div className="mt-5 grid gap-4 sm:grid-cols-2 xl:grid-cols-3">
-                    {RECENT_PROJECTS.map((project, index) => (
-                      <Link className="overflow-hidden rounded-xl border border-slate-200 bg-slate-50 shadow-sm transition hover:-translate-y-0.5 hover:bg-white hover:shadow-md" href={primaryActionHref} key={project.title}>
-                        <div className="relative aspect-video bg-gradient-to-br from-slate-200 via-white to-indigo-100">
-                          <div className="absolute left-3 top-3 rounded-md bg-slate-700/80 px-2 py-1 text-xs font-black text-white">{project.type}</div>
-                          <div className="absolute bottom-3 right-3 text-3xl font-black text-white/80">{String(index + 1).padStart(2, '0')}</div>
-                        </div>
-                        <div className="p-4">
-                          <div className="truncate text-sm font-black text-slate-950">{project.title}</div>
-                          <span className={`mt-3 inline-flex rounded-full px-2.5 py-1 text-xs font-bold ring-1 ${project.tone}`}>{project.status}</span>
-                        </div>
-                      </Link>
-                    ))}
-                  </div>
-                </div>
+                <FactoryRecentProjectsPanel
+                  filters={RECENT_FILTERS}
+                  nextLabel={activeStep.next}
+                  primaryActionHref={primaryActionHref}
+                  projects={RECENT_PROJECTS}
+                />
 
                 <aside className="rounded-xl border border-slate-200 bg-white p-5 shadow-sm">
                   <div className="flex items-start justify-between gap-3">

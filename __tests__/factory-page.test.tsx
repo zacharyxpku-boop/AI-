@@ -18,6 +18,9 @@ describe('factory page', () => {
     expect(html).toContain('Hi, what will we create today?');
     expect(html).toContain('Quick Start');
     expect(html).toContain('Action Preview');
+    expect(html).toContain('Recent Workspace');
+    expect(html).toContain('Workspace Detail');
+    expect(html).toContain('打开这个工程');
     expect(html).toContain('打开这个工作流');
     expect(html).toContain('小W 在线 · 点我打开下一步助手');
     expect(html).not.toContain('86%');
