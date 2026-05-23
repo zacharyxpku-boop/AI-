@@ -17,6 +17,7 @@ describe('factory page', () => {
     expect(html).toContain('/factory/manage?variant=friend_trial');
     expect(html).toContain('Hi, what will we create today?');
     expect(html).toContain('搜索工具、工程、下一步...');
+    expect(html).toContain('Ctrl K');
     expect(html).toContain('打开脚本');
     expect(html).toContain('把商品卖点拆成标题、口播和图文草稿。');
     expect(html).toContain('Tool Launcher');
