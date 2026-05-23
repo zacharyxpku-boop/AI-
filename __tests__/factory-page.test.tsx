@@ -14,7 +14,8 @@ describe('factory page', () => {
     expect(html).toContain('/factory/create?variant=friend_trial');
     expect(html).toContain('/factory/video?variant=friend_trial');
     expect(html).toContain('AI 电商内容工作台');
-    expect(html).toContain('今天要为哪个商品生产增长内容?');
+    expect(html).toContain('Hi, what will we create today?');
+    expect(html).toContain('AI工具');
     expect(html).toContain('素材云盘');
     expect(html).toContain('批量合成');
     expect(html).toContain('客户看得懂的生产记录');
