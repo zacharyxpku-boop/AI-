@@ -116,6 +116,12 @@ const PRODUCT_FIELDS = [
   { label: '渠道', value: '小红书' },
 ];
 
+const TASK_READINESS = [
+  '先确认今天只推 1 个商品和 1 个主渠道，避免内容方向分散。',
+  '没有商品图、授权或口播信息时，先去素材页补齐再生成内容。',
+  '销售只接客户真实确认和发布证明，不接虚构效果数据。',
+];
+
 const metricTone: Record<Tone, string> = {
   slate: 'border-slate-200 bg-slate-50 text-slate-900',
   emerald: 'border-emerald-200 bg-emerald-50 text-emerald-900',
@@ -295,9 +301,12 @@ export function FactoryFriendTrialExperience({
                       <h3 className="mt-1 text-2xl font-semibold text-stone-950">创建一个商品增长任务</h3>
                       <p className="mt-2 max-w-xl text-sm leading-6 text-pretty text-stone-500">{activeStep.mainJob}</p>
                     </div>
-                    <button className="min-h-11 rounded-xl bg-emerald-600 px-5 text-sm font-semibold text-white shadow-sm transition-colors hover:bg-emerald-700" type="button">
-                      生成内容计划
-                    </button>
+                    <Link
+                      className="inline-flex min-h-11 items-center justify-center rounded-xl bg-emerald-600 px-5 text-sm font-semibold text-white shadow-sm transition-colors hover:bg-emerald-700"
+                      href={primaryActionHref}
+                    >
+                      先确认卖点
+                    </Link>
                   </div>
 
                   <div className="mt-5 grid gap-3 md:grid-cols-3">
@@ -317,6 +326,18 @@ export function FactoryFriendTrialExperience({
                         {item.detail ? <p className="mt-2 text-xs leading-5 opacity-75">{item.detail}</p> : null}
                       </div>
                     ))}
+                  </div>
+
+                  <div className="mt-5 rounded-2xl border border-amber-200 bg-amber-50 p-4">
+                    <div className="text-xs font-medium text-amber-700">推进前先确认</div>
+                    <ul className="mt-3 space-y-2 text-sm leading-6 text-amber-900">
+                      {TASK_READINESS.map(item => (
+                        <li className="flex gap-2" key={item}>
+                          <span className="mt-2 h-1.5 w-1.5 flex-none rounded-full bg-amber-500" />
+                          <span>{item}</span>
+                        </li>
+                      ))}
+                    </ul>
                   </div>
                 </div>
 

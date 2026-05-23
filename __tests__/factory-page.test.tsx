@@ -13,5 +13,7 @@ describe('factory page', () => {
     expect(html).toContain('/factory/creative?variant=friend_trial');
     expect(html).toContain('进入下一步');
     expect(html).toContain('点击后是真的进入下一站');
+    expect(html).toContain('先确认卖点');
+    expect(html).toContain('推进前先确认');
   });
 });
