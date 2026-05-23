@@ -1,6 +1,7 @@
 import Link from 'next/link';
 import type { ReactNode } from 'react';
 
+import { FactoryWorkbenchAssistant } from './FactoryWorkbenchAssistant';
 import { FactoryWorkbenchInteractionPanel } from './FactoryWorkbenchInteractionPanel';
 
 type Tone = 'slate' | 'emerald' | 'amber' | 'sky';
@@ -541,17 +542,7 @@ export function FactoryFriendTrialExperience({
           </div>
         </section>
       </div>
-      <div className="pointer-events-none fixed bottom-5 right-5 z-30 hidden items-end gap-3 md:flex">
-        <div className="rounded-2xl border border-slate-200 bg-white/95 px-4 py-3 text-sm font-bold text-slate-700 shadow-xl backdrop-blur">
-          小W 在线 · 可继续创建脚本、上传素材或生成发布清单
-        </div>
-        <Link className="pointer-events-auto flex size-14 items-center justify-center rounded-full bg-gradient-to-br from-indigo-500 via-pink-500 to-cyan-400 text-lg font-black text-white shadow-xl ring-4 ring-white" href={primaryActionHref}>
-          W
-        </Link>
-        <Link className="pointer-events-auto flex size-11 items-center justify-center rounded-full bg-slate-950 text-sm font-black text-white shadow-xl" href="/settings/kuaizi">
-          ?
-        </Link>
-      </div>
+      <FactoryWorkbenchAssistant primaryActionHref={primaryActionHref} />
     </main>
   );
 }
