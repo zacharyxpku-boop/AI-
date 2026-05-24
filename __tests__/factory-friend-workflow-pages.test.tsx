@@ -8,11 +8,11 @@ import ManageFactoryPage from '@/app/factory/manage/page';
 import VideoFactoryPage from '@/app/factory/video/page';
 
 const pages = [
-  { name: 'creative', page: CreativeFactoryPage, expected: '先把商品卖点写成能审核的脚本', next: '/factory/create?variant=friend_trial' },
-  { name: 'create', page: CreateFactoryPage, expected: '把商品资料变成可复用素材货架', next: '/factory/video?variant=friend_trial' },
-  { name: 'video', page: VideoFactoryPage, expected: '一组卖点生成多条内容任务', next: '/factory/cast?variant=friend_trial' },
-  { name: 'cast', page: CastFactoryPage, expected: '发到平台，并留下发布证明', next: '/factory/manage?variant=friend_trial' },
-  { name: 'manage', page: ManageFactoryPage, expected: '把发布证明和客户反馈交给负责人', next: '/factory?variant=friend_trial' },
+  { name: 'creative', page: CreativeFactoryPage, expected: '先把商品资料变成客户能直接选择的卖点脚本', next: '/factory/create?variant=friend_trial' },
+  { name: 'create', page: CreateFactoryPage, expected: '把商品图、模特图、场景图和授权说明整理成素材货架', next: '/factory/video?variant=friend_trial' },
+  { name: 'video', page: VideoFactoryPage, expected: '用视频 API、数字人 API 和本地混剪引擎生成稳定内容版本', next: '/factory/cast?variant=friend_trial' },
+  { name: 'cast', page: CastFactoryPage, expected: '把内容变成客户自己能发布的多平台发布包', next: '/factory/manage?variant=friend_trial' },
+  { name: 'manage', page: ManageFactoryPage, expected: '把表现数据、客服反馈和售后问题变成下一轮增长动作', next: '/factory?variant=friend_trial' },
 ];
 
 describe('factory friend trial workflow pages', () => {
@@ -24,8 +24,9 @@ describe('factory friend trial workflow pages', () => {
 
     expect(html).toContain('Wenai 商品增长工作台');
     expect(html).toContain(expected);
-    expect(html).toContain('provider 未配置前');
-    expect(html).toContain('下一步助手');
+    expect(html).toContain('这一页最后交付什么');
+    expect(html).toContain('不用外部登录也能推进');
+    expect(html).not.toContain('provider 未配置前');
     expect(html).not.toContain('fixed bottom-5 right-5');
     expect(html).toContain(next.replaceAll('&', '&amp;'));
     expect(html).toContain('/factory/creative?variant=friend_trial');

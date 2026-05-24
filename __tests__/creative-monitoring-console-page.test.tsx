@@ -18,7 +18,7 @@ describe('creative monitoring console page', () => {
     const html = renderToStaticMarkup(page);
 
     expect(html).toContain('Wenai 商品增长工作台');
-    expect(html).toContain('先把商品卖点写成能拍、能发的内容脚本');
+    expect(html).toContain('先把商品资料变成客户能直接选择的卖点脚本');
     expect(html).toContain('商品利益点 / 平台话术 / 审核边界');
     expect(html).toContain('这一步要完成的事');
     expect(html).toContain('下一步怎么走');

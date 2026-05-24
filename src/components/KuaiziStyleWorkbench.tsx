@@ -91,9 +91,11 @@ const flowSteps: FlowStep[] = [
 const serviceNav = [
   { label: '商品资料', href: '/factory/creative?variant=friend_trial' },
   { label: '图片生成', href: '/factory/create?variant=friend_trial' },
+  { label: '模特生图', href: '/factory/create?variant=friend_trial' },
   { label: '视频混剪', href: '/factory/video?variant=friend_trial' },
   { label: '数字人口播', href: '/factory/video?variant=friend_trial' },
   { label: '发布包', href: '/factory/cast?variant=friend_trial' },
+  { label: '客服素材', href: '/factory/manage?variant=friend_trial' },
   { label: '复盘跟进', href: '/factory/manage?variant=friend_trial' },
 ];
 
@@ -108,11 +110,53 @@ const projects: Project[] = [
 
 const capabilityRows = [
   ['图片生成', '接入已有图片 API Key，生成主图、场景图、卖点图', '可接入', '上传商品图'],
+  ['模特生图', '用商品图和人群定位生成模特图、穿搭图、手持图', '等图片 Key', '确认模特风格'],
   ['视频生成', '接入已有视频 API Key，批量生成不同平台尺寸', '可接入', '确认分镜'],
   ['数字人/配音', '接入数字人或 TTS API，生成口播素材', '可接入', '选择人设和音色'],
-  ['开源混剪', '用开源剪辑组件把素材、字幕、封面拼成视频任务', '可本地执行', '导出任务包'],
-  ['账号分发', '先生成发布包和回填表；客户可自行发布，也可授权执行', '半自动', '选择发布方式'],
-  ['表现回流', '导入链接、截图、CSV 或手动数据，形成下一轮建议', '可用', '回填结果'],
+  ['开源混剪', '用 Remotion + FFmpeg + 时间线组件把素材、字幕、封面拼成稳定任务', '可本地执行', '进入渲染队列'],
+  ['账号分发', '先生成各平台标题、正文、标签、封面和发布清单；客户自行发布', '发布包优先', '导出平台包'],
+  ['表现回流', '导入链接、截图、CSV 或手动数据，形成下一轮建议', '可用', '上传表现数据'],
+  ['客服素材', '把商品卖点、常见问题、差评原因整理成客服话术和售后卡片', '可生成', '补充 FAQ'],
+] as const;
+
+const remixEngineRows = [
+  {
+    title: '时间线混剪',
+    body: '把脚本、商品图、视频片段、字幕、BGM、封面组成可复用时间线，优先用开源时间线编辑思路，输出稳定任务 JSON。',
+    status: '内置任务层',
+  },
+  {
+    title: '模板化渲染',
+    body: '用 Remotion 思路承接商品卡、价格锚点、口播字幕、前后对比、模特展示等模板，保证同一商品能批量出多版本。',
+    status: '可接渲染层',
+  },
+  {
+    title: 'FFmpeg 合成',
+    body: '最终用 FFmpeg 做转码、裁切、拼接、字幕烧录、音频混合和多尺寸输出，不依赖平台登录。',
+    status: '本地/服务器可跑',
+  },
+  {
+    title: '稳定队列',
+    body: '把渲染拆成待执行、渲染中、需补素材、已导出四类状态；失败时只重跑单条任务，不影响整批交付。',
+    status: '需要工程化',
+  },
+] as const;
+
+const commerceAssistantRows = [
+  ['商品上新', '标题、卖点、详情页结构、首批图文和短视频脚本。'],
+  ['模特与场景', '模特生图、手持图、穿搭图、场景图、规格图、对比图。'],
+  ['内容混剪', '短视频、数字人口播、多语配音、字幕、封面、BGM、批量尺寸。'],
+  ['平台发布包', '小红书、TikTok、Shopify、Meta、视频号的标题、正文、标签和素材清单。'],
+  ['客服与售后', 'FAQ、异议处理、差评解释、物流/尺码/材质话术、售后卡片。'],
+  ['表现复盘', '客户上传链接、截图、CSV 后，生成下一轮角度、素材缺口和放大建议。'],
+] as const;
+
+const publishingRows = [
+  ['小红书', '标题 3 版、正文 2 版、标签、封面、首评引导。'],
+  ['TikTok', '3 秒钩子、口播脚本、字幕、封面、Shop CTA。'],
+  ['Shopify', '商品标题、五点卖点、详情页模块、FAQ。'],
+  ['Meta', '广告主文案、标题、描述、素材尺寸清单。'],
+  ['视频号', '口播标题、短正文、评论区引导、私域承接话术。'],
 ] as const;
 
 function MiniIllustration({ step, large = false }: { step: FlowStep; large?: boolean }) {
@@ -214,7 +258,7 @@ export function KuaiziStyleWorkbench() {
             <div className="flex flex-col gap-3 lg:flex-row lg:items-center lg:justify-between">
               <div className="min-w-0">
                 <div className="flex flex-wrap items-center gap-2">
-                  <h1 className="text-lg font-black tracking-tight md:text-xl">Wenai 商品内容增长工作台</h1>
+                  <h1 className="text-lg font-black tracking-tight md:text-xl">Wenai 商品增长工作台</h1>
                   <span className="rounded-md bg-blue-50 px-2 py-1 text-xs font-bold text-blue-700 ring-1 ring-blue-100">API Key 可接入</span>
                   <span className="rounded-md bg-emerald-50 px-2 py-1 text-xs font-bold text-emerald-700 ring-1 ring-emerald-100">可先交付发布包</span>
                 </div>
@@ -243,7 +287,7 @@ export function KuaiziStyleWorkbench() {
                         不让客户看一堆抽象模块。客户只要按步骤填商品资料、选卖点、生成图片和视频、导出发布包，再把发布结果回填，平台就能给出下一轮建议。
                       </p>
                       <div className="mt-6 flex flex-wrap justify-center gap-2 lg:justify-start">
-                        {['商品图', '短视频', '数字人口播', '多平台文案', '发布包', '复盘建议'].map(item => (
+                        {['商品图', '模特生图', '短视频', '数字人口播', '客服话术', '发布包', '复盘建议'].map(item => (
                           <span className="rounded-full bg-white px-3 py-1.5 text-xs font-black text-slate-700 shadow-sm ring-1 ring-slate-200" key={item}>{item}</span>
                         ))}
                       </div>
@@ -324,6 +368,81 @@ export function KuaiziStyleWorkbench() {
                     开始生成卖点脚本
                   </Link>
                 </aside>
+              </section>
+
+              <section className="grid gap-5 xl:grid-cols-[minmax(0,1fr)_420px]">
+                <div className="rounded-lg border border-[#e2e8f5] bg-white p-5 shadow-sm">
+                  <div className="flex flex-col gap-2 md:flex-row md:items-end md:justify-between">
+                    <div>
+                      <p className="text-xs font-black uppercase tracking-[0.18em] text-indigo-500">Open Remix Engine</p>
+                      <h3 className="mt-1 text-lg font-black text-slate-950">混剪不等外部平台，先做成稳定的本地渲染系统</h3>
+                    </div>
+                    <Link className="text-sm font-black text-indigo-600" href="/factory/video?variant=friend_trial">查看视频 / 数字人流程</Link>
+                  </div>
+                  <div className="mt-5 grid gap-3 md:grid-cols-2">
+                    {remixEngineRows.map(row => (
+                      <article className="rounded-md border border-slate-200 bg-slate-50 p-4" key={row.title}>
+                        <div className="flex items-start justify-between gap-3">
+                          <h4 className="text-sm font-black text-slate-950">{row.title}</h4>
+                          <span className="shrink-0 rounded bg-indigo-50 px-2 py-1 text-[11px] font-black text-indigo-700">{row.status}</span>
+                        </div>
+                        <p className="mt-2 text-sm leading-6 text-slate-600">{row.body}</p>
+                      </article>
+                    ))}
+                  </div>
+                </div>
+
+                <aside className="rounded-lg border border-[#d8e4ff] bg-[#f4f8ff] p-5 text-slate-950 shadow-sm">
+                  <p className="text-xs font-black uppercase tracking-[0.18em] text-blue-600">Render Queue</p>
+                  <h3 className="mt-2 text-xl font-black leading-snug">大规模渲染队列先按“任务包”解决</h3>
+                  <p className="mt-3 text-sm leading-6 text-slate-600">
+                    每条视频都有素材清单、模板、尺寸、字幕、封面和输出路径。失败时只回到缺口，不让客户看到复杂报错。
+                  </p>
+                  <div className="mt-5 grid gap-2">
+                    {['待补素材', '可渲染', '渲染中', '已导出'].map((item, index) => (
+                      <div className="flex items-center justify-between rounded-md border border-blue-100 bg-white px-3 py-2 text-sm font-black text-slate-800" key={item}>
+                        <span>{item}</span>
+                        <span className="rounded bg-blue-50 px-2 py-1 text-xs text-blue-700">{index === 0 ? '2' : index === 1 ? '8' : index === 2 ? '1' : '5'}</span>
+                      </div>
+                    ))}
+                  </div>
+                </aside>
+              </section>
+
+              <section className="rounded-lg border border-[#e2e8f5] bg-white p-5 shadow-sm">
+                <div className="flex flex-col gap-3 md:flex-row md:items-end md:justify-between">
+                  <div>
+                    <p className="text-xs font-black uppercase tracking-[0.18em] text-emerald-600">Ecommerce Operating System</p>
+                    <h3 className="mt-1 text-lg font-black text-slate-950">功能很多，但按电商人每天的工作组织</h3>
+                    <p className="mt-1 text-sm leading-6 text-slate-500">不是堆 AI 工具，而是把上新、模特图、内容、发布、客服、复盘放进同一个商品增长闭环。</p>
+                  </div>
+                </div>
+                <div className="mt-5 grid gap-3 md:grid-cols-2 xl:grid-cols-3">
+                  {commerceAssistantRows.map(row => (
+                    <article className="rounded-md border border-slate-200 bg-slate-50 p-4" key={row[0]}>
+                      <h4 className="text-sm font-black text-slate-950">{row[0]}</h4>
+                      <p className="mt-2 text-sm leading-6 text-slate-600">{row[1]}</p>
+                    </article>
+                  ))}
+                </div>
+              </section>
+
+              <section className="rounded-lg border border-[#e2e8f5] bg-white p-5 shadow-sm">
+                <div className="flex flex-col gap-3 md:flex-row md:items-end md:justify-between">
+                  <div>
+                    <p className="text-xs font-black uppercase tracking-[0.18em] text-sky-600">Publishing Matrix</p>
+                    <h3 className="mt-1 text-lg font-black text-slate-950">多账号矩阵先不做自动登录，先把每个平台发布包做准</h3>
+                    <p className="mt-1 text-sm leading-6 text-slate-500">客户自己发布，平台表现先上传截图、链接或 CSV；后续再接云盘和数据回流。</p>
+                  </div>
+                </div>
+                <div className="mt-5 grid gap-3 md:grid-cols-5">
+                  {publishingRows.map(row => (
+                    <article className="rounded-md border border-slate-200 bg-slate-50 p-3" key={row[0]}>
+                      <h4 className="text-sm font-black text-slate-950">{row[0]}</h4>
+                      <p className="mt-2 text-xs leading-5 text-slate-600">{row[1]}</p>
+                    </article>
+                  ))}
+                </div>
               </section>
 
               <section className="rounded-lg border border-[#e2e8f5] bg-white p-5 shadow-sm">

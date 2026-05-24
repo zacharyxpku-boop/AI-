@@ -12,8 +12,10 @@ type WorkflowConfig = {
   toolMeta: string;
   status: string;
   accent: string;
+  outcome: string;
   cards: Array<{ label: string; value: string; detail: string }>;
   tasks: Array<{ title: string; owner: string; status: string }>;
+  deliverables: Array<{ title: string; body: string; status: string }>;
 };
 
 const workflowNav: Array<{ id: WorkflowStep; label: string; href: string }> = [
@@ -27,14 +29,15 @@ const workflowNav: Array<{ id: WorkflowStep; label: string; href: string }> = [
 const configs: Record<WorkflowStep, WorkflowConfig> = {
   creative: {
     eyebrow: 'Step 01',
-    title: '先把商品卖点写成能拍、能发的内容脚本',
-    subtitle: '客户输入商品资料和目标平台，系统输出标题、口播、图文脚本、禁用词提醒和下一步素材清单。',
+    title: '先把商品资料变成客户能直接选择的卖点脚本',
+    subtitle: '客户输入商品、平台和人群，系统把卖点、场景、口播、图文和禁用词整理成一页可执行 brief，不再让客户面对抽象模块。',
     primaryLabel: '去整理素材',
     primaryHref: '/factory/create?variant=friend_trial',
     toolName: '卖点脚本生成',
     toolMeta: '商品利益点 / 平台话术 / 审核边界',
     status: '可直接使用',
     accent: 'from-violet-500 via-fuchsia-500 to-rose-400',
+    outcome: '客户看到的是“今天这个商品先拍什么、先发什么、缺什么素材”，不是一堆工具名。',
     cards: [
       { label: '商品目标', value: '1 个主推商品', detail: '先确定今天要生成内容的商品和平台。' },
       { label: '内容角度', value: '3 条候选脚本', detail: '痛点、场景、优惠各一条，客户能直接选。' },
@@ -45,20 +48,26 @@ const configs: Record<WorkflowStep, WorkflowConfig> = {
       { title: '选择首条口播脚本方向', owner: '运营', status: '下一步' },
       { title: '标记不能使用的夸张词', owner: '系统', status: '自动提示' },
     ],
+    deliverables: [
+      { title: '卖点角度', body: '痛点、场景、价格锚点、对比证明和评论区钩子分开呈现。', status: '已内置' },
+      { title: '平台脚本', body: '小红书图文、TikTok 口播、Shopify 详情页和 Meta 广告各有一套表达。', status: '可生成' },
+      { title: '素材缺口', body: '脚本生成后自动反推还缺商品图、场景图、授权图或短视频片段。', status: '下一步' },
+    ],
   },
   create: {
     eyebrow: 'Step 02',
-    title: '把商品图、视频片段和授权说明整理成素材货架',
-    subtitle: '客户能看到哪些素材可用、哪些素材缺失、哪些图片可以生成，避免一上来就跳到复杂后台。',
+    title: '把商品图、模特图、场景图和授权说明整理成素材货架',
+    subtitle: '图片、模特生图、卖点图和授权边界放在同一个货架里。你的图片 Key 到位后直接生成；暂时没有 Key 时先输出 prompt 和素材任务。',
     primaryLabel: '去生成视频',
     primaryHref: '/factory/video?variant=friend_trial',
     toolName: '素材与图片生成',
-    toolMeta: '商品图 / 场景图 / 卖点图',
+    toolMeta: '商品图 / 模特生图 / 场景图 / 卖点图',
     status: 'API Key 可接入',
     accent: 'from-emerald-500 via-cyan-500 to-blue-500',
+    outcome: '电商人最关心的不是“生成图片”，而是主图、穿搭图、手持图、使用场景图能不能批量补齐。',
     cards: [
       { label: '可用素材', value: '6 个', detail: '主图、包装图、场景图、视频片段归档。' },
-      { label: '图片生成', value: '可接 API', detail: '已有图片 Key 时直接生成；没有时导出 prompt。' },
+      { label: '模特生图', value: 'Key 到位即接', detail: '支持模特图、穿搭图、手持图、局部细节图的任务拆解。' },
       { label: '缺口', value: '1 项待补', detail: '缺授权图或高清商品图时直接提示客户。' },
     ],
     tasks: [
@@ -66,68 +75,91 @@ const configs: Record<WorkflowStep, WorkflowConfig> = {
       { title: '生成第一批场景图 prompt', owner: '系统', status: '可执行' },
       { title: '锁定首轮可复用素材', owner: '运营', status: '处理中' },
     ],
+    deliverables: [
+      { title: '商品影棚', body: '主图、白底图、场景图、卖点图、规格图和对比图按用途归档。', status: '可用' },
+      { title: '模特与人群', body: '用商品和人群定位生成模特风格、年龄、动作、场景和构图任务。', status: '等 Key' },
+      { title: '授权检查', body: '缺 logo、素材授权或真人肖像授权时先卡在素材缺口，不让它进入量产。', status: '已内置' },
+    ],
   },
   video: {
     eyebrow: 'Step 03',
-    title: '用视频 API、数字人 API 或开源混剪组件生成内容版本',
-    subtitle: '已有 Key 就接入生成；没有 Key 就导出分镜、字幕、素材包和本地混剪任务。',
+    title: '用视频 API、数字人 API 和本地混剪引擎生成稳定内容版本',
+    subtitle: '图片视频数字人等 Key 等你给；混剪先走开源/本地工作流，把脚本、素材、字幕、封面、BGM 和尺寸封成稳定渲染任务。',
     primaryLabel: '去生成发布包',
     primaryHref: '/factory/cast?variant=friend_trial',
     toolName: '视频与数字人生产',
     toolMeta: '短视频 / 数字人口播 / 多语配音',
     status: 'API / 本地混剪双路径',
     accent: 'from-indigo-500 via-purple-500 to-pink-500',
+    outcome: '目标不是炫酷剪辑台，而是让同一组素材稳定产出多平台短视频、数字人口播和多语版本。',
     cards: [
       { label: '视频任务', value: '8 条', detail: '按平台尺寸、脚本角度和素材组合生成。' },
       { label: '数字人口播', value: '可接入', detail: '有数字人 Key 时进入生成，没有时导出脚本。' },
-      { label: '开源混剪', value: '可封装', detail: '把素材、字幕、封面和 BGM 组成可执行任务。' },
+      { label: '开源混剪', value: '本地优先', detail: 'Remotion 思路做模板，FFmpeg 做合成，时间线 JSON 做任务交接。' },
     ],
     tasks: [
       { title: '确认首批 3 条视频脚本', owner: '客户', status: '待确认' },
       { title: '选择竖版封面和字幕样式', owner: '运营', status: '下一步' },
       { title: '导出 API 任务或本地混剪包', owner: '系统', status: '可执行' },
     ],
+    deliverables: [
+      { title: '时间线任务', body: '脚本、镜头、素材、字幕、封面、音频和输出尺寸统一成可重跑任务。', status: '可封装' },
+      { title: '稳定渲染队列', body: '待补素材、可渲染、渲染中、已导出四种状态；失败只重跑单条任务。', status: '工程化中' },
+      { title: '数字人口播', body: 'Key 到位后接数字人/TTS；未接前先交付口播稿、字幕和素材包。', status: '等 Key' },
+    ],
   },
   cast: {
     eyebrow: 'Step 04',
-    title: '把内容变成客户能直接发布的多平台发布包',
-    subtitle: '生成标题、正文、封面、素材、发布时间和回填表。客户可自己发布；若授权，也可以按流程辅助执行。',
+    title: '把内容变成客户自己能发布的多平台发布包',
+    subtitle: '多账号矩阵先不碰自动登录，重点把每个平台的标题、正文、标签、封面、素材和回填表做准，客户拿到就能发。',
     primaryLabel: '去复盘跟进',
     primaryHref: '/factory/manage?variant=friend_trial',
     toolName: '发布包与分发',
     toolMeta: '小红书 / TikTok / Shopify / Meta',
     status: '先交付发布包',
     accent: 'from-sky-500 via-cyan-500 to-lime-400',
+    outcome: '先解决“发什么、复制什么、上传什么、发布后回填什么”，不把客户带进复杂账号授权。',
     cards: [
       { label: '发布包', value: '5 个渠道', detail: '每个平台有对应标题、文案、封面和素材。' },
       { label: '客户自发', value: '推荐路径', detail: '客户拿到内容包后直接复制发布。' },
-      { label: '授权辅助', value: '可选路径', detail: '只在客户授权范围内做浏览器执行，不保存敏感凭据。' },
+      { label: '授权辅助', value: '后续增强', detail: '只有客户明确授权时才做辅助执行，不作为当前上线阻塞。' },
     ],
     tasks: [
       { title: '导出小红书发布包', owner: '系统', status: '可执行' },
       { title: '确认 TikTok Shop 发布时间', owner: '客户', status: '待确认' },
       { title: '准备发布结果回填表', owner: '运营', status: '下一步' },
     ],
+    deliverables: [
+      { title: '平台标题包', body: '参考超级 IP/口播结构，为小红书、TikTok、Shopify、Meta、视频号分别生成标题。', status: '可生成' },
+      { title: '发布素材包', body: '每个平台对应封面、正文、标签、素材清单、发布时间建议和注意事项。', status: '可导出' },
+      { title: '客户自发路径', body: '客户发布后只需要回填链接、截图或 CSV，平台再做下一轮复盘。', status: '推荐' },
+    ],
   },
   manage: {
     eyebrow: 'Step 05',
-    title: '把发布结果和客户反馈变成下一轮增长动作',
-    subtitle: '客户不用看后台术语，只看哪些内容有效、下一轮拍什么、哪些素材要补、是否继续放大。',
+    title: '把表现数据、客服反馈和售后问题变成下一轮增长动作',
+    subtitle: '平台数据直连先不作为阻塞。客户可上传链接、截图、CSV 或云盘资料，系统判断哪条内容有效、下一轮拍什么、客服话术怎么补。',
     primaryLabel: '回到工作台',
     primaryHref: '/factory?variant=friend_trial',
     toolName: '表现复盘与客户跟进',
     toolMeta: '链接 / 截图 / 数据 / 下一轮建议',
     status: '可手动或 CSV 导入',
     accent: 'from-slate-700 via-blue-600 to-cyan-500',
+    outcome: '复盘页要回答电商人每天最实际的问题：哪条继续放大、哪条换角度、客服和售后该怎么说。',
     cards: [
       { label: '可复盘内容', value: '4 条', detail: '来自链接、截图、客户反馈或 CSV。' },
       { label: '下一轮建议', value: '3 项', detail: '继续放大、换角度、补素材。' },
-      { label: '客户交付', value: '一页报告', detail: '直接给客户看，不需要解释后台字段。' },
+      { label: '客服素材', value: '可生成', detail: 'FAQ、差评解释、物流/尺码/材质话术和售后卡片。' },
     ],
     tasks: [
       { title: '回填首批发布链接', owner: '客户', status: '待回填' },
       { title: '整理表现最好的脚本角度', owner: '系统', status: '可生成' },
       { title: '发送下一轮内容建议', owner: '销售', status: '今天' },
+    ],
+    deliverables: [
+      { title: '表现上传', body: '链接、截图、CSV、云盘文件都能作为第一阶段数据入口。', status: '可用' },
+      { title: '复盘建议', body: '从点击、收藏、评论、转化和客户反馈里生成下一轮内容角度。', status: '可生成' },
+      { title: '客服与售后', body: '把常见问题、异议、差评原因整理成客服话术和售后卡片。', status: '新增' },
     ],
   },
 };
@@ -223,7 +255,7 @@ export function KuaiziWorkflowConsole({ active }: { active: WorkflowStep }) {
                   <div className="max-w-2xl">
                     <p className="text-sm font-bold text-indigo-600">{config.toolName}</p>
                     <h2 className="mt-2 break-words text-2xl font-black md:text-3xl">{config.toolMeta}</h2>
-                    <p className="mt-3 text-sm leading-6 text-slate-500">这一页只保留一个主动作，客户知道自己现在该做什么、会得到什么结果。</p>
+                    <p className="mt-3 text-sm leading-6 text-slate-500">{config.outcome}</p>
                     <div className={`mt-4 h-2 w-full max-w-[360px] rounded-full bg-gradient-to-r ${config.accent}`} />
                     <Link className="mt-5 inline-flex min-h-11 max-w-full items-center justify-center rounded-md bg-slate-950 px-4 text-sm font-black text-white" href={config.primaryHref}>
                       <span className="truncate">{config.primaryLabel}</span>
@@ -241,6 +273,27 @@ export function KuaiziWorkflowConsole({ active }: { active: WorkflowStep }) {
                     <p className="mt-2 text-sm leading-6 text-slate-500">{card.detail}</p>
                   </article>
                 ))}
+              </section>
+
+              <section className="rounded-md border border-slate-200 bg-white p-4 shadow-sm">
+                <div className="flex flex-col gap-2 sm:flex-row sm:items-end sm:justify-between">
+                  <div>
+                    <p className="text-xs font-black uppercase tracking-[0.18em] text-slate-400">Deliverables</p>
+                    <h2 className="mt-1 text-lg font-black text-slate-950">这一页最后交付什么</h2>
+                  </div>
+                  <span className="rounded-md bg-slate-100 px-2.5 py-1 text-xs font-black text-slate-600">不用外部登录也能推进</span>
+                </div>
+                <div className="mt-4 grid gap-3 lg:grid-cols-3">
+                  {config.deliverables.map(item => (
+                    <article key={item.title} className="min-w-0 rounded-md border border-slate-100 bg-slate-50 p-3">
+                      <div className="flex items-start justify-between gap-2">
+                        <h3 className="break-words text-sm font-black text-slate-900">{item.title}</h3>
+                        <span className="shrink-0 rounded bg-white px-2 py-1 text-[11px] font-black text-indigo-700 ring-1 ring-slate-200">{item.status}</span>
+                      </div>
+                      <p className="mt-2 text-sm leading-6 text-slate-600">{item.body}</p>
+                    </article>
+                  ))}
+                </div>
               </section>
 
               <section className="rounded-md border border-slate-200 bg-white p-4 shadow-sm">
