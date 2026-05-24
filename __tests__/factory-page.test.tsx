@@ -18,6 +18,8 @@ describe('factory page', () => {
     expect(html).toContain('搜索工具 Ctrl K');
     expect(html).toContain('从一个商品，生成一整套可发布内容');
     expect(html).toContain('模特生图');
+    expect(html).toContain('模特生图先做成任务包');
+    expect(html).toContain('个图片任务');
     expect(html).toContain('开源混剪');
     expect(html).toContain('大规模渲染队列');
     expect(html).toContain('多账号矩阵先不做自动登录');
@@ -32,6 +34,8 @@ describe('factory page', () => {
     expect(html).toContain('回填后系统看什么');
     expect(html).toContain('建议并发');
     expect(html).toContain('客服素材');
+    expect(html).toContain('售前承接');
+    expect(html).toContain('差评挽回');
     expect(html).toContain('Wenai 商品增长工作台');
     expect(html).not.toContain('provider 待配置');
     expect(html).not.toContain('小W 在线');

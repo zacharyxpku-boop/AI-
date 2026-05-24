@@ -199,6 +199,29 @@ export interface CommerceCustomerServicePack {
   escalationRules: string[];
 }
 
+export interface CommerceModelImageTaskPack {
+  productName: string;
+  providerBoundary: string;
+  tasks: Array<{
+    id: string;
+    imageType: 'model_handheld' | 'scene_lifestyle' | 'detail_proof' | 'comparison_card';
+    title: string;
+    prompt: string;
+    negativePrompt: string;
+    requiredInputs: string[];
+    qualityChecks: string[];
+    fallbackWithoutKey: string;
+  }>;
+  reviewChecklist: string[];
+}
+
+export interface CommerceCustomerSupportWorkflow {
+  preSaleReplies: Array<{ scenario: string; reply: string; assetToSend: string }>;
+  afterSaleReplies: Array<{ scenario: string; reply: string; escalation: string }>;
+  negativeReviewRecovery: Array<{ issue: string; response: string; nextAction: string }>;
+  humanHandoffRules: string[];
+}
+
 export interface CommerceOpenSourceAdapter {
   id: string;
   name: string;
@@ -1313,6 +1336,95 @@ export function buildCommerceCustomerServicePack(input: CommerceRemixPlanInput):
   };
 }
 
+export function buildCommerceModelImageTaskPack(input: CommerceRemixPlanInput): CommerceModelImageTaskPack {
+  const product = safeText(input.productName, '商品');
+  const point = safeText(input.sellingPoints[0] || '', '核心卖点');
+  const secondaryPoint = safeText(input.sellingPoints[1] || '', '使用体验');
+  const audience = safeText(input.audience, '目标用户');
+  return {
+    productName: product,
+    providerBoundary: '图片 API Key 到位后可直接执行；未接 Key 时先导出 prompt、参考图要求和人工验收清单。',
+    tasks: [
+      {
+        id: 'model-handheld-proof',
+        imageType: 'model_handheld',
+        title: '手持模特证明图',
+        prompt: `${audience}在真实生活场景中手持${product}，画面突出${point}，自然光，电商主图级清晰度，商品主体无遮挡，人物表情自然。`,
+        negativePrompt: '不要夸张表情、不要多余手指、不要遮挡商品、不要水印、不要平台 logo、不要虚假效果对比。',
+        requiredInputs: ['商品主图', '目标人群', '使用场景', '授权边界'],
+        qualityChecks: ['商品主体完整', '手部和脸部不畸形', '卖点能从画面看出来', '不出现未经授权品牌'],
+        fallbackWithoutKey: '先让客户上传手持照片或开箱图；没有照片时把 prompt 放进补素材任务。',
+      },
+      {
+        id: 'scene-lifestyle-proof',
+        imageType: 'scene_lifestyle',
+        title: '场景生活方式图',
+        prompt: `${product}出现在${audience}的日常使用场景中，强调${point}和${secondaryPoint}，背景干净，有空间放标题和卖点卡片。`,
+        negativePrompt: '不要杂乱背景、不要错误规格、不要和商品无关的人群、不要过度滤镜。',
+        requiredInputs: ['商品主图', '场景关键词', '平台尺寸', '标题安全区'],
+        qualityChecks: ['场景和受众一致', '标题区域留白', '商品比例合理', '适合 9:16 和 1:1 裁切'],
+        fallbackWithoutKey: '用客户现有场景图或素材库图片做占位，进入本地混剪时保留缺口标记。',
+      },
+      {
+        id: 'detail-proof-card',
+        imageType: 'detail_proof',
+        title: '细节证明图',
+        prompt: `${product}的关键细节特写，突出${point}，使用清晰标注线和简短卖点，不夸大承诺，适合详情页和短视频中段证明。`,
+        negativePrompt: '不要医疗或绝对化承诺、不要看不清的文字、不要错误材质、不要虚构认证。',
+        requiredInputs: ['细节图', '规格参数', '禁用词', '售后边界'],
+        qualityChecks: ['文字不超过两行', '规格与详情页一致', '无绝对化承诺', '细节清晰可辨'],
+        fallbackWithoutKey: '先导出细节图拍摄清单，客户补图后再进入模板。',
+      },
+      {
+        id: 'comparison-card',
+        imageType: 'comparison_card',
+        title: '对比解释卡',
+        prompt: `${product}解决${point}的前后对比卡片，左侧展示常见问题，右侧展示使用后状态，文案克制，适合客服解释和发布封面。`,
+        negativePrompt: '不要贬低竞品、不要虚构数据、不要夸张前后对比、不要制造恐惧。',
+        requiredInputs: ['常见问题', '卖点解释', '客服 FAQ', '售后政策'],
+        qualityChecks: ['对比不攻击竞品', '客服可直接发送', '和 FAQ 口径一致', '适合截图传播'],
+        fallbackWithoutKey: '用文本卡片先交付，图片 Key 到位后再生成视觉版本。',
+      },
+    ],
+    reviewChecklist: [
+      '商品主体和规格不能画错',
+      '模特图必须有生成记录或客户授权',
+      '标题和字幕不能遮挡脸、手、商品主体和平台按钮',
+      '客服、详情页、发布文案里的承诺必须一致',
+    ],
+  };
+}
+
+export function buildCommerceCustomerSupportWorkflow(
+  input: CommerceRemixPlanInput,
+  servicePack = buildCommerceCustomerServicePack(input),
+): CommerceCustomerSupportWorkflow {
+  const product = safeText(input.productName, '商品');
+  const point = safeText(input.sellingPoints[0] || '', '核心卖点');
+  return {
+    preSaleReplies: [
+      { scenario: '客户问适不适合自己', reply: servicePack.faq[0]?.answer || `${product}适合关注${point}的人群。`, assetToSend: '适合人群图 + 详情页 FAQ' },
+      { scenario: '客户觉得贵', reply: servicePack.objectionReplies[0]?.reply || `先解释${point}的具体价值，再给规格和售后说明。`, assetToSend: '细节证明图 + 对比解释卡' },
+      { scenario: '客户担心不好用', reply: servicePack.objectionReplies[1]?.reply || '先发送使用步骤和真实反馈截图，不夸大承诺。', assetToSend: '使用步骤图 + 模特/场景证明图' },
+    ],
+    afterSaleReplies: [
+      { scenario: '收到后不会使用', reply: `先发送${product}使用提醒和步骤图，再确认客户的具体使用场景。`, escalation: '仍无法解决时转人工客服' },
+      { scenario: '物流或破损问题', reply: servicePack.objectionReplies[2]?.reply || '先确认订单状态，再给出补发、退换或人工处理路径。', escalation: '涉及退款、补发、投诉立即转人工' },
+      { scenario: '规格不匹配', reply: '请客户提供订单号、规格截图和实物照片，按售后政策判断退换路径。', escalation: '规格争议或平台处罚风险转人工' },
+    ],
+    negativeReviewRecovery: [
+      { issue: '觉得效果不明显', response: `先承认体验差异，再解释${point}适用场景，避免反驳客户。`, nextAction: '补一张场景证明图和使用步骤卡' },
+      { issue: '觉得价格高', response: '回复时只讲规格、材质、售后和适用人群，不攻击竞品。', nextAction: '生成价格异议解释卡' },
+      { issue: '物流或售后不满', response: '先处理订单问题，再邀请客户补充截图，不在公开区争辩。', nextAction: '转人工并记录差评原因' },
+    ],
+    humanHandoffRules: [
+      '涉及退款、投诉、侵权、安全、医疗或平台处罚风险必须转人工',
+      '客户上传差评截图后先记录原因，再生成解释话术和补素材任务',
+      '任何客服承诺必须和详情页、物流政策、售后政策一致',
+    ],
+  };
+}
+
 export function executeCommerceRemixDryRun(plan: CommerceRemixEnginePlan, options: { failQueueItemIds?: string[] } = {}): CommerceRemixDryRunResult {
   const failIds = new Set(options.failQueueItemIds || []);
   const queue: CommerceRemixQueueItem[] = [];
@@ -1466,6 +1578,15 @@ export function buildDemoCommerceRemixQualityGate() {
 
 export function buildDemoCommerceCustomerServicePack() {
   return buildCommerceCustomerServicePack(buildDemoCommerceRemixInput());
+}
+
+export function buildDemoCommerceModelImageTaskPack() {
+  return buildCommerceModelImageTaskPack(buildDemoCommerceRemixInput());
+}
+
+export function buildDemoCommerceCustomerSupportWorkflow() {
+  const input = buildDemoCommerceRemixInput();
+  return buildCommerceCustomerSupportWorkflow(input, buildCommerceCustomerServicePack(input));
 }
 
 function buildDemoCommerceRemixInput(): CommerceRemixPlanInput {

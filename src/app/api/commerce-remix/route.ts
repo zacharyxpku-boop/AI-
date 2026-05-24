@@ -3,7 +3,9 @@ import {
   buildCommerceCloudDriveManifest,
   buildCommerceCloudDriveReturnPlan,
   buildCommerceCustomerServicePack,
+  buildCommerceCustomerSupportWorkflow,
   buildCommerceCreatorPersonaMatrix,
+  buildCommerceModelImageTaskPack,
   buildCommerceOpenSourceAdapters,
   buildCommercePublishingMatrixPlan,
   buildCommerceRemixEnginePlan,
@@ -16,7 +18,9 @@ import {
   buildDemoCommerceCloudDriveManifest,
   buildDemoCommerceCloudDriveReturnPlan,
   buildDemoCommerceCustomerServicePack,
+  buildDemoCommerceCustomerSupportWorkflow,
   buildDemoCommerceCreatorPersonaMatrix,
+  buildDemoCommerceModelImageTaskPack,
   buildDemoCommercePublishingMatrixPlan,
   buildDemoCommercePerformanceUploadReport,
   buildDemoCommerceRemixDryRun,
@@ -76,6 +80,8 @@ function buildInputResponse(input: CommerceRemixPlanInput, body: CommerceRemixRe
   });
   const performanceReport = evaluateCommercePerformanceUploads(body.performanceUploads || []);
   const servicePack = buildCommerceCustomerServicePack(input);
+  const modelImageTaskPack = buildCommerceModelImageTaskPack(input);
+  const customerSupportWorkflow = buildCommerceCustomerSupportWorkflow(input, servicePack);
   const openSourceAdapters = buildCommerceOpenSourceAdapters();
   const executionRecipes = buildCommerceRemixExecutionRecipes(input, plan, openSourceAdapters);
   const workflowPlaybook = buildCommerceRemixWorkflowPlaybook(input, plan);
@@ -98,6 +104,8 @@ function buildInputResponse(input: CommerceRemixPlanInput, body: CommerceRemixRe
     dryRun,
     performanceReport,
     servicePack,
+    modelImageTaskPack,
+    customerSupportWorkflow,
     openSourceAdapters,
     executionRecipes,
     workflowPlaybook,
@@ -121,6 +129,8 @@ export async function GET() {
     dryRun: buildDemoCommerceRemixDryRun(),
     performanceReport: buildDemoCommercePerformanceUploadReport(),
     servicePack: buildDemoCommerceCustomerServicePack(),
+    modelImageTaskPack: buildDemoCommerceModelImageTaskPack(),
+    customerSupportWorkflow: buildDemoCommerceCustomerSupportWorkflow(),
     openSourceAdapters: buildCommerceOpenSourceAdapters(),
     executionRecipes: buildDemoCommerceRemixExecutionRecipes(),
     workflowPlaybook: buildDemoCommerceRemixWorkflowPlaybook(),

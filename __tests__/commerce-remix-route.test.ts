@@ -85,6 +85,8 @@ describe('/api/commerce-remix', () => {
     expect(body.performanceReport.bestTitle).toBe('Hook A');
     expect(body.cloudDrive.folders.map((folder: { path: string }) => folder.path).join(' ')).toContain('04-customer-return');
     expect(body.servicePack.objectionReplies.map((item: { objection: string }) => item.objection)).toContain('担心不好用');
+    expect(body.modelImageTaskPack.tasks.map((task: { id: string }) => task.id)).toContain('model-handheld-proof');
+    expect(body.customerSupportWorkflow.preSaleReplies.map((item: { scenario: string }) => item.scenario)).toContain('客户觉得贵');
     expect(body.openSourceAdapters.find((adapter: { id: string }) => adapter.id === 'queue-worker').readiness).toBe('ready_now');
     expect(body.executionRecipes.find((recipe: { adapterId: string }) => recipe.adapterId === 'ffmpeg').passCriteria.join(' ')).toContain('MP4 可播放');
     expect(body.workflowPlaybook.noProviderFallbacks.join(' ')).toContain('没有自动发布');

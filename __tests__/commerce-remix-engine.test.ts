@@ -8,7 +8,9 @@ import {
   buildCommerceCloudDriveManifest,
   buildCommerceCloudDriveReturnPlan,
   buildCommerceCustomerServicePack,
+  buildCommerceCustomerSupportWorkflow,
   buildCommerceCreatorPersonaMatrix,
+  buildCommerceModelImageTaskPack,
   buildCommerceOpenSourceAdapters,
   buildCommercePublishingMatrixPlan,
   buildCommerceRemixTemplateBank,
@@ -310,12 +312,31 @@ describe('commerce remix engine', () => {
 
   it('builds customer service and after-sales material from ecommerce selling points', () => {
     const pack = buildCommerceCustomerServicePack(baseInput);
+    const workflow = buildCommerceCustomerSupportWorkflow(baseInput, pack);
 
     expect(pack.faq[0].question).toContain('Travel Pet Bowl');
     expect(pack.faq[0].answer).toContain('traveling pet owners');
     expect(pack.objectionReplies.map(item => item.objection)).toEqual(['觉得价格高', '担心不好用', '物流或售后问题']);
     expect(pack.afterSalesCards).toHaveLength(3);
     expect(pack.escalationRules.join(' ')).toContain('退款');
+    expect(workflow.preSaleReplies.map(item => item.scenario)).toContain('客户觉得贵');
+    expect(workflow.negativeReviewRecovery.map(item => item.issue)).toContain('物流或售后不满');
+    expect(workflow.humanHandoffRules.join(' ')).toContain('平台处罚风险');
+  });
+
+  it('builds model image tasks without requiring image provider keys', () => {
+    const pack = buildCommerceModelImageTaskPack(baseInput);
+
+    expect(pack.providerBoundary).toContain('未接 Key 时先导出 prompt');
+    expect(pack.tasks.map(task => task.id)).toEqual([
+      'model-handheld-proof',
+      'scene-lifestyle-proof',
+      'detail-proof-card',
+      'comparison-card',
+    ]);
+    expect(pack.tasks[0].prompt).toContain('Travel Pet Bowl');
+    expect(pack.tasks[0].fallbackWithoutKey).toContain('补素材任务');
+    expect(pack.reviewChecklist.join(' ')).toContain('模特图必须有生成记录或客户授权');
   });
 
   it('maps open-source remix capabilities into guarded ecommerce adapters', () => {

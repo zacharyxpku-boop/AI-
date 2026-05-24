@@ -6,7 +6,9 @@ import {
   buildDemoCommerceCloudDriveManifest,
   buildDemoCommerceCloudDriveReturnPlan,
   buildDemoCommerceCustomerServicePack,
+  buildDemoCommerceCustomerSupportWorkflow,
   buildDemoCommerceCreatorPersonaMatrix,
+  buildDemoCommerceModelImageTaskPack,
   buildCommerceOpenSourceAdapters,
   buildDemoCommercePublishingMatrixPlan,
   buildDemoCommercePerformanceUploadReport,
@@ -214,6 +216,8 @@ export function KuaiziStyleWorkbench() {
   const templateBank = useMemo(() => buildDemoCommerceRemixTemplateBank(), []);
   const qualityGate = useMemo(() => buildDemoCommerceRemixQualityGate(), []);
   const servicePack = useMemo(() => buildDemoCommerceCustomerServicePack(), []);
+  const modelImageTaskPack = useMemo(() => buildDemoCommerceModelImageTaskPack(), []);
+  const customerSupportWorkflow = useMemo(() => buildDemoCommerceCustomerSupportWorkflow(), []);
   const openSourceAdapters = useMemo(() => buildCommerceOpenSourceAdapters(), []);
   const executionRecipes = useMemo(() => buildDemoCommerceRemixExecutionRecipes(), []);
   const workflowPlaybook = useMemo(() => buildDemoCommerceRemixWorkflowPlaybook(), []);
@@ -331,6 +335,31 @@ export function KuaiziStyleWorkbench() {
                       </button>
                     ))}
                   </div>
+                </div>
+              </section>
+
+              <section className="rounded-lg border border-[#e2e8f5] bg-white p-5 shadow-sm">
+                <div className="flex flex-col gap-3 md:flex-row md:items-end md:justify-between">
+                  <div>
+                    <p className="text-xs font-black uppercase tracking-[0.18em] text-orange-600">Model Image Tasks</p>
+                    <h3 className="mt-1 text-lg font-black text-slate-950">模特生图先做成任务包，Key 到位后直接执行</h3>
+                    <p className="mt-1 text-sm leading-6 text-slate-500">{modelImageTaskPack.providerBoundary}</p>
+                  </div>
+                  <span className="rounded-md bg-orange-50 px-3 py-2 text-sm font-black text-orange-700">{modelImageTaskPack.tasks.length} 个图片任务</span>
+                </div>
+                <div className="mt-5 grid gap-3 lg:grid-cols-4">
+                  {modelImageTaskPack.tasks.map(task => (
+                    <article className="min-w-0 rounded-md border border-orange-100 bg-orange-50 p-4" key={task.id}>
+                      <h4 className="text-sm font-black text-slate-950">{task.title}</h4>
+                      <p className="mt-2 line-clamp-3 text-xs leading-5 text-slate-600">{task.prompt}</p>
+                      <div className="mt-3 rounded bg-white p-2 text-xs font-bold leading-5 text-orange-700 ring-1 ring-orange-100">{task.fallbackWithoutKey}</div>
+                      <div className="mt-3 flex flex-wrap gap-1.5">
+                        {task.qualityChecks.slice(0, 3).map(check => (
+                          <span className="rounded bg-white px-2 py-1 text-[11px] font-bold text-slate-600 ring-1 ring-orange-100" key={check}>{check}</span>
+                        ))}
+                      </div>
+                    </article>
+                  ))}
                 </div>
               </section>
 
@@ -701,6 +730,44 @@ export function KuaiziStyleWorkbench() {
                         <div className="rounded bg-white p-2 text-xs leading-5 ring-1 ring-slate-100" key={item.title}>
                           <div className="font-black text-slate-800">{item.title}</div>
                           <div className="mt-1 text-slate-500">{item.body}</div>
+                        </div>
+                      ))}
+                    </div>
+                  </article>
+                </div>
+                <div className="mt-5 grid gap-3 lg:grid-cols-3">
+                  <article className="rounded-md border border-rose-100 bg-rose-50 p-4">
+                    <h4 className="text-sm font-black text-slate-950">售前承接</h4>
+                    <div className="mt-3 space-y-2">
+                      {customerSupportWorkflow.preSaleReplies.map(item => (
+                        <div className="rounded bg-white p-2 text-xs leading-5 ring-1 ring-rose-100" key={item.scenario}>
+                          <div className="font-black text-rose-700">{item.scenario}</div>
+                          <div className="mt-1 text-slate-600">{item.reply}</div>
+                          <div className="mt-1 font-bold text-slate-500">发送：{item.assetToSend}</div>
+                        </div>
+                      ))}
+                    </div>
+                  </article>
+                  <article className="rounded-md border border-rose-100 bg-rose-50 p-4">
+                    <h4 className="text-sm font-black text-slate-950">售后处理</h4>
+                    <div className="mt-3 space-y-2">
+                      {customerSupportWorkflow.afterSaleReplies.map(item => (
+                        <div className="rounded bg-white p-2 text-xs leading-5 ring-1 ring-rose-100" key={item.scenario}>
+                          <div className="font-black text-rose-700">{item.scenario}</div>
+                          <div className="mt-1 text-slate-600">{item.reply}</div>
+                          <div className="mt-1 font-bold text-slate-500">{item.escalation}</div>
+                        </div>
+                      ))}
+                    </div>
+                  </article>
+                  <article className="rounded-md border border-rose-100 bg-rose-50 p-4">
+                    <h4 className="text-sm font-black text-slate-950">差评挽回</h4>
+                    <div className="mt-3 space-y-2">
+                      {customerSupportWorkflow.negativeReviewRecovery.map(item => (
+                        <div className="rounded bg-white p-2 text-xs leading-5 ring-1 ring-rose-100" key={item.issue}>
+                          <div className="font-black text-rose-700">{item.issue}</div>
+                          <div className="mt-1 text-slate-600">{item.response}</div>
+                          <div className="mt-1 font-bold text-slate-500">下一步：{item.nextAction}</div>
                         </div>
                       ))}
                     </div>
