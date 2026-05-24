@@ -314,6 +314,22 @@ export interface CommerceCustomerDeliveryMap {
   handoffRules: string[];
 }
 
+export interface CommerceProviderActivationPlan {
+  currentMode: string;
+  lanes: Array<{
+    id: string;
+    name: string;
+    currentPath: string;
+    activateWhen: string;
+    requiredFromCustomer: string[];
+    acceptanceGate: string[];
+    fallbackUntilActivated: string;
+    customerFacingWording: string;
+  }>;
+  notNeededForFirstDelivery: string[];
+  mustNotDo: string[];
+}
+
 const PLATFORM_LABELS: Record<RemixPlatform, string> = {
   xiaohongshu: '小红书',
   tiktok: 'TikTok',
@@ -1511,6 +1527,77 @@ export function buildCommerceCustomerDeliveryMap(input: CommerceRemixPlanInput):
   };
 }
 
+export function buildCommerceProviderActivationPlan(): CommerceProviderActivationPlan {
+  return {
+    currentMode: '本地优先：混剪、发布包、云盘回填、客服素材和复盘建议不依赖外部 provider。',
+    lanes: [
+      {
+        id: 'image-key',
+        name: '图片和模特生图 Key',
+        currentPath: '先导出模特图、场景图、细节图和对比卡 prompt，客户可上传已有图。',
+        activateWhen: '你提供图片生成 API Key，并确认可商用模型、图片尺寸和回调方式。',
+        requiredFromCustomer: ['图片 API Key', '可商用范围', '默认尺寸', '失败回调或查询方式'],
+        acceptanceGate: ['生成图不画错商品', '模特图有生成记录或授权说明', '输出能进入素材货架和混剪任务'],
+        fallbackUntilActivated: '用客户原图、参考图、人工拍摄清单和 prompt 包先交付。',
+        customerFacingWording: '图片任务已准备好，Key 到位后可直接批量生成。',
+      },
+      {
+        id: 'video-key',
+        name: '视频生成 Key',
+        currentPath: '本地时间线、字幕、FFmpeg 命令和渲染批次已经可生成任务包。',
+        activateWhen: '需要真实 AI 视频生成，而不是本地素材混剪时再接。',
+        requiredFromCustomer: ['视频 API Key', '任务提交接口', '结果查询或回调', '失败码和重试规则'],
+        acceptanceGate: ['每条视频有任务 ID', '结果能写回 render queue', '失败只影响单条任务', '不泄漏 Key'],
+        fallbackUntilActivated: '继续走本地混剪、客户素材、字幕和发布包。',
+        customerFacingWording: '短视频先走稳定混剪；需要 AI 生成镜头时再接视频 Key。',
+      },
+      {
+        id: 'avatar-tts-key',
+        name: '数字人 / TTS Key',
+        currentPath: '先交付口播稿、字幕、开场话术和多账号人设。',
+        activateWhen: '客户需要真人口播替代人工录音，且你提供数字人或 TTS Key。',
+        requiredFromCustomer: ['数字人或 TTS Key', '可用人设/音色', '语言范围', '回调或下载方式'],
+        acceptanceGate: ['口播和字幕一致', '音色/人设可复用', '失败不阻塞其他平台发布包'],
+        fallbackUntilActivated: '导出口播稿、字幕和录音说明，客户可人工录音。',
+        customerFacingWording: '数字人口播脚本已就绪，Key 到位后换成自动生成。',
+      },
+      {
+        id: 'cloud-drive',
+        name: '云盘 / 对象存储',
+        currentPath: '当前先用导出目录、链接、截图和 CSV 回填。',
+        activateWhen: '客户文件量变大、多人协作或需要长期留存时再接。',
+        requiredFromCustomer: ['云盘或对象存储配置', '上传目录规则', '访问权限', '签名链接策略'],
+        acceptanceGate: ['客户只能访问自己的目录', '回填文件能被复盘读取', '链接过期和权限可控'],
+        fallbackUntilActivated: '用本地导出包或客户上传链接先跑。',
+        customerFacingWording: '先用回填表和目录交付；规模变大后接企业云盘。',
+      },
+      {
+        id: 'analytics-api',
+        name: '平台表现数据 API',
+        currentPath: '客户上传发布链接、截图、CSV，系统做下一轮复盘。',
+        activateWhen: '平台账号、授权和归因口径稳定后再接。',
+        requiredFromCustomer: ['平台授权', '指标口径', '时间窗口', '账号和作品映射'],
+        acceptanceGate: ['指标和客户后台一致', '没有授权时不读取', '缺数据时不虚构表现'],
+        fallbackUntilActivated: '客户手动上传链接、截图、CSV 或云盘目录。',
+        customerFacingWording: '表现先上传，我们先复盘；后续可接自动数据回流。',
+      },
+    ],
+    notNeededForFirstDelivery: [
+      '平台自动登录',
+      '平台自动发布 OAuth',
+      '广告账户授权',
+      '自动 analytics sync',
+      '企业云盘同步',
+    ],
+    mustNotDo: [
+      '不代管客户账号密码',
+      '不绕过平台发布流程',
+      '不把未接 Key 的能力写成已自动生成',
+      '不虚构播放量、订单、收入或转化',
+    ],
+  };
+}
+
 export function executeCommerceRemixDryRun(plan: CommerceRemixEnginePlan, options: { failQueueItemIds?: string[] } = {}): CommerceRemixDryRunResult {
   const failIds = new Set(options.failQueueItemIds || []);
   const queue: CommerceRemixQueueItem[] = [];
@@ -1677,6 +1764,10 @@ export function buildDemoCommerceCustomerSupportWorkflow() {
 
 export function buildDemoCommerceCustomerDeliveryMap() {
   return buildCommerceCustomerDeliveryMap(buildDemoCommerceRemixInput());
+}
+
+export function buildDemoCommerceProviderActivationPlan() {
+  return buildCommerceProviderActivationPlan();
 }
 
 function buildDemoCommerceRemixInput(): CommerceRemixPlanInput {

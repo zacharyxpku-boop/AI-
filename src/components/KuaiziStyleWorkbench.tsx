@@ -11,6 +11,7 @@ import {
   buildDemoCommerceCreatorPersonaMatrix,
   buildDemoCommerceModelImageTaskPack,
   buildCommerceOpenSourceAdapters,
+  buildDemoCommerceProviderActivationPlan,
   buildDemoCommercePublishingMatrixPlan,
   buildDemoCommercePerformanceUploadReport,
   buildDemoCommerceRemixDryRun,
@@ -220,6 +221,7 @@ export function KuaiziStyleWorkbench() {
   const servicePack = useMemo(() => buildDemoCommerceCustomerServicePack(), []);
   const modelImageTaskPack = useMemo(() => buildDemoCommerceModelImageTaskPack(), []);
   const customerSupportWorkflow = useMemo(() => buildDemoCommerceCustomerSupportWorkflow(), []);
+  const providerActivationPlan = useMemo(() => buildDemoCommerceProviderActivationPlan(), []);
   const openSourceAdapters = useMemo(() => buildCommerceOpenSourceAdapters(), []);
   const executionRecipes = useMemo(() => buildDemoCommerceRemixExecutionRecipes(), []);
   const workflowPlaybook = useMemo(() => buildDemoCommerceRemixWorkflowPlaybook(), []);
@@ -366,6 +368,46 @@ export function KuaiziStyleWorkbench() {
                   {customerDeliveryMap.handoffRules.map(rule => (
                     <div className="rounded-md border border-slate-200 bg-slate-50 px-3 py-2 text-xs font-bold leading-5 text-slate-600" key={rule}>{rule}</div>
                   ))}
+                </div>
+              </section>
+
+              <section className="rounded-lg border border-[#d8e4ff] bg-white p-5 shadow-sm">
+                <div className="flex flex-col gap-3 lg:flex-row lg:items-end lg:justify-between">
+                  <div className="min-w-0">
+                    <p className="text-xs font-black uppercase tracking-[0.18em] text-violet-600">接入计划</p>
+                    <h3 className="mt-1 text-lg font-black leading-6 text-slate-950">现在能交付，Key 到位后增强</h3>
+                    <p className="mt-2 max-w-4xl text-sm leading-6 text-slate-600">{providerActivationPlan.currentMode}</p>
+                  </div>
+                  <span className="w-fit rounded-md bg-violet-50 px-3 py-2 text-sm font-black text-violet-700">{providerActivationPlan.lanes.length} 条增强通道</span>
+                </div>
+
+                <div className="mt-5 grid gap-3 lg:grid-cols-5">
+                  {providerActivationPlan.lanes.map(lane => (
+                    <article className="min-w-0 rounded-md border border-violet-100 bg-violet-50 p-3" key={lane.id}>
+                      <h4 className="text-sm font-black leading-5 text-slate-950">{lane.name}</h4>
+                      <p className="mt-2 line-clamp-3 text-xs leading-5 text-slate-600">{lane.customerFacingWording}</p>
+                      <p className="mt-3 rounded bg-white p-2 text-xs font-bold leading-5 text-violet-700 ring-1 ring-violet-100">{lane.fallbackUntilActivated}</p>
+                    </article>
+                  ))}
+                </div>
+
+                <div className="mt-4 grid gap-3 lg:grid-cols-2">
+                  <div className="rounded-md border border-emerald-100 bg-emerald-50 p-4">
+                    <h4 className="text-sm font-black text-slate-950">首版不需要</h4>
+                    <div className="mt-3 grid gap-2 sm:grid-cols-2">
+                      {providerActivationPlan.notNeededForFirstDelivery.map(item => (
+                        <div className="rounded bg-white px-3 py-2 text-xs font-bold leading-5 text-emerald-800 ring-1 ring-emerald-100" key={item}>{item}</div>
+                      ))}
+                    </div>
+                  </div>
+                  <div className="rounded-md border border-rose-100 bg-rose-50 p-4">
+                    <h4 className="text-sm font-black text-slate-950">交付红线</h4>
+                    <div className="mt-3 grid gap-2 sm:grid-cols-2">
+                      {providerActivationPlan.mustNotDo.map(item => (
+                        <div className="rounded bg-white px-3 py-2 text-xs font-bold leading-5 text-rose-800 ring-1 ring-rose-100" key={item}>{item}</div>
+                      ))}
+                    </div>
+                  </div>
                 </div>
               </section>
 

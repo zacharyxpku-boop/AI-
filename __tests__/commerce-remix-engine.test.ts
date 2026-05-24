@@ -13,6 +13,7 @@ import {
   buildCommerceCreatorPersonaMatrix,
   buildCommerceModelImageTaskPack,
   buildCommerceOpenSourceAdapters,
+  buildCommerceProviderActivationPlan,
   buildCommercePublishingMatrixPlan,
   buildCommerceRemixTemplateBank,
   buildCommerceRemixExecutionRecipes,
@@ -357,6 +358,22 @@ describe('commerce remix engine', () => {
     });
     expect(adapters.find(adapter => adapter.id === 'remotion')?.repositoryUrl).toBe('https://github.com/remotion-dev/remotion');
     expect(adapters.map(adapter => adapter.guardrail).join(' ')).toContain('不接收客户账号凭据');
+  });
+
+  it('separates first-delivery work from optional provider activation', () => {
+    const plan = buildCommerceProviderActivationPlan();
+
+    expect(plan.currentMode).toContain('本地优先');
+    expect(plan.lanes.map(lane => lane.id)).toEqual([
+      'image-key',
+      'video-key',
+      'avatar-tts-key',
+      'cloud-drive',
+      'analytics-api',
+    ]);
+    expect(plan.notNeededForFirstDelivery).toContain('平台自动登录');
+    expect(plan.mustNotDo).toContain('不代管客户账号密码');
+    expect(JSON.stringify(plan)).not.toMatch(/apiKey|accessToken|Bearer|sk-/i);
   });
 
   it('turns adapters into executable remix recipes with clear pass criteria', () => {

@@ -8,6 +8,7 @@ import {
   buildCommerceCreatorPersonaMatrix,
   buildCommerceModelImageTaskPack,
   buildCommerceOpenSourceAdapters,
+  buildCommerceProviderActivationPlan,
   buildCommercePublishingMatrixPlan,
   buildCommerceRemixEnginePlan,
   buildCommerceRemixExportPackage,
@@ -23,6 +24,7 @@ import {
   buildDemoCommerceCustomerSupportWorkflow,
   buildDemoCommerceCreatorPersonaMatrix,
   buildDemoCommerceModelImageTaskPack,
+  buildDemoCommerceProviderActivationPlan,
   buildDemoCommercePublishingMatrixPlan,
   buildDemoCommercePerformanceUploadReport,
   buildDemoCommerceRemixDryRun,
@@ -85,6 +87,7 @@ function buildInputResponse(input: CommerceRemixPlanInput, body: CommerceRemixRe
   const modelImageTaskPack = buildCommerceModelImageTaskPack(input);
   const customerSupportWorkflow = buildCommerceCustomerSupportWorkflow(input, servicePack);
   const customerDeliveryMap = buildCommerceCustomerDeliveryMap(input);
+  const providerActivationPlan = buildCommerceProviderActivationPlan();
   const openSourceAdapters = buildCommerceOpenSourceAdapters();
   const executionRecipes = buildCommerceRemixExecutionRecipes(input, plan, openSourceAdapters);
   const workflowPlaybook = buildCommerceRemixWorkflowPlaybook(input, plan);
@@ -110,6 +113,7 @@ function buildInputResponse(input: CommerceRemixPlanInput, body: CommerceRemixRe
     modelImageTaskPack,
     customerSupportWorkflow,
     customerDeliveryMap,
+    providerActivationPlan,
     openSourceAdapters,
     executionRecipes,
     workflowPlaybook,
@@ -136,6 +140,7 @@ export async function GET() {
     modelImageTaskPack: buildDemoCommerceModelImageTaskPack(),
     customerSupportWorkflow: buildDemoCommerceCustomerSupportWorkflow(),
     customerDeliveryMap: buildDemoCommerceCustomerDeliveryMap(),
+    providerActivationPlan: buildDemoCommerceProviderActivationPlan(),
     openSourceAdapters: buildCommerceOpenSourceAdapters(),
     executionRecipes: buildDemoCommerceRemixExecutionRecipes(),
     workflowPlaybook: buildDemoCommerceRemixWorkflowPlaybook(),
