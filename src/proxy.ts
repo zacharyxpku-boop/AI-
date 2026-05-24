@@ -15,6 +15,7 @@ const PUBLIC_EXACT_PATHS = new Set([
   '/api/sales/inquiry',
   '/api/health',
   '/api/share',
+  '/api/commerce-remix',
   '/api/unsubscribe',
 ]);
 

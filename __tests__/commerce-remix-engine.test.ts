@@ -3,10 +3,14 @@ import { describe, expect, it } from 'vitest';
 import {
   buildCommerceRemixEnginePlan,
   buildCommerceRenderBatchPlan,
+  buildCommerceRenderCapacityPlan,
   buildCommerceTimeline,
   buildCommerceCloudDriveManifest,
   buildCommerceCustomerServicePack,
+  buildCommerceOpenSourceAdapters,
+  buildCommercePublishingMatrixPlan,
   buildCommerceRemixTemplateBank,
+  buildCommerceRemixWorkflowPlaybook,
   buildDemoCommerceRemixEnginePlan,
   buildFfmpegCommandManifest,
   buildCommerceRemixExportPackage,
@@ -305,5 +309,66 @@ describe('commerce remix engine', () => {
     expect(pack.objectionReplies.map(item => item.objection)).toEqual(['觉得价格高', '担心不好用', '物流或售后问题']);
     expect(pack.afterSalesCards).toHaveLength(3);
     expect(pack.escalationRules.join(' ')).toContain('退款');
+  });
+
+  it('maps open-source remix capabilities into guarded ecommerce adapters', () => {
+    const adapters = buildCommerceOpenSourceAdapters();
+
+    expect(adapters.map(adapter => adapter.id)).toEqual([
+      'ffmpeg',
+      'remotion',
+      'whisper',
+      'opencv-mediapipe',
+      'mlt-shotcut',
+      'queue-worker',
+    ]);
+    expect(adapters.find(adapter => adapter.id === 'ffmpeg')).toMatchObject({
+      integrationMode: 'local_worker',
+      readiness: 'ready_now',
+    });
+    expect(adapters.map(adapter => adapter.guardrail).join(' ')).toContain('不接收客户账号凭据');
+  });
+
+  it('builds a customer-readable remix workflow with no-provider fallbacks', () => {
+    const plan = buildCommerceRemixEnginePlan(baseInput);
+    const playbook = buildCommerceRemixWorkflowPlaybook(baseInput, plan);
+
+    expect(playbook.stages.map(stage => stage.id)).toEqual([
+      'brief',
+      'asset-shelf',
+      'template-remix',
+      'render-queue',
+      'publishing-pack',
+      'return-loop',
+    ]);
+    expect(playbook.stages.find(stage => stage.id === 'publishing-pack')?.qualityGate).toContain('不自动登录');
+    expect(playbook.noProviderFallbacks.join(' ')).toContain('客户上传链接、截图、CSV');
+  });
+
+  it('plans platform title matrices for customer self-publishing', () => {
+    const matrix = buildCommercePublishingMatrixPlan(baseInput);
+
+    expect(matrix).toHaveLength(3);
+    expect(matrix[0].accountAngles.map(angle => angle.accountType)).toEqual(['真实买家号', '测评种草号', '店铺官方号']);
+    expect(matrix[0].accountAngles[0].publishNote).toContain('客户自发');
+    expect(matrix[1].accountAngles[1].assetHint).toContain('对比图');
+  });
+
+  it('summarizes render capacity without pretending platform automation', () => {
+    const completeInput: CommerceRemixPlanInput = {
+      ...baseInput,
+      assets: [
+        ...baseInput.assets,
+        { id: 'missing-model', kind: 'model_image', label: 'model image', uri: 'assets/model.png', rightsReady: true },
+      ],
+    };
+    const plan = buildCommerceRemixEnginePlan(completeInput);
+    const batchPlan = buildCommerceRenderBatchPlan(plan.queue, { maxConcurrency: 2 });
+    const capacity = buildCommerceRenderCapacityPlan(plan.queue, batchPlan);
+
+    expect(capacity.recommendedConcurrency).toBe(2);
+    expect(capacity.estimatedOutputsPerHour).toBe(24);
+    expect(capacity.queuePolicy.join(' ')).toContain('不自动登录任何平台账号');
+    expect(capacity.scalePath.join(' ')).toContain('多 worker');
   });
 });

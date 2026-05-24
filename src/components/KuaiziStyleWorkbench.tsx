@@ -5,12 +5,16 @@ import { useMemo, useState } from 'react';
 import {
   buildDemoCommerceCloudDriveManifest,
   buildDemoCommerceCustomerServicePack,
+  buildCommerceOpenSourceAdapters,
+  buildDemoCommercePublishingMatrixPlan,
   buildDemoCommercePerformanceUploadReport,
   buildDemoCommerceRemixDryRun,
   buildDemoCommerceRemixEnginePlan,
   buildDemoCommerceRemixExportPackage,
+  buildDemoCommerceRemixWorkflowPlaybook,
   buildDemoCommerceRemixQualityGate,
   buildDemoCommerceRemixTemplateBank,
+  buildDemoCommerceRenderCapacityPlan,
   buildDemoCommerceRenderBatchPlan,
 } from '@/lib/commerce-remix-engine';
 
@@ -207,6 +211,10 @@ export function KuaiziStyleWorkbench() {
   const templateBank = useMemo(() => buildDemoCommerceRemixTemplateBank(), []);
   const qualityGate = useMemo(() => buildDemoCommerceRemixQualityGate(), []);
   const servicePack = useMemo(() => buildDemoCommerceCustomerServicePack(), []);
+  const openSourceAdapters = useMemo(() => buildCommerceOpenSourceAdapters(), []);
+  const workflowPlaybook = useMemo(() => buildDemoCommerceRemixWorkflowPlaybook(), []);
+  const publishingMatrix = useMemo(() => buildDemoCommercePublishingMatrixPlan(), []);
+  const renderCapacity = useMemo(() => buildDemoCommerceRenderCapacityPlan(), []);
   const queueSummary = useMemo(() => {
     const statuses = ['needs_material', 'ready', 'rendering', 'exported'] as const;
     return statuses.map(status => ({
@@ -320,6 +328,51 @@ export function KuaiziStyleWorkbench() {
                 </div>
               </section>
 
+              <section className="rounded-lg border border-[#e2e8f5] bg-white p-5 shadow-sm">
+                <div className="flex flex-col gap-3 md:flex-row md:items-end md:justify-between">
+                  <div>
+                    <p className="text-xs font-black uppercase tracking-[0.18em] text-cyan-600">Customer Workflow</p>
+                    <h3 className="mt-1 text-lg font-black text-slate-950">客户看到的是一条商品增长流水线，不是零散 AI 工具</h3>
+                    <p className="mt-1 text-sm leading-6 text-slate-500">从商品资料到发布回填，每一步都写清客户要做什么、系统产出什么、什么时候不能继续。</p>
+                  </div>
+                  <div className="rounded-md bg-cyan-50 px-3 py-2 text-sm font-black text-cyan-700">{workflowPlaybook.stages.length} 步闭环</div>
+                </div>
+                <div className="mt-5 grid gap-3 lg:grid-cols-3">
+                  {workflowPlaybook.stages.map((stage, index) => (
+                    <article className="min-w-0 rounded-md border border-slate-200 bg-slate-50 p-4" key={stage.id}>
+                      <div className="flex items-start gap-3">
+                        <span className="grid size-7 shrink-0 place-items-center rounded-md bg-cyan-600 text-xs font-black text-white">{index + 1}</span>
+                        <div className="min-w-0">
+                          <h4 className="text-sm font-black leading-5 text-slate-950">{stage.title}</h4>
+                          <p className="mt-1 text-xs font-black leading-5 text-cyan-700">{stage.output}</p>
+                        </div>
+                      </div>
+                      <p className="mt-3 text-xs leading-5 text-slate-600">客户：{stage.customerAction}</p>
+                      <p className="mt-2 text-xs leading-5 text-slate-600">系统：{stage.systemAction}</p>
+                      <p className="mt-3 rounded bg-white p-2 text-xs font-bold leading-5 text-slate-700 ring-1 ring-slate-100">{stage.qualityGate}</p>
+                    </article>
+                  ))}
+                </div>
+                <div className="mt-4 grid gap-3 md:grid-cols-2">
+                  <div className="rounded-md border border-cyan-100 bg-cyan-50 p-4">
+                    <h4 className="text-sm font-black text-slate-950">稳定默认项</h4>
+                    <div className="mt-3 grid gap-2">
+                      {workflowPlaybook.stableDefaults.map(item => (
+                        <div className="rounded bg-white px-3 py-2 text-xs font-bold leading-5 text-slate-700 ring-1 ring-cyan-100" key={item}>{item}</div>
+                      ))}
+                    </div>
+                  </div>
+                  <div className="rounded-md border border-amber-100 bg-amber-50 p-4">
+                    <h4 className="text-sm font-black text-slate-950">没有外部 provider 时的替代路径</h4>
+                    <div className="mt-3 grid gap-2">
+                      {workflowPlaybook.noProviderFallbacks.map(item => (
+                        <div className="rounded bg-white px-3 py-2 text-xs font-bold leading-5 text-slate-700 ring-1 ring-amber-100" key={item}>{item}</div>
+                      ))}
+                    </div>
+                  </div>
+                </div>
+              </section>
+
               <section className="grid gap-5 xl:grid-cols-[minmax(0,1fr)_360px]">
                 <div className="rounded-lg border border-[#e2e8f5] bg-white p-5 shadow-sm">
                   <div className="flex flex-col gap-3 md:flex-row md:items-center md:justify-between">
@@ -395,6 +448,27 @@ export function KuaiziStyleWorkbench() {
                       </article>
                     ))}
                   </div>
+                  <div className="mt-5 rounded-md border border-indigo-100 bg-indigo-50 p-4">
+                    <div className="flex flex-col gap-2 md:flex-row md:items-end md:justify-between">
+                      <div>
+                        <p className="text-xs font-black uppercase tracking-[0.18em] text-indigo-600">开源能力适配器</p>
+                        <h4 className="mt-1 text-base font-black text-slate-950">不是堆开源项目，而是把成熟能力封成电商任务</h4>
+                      </div>
+                      <span className="rounded bg-white px-2.5 py-1 text-xs font-black text-indigo-700 ring-1 ring-indigo-100">{openSourceAdapters.length} 个适配器</span>
+                    </div>
+                    <div className="mt-4 grid gap-2 lg:grid-cols-3">
+                      {openSourceAdapters.map(adapter => (
+                        <article className="min-w-0 rounded-md bg-white p-3 ring-1 ring-indigo-100" key={adapter.id}>
+                          <div className="flex items-start justify-between gap-2">
+                            <h5 className="text-sm font-black leading-5 text-slate-950">{adapter.name}</h5>
+                            <span className="shrink-0 rounded bg-slate-100 px-2 py-1 text-[11px] font-black text-slate-600">{adapter.readiness === 'ready_now' ? '可先用' : adapter.readiness === 'key_optional' ? '等 Key' : '后续'}</span>
+                          </div>
+                          <p className="mt-2 line-clamp-2 text-xs font-bold leading-5 text-indigo-700">{adapter.useFor}</p>
+                          <p className="mt-2 text-xs leading-5 text-slate-600">{adapter.customerValue}</p>
+                        </article>
+                      ))}
+                    </div>
+                  </div>
                 </div>
 
                 <aside className="rounded-lg border border-[#d8e4ff] bg-[#f4f8ff] p-5 text-slate-950 shadow-sm">
@@ -426,7 +500,15 @@ export function KuaiziStyleWorkbench() {
                     ))}
                   </div>
                   <div className="mt-4 rounded-md border border-blue-100 bg-white p-3 text-xs leading-5 text-slate-600">
-                    当前样例已经生成 {remixPlan.timeline.clips.length} 个时间线片段、{remixPlan.ffmpegCommands.length} 条 FFmpeg 命令、{remixPlan.publishingPacks.length} 个平台发布包，并拆成 {batchPlan.batches.length} 个稳定渲染批次。
+                    当前样例已经生成 {remixPlan.timeline.clips.length} 个时间线片段、{remixPlan.ffmpegCommands.length} 条 FFmpeg 命令、{remixPlan.publishingPacks.length} 个平台发布包，并拆成 {batchPlan.batches.length} 个稳定渲染批次；建议并发 {renderCapacity.recommendedConcurrency}，预估每小时 {renderCapacity.estimatedOutputsPerHour} 条输出。
+                  </div>
+                  <div className="mt-3 grid gap-2">
+                    {renderCapacity.failureIsolation.map(item => (
+                      <div className="rounded-md bg-white px-3 py-2 text-xs font-bold leading-5 text-slate-700 ring-1 ring-blue-100" key={item}>{item}</div>
+                    ))}
+                  </div>
+                  <div className="mt-3 rounded-md border border-indigo-100 bg-indigo-50 px-3 py-2 text-xs font-black leading-5 text-indigo-700">
+                    已接本地接口：/api/commerce-remix，可直接生成任务包、质量门禁、渲染批次和客户回填复盘。
                   </div>
                   <div className="mt-3 space-y-2">
                     {remixPackage.artifacts.slice(0, 4).map(artifact => (
@@ -608,6 +690,22 @@ export function KuaiziStyleWorkbench() {
                     <article className="rounded-md border border-slate-200 bg-slate-50 p-3" key={row[0]}>
                       <h4 className="text-sm font-black text-slate-950">{row[0]}</h4>
                       <p className="mt-2 text-xs leading-5 text-slate-600">{row[1]}</p>
+                    </article>
+                  ))}
+                </div>
+                <div className="mt-5 grid gap-3 lg:grid-cols-5">
+                  {publishingMatrix.map(plan => (
+                    <article className="min-w-0 rounded-md border border-sky-100 bg-sky-50 p-3" key={plan.platform}>
+                      <h4 className="text-sm font-black text-slate-950">{plan.platform}</h4>
+                      <div className="mt-3 space-y-2">
+                        {plan.accountAngles.slice(0, 3).map(angle => (
+                          <div className="rounded bg-white p-2 text-xs ring-1 ring-sky-100" key={`${plan.platform}-${angle.accountType}`}>
+                            <div className="font-black text-sky-700">{angle.accountType}</div>
+                            <div className="mt-1 line-clamp-2 font-bold leading-5 text-slate-700">{angle.title}</div>
+                            <div className="mt-1 line-clamp-2 leading-5 text-slate-500">{angle.assetHint}</div>
+                          </div>
+                        ))}
+                      </div>
                     </article>
                   ))}
                 </div>

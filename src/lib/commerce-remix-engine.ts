@@ -199,6 +199,49 @@ export interface CommerceCustomerServicePack {
   escalationRules: string[];
 }
 
+export interface CommerceOpenSourceAdapter {
+  id: string;
+  name: string;
+  useFor: string;
+  integrationMode: 'task_manifest' | 'local_worker' | 'optional_provider';
+  customerValue: string;
+  readiness: 'ready_now' | 'key_optional' | 'later';
+  guardrail: string;
+}
+
+export interface CommerceRemixWorkflowPlaybook {
+  stages: Array<{
+    id: string;
+    title: string;
+    customerAction: string;
+    systemAction: string;
+    output: string;
+    qualityGate: string;
+  }>;
+  stableDefaults: string[];
+  noProviderFallbacks: string[];
+}
+
+export interface CommercePublishingMatrixPlan {
+  platform: RemixPlatform;
+  accountAngles: Array<{
+    accountType: string;
+    title: string;
+    firstLine: string;
+    assetHint: string;
+    publishNote: string;
+  }>;
+}
+
+export interface CommerceRenderCapacityPlan {
+  laneCount: number;
+  recommendedConcurrency: number;
+  estimatedOutputsPerHour: number;
+  queuePolicy: string[];
+  failureIsolation: string[];
+  scalePath: string[];
+}
+
 const PLATFORM_LABELS: Record<RemixPlatform, string> = {
   xiaohongshu: '小红书',
   tiktok: 'TikTok',
@@ -291,6 +334,65 @@ export function getCommerceRemixEngineStack(): CommerceRemixEnginePlan['engineSt
       role: '成片质量门禁',
       openSourceReference: 'Open-source media QA / render validation patterns',
       reason: '导出前检查字幕、素材授权、尺寸、音频、时长和发布包完整性，减少客户拿到不可用成片。',
+    },
+  ];
+}
+
+export function buildCommerceOpenSourceAdapters(): CommerceOpenSourceAdapter[] {
+  return [
+    {
+      id: 'ffmpeg',
+      name: 'FFmpeg / ffmpeg.wasm',
+      useFor: '转码、裁切、拼接、字幕烧录、音频响度标准化、多尺寸导出',
+      integrationMode: 'local_worker',
+      customerValue: '把商品图、视频片段、字幕和配音稳定合成 MP4，不依赖外部视频 provider。',
+      readiness: 'ready_now',
+      guardrail: '只保存参数数组和输出路径，不拼接 shell 字符串，不接收客户账号凭据。',
+    },
+    {
+      id: 'remotion',
+      name: 'Remotion templates',
+      useFor: '商品卡、价格锚点、模特证明、字幕版式、结尾 CTA 模板',
+      integrationMode: 'task_manifest',
+      customerValue: '让短视频像电商模板一样可复用，换商品后仍能稳定出片。',
+      readiness: 'ready_now',
+      guardrail: '先导出模板任务包；真实渲染可走本地 worker 或后续队列。',
+    },
+    {
+      id: 'whisper',
+      name: 'Whisper.cpp / faster-whisper',
+      useFor: '客户上传口播或直播切片的转写、字幕切句、多语字幕底稿',
+      integrationMode: 'optional_provider',
+      customerValue: '把已有口播素材变成字幕、标题和重剪素材，不等数字人 Key。',
+      readiness: 'later',
+      guardrail: '首版先交付字幕文件和口播稿，不承诺自动识别所有方言或噪声场景。',
+    },
+    {
+      id: 'opencv-mediapipe',
+      name: 'OpenCV / MediaPipe',
+      useFor: '画面主体检测、商品/人脸安全区、字幕遮挡预检、封面裁切建议',
+      integrationMode: 'optional_provider',
+      customerValue: '减少字幕压住商品、模特脸部或平台按钮的问题。',
+      readiness: 'later',
+      guardrail: '仅做质量提示，不做人脸身份识别或用户画像。',
+    },
+    {
+      id: 'mlt-shotcut',
+      name: 'MLT / Shotcut / OpenShot patterns',
+      useFor: '时间线、转场、滤镜、轨道和导出配置的开源剪辑器范式',
+      integrationMode: 'task_manifest',
+      customerValue: '吸收成熟剪辑器的稳定结构，但不把客户带进复杂编辑器。',
+      readiness: 'ready_now',
+      guardrail: '只沉淀电商模板和任务清单，不复制大仓库 UI 或不明许可素材。',
+    },
+    {
+      id: 'queue-worker',
+      name: 'BullMQ-style worker queue',
+      useFor: '大批量渲染排队、并发限制、单条失败重试、输出记录',
+      integrationMode: 'local_worker',
+      customerValue: '几十到几百条视频可以分批跑，失败不拖垮整批交付。',
+      readiness: 'ready_now',
+      guardrail: '首版只执行本地任务和导出包；云端 worker、对象存储和监控后续可接。',
     },
   ];
 }
@@ -415,6 +517,26 @@ export function buildPlatformPublishingPacks(input: CommerceRemixPlanInput): Pla
       ],
     };
   });
+}
+
+export function buildCommercePublishingMatrixPlan(
+  input: CommerceRemixPlanInput,
+  packs = buildPlatformPublishingPacks(input),
+): CommercePublishingMatrixPlan[] {
+  return packs.map(pack => ({
+    platform: pack.platform,
+    accountAngles: pack.accountVariants.map((variant, index) => ({
+      accountType: variant.accountType,
+      title: variant.title,
+      firstLine: variant.firstLine,
+      assetHint: index === 0
+        ? '用真实使用场景、开箱或手持图做封面'
+        : index === 1
+          ? '用对比图、细节图或规格图做证明'
+          : '用商品主图、售后承诺和店铺承接页做闭环',
+      publishNote: `${PLATFORM_LABELS[pack.platform]}客户自发：复制标题和正文，上传对应成片，发布后回填链接、截图或 CSV。`,
+    })),
+  }));
 }
 
 export function buildAccountMatrixPublishingVariants(platform: RemixPlatform, productName: string, point: string, audience: string): PlatformPublishingPack['accountVariants'] {
@@ -723,6 +845,37 @@ export function buildCommerceRenderBatchPlan(queue: CommerceRemixQueueItem[], op
   };
 }
 
+export function buildCommerceRenderCapacityPlan(
+  queue: CommerceRemixQueueItem[],
+  batchPlan = buildCommerceRenderBatchPlan(queue),
+): CommerceRenderCapacityPlan {
+  const runnableCount = queue.filter(item => item.status === 'ready' || item.status === 'failed_retryable').length;
+  const blockedCount = queue.filter(item => item.status === 'blocked' || item.status === 'needs_material').length;
+  const laneCount = Math.max(1, batchPlan.batches.length || Math.ceil(queue.length / Math.max(1, batchPlan.maxConcurrency)));
+  const estimatedOutputsPerHour = Math.max(0, runnableCount * 8);
+  return {
+    laneCount,
+    recommendedConcurrency: batchPlan.maxConcurrency,
+    estimatedOutputsPerHour,
+    queuePolicy: [
+      `可跑任务 ${runnableCount} 条，缺素材或阻断 ${blockedCount} 条`,
+      `每批最多 ${batchPlan.maxConcurrency} 条并发，避免单机或小云主机被渲染打满`,
+      '每条视频保留 platform、尺寸、模板、字幕、输出路径和重试次数',
+      '渲染完成后只进入客户自发布交付包，不自动登录任何平台账号',
+    ],
+    failureIsolation: [
+      '缺素材任务不进入批次',
+      '单条失败只重试该条，不回滚已导出的 MP4',
+      '连续失败后标记 blocked，并把素材编码、字幕和音频检查项写回任务',
+    ],
+    scalePath: [
+      '本地单机：FFmpeg 参数数组 + 导出目录 + dry-run 验证',
+      '小团队：队列 worker + 对象存储/云盘交付 + 失败重跑面板',
+      '更大规模：多 worker 分片、渲染日志、云存储签名链接和客户空间权限',
+    ],
+  };
+}
+
 export function executeCommerceRenderBatches(queue: CommerceRemixQueueItem[], plan = buildCommerceRenderBatchPlan(queue), options: { failQueueItemIds?: string[] } = {}): CommerceRenderBatchExecution {
   const failIds = new Set(options.failQueueItemIds || []);
   const byId = new Map(queue.map(item => [item.id, item]));
@@ -791,6 +944,78 @@ export function buildCommerceRemixTemplateBank(input: CommerceRemixPlanInput): C
       qualityChecks: ['FAQ 与商品卖点一致', '售后承诺不过度', '敏感问题进入人工复核'],
     },
   ];
+}
+
+export function buildCommerceRemixWorkflowPlaybook(
+  input: CommerceRemixPlanInput,
+  plan = buildCommerceRemixEnginePlan(input),
+): CommerceRemixWorkflowPlaybook {
+  const product = safeText(input.productName, '商品');
+  const platformText = input.platforms.map(platform => PLATFORM_LABELS[platform]).join(' / ');
+  return {
+    stages: [
+      {
+        id: 'brief',
+        title: '商品和卖点定稿',
+        customerAction: `提供${product}的商品图、卖点、受众、禁用词和参考链接。`,
+        systemAction: '整理标题、口播、图文脚本、素材缺口和风险提示。',
+        output: '商品 brief、首轮脚本、素材清单',
+        qualityGate: '卖点不能只写抽象词，必须能落到画面或客服回答。',
+      },
+      {
+        id: 'asset-shelf',
+        title: '素材货架',
+        customerAction: '上传商品图、视频片段、授权说明；缺模特图时先记录为待生成。',
+        systemAction: `检查 ${plan.missingAssets.length} 个素材/授权缺口，并生成可拍摄或可生成的补素材任务。`,
+        output: '素材货架、授权状态、缺口清单',
+        qualityGate: '未确认授权的素材不能进入客户交付包。',
+      },
+      {
+        id: 'template-remix',
+        title: '开源混剪任务',
+        customerAction: '确认主平台和想要测试的内容角度。',
+        systemAction: '用时间线、模板、字幕、封面、BGM 和 FFmpeg 参数数组生成稳定任务包。',
+        output: `${plan.timeline.clips.length} 个 clip / ${plan.ffmpegCommands.length} 条渲染命令`,
+        qualityGate: '每条视频都必须有字幕、安全区、输出尺寸和失败重试路径。',
+      },
+      {
+        id: 'render-queue',
+        title: '批量渲染队列',
+        customerAction: '只确认是否补素材或先导出已有版本。',
+        systemAction: '按平台和尺寸拆分任务；失败只重跑单条，成功视频进入交付目录。',
+        output: `${plan.queue.length} 条队列任务`,
+        qualityGate: '缺素材的任务不进入渲染，避免交付空视频。',
+      },
+      {
+        id: 'publishing-pack',
+        title: '多账号发布包',
+        customerAction: `客户自己登录 ${platformText} 发布，并按清单回填结果。`,
+        systemAction: '生成各平台标题、正文、标签、封面建议、账号角度和发布时间提醒。',
+        output: `${plan.publishingPacks.length} 个平台发布包`,
+        qualityGate: '不代管账号，不自动登录，不绕过平台发布流程。',
+      },
+      {
+        id: 'return-loop',
+        title: '表现回填和下一轮',
+        customerAction: '上传发布链接、截图、CSV 或云盘目录。',
+        systemAction: '判断哪条标题和素材有效，生成下一轮重剪、客服和售后动作。',
+        output: '复盘建议、下一轮素材缺口、客服话术',
+        qualityGate: '没有真实回填时不虚构播放量、订单和转化。',
+      },
+    ],
+    stableDefaults: [
+      '首轮只保留三类模板：种草证明、模特场景、客服异议',
+      '所有渲染输出默认生成 9:16，按平台补 1:1 或 16:9',
+      '字幕默认最多两行，避开底部平台按钮和商品主体',
+      '标题矩阵默认按真实买家号、测评种草号、店铺官方号三种角度生成',
+    ],
+    noProviderFallbacks: [
+      '没有图片 Key：先导出模特图和场景图 prompt，客户可上传已有图',
+      '没有视频/数字人 Key：先导出口播稿、字幕、时间线和本地混剪任务',
+      '没有平台数据 API：客户上传链接、截图、CSV 或云盘目录',
+      '没有自动发布：客户自己登录平台发布，Wenai 只给发布包和回填表',
+    ],
+  };
 }
 
 export function evaluateCommerceRemixQuality(
@@ -973,8 +1198,31 @@ export function buildDemoCommerceRenderBatchPlan() {
   return buildCommerceRenderBatchPlan(plan.queue, { maxConcurrency: 3, retryBudget: 2 });
 }
 
+export function buildDemoCommerceRenderCapacityPlan() {
+  const demoInput = buildDemoCommerceRemixInput();
+  const readyInput = {
+    ...demoInput,
+    assets: demoInput.assets.map(asset => asset.id === 'model-handheld'
+      ? { ...asset, missing: false, uri: 'assets/model-handheld.png', rightsReady: true }
+      : asset),
+  };
+  const plan = buildCommerceRemixEnginePlan(readyInput);
+  const batchPlan = buildCommerceRenderBatchPlan(plan.queue, { maxConcurrency: 3, retryBudget: 2 });
+  return buildCommerceRenderCapacityPlan(plan.queue, batchPlan);
+}
+
 export function buildDemoCommerceRemixTemplateBank() {
   return buildCommerceRemixTemplateBank(buildDemoCommerceRemixInput());
+}
+
+export function buildDemoCommerceRemixWorkflowPlaybook() {
+  const input = buildDemoCommerceRemixInput();
+  return buildCommerceRemixWorkflowPlaybook(input, buildCommerceRemixEnginePlan(input));
+}
+
+export function buildDemoCommercePublishingMatrixPlan() {
+  const input = buildDemoCommerceRemixInput();
+  return buildCommercePublishingMatrixPlan(input);
 }
 
 export function buildDemoCommerceRemixQualityGate() {

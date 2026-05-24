@@ -18,11 +18,13 @@ describe('proxy public review portal access', () => {
     const readinessResponse = await proxy(request('/api/readiness?projectId=default-project'));
     const actionQueueResponse = await proxy(request('/api/industrial-chain/action-queue?projectId=default-project'));
     const assetPermissionResponse = await proxy(request('/api/asset-permissions?projectId=default-project'));
+    const commerceRemixResponse = await proxy(request('/api/commerce-remix'));
     const adminReviewLinksResponse = await proxy(request('/api/industrial-chain/review-links'));
 
     expect(readinessResponse.status).toBe(200);
     expect(actionQueueResponse.status).toBe(200);
     expect(assetPermissionResponse.status).toBe(200);
+    expect(commerceRemixResponse.status).toBe(200);
     expect(adminReviewLinksResponse.status).toBe(307);
     expect(adminReviewLinksResponse.headers.get('location')).toBe('http://localhost/login');
   });
