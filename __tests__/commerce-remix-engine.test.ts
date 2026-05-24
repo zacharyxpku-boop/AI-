@@ -433,6 +433,10 @@ describe('commerce remix engine', () => {
     expect(personas).toHaveLength(3);
     expect(personas[0].personas).toHaveLength(3);
     expect(personas[0].personas[0].openingLines.join(' ')).toContain('回填链接、截图或 CSV');
+    expect(personas[0].personas[0].contentPillars).toContain('痛点场景');
+    expect(personas[0].personas[1].filmingPrompts.join(' ')).toContain('桌面俯拍');
+    expect(personas[0].personas[2].returnMetrics.length).toBeGreaterThanOrEqual(4);
+    expect(personas[0].personas[0].sourcePatterns.join(' ')).toContain('开源提词器');
     expect(personas[0].personas[0].doNotClaim).toContain('不承诺平台自动登录或自动发布');
   });
 

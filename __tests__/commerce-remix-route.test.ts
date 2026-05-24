@@ -95,6 +95,8 @@ describe('/api/commerce-remix', () => {
     expect(body.workflowPlaybook.noProviderFallbacks.join(' ')).toContain('没有自动发布');
     expect(body.publishingMatrix[0].accountAngles[0].publishNote).toContain('客户自发');
     expect(body.creatorPersonaMatrix[0].personas[0].doNotClaim).toContain('不承诺平台自动登录或自动发布');
+    expect(body.creatorPersonaMatrix[0].personas[0].contentPillars).toContain('痛点场景');
+    expect(body.creatorPersonaMatrix[0].personas[0].returnMetrics.length).toBeGreaterThanOrEqual(4);
     expect(body.cloudReturnPlan.nextRoundOutputs).toContain('重剪任务清单');
   });
 

@@ -277,8 +277,12 @@ export interface CommerceCreatorPersonaMatrix {
     voiceStyle: string;
     titleFormulas: string[];
     openingLines: string[];
+    contentPillars: string[];
+    filmingPrompts: string[];
     proofAssets: string[];
     publishCadence: string;
+    returnMetrics: string[];
+    sourcePatterns: string[];
     doNotClaim: string[];
   }>;
 }
@@ -829,6 +833,16 @@ export function buildCommerceCreatorPersonaMatrix(
           isReviewer ? `别先看价格，先看它有没有把${point}讲清楚。` : `如果你是${audience}，这条可以直接照着选。`,
           `发布后客户只需要回填链接、截图或 CSV，我们再判断下一轮怎么重剪。`,
         ],
+        contentPillars: isBuyer
+          ? ['痛点场景', '真实使用', '避坑提醒', '评论区答疑']
+          : isReviewer
+            ? ['问题定义', '细节证据', '适合/不适合', '同款复测']
+            : ['规格解释', '售后承接', '购买路径', '客服 FAQ'],
+        filmingPrompts: isBuyer
+          ? [`用${audience}真实场景开场`, '先拍问题，再拍商品进入画面', '保留一条评论区追问作为下一条选题']
+          : isReviewer
+            ? ['桌面俯拍开箱和细节', '同一角度展示前后对比', '用字幕标出不能夸大的边界']
+            : ['展示商品主图和规格', '用客服问题做开场', '结尾给自发布后的回填提醒'],
         proofAssets: isBuyer
           ? ['真实使用图', '手持或开箱图', '发布后评论截图']
           : isReviewer
@@ -839,6 +853,16 @@ export function buildCommerceCreatorPersonaMatrix(
           : plan.platform === 'xiaohongshu'
             ? '首轮 3 篇：场景种草、测评对比、避坑 FAQ，避免同一天连续刷屏。'
             : '首轮 2-3 个版本：商品页承接、广告素材、客服 FAQ，同步记录表现。',
+        returnMetrics: plan.platform === 'shopify'
+          ? ['商品页点击', '加购', '结账', '客服咨询']
+          : plan.platform === 'meta'
+            ? ['点击率', '落地页浏览', '询盘', '素材疲劳']
+            : ['播放/阅读', '完播或停留', '收藏评论', '私信或商品点击'],
+        sourcePatterns: [
+          '开源提词器思路：把口播拆成短句，方便客户照读或数字人后续接入',
+          '开源内容日历思路：同一商品按账号人设拆成多条，而不是重复发同一条',
+          '开源字幕/剪辑思路：口播、字幕和混剪时间线保持同一份脚本来源',
+        ],
         doNotClaim: [
           '不承诺平台自动登录或自动发布',
           '不虚构播放量、订单和转化',

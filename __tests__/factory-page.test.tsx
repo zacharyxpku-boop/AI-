@@ -27,6 +27,8 @@ describe('factory page', () => {
     expect(html).toContain('大规模渲染队列');
     expect(html).toContain('多账号矩阵先不做自动登录');
     expect(html).toContain('超级 IP 和口播标题矩阵');
+    expect(html).toContain('开源提词器思路');
+    expect(html).toContain('回填：');
     expect(html).toContain('个账号人设');
     expect(html).toContain('开源能力适配器');
     expect(html).toContain('执行配方');

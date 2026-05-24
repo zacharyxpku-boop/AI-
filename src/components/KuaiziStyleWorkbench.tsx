@@ -919,11 +919,19 @@ export function KuaiziStyleWorkbench() {
                               <div className="font-black text-sky-700">{persona.accountType}</div>
                               <p className="mt-1 line-clamp-2 leading-5 text-slate-600">{persona.voiceStyle}</p>
                               <p className="mt-1 line-clamp-2 font-bold leading-5 text-slate-800">{persona.openingLines[0]}</p>
+                              <p className="mt-1 line-clamp-2 text-[11px] font-bold leading-4 text-sky-700">{persona.contentPillars.slice(0, 3).join(' / ')}</p>
+                              <p className="mt-1 line-clamp-2 text-[11px] leading-4 text-slate-500">{persona.filmingPrompts[0]}</p>
                               <p className="mt-1 text-[11px] font-bold leading-4 text-slate-500">{persona.proofAssets.slice(0, 2).join(' / ')}</p>
+                              <p className="mt-1 line-clamp-2 text-[11px] font-bold leading-4 text-emerald-700">回填：{persona.returnMetrics.slice(0, 2).join(' / ')}</p>
                             </div>
                           ))}
                         </div>
                       </article>
+                    ))}
+                  </div>
+                  <div className="mt-4 grid gap-2 md:grid-cols-3">
+                    {creatorPersonaMatrix[0]?.personas[0]?.sourcePatterns.map(pattern => (
+                      <div className="rounded-md bg-white px-3 py-2 text-xs font-bold leading-5 text-slate-700 ring-1 ring-sky-100" key={pattern}>{pattern}</div>
                     ))}
                   </div>
                 </div>
