@@ -11,6 +11,7 @@ import {
   buildCommerceCustomerServicePack,
   buildCommerceCustomerSupportWorkflow,
   buildCommerceCreatorPersonaMatrix,
+  buildCommerceFirstDeliveryChecklist,
   buildCommerceModelImageTaskPack,
   buildCommerceOpenSourceAdapters,
   buildCommerceProviderActivationPlan,
@@ -384,6 +385,18 @@ describe('commerce remix engine', () => {
     expect(plan.notNeededForFirstDelivery).toContain('平台自动登录');
     expect(plan.mustNotDo).toContain('不代管客户账号密码');
     expect(JSON.stringify(plan)).not.toMatch(/apiKey|accessToken|Bearer|sk-/i);
+  });
+
+  it('summarizes first delivery without waiting for image video or avatar keys', () => {
+    const plan = buildCommerceRemixEnginePlan(baseInput);
+    const checklist = buildCommerceFirstDeliveryChecklist(baseInput, plan);
+
+    expect(checklist.promise).toContain('不等图片/视频/数字人 Key');
+    expect(checklist.customerInputs).toContain('商品链接或主图');
+    expect(checklist.wenaiOutputs.join(' ')).toContain('平台标题矩阵');
+    expect(checklist.noWaitItems).toContain('平台自动登录');
+    expect(checklist.acceptanceChecklist.join(' ')).toContain('客户发布后只需回填链接、截图、CSV');
+    expect(checklist.nextRoundTrigger.join(' ')).toContain('多 worker');
   });
 
   it('turns adapters into executable remix recipes with clear pass criteria', () => {

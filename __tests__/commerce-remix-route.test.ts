@@ -92,6 +92,8 @@ describe('/api/commerce-remix', () => {
     expect(body.customerDeliveryMap.phases.map((phase: { id: string }) => phase.id)).toContain('publish');
     expect(body.providerActivationPlan.lanes.map((lane: { id: string }) => lane.id)).toContain('image-key');
     expect(body.providerActivationPlan.notNeededForFirstDelivery).toContain('平台自动登录');
+    expect(body.firstDeliveryChecklist.promise).toContain('不等图片/视频/数字人 Key');
+    expect(body.firstDeliveryChecklist.noWaitItems).toContain('平台自动登录');
     expect(body.openSourceAdapters.find((adapter: { id: string }) => adapter.id === 'queue-worker').readiness).toBe('ready_now');
     expect(body.executionRecipes.find((recipe: { adapterId: string }) => recipe.adapterId === 'ffmpeg').passCriteria.join(' ')).toContain('MP4 可播放');
     expect(body.workflowPlaybook.noProviderFallbacks.join(' ')).toContain('没有自动发布');

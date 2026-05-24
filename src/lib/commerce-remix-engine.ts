@@ -338,6 +338,15 @@ export interface CommerceProviderActivationPlan {
   mustNotDo: string[];
 }
 
+export interface CommerceFirstDeliveryChecklist {
+  promise: string;
+  customerInputs: string[];
+  wenaiOutputs: string[];
+  noWaitItems: string[];
+  acceptanceChecklist: string[];
+  nextRoundTrigger: string[];
+}
+
 const PLATFORM_LABELS: Record<RemixPlatform, string> = {
   xiaohongshu: '小红书',
   tiktok: 'TikTok',
@@ -1720,6 +1729,43 @@ export function buildCommerceProviderActivationPlan(): CommerceProviderActivatio
   };
 }
 
+export function buildCommerceFirstDeliveryChecklist(
+  input: CommerceRemixPlanInput,
+  plan = buildCommerceRemixEnginePlan(input),
+  exportPackage = buildCommerceRemixExportPackage(input, plan),
+  deliveryMap = buildCommerceCustomerDeliveryMap(input),
+  providerPlan = buildCommerceProviderActivationPlan(),
+): CommerceFirstDeliveryChecklist {
+  const product = safeText(input.productName, '商品');
+  const platforms = input.platforms.map(platform => PLATFORM_LABELS[platform]).join(' / ');
+  return {
+    promise: `${product} 首版不等图片/视频/数字人 Key，也能交付 ${platforms} 可自发布内容包和下一轮复盘入口。`,
+    customerInputs: unique(deliveryMap.phases.flatMap(phase => phase.customerInput)).slice(0, 10),
+    wenaiOutputs: unique([
+      ...deliveryMap.phases.flatMap(phase => phase.wenaiOutput),
+      ...exportPackage.artifacts.map(artifact => artifact.description),
+    ]).slice(0, 14),
+    noWaitItems: [
+      ...providerPlan.notNeededForFirstDelivery,
+      '图片/视频/数字人 Key 未到位时先交付 prompt、脚本、字幕和本地混剪任务',
+    ],
+    acceptanceChecklist: [
+      '商品资料、卖点、禁用词和目标平台已确认',
+      `至少生成 ${plan.publishingPacks.length} 个平台发布包，每个平台有标题、正文、标签、封面建议和回填要求`,
+      `混剪任务有 ${plan.timeline.clips.length} 个时间线片段、${plan.ffmpegCommands.length} 条 FFmpeg 参数数组和失败重试路径`,
+      '模特图、场景图、细节图和对比卡都有 prompt 或客户素材补充路径',
+      '客服 FAQ、异议处理、售后卡片和差评挽回话术能承接发布后的咨询',
+      '客户发布后只需回填链接、截图、CSV 或云盘目录；没有真实回填不展示虚构表现',
+    ],
+    nextRoundTrigger: [
+      '客户回填发布链接或截图后，开始判断哪个标题和账号人设值得放大',
+      '客户补齐缺失素材后，blocked 渲染任务可重新进入队列',
+      'API Key 到位后，把已有 prompt、脚本和时间线切换为自动生图、视频或数字人口播',
+      '单批超过 30 条成片或多人协作时，再接企业云盘、对象存储或多 worker',
+    ],
+  };
+}
+
 export function executeCommerceRemixDryRun(plan: CommerceRemixEnginePlan, options: { failQueueItemIds?: string[] } = {}): CommerceRemixDryRunResult {
   const failIds = new Set(options.failQueueItemIds || []);
   const queue: CommerceRemixQueueItem[] = [];
@@ -1890,6 +1936,12 @@ export function buildDemoCommerceCustomerDeliveryMap() {
 
 export function buildDemoCommerceProviderActivationPlan() {
   return buildCommerceProviderActivationPlan();
+}
+
+export function buildDemoCommerceFirstDeliveryChecklist() {
+  const input = buildDemoCommerceRemixInput();
+  const plan = buildCommerceRemixEnginePlan(input);
+  return buildCommerceFirstDeliveryChecklist(input, plan, buildCommerceRemixExportPackage(input, plan));
 }
 
 function buildDemoCommerceRemixInput(): CommerceRemixPlanInput {

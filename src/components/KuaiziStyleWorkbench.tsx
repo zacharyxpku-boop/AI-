@@ -9,6 +9,7 @@ import {
   buildDemoCommerceCustomerServicePack,
   buildDemoCommerceCustomerSupportWorkflow,
   buildDemoCommerceCreatorPersonaMatrix,
+  buildDemoCommerceFirstDeliveryChecklist,
   buildDemoCommerceModelImageTaskPack,
   buildCommerceOpenSourceAdapters,
   buildDemoCommerceProviderActivationPlan,
@@ -231,6 +232,7 @@ export function KuaiziStyleWorkbench() {
   const modelImageTaskPack = useMemo(() => buildDemoCommerceModelImageTaskPack(), []);
   const customerSupportWorkflow = useMemo(() => buildDemoCommerceCustomerSupportWorkflow(), []);
   const providerActivationPlan = useMemo(() => buildDemoCommerceProviderActivationPlan(), []);
+  const firstDeliveryChecklist = useMemo(() => buildDemoCommerceFirstDeliveryChecklist(), []);
   const openSourceAdapters = useMemo(() => buildCommerceOpenSourceAdapters(), []);
   const executionRecipes = useMemo(() => buildDemoCommerceRemixExecutionRecipes(), []);
   const workflowPlaybook = useMemo(() => buildDemoCommerceRemixWorkflowPlaybook(), []);
@@ -348,6 +350,56 @@ export function KuaiziStyleWorkbench() {
                       </button>
                     ))}
                   </div>
+                </div>
+              </section>
+
+              <section className="rounded-lg border border-[#dbe6ff] bg-white p-5 shadow-sm">
+                <div className="flex flex-col gap-3 md:flex-row md:items-end md:justify-between">
+                  <div className="min-w-0">
+                    <p className="text-xs font-black tracking-[0.18em] text-emerald-600">首版交付清单</p>
+                    <h3 className="mt-1 text-lg font-black text-slate-950">不等 Key，也能先给客户一套可发布资产</h3>
+                    <p className="mt-1 max-w-4xl text-sm leading-6 text-slate-500">{firstDeliveryChecklist.promise}</p>
+                  </div>
+                  <span className="w-fit rounded-md bg-emerald-50 px-3 py-2 text-sm font-black text-emerald-700">{firstDeliveryChecklist.acceptanceChecklist.length} 条验收项</span>
+                </div>
+                <div className="mt-5 grid gap-3 lg:grid-cols-4">
+                  <article className="rounded-md border border-emerald-100 bg-emerald-50 p-4">
+                    <h4 className="text-sm font-black text-slate-950">客户先给</h4>
+                    <div className="mt-3 space-y-2">
+                      {firstDeliveryChecklist.customerInputs.slice(0, 5).map(item => (
+                        <div className="rounded bg-white px-3 py-2 text-xs font-bold leading-5 text-slate-700 ring-1 ring-emerald-100" key={item}>{item}</div>
+                      ))}
+                    </div>
+                  </article>
+                  <article className="rounded-md border border-blue-100 bg-blue-50 p-4">
+                    <h4 className="text-sm font-black text-slate-950">Wenai 交付</h4>
+                    <div className="mt-3 space-y-2">
+                      {firstDeliveryChecklist.wenaiOutputs.slice(0, 5).map(item => (
+                        <div className="rounded bg-white px-3 py-2 text-xs font-bold leading-5 text-slate-700 ring-1 ring-blue-100" key={item}>{item}</div>
+                      ))}
+                    </div>
+                  </article>
+                  <article className="rounded-md border border-violet-100 bg-violet-50 p-4">
+                    <h4 className="text-sm font-black text-slate-950">首版不用等</h4>
+                    <div className="mt-3 space-y-2">
+                      {firstDeliveryChecklist.noWaitItems.slice(0, 5).map(item => (
+                        <div className="rounded bg-white px-3 py-2 text-xs font-bold leading-5 text-slate-700 ring-1 ring-violet-100" key={item}>{item}</div>
+                      ))}
+                    </div>
+                  </article>
+                  <article className="rounded-md border border-amber-100 bg-amber-50 p-4">
+                    <h4 className="text-sm font-black text-slate-950">验收和下一轮</h4>
+                    <div className="mt-3 space-y-2">
+                      {firstDeliveryChecklist.nextRoundTrigger.map(item => (
+                        <div className="rounded bg-white px-3 py-2 text-xs font-bold leading-5 text-slate-700 ring-1 ring-amber-100" key={item}>{item}</div>
+                      ))}
+                    </div>
+                  </article>
+                </div>
+                <div className="mt-4 grid gap-2 md:grid-cols-3">
+                  {firstDeliveryChecklist.acceptanceChecklist.slice(0, 6).map(item => (
+                    <div className="rounded-md border border-slate-200 bg-slate-50 px-3 py-2 text-xs font-bold leading-5 text-slate-700" key={item}>{item}</div>
+                  ))}
                 </div>
               </section>
 

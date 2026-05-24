@@ -21,6 +21,10 @@ describe('factory page', () => {
     expect(html).toContain('功能很多，但客户只看到一条商品增长流水线');
     expect(html).toContain('发布不代登');
     expect(html).toContain('数据回下一轮');
+    expect(html).toContain('首版交付清单');
+    expect(html).toContain('不等 Key，也能先给客户一套可发布资产');
+    expect(html).toContain('首版不用等');
+    expect(html).toContain('验收和下一轮');
     expect(html).toContain('交付导航');
     expect(html).toContain('个交付节点');
     expect(html).toContain('客户只按步骤补资料');
