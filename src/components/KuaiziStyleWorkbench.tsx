@@ -150,6 +150,15 @@ const commerceAssistantRows = [
   ['表现复盘', '客户上传链接、截图、CSV 后，生成下一轮角度、素材缺口和放大建议。'],
 ] as const;
 
+const operatingSystemRows = [
+  ['资料进来', '商品链接、主图、卖点、禁用词、参考账号', '形成 brief、素材缺口和风险提醒'],
+  ['素材变资产', '商品图、模特图、场景图、细节图、口播稿', '进入图片任务、混剪时间线和客服素材'],
+  ['内容成批量', '开源混剪、字幕、封面、BGM、尺寸适配', '输出可复核的渲染队列和 MP4 交付包'],
+  ['发布不代登', '标题、正文、标签、账号人设、发布时间', '客户自己发布，Wenai 只交付发布包'],
+  ['客服接住单', 'FAQ、异议、售后、差评挽回、人工转接', '让内容流量能被客服和售后承接'],
+  ['数据回下一轮', '链接、截图、CSV、云盘目录、客户备注', '生成下一轮标题、素材缺口和重剪建议'],
+] as const;
+
 const publishingRows = [
   ['小红书', '标题 3 版、正文 2 版、标签、封面、首评引导。'],
   ['TikTok', '3 秒钩子、口播脚本、字幕、封面、Shop CTA。'],
@@ -339,6 +348,33 @@ export function KuaiziStyleWorkbench() {
                       </button>
                     ))}
                   </div>
+                </div>
+              </section>
+
+              <section className="rounded-lg border border-[#dbe6ff] bg-white p-5 shadow-sm">
+                <div className="flex flex-col gap-3 md:flex-row md:items-end md:justify-between">
+                  <div className="min-w-0">
+                    <p className="text-xs font-black tracking-[0.18em] text-indigo-600">电商增长闭环</p>
+                    <h3 className="mt-1 text-lg font-black text-slate-950">功能很多，但客户只看到一条商品增长流水线</h3>
+                    <p className="mt-1 max-w-4xl text-sm leading-6 text-slate-500">
+                      Wenai 把商品资料、图片任务、开源混剪、发布包、客服话术和表现回填串成同一套交付链路；图片、视频、数字人 Key 到位后增强，不影响首版先交付。
+                    </p>
+                  </div>
+                  <span className="w-fit rounded-md bg-indigo-50 px-3 py-2 text-sm font-black text-indigo-700">{operatingSystemRows.length} 条流水线</span>
+                </div>
+                <div className="mt-5 grid gap-3 md:grid-cols-2 xl:grid-cols-3">
+                  {operatingSystemRows.map((row, index) => (
+                    <article className="min-w-0 rounded-md border border-indigo-100 bg-indigo-50 p-4" key={row[0]}>
+                      <div className="flex items-start gap-3">
+                        <span className="grid size-7 shrink-0 place-items-center rounded-md bg-white text-xs font-black text-indigo-700 ring-1 ring-indigo-100">{index + 1}</span>
+                        <div className="min-w-0">
+                          <h4 className="text-sm font-black leading-5 text-slate-950">{row[0]}</h4>
+                          <p className="mt-1 text-xs font-bold leading-5 text-indigo-700">{row[1]}</p>
+                        </div>
+                      </div>
+                      <p className="mt-3 rounded bg-white p-2 text-xs font-bold leading-5 text-slate-700 ring-1 ring-indigo-100">{row[2]}</p>
+                    </article>
+                  ))}
                 </div>
               </section>
 
