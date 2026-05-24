@@ -2,6 +2,7 @@
 
 import Link from 'next/link';
 import { useMemo, useState } from 'react';
+import { buildDemoCommerceRemixEnginePlan } from '@/lib/commerce-remix-engine';
 
 type FlowId = 'brief' | 'asset' | 'image' | 'video' | 'publish' | 'review';
 
@@ -119,29 +120,6 @@ const capabilityRows = [
   ['客服素材', '把商品卖点、常见问题、差评原因整理成客服话术和售后卡片', '可生成', '补充 FAQ'],
 ] as const;
 
-const remixEngineRows = [
-  {
-    title: '时间线混剪',
-    body: '把脚本、商品图、视频片段、字幕、BGM、封面组成可复用时间线，优先用开源时间线编辑思路，输出稳定任务 JSON。',
-    status: '内置任务层',
-  },
-  {
-    title: '模板化渲染',
-    body: '用 Remotion 思路承接商品卡、价格锚点、口播字幕、前后对比、模特展示等模板，保证同一商品能批量出多版本。',
-    status: '可接渲染层',
-  },
-  {
-    title: 'FFmpeg 合成',
-    body: '最终用 FFmpeg 做转码、裁切、拼接、字幕烧录、音频混合和多尺寸输出，不依赖平台登录。',
-    status: '本地/服务器可跑',
-  },
-  {
-    title: '稳定队列',
-    body: '把渲染拆成待执行、渲染中、需补素材、已导出四类状态；失败时只重跑单条任务，不影响整批交付。',
-    status: '需要工程化',
-  },
-] as const;
-
 const commerceAssistantRows = [
   ['商品上新', '标题、卖点、详情页结构、首批图文和短视频脚本。'],
   ['模特与场景', '模特生图、手持图、穿搭图、场景图、规格图、对比图。'],
@@ -210,6 +188,15 @@ export function KuaiziStyleWorkbench() {
     if (!value) return projects;
     return projects.filter(project => `${project.title} ${project.category} ${project.status} ${project.next}`.toLowerCase().includes(value));
   }, [query]);
+  const remixPlan = useMemo(() => buildDemoCommerceRemixEnginePlan(), []);
+  const queueSummary = useMemo(() => {
+    const statuses = ['needs_material', 'ready', 'rendering', 'exported'] as const;
+    return statuses.map(status => ({
+      status,
+      count: remixPlan.queue.filter(item => item.status === status).length,
+      label: status === 'needs_material' ? '待补素材' : status === 'ready' ? '可渲染' : status === 'rendering' ? '渲染中' : '已导出',
+    }));
+  }, [remixPlan]);
 
   return (
     <main className="min-h-screen bg-[#f7f9ff] text-slate-950">
@@ -380,13 +367,13 @@ export function KuaiziStyleWorkbench() {
                     <Link className="text-sm font-black text-indigo-600" href="/factory/video?variant=friend_trial">查看视频 / 数字人流程</Link>
                   </div>
                   <div className="mt-5 grid gap-3 md:grid-cols-2">
-                    {remixEngineRows.map(row => (
-                      <article className="rounded-md border border-slate-200 bg-slate-50 p-4" key={row.title}>
+                    {remixPlan.engineStack.map(row => (
+                      <article className="rounded-md border border-slate-200 bg-slate-50 p-4" key={row.id}>
                         <div className="flex items-start justify-between gap-3">
-                          <h4 className="text-sm font-black text-slate-950">{row.title}</h4>
-                          <span className="shrink-0 rounded bg-indigo-50 px-2 py-1 text-[11px] font-black text-indigo-700">{row.status}</span>
+                          <h4 className="text-sm font-black text-slate-950">{row.role}</h4>
+                          <span className="shrink-0 rounded bg-indigo-50 px-2 py-1 text-[11px] font-black text-indigo-700">{row.openSourceReference}</span>
                         </div>
-                        <p className="mt-2 text-sm leading-6 text-slate-600">{row.body}</p>
+                        <p className="mt-2 text-sm leading-6 text-slate-600">{row.reason}</p>
                       </article>
                     ))}
                   </div>
@@ -399,12 +386,15 @@ export function KuaiziStyleWorkbench() {
                     每条视频都有素材清单、模板、尺寸、字幕、封面和输出路径。失败时只回到缺口，不让客户看到复杂报错。
                   </p>
                   <div className="mt-5 grid gap-2">
-                    {['待补素材', '可渲染', '渲染中', '已导出'].map((item, index) => (
-                      <div className="flex items-center justify-between rounded-md border border-blue-100 bg-white px-3 py-2 text-sm font-black text-slate-800" key={item}>
-                        <span>{item}</span>
-                        <span className="rounded bg-blue-50 px-2 py-1 text-xs text-blue-700">{index === 0 ? '2' : index === 1 ? '8' : index === 2 ? '1' : '5'}</span>
+                    {queueSummary.map(item => (
+                      <div className="flex items-center justify-between rounded-md border border-blue-100 bg-white px-3 py-2 text-sm font-black text-slate-800" key={item.status}>
+                        <span>{item.label}</span>
+                        <span className="rounded bg-blue-50 px-2 py-1 text-xs text-blue-700">{item.count}</span>
                       </div>
                     ))}
+                  </div>
+                  <div className="mt-4 rounded-md border border-blue-100 bg-white p-3 text-xs leading-5 text-slate-600">
+                    当前样例已经生成 {remixPlan.timeline.clips.length} 个时间线片段、{remixPlan.ffmpegCommands.length} 条 FFmpeg 命令、{remixPlan.publishingPacks.length} 个平台发布包。
                   </div>
                 </aside>
               </section>
