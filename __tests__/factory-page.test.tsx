@@ -25,6 +25,9 @@ describe('factory page', () => {
     expect(html).toContain('个图片任务');
     expect(html).toContain('开源混剪');
     expect(html).toContain('大规模渲染队列');
+    expect(html).toContain('队列治理');
+    expect(html).toContain('云盘交付结构');
+    expect(html).toContain('首批每个平台至少抽检');
     expect(html).toContain('多账号矩阵先不做自动登录');
     expect(html).toContain('超级 IP 和口播标题矩阵');
     expect(html).toContain('开源提词器思路');

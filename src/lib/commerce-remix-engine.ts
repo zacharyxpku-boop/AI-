@@ -293,6 +293,10 @@ export interface CommerceRenderCapacityPlan {
   estimatedOutputsPerHour: number;
   queuePolicy: string[];
   failureIsolation: string[];
+  monitoringSignals: string[];
+  humanReviewGates: string[];
+  storageHandoff: string[];
+  scaleTriggers: string[];
   scalePath: string[];
 }
 
@@ -1234,6 +1238,30 @@ export function buildCommerceRenderCapacityPlan(
       '缺素材任务不进入批次',
       '单条失败只重试该条，不回滚已导出的 MP4',
       '连续失败后标记 blocked，并把素材编码、字幕和音频检查项写回任务',
+    ],
+    monitoringSignals: [
+      '每批记录 started/exported/failed/blocked 数量',
+      '每条任务记录平台、尺寸、模板、输出路径、attempt 和失败原因',
+      '连续失败超过重试预算时进入人工复核，不继续占用渲染并发',
+      '导出完成后等待客户回填链接、截图或 CSV，不自动读取平台账号',
+    ],
+    humanReviewGates: [
+      '首批每个平台至少抽检 1 条成片',
+      '字幕、商品主体、模特脸和平台按钮安全区必须人工抽检',
+      'blocked 任务先查素材编码、缺图、字幕过长、音频响度，再允许重跑',
+      '涉及售后承诺、价格、功效或对比的成片进入发布前复核',
+    ],
+    storageHandoff: [
+      '01-source-assets 存客户原始素材和授权说明',
+      '02-render-outputs 存 MP4、封面、字幕和渲染日志',
+      '03-publishing-packs 存各平台标题、口播、标签和自发布清单',
+      '04-customer-return 等客户回填发布链接、截图、CSV 或云盘目录',
+    ],
+    scaleTriggers: [
+      '单批超过 30 条成片时拆分商品/平台批次',
+      '连续两批失败率超过 15% 时降低并发并先做素材复核',
+      '单机渲染超过 2 小时仍未完成时转多 worker 队列',
+      '客户要求长期留存或多人协作时接对象存储/企业云盘',
     ],
     scalePath: [
       '本地单机：FFmpeg 参数数组 + 导出目录 + dry-run 验证',

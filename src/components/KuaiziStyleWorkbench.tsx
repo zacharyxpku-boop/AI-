@@ -635,6 +635,23 @@ export function KuaiziStyleWorkbench() {
                       <div className="rounded-md bg-white px-3 py-2 text-xs font-bold leading-5 text-slate-700 ring-1 ring-blue-100" key={item}>{item}</div>
                     ))}
                   </div>
+                  <div className="mt-4 rounded-md border border-blue-100 bg-white p-3">
+                    <div className="text-xs font-black tracking-[0.16em] text-blue-600">队列治理</div>
+                    <div className="mt-3 grid gap-2">
+                      {renderCapacity.monitoringSignals.slice(0, 3).map(item => (
+                        <div className="rounded bg-blue-50 px-3 py-2 text-xs font-bold leading-5 text-slate-700" key={item}>{item}</div>
+                      ))}
+                    </div>
+                  </div>
+                  <div className="mt-3 grid gap-2">
+                    {renderCapacity.humanReviewGates.slice(0, 3).map(item => (
+                      <div className="rounded-md bg-amber-50 px-3 py-2 text-xs font-bold leading-5 text-amber-800 ring-1 ring-amber-100" key={item}>{item}</div>
+                    ))}
+                  </div>
+                  <div className="mt-3 rounded-md border border-cyan-100 bg-cyan-50 p-3">
+                    <div className="text-xs font-black text-cyan-700">云盘交付结构</div>
+                    <p className="mt-2 text-xs font-bold leading-5 text-slate-700">{renderCapacity.storageHandoff.slice(0, 2).join(' / ')}</p>
+                  </div>
                   <div className="mt-3 rounded-md border border-indigo-100 bg-indigo-50 px-3 py-2 text-xs font-black leading-5 text-indigo-700">
                     已接本地接口：/api/commerce-remix，可直接生成任务包、质量门禁、渲染批次和客户回填复盘。
                   </div>

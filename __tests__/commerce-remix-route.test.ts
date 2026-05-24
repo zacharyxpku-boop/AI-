@@ -52,6 +52,8 @@ describe('/api/commerce-remix', () => {
     expect(body.publishingMatrix[0].accountAngles.length).toBeGreaterThanOrEqual(3);
     expect(body.creatorPersonaMatrix[0].personas[0].titleFormulas.length).toBeGreaterThanOrEqual(3);
     expect(body.renderCapacity.queuePolicy.join(' ')).toContain('不自动登录');
+    expect(body.renderCapacity.monitoringSignals.join(' ')).toContain('failed/blocked');
+    expect(body.renderCapacity.storageHandoff.join(' ')).toContain('02-render-outputs');
     expect(body.cloudReturnPlan.intakeFields.map((field: { label: string }) => field.label)).toContain('表现 CSV');
     expect(JSON.stringify(body)).not.toMatch(/apiKey|accessToken|Bearer|sk-/i);
   });

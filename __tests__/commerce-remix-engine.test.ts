@@ -455,6 +455,10 @@ describe('commerce remix engine', () => {
     expect(capacity.recommendedConcurrency).toBe(2);
     expect(capacity.estimatedOutputsPerHour).toBe(24);
     expect(capacity.queuePolicy.join(' ')).toContain('不自动登录任何平台账号');
+    expect(capacity.monitoringSignals.join(' ')).toContain('failed/blocked');
+    expect(capacity.humanReviewGates.join(' ')).toContain('字幕、商品主体');
+    expect(capacity.storageHandoff.join(' ')).toContain('04-customer-return');
+    expect(capacity.scaleTriggers.join(' ')).toContain('多 worker');
     expect(capacity.scalePath.join(' ')).toContain('多 worker');
   });
 });
