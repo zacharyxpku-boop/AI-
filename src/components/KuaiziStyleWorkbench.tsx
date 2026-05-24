@@ -15,6 +15,7 @@ import {
   buildDemoCommerceModelImageTaskPack,
   buildCommerceOpenSourceAdapters,
   buildDemoCommerceProviderActivationPlan,
+  buildDemoCommerceProviderNeedAssessment,
   buildDemoCommercePublishingMatrixPlan,
   buildDemoCommercePerformanceUploadReport,
   buildDemoCommerceRemixDryRun,
@@ -236,6 +237,7 @@ export function KuaiziStyleWorkbench() {
   const customerSupportWorkflow = useMemo(() => buildDemoCommerceCustomerSupportWorkflow(), []);
   const salesConversationBoard = useMemo(() => buildDemoCommerceSalesConversationBoard(), []);
   const providerActivationPlan = useMemo(() => buildDemoCommerceProviderActivationPlan(), []);
+  const providerNeedAssessment = useMemo(() => buildDemoCommerceProviderNeedAssessment(), []);
   const firstDeliveryChecklist = useMemo(() => buildDemoCommerceFirstDeliveryChecklist(), []);
   const openSourceAdapters = useMemo(() => buildCommerceOpenSourceAdapters(), []);
   const executionRecipes = useMemo(() => buildDemoCommerceRemixExecutionRecipes(), []);
@@ -501,6 +503,38 @@ export function KuaiziStyleWorkbench() {
                         <div className="rounded bg-white px-3 py-2 text-xs font-bold leading-5 text-rose-800 ring-1 ring-rose-100" key={item}>{item}</div>
                       ))}
                     </div>
+                  </div>
+                </div>
+                <div className="mt-5 rounded-md border border-violet-100 bg-violet-50 p-4">
+                  <div className="flex flex-col gap-2 lg:flex-row lg:items-end lg:justify-between">
+                    <div>
+                      <p className="text-xs font-black uppercase tracking-[0.18em] text-violet-700">Provider Need Assessment</p>
+                      <h4 className="mt-1 text-base font-black text-slate-950">外部 provider 需求评估：首版可交付，Key 到位后增强</h4>
+                      <p className="mt-2 max-w-4xl text-sm leading-6 text-slate-600">{providerNeedAssessment.customerSummary}</p>
+                    </div>
+                    <span className="w-fit rounded bg-white px-2.5 py-1 text-xs font-black text-violet-700 ring-1 ring-violet-100">
+                      {providerNeedAssessment.verdict === 'first_delivery_ready' ? '首版可交付' : '需要补配置'}
+                    </span>
+                  </div>
+                  <div className="mt-4 grid gap-3 lg:grid-cols-4">
+                    {providerNeedAssessment.canRunNow.map(item => (
+                      <article className="min-w-0 rounded-md bg-white p-3 ring-1 ring-violet-100" key={item.capability}>
+                        <h5 className="text-sm font-black leading-5 text-slate-950">{item.capability}</h5>
+                        <p className="mt-2 line-clamp-3 text-xs leading-5 text-slate-600">{item.evidence}</p>
+                        <p className="mt-3 line-clamp-2 text-[11px] font-bold leading-4 text-violet-700">{item.customerAction}</p>
+                      </article>
+                    ))}
+                  </div>
+                  <div className="mt-4 grid gap-2 md:grid-cols-3">
+                    {providerNeedAssessment.waitingForYourKeys.map(item => (
+                      <div className="rounded-md bg-white px-3 py-2 text-xs leading-5 ring-1 ring-violet-100" key={item.keyType}>
+                        <div className="font-black text-violet-700">{item.keyType}</div>
+                        <div className="mt-1 font-bold text-slate-600">{item.fallbackNow}</div>
+                      </div>
+                    ))}
+                  </div>
+                  <div className="mt-4 rounded-md bg-white p-3 text-xs font-bold leading-5 text-slate-700 ring-1 ring-violet-100">
+                    {providerNeedAssessment.finalRecommendation}
                   </div>
                 </div>
               </section>

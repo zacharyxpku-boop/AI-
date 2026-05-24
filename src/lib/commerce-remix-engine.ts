@@ -387,6 +387,16 @@ export interface CommerceProviderActivationPlan {
   mustNotDo: string[];
 }
 
+export interface CommerceProviderNeedAssessment {
+  verdict: 'first_delivery_ready' | 'key_waiting' | 'provider_required';
+  customerSummary: string;
+  canRunNow: Array<{ capability: string; evidence: string; customerAction: string }>;
+  waitingForYourKeys: Array<{ keyType: string; unlocks: string; fallbackNow: string }>;
+  notRequiredNow: string[];
+  escalationTriggers: string[];
+  finalRecommendation: string;
+}
+
 export interface CommerceFirstDeliveryChecklist {
   promise: string;
   customerInputs: string[];
@@ -2040,6 +2050,60 @@ export function buildCommerceProviderActivationPlan(): CommerceProviderActivatio
   };
 }
 
+export function buildCommerceProviderNeedAssessment(
+  input: CommerceRemixPlanInput,
+  plan = buildCommerceRemixEnginePlan(input),
+  providerPlan = buildCommerceProviderActivationPlan(),
+): CommerceProviderNeedAssessment {
+  const platformLabels = unique(input.platforms).map(platform => PLATFORM_LABELS[platform]).join(' / ');
+  return {
+    verdict: 'first_delivery_ready',
+    customerSummary: `首版不需要额外外部 provider：${platformLabels || '目标平台'} 可以先交付商品脚本、开源混剪任务、标题矩阵、发布包、客服话术和客户回填入口。`,
+    canRunNow: [
+      {
+        capability: '开源混剪和稳定渲染队列',
+        evidence: `${plan.timeline.clips.length} 个时间线片段、${plan.ffmpegCommands.length} 条 FFmpeg 参数、${plan.queue.length} 个平台/尺寸任务已经可以形成任务包。`,
+        customerAction: '客户补齐授权素材或确认缺口，Wenai 输出本地渲染包和可发布成片结构。',
+      },
+      {
+        capability: '多账号标题和发布包',
+        evidence: `${plan.publishingPacks.length} 个平台发布包已经覆盖标题、正文、标签、CTA 和回填要求。`,
+        customerAction: '客户自己登录平台发布，不把账号密码或 cookie 交给 Wenai。',
+      },
+      {
+        capability: '客服/售后/复购对话运营',
+        evidence: 'FAQ、异议处理、售后卡片、差评挽回和复购提醒可以从商品卖点直接生成。',
+        customerAction: '客户上传问题截图或高频评论，运营把它们回填为下一轮内容机会。',
+      },
+      {
+        capability: '表现回填和下一轮复盘',
+        evidence: '发布链接、截图、CSV 或云盘目录足以进入下一轮标题、封面、素材和重剪建议。',
+        customerAction: '客户发布后上传证据；没有真实回填时不展示虚构表现。',
+      },
+    ],
+    waitingForYourKeys: providerPlan.lanes
+      .filter(lane => ['image-key', 'video-key', 'avatar-tts-key'].includes(lane.id))
+      .map(lane => ({
+        keyType: lane.name,
+        unlocks: lane.customerFacingWording,
+        fallbackNow: lane.fallbackUntilActivated,
+      })),
+    notRequiredNow: [
+      ...providerPlan.notNeededForFirstDelivery,
+      '自动读取平台后台表现',
+      '自动代客户操作电脑或浏览器',
+      '自动代客户回复私信、评论或售后工单',
+    ],
+    escalationTriggers: [
+      '单客户每批超过 100 条成片且需要多人同时审核时，再接对象存储和分布式 worker。',
+      '客户要求系统直接发布到平台时，再评估平台 OAuth、开放接口或客户授权的辅助操作。',
+      '客户要求每天自动读取后台表现时，再接平台 analytics API 或授权数据源。',
+      '客户要求 AI 直接生成真人口播、视频镜头或模特图时，等待你提供对应 Key 后接入。',
+    ],
+    finalRecommendation: '现在先按“本地/开源混剪 + 客户自发布 + 云盘/CSV 回填”交付；图片、视频、数字人 Key 到位后增强生成层，平台账号和后台数据暂不作为首版 blocker。',
+  };
+}
+
 export function buildCommerceFirstDeliveryChecklist(
   input: CommerceRemixPlanInput,
   plan = buildCommerceRemixEnginePlan(input),
@@ -2266,6 +2330,11 @@ export function buildDemoCommerceCustomerDeliveryMap() {
 
 export function buildDemoCommerceProviderActivationPlan() {
   return buildCommerceProviderActivationPlan();
+}
+
+export function buildDemoCommerceProviderNeedAssessment() {
+  const input = buildDemoCommerceRemixInput();
+  return buildCommerceProviderNeedAssessment(input, buildCommerceRemixEnginePlan(input), buildCommerceProviderActivationPlan());
 }
 
 export function buildDemoCommerceFirstDeliveryChecklist() {

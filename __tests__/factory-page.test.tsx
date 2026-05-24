@@ -49,6 +49,9 @@ describe('factory page', () => {
     expect(html).toContain('平台自动登录不是首版 blocker');
     expect(html).toContain('客户看到的是一条商品增长流水线');
     expect(html).toContain('没有外部 provider 时的替代路径');
+    expect(html).toContain('外部 provider 需求评估');
+    expect(html).toContain('首版可交付');
+    expect(html).toContain('客户自发布');
     expect(html).toContain('客户回填字段');
     expect(html).toContain('回填后系统看什么');
     expect(html).toContain('建议并发');

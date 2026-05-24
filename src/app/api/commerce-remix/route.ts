@@ -12,6 +12,7 @@ import {
   buildCommerceModelImageTaskPack,
   buildCommerceOpenSourceAdapters,
   buildCommerceProviderActivationPlan,
+  buildCommerceProviderNeedAssessment,
   buildCommercePublishingMatrixPlan,
   buildCommerceRemixEnginePlan,
   buildCommerceRemixExportPackage,
@@ -32,6 +33,7 @@ import {
   buildDemoCommerceFirstDeliveryChecklist,
   buildDemoCommerceModelImageTaskPack,
   buildDemoCommerceProviderActivationPlan,
+  buildDemoCommerceProviderNeedAssessment,
   buildDemoCommercePublishingMatrixPlan,
   buildDemoCommercePerformanceUploadReport,
   buildDemoCommerceRemixDryRun,
@@ -97,6 +99,7 @@ function buildInputResponse(input: CommerceRemixPlanInput, body: CommerceRemixRe
   const salesConversationBoard = buildCommerceSalesConversationBoard(input, servicePack, customerSupportWorkflow);
   const customerDeliveryMap = buildCommerceCustomerDeliveryMap(input);
   const providerActivationPlan = buildCommerceProviderActivationPlan();
+  const providerNeedAssessment = buildCommerceProviderNeedAssessment(input, plan, providerActivationPlan);
   const firstDeliveryChecklist = buildCommerceFirstDeliveryChecklist(input, plan, exportPackage, customerDeliveryMap, providerActivationPlan);
   const openSourceAdapters = buildCommerceOpenSourceAdapters();
   const executionRecipes = buildCommerceRemixExecutionRecipes(input, plan, openSourceAdapters);
@@ -127,6 +130,7 @@ function buildInputResponse(input: CommerceRemixPlanInput, body: CommerceRemixRe
     salesConversationBoard,
     customerDeliveryMap,
     providerActivationPlan,
+    providerNeedAssessment,
     firstDeliveryChecklist,
     openSourceAdapters,
     executionRecipes,
@@ -158,6 +162,7 @@ export async function GET() {
     salesConversationBoard: buildDemoCommerceSalesConversationBoard(),
     customerDeliveryMap: buildDemoCommerceCustomerDeliveryMap(),
     providerActivationPlan: buildDemoCommerceProviderActivationPlan(),
+    providerNeedAssessment: buildDemoCommerceProviderNeedAssessment(),
     firstDeliveryChecklist: buildDemoCommerceFirstDeliveryChecklist(),
     openSourceAdapters: buildCommerceOpenSourceAdapters(),
     executionRecipes: buildDemoCommerceRemixExecutionRecipes(),

@@ -98,6 +98,8 @@ describe('/api/commerce-remix', () => {
     expect(body.salesConversationBoard.lanes.find((lane: { id: string }) => lane.id === 'after_sales').proofToCollect).toContain('处理结果');
     expect(body.customerDeliveryMap.phases.map((phase: { id: string }) => phase.id)).toContain('publish');
     expect(body.providerActivationPlan.lanes.map((lane: { id: string }) => lane.id)).toContain('image-key');
+    expect(body.providerNeedAssessment.verdict).toBe('first_delivery_ready');
+    expect(body.providerNeedAssessment.notRequiredNow).toContain('自动代客户操作电脑或浏览器');
     expect(body.providerActivationPlan.notNeededForFirstDelivery).toContain('平台自动登录');
     expect(body.firstDeliveryChecklist.promise).toContain('不等图片/视频/数字人 Key');
     expect(body.firstDeliveryChecklist.noWaitItems).toContain('平台自动登录');

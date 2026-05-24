@@ -17,6 +17,7 @@ import {
   buildCommerceModelImageTaskPack,
   buildCommerceOpenSourceAdapters,
   buildCommerceProviderActivationPlan,
+  buildCommerceProviderNeedAssessment,
   buildCommercePublishingMatrixPlan,
   buildCommerceRemixTemplateBank,
   buildCommerceRemixExecutionRecipes,
@@ -409,6 +410,7 @@ describe('commerce remix engine', () => {
 
   it('separates first-delivery work from optional provider activation', () => {
     const plan = buildCommerceProviderActivationPlan();
+    const assessment = buildCommerceProviderNeedAssessment(baseInput, buildCommerceRemixEnginePlan(baseInput), plan);
 
     expect(plan.currentMode).toContain('本地优先');
     expect(plan.lanes.map(lane => lane.id)).toEqual([
@@ -420,7 +422,13 @@ describe('commerce remix engine', () => {
     ]);
     expect(plan.notNeededForFirstDelivery).toContain('平台自动登录');
     expect(plan.mustNotDo).toContain('不代管客户账号密码');
+    expect(assessment.verdict).toBe('first_delivery_ready');
+    expect(assessment.canRunNow.map(item => item.capability)).toContain('开源混剪和稳定渲染队列');
+    expect(assessment.waitingForYourKeys.map(item => item.keyType).join(' ')).toContain('图片');
+    expect(assessment.notRequiredNow).toContain('自动代客户操作电脑或浏览器');
+    expect(assessment.finalRecommendation).toContain('客户自发布');
     expect(JSON.stringify(plan)).not.toMatch(/apiKey|accessToken|Bearer|sk-/i);
+    expect(JSON.stringify(assessment)).not.toMatch(/apiKey|accessToken|Bearer|sk-/i);
   });
 
   it('summarizes first delivery without waiting for image video or avatar keys', () => {
