@@ -175,6 +175,30 @@ export interface CommerceRenderBatchExecution {
   queue: CommerceRemixQueueItem[];
 }
 
+export interface CommerceRemixTemplate {
+  id: string;
+  name: string;
+  bestFor: string;
+  sceneOrder: string[];
+  transitions: string[];
+  captionSafeArea: string;
+  qualityChecks: string[];
+}
+
+export interface CommerceRemixQualityGate {
+  score: number;
+  passed: boolean;
+  checks: Array<{ id: string; passed: boolean; evidence: string; fix?: string }>;
+  operatorSummary: string;
+}
+
+export interface CommerceCustomerServicePack {
+  faq: Array<{ question: string; answer: string }>;
+  objectionReplies: Array<{ objection: string; reply: string }>;
+  afterSalesCards: Array<{ title: string; body: string }>;
+  escalationRules: string[];
+}
+
 const PLATFORM_LABELS: Record<RemixPlatform, string> = {
   xiaohongshu: '小红书',
   tiktok: 'TikTok',
@@ -227,6 +251,12 @@ export function getCommerceRemixEngineStack(): CommerceRemixEnginePlan['engineSt
       reason: '用 React 组件思路管理商品卡、价格锚点、字幕、模特展示和结尾 CTA 模板。',
     },
     {
+      id: 'commerce-template-bank',
+      role: '电商混剪模板库',
+      openSourceReference: 'OpenShot / Shotcut / timeline-based editor patterns',
+      reason: '把开源剪辑器里的模板、转场、字幕安全区和镜头顺序收敛成少量稳定电商模板，避免功能很多但客户看不懂。',
+    },
+    {
       id: 'ffmpeg-render',
       role: '最终合成层',
       openSourceReference: 'FFmpeg / ffmpeg.wasm',
@@ -255,6 +285,12 @@ export function getCommerceRemixEngineStack(): CommerceRemixEnginePlan['engineSt
       role: '客户回填复盘层',
       openSourceReference: 'Open-source CSV import / cloud-drive handoff pattern',
       reason: '自动抓平台数据先不作为前置条件；客户上传链接、截图、CSV 或云盘目录后，也能形成下一轮标题和素材建议。',
+    },
+    {
+      id: 'quality-gate',
+      role: '成片质量门禁',
+      openSourceReference: 'Open-source media QA / render validation patterns',
+      reason: '导出前检查字幕、素材授权、尺寸、音频、时长和发布包完整性，减少客户拿到不可用成片。',
     },
   ];
 }
@@ -723,6 +759,116 @@ export function executeCommerceRenderBatches(queue: CommerceRemixQueueItem[], pl
   };
 }
 
+export function buildCommerceRemixTemplateBank(input: CommerceRemixPlanInput): CommerceRemixTemplate[] {
+  const product = safeText(input.productName, '商品');
+  const point = safeText(input.sellingPoints[0] || '', '核心卖点');
+  return [
+    {
+      id: 'hook-proof-cta',
+      name: '三段式种草短视频',
+      bestFor: '小红书、TikTok、视频号首轮测试',
+      sceneOrder: [`3 秒痛点：${point}`, `${product}使用证明`, '适合人群和轻 CTA'],
+      transitions: ['hard-cut-on-beat', 'zoom-proof-in', 'caption-card-out'],
+      captionSafeArea: '9:16 底部 22% 留给平台按钮，字幕放在中下安全区。',
+      qualityChecks: ['首屏出现具体痛点', '每 4-7 秒有画面变化', '结尾 CTA 不夸大承诺'],
+    },
+    {
+      id: 'model-scene-proof',
+      name: '模特场景证明片',
+      bestFor: '服饰、美妆、家居、宠物用品等需要使用感的商品',
+      sceneOrder: ['模特或手持图开场', '商品细节和尺寸证明', '前后对比或使用场景', '购买前 FAQ'],
+      transitions: ['match-cut', 'detail-push', 'split-screen-proof'],
+      captionSafeArea: '人物脸部和商品主体不压字幕；字幕最多两行。',
+      qualityChecks: ['模特图授权或生成记录存在', '商品主体无遮挡', '字幕不盖住手部/脸部/价格'],
+    },
+    {
+      id: 'service-objection-loop',
+      name: '客服异议转化片',
+      bestFor: '差评解释、物流说明、尺寸材质、售后承诺和直播切片复用',
+      sceneOrder: ['真实问题', '原因解释', '解决办法', '客服话术卡片'],
+      transitions: ['question-card-in', 'proof-cut', 'support-card-out'],
+      captionSafeArea: '问题卡片在上 35%，解决办法在中部，避免遮挡平台评论区。',
+      qualityChecks: ['FAQ 与商品卖点一致', '售后承诺不过度', '敏感问题进入人工复核'],
+    },
+  ];
+}
+
+export function evaluateCommerceRemixQuality(
+  input: CommerceRemixPlanInput,
+  plan = buildCommerceRemixEnginePlan(input),
+  templates = buildCommerceRemixTemplateBank(input),
+): CommerceRemixQualityGate {
+  const checks = [
+    {
+      id: 'material-ready',
+      passed: plan.missingAssets.length === 0,
+      evidence: plan.missingAssets.length === 0 ? '素材和授权已齐' : `仍缺 ${plan.missingAssets.map(asset => asset.label).join(' / ')}`,
+      fix: plan.missingAssets.length === 0 ? undefined : '补齐商品图、模特图、视频片段或授权说明',
+    },
+    {
+      id: 'timeline-complete',
+      passed: plan.timeline.durationSeconds >= 8 && plan.timeline.clips.some(clip => clip.track === 'subtitle'),
+      evidence: `${plan.timeline.durationSeconds}s / ${plan.timeline.clips.length} clips`,
+      fix: '至少保留 8 秒成片，并包含字幕轨道',
+    },
+    {
+      id: 'template-covered',
+      passed: templates.length >= 3,
+      evidence: `${templates.length} 个电商混剪模板可用`,
+      fix: '补充种草、模特证明、客服异议三类模板',
+    },
+    {
+      id: 'publish-pack-ready',
+      passed: plan.publishingPacks.length === input.platforms.length && plan.publishingPacks.every(pack => pack.accountVariants.length >= 3),
+      evidence: `${plan.publishingPacks.length} 个平台发布包 / ${plan.publishingPacks.reduce((sum, pack) => sum + pack.accountVariants.length, 0)} 个账号角度`,
+      fix: '为每个平台生成标题、正文、标签和账号矩阵角度',
+    },
+    {
+      id: 'render-command-safe',
+      passed: plan.ffmpegCommands.every(command => Array.isArray(command.args) && command.args.includes('-filter_complex')),
+      evidence: `${plan.ffmpegCommands.length} 条 FFmpeg 参数数组`,
+      fix: '使用参数数组，不拼接 shell 字符串',
+    },
+  ];
+  const passedCount = checks.filter(check => check.passed).length;
+  const score = Math.round((passedCount / checks.length) * 100);
+  const hardGatesPassed = checks
+    .filter(check => check.id === 'material-ready' || check.id === 'publish-pack-ready')
+    .every(check => check.passed);
+  return {
+    score,
+    passed: score >= 80 && hardGatesPassed,
+    checks,
+    operatorSummary: score >= 80 && hardGatesPassed
+      ? '可以进入客户发布包导出和自发布回填。'
+      : '先补素材、模板或发布包，再进入批量渲染。',
+  };
+}
+
+export function buildCommerceCustomerServicePack(input: CommerceRemixPlanInput): CommerceCustomerServicePack {
+  const product = safeText(input.productName, '商品');
+  const point = safeText(input.sellingPoints[0] || '', '核心卖点');
+  const secondaryPoint = safeText(input.sellingPoints[1] || '', '使用体验');
+  return {
+    faq: [
+      { question: `${product}适合什么人？`, answer: `适合${input.audience}，尤其是关注${point}的人群。` },
+      { question: `和普通产品有什么区别？`, answer: `先看${point}，再看${secondaryPoint}，不要只按价格判断。` },
+      { question: '购买前需要确认什么？', answer: '请先确认规格、使用场景、物流时效和售后边界。' },
+    ],
+    objectionReplies: [
+      { objection: '觉得价格高', reply: `可以先解释${point}带来的具体场景价值，再给出规格和售后说明。` },
+      { objection: '担心不好用', reply: '优先发送使用步骤、场景图和真实反馈截图，不做夸大承诺。' },
+      { objection: '物流或售后问题', reply: '先确认订单状态，再给出可执行的补发、退换或人工处理路径。' },
+    ],
+    afterSalesCards: [
+      { title: '使用提醒', body: `第一次使用${product}前，先按说明检查规格和场景是否匹配。` },
+      { title: '问题反馈', body: '请提供订单号、问题截图和使用场景，客服会按售后规则处理。' },
+      { title: '复购引导', body: `如果${point}的体验有效，可以收藏同类配件或下一轮组合包。` },
+    ],
+    escalationRules: ['涉及退款、医疗、安全、侵权或平台处罚的问题转人工', '客户提供差评截图后先记录原因，再生成解释话术', '任何承诺必须和商品详情页、物流与售后政策一致'],
+  };
+}
+
 export function executeCommerceRemixDryRun(plan: CommerceRemixEnginePlan, options: { failQueueItemIds?: string[] } = {}): CommerceRemixDryRunResult {
   const failIds = new Set(options.failQueueItemIds || []);
   const queue: CommerceRemixQueueItem[] = [];
@@ -825,6 +971,19 @@ export function buildDemoCommerceRenderBatchPlan() {
   };
   const plan = buildCommerceRemixEnginePlan(readyInput);
   return buildCommerceRenderBatchPlan(plan.queue, { maxConcurrency: 3, retryBudget: 2 });
+}
+
+export function buildDemoCommerceRemixTemplateBank() {
+  return buildCommerceRemixTemplateBank(buildDemoCommerceRemixInput());
+}
+
+export function buildDemoCommerceRemixQualityGate() {
+  const demoInput = buildDemoCommerceRemixInput();
+  return evaluateCommerceRemixQuality(demoInput, buildCommerceRemixEnginePlan(demoInput));
+}
+
+export function buildDemoCommerceCustomerServicePack() {
+  return buildCommerceCustomerServicePack(buildDemoCommerceRemixInput());
 }
 
 function buildDemoCommerceRemixInput(): CommerceRemixPlanInput {

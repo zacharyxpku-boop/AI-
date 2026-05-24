@@ -4,10 +4,13 @@ import Link from 'next/link';
 import { useMemo, useState } from 'react';
 import {
   buildDemoCommerceCloudDriveManifest,
+  buildDemoCommerceCustomerServicePack,
   buildDemoCommercePerformanceUploadReport,
   buildDemoCommerceRemixDryRun,
   buildDemoCommerceRemixEnginePlan,
   buildDemoCommerceRemixExportPackage,
+  buildDemoCommerceRemixQualityGate,
+  buildDemoCommerceRemixTemplateBank,
   buildDemoCommerceRenderBatchPlan,
 } from '@/lib/commerce-remix-engine';
 
@@ -201,6 +204,9 @@ export function KuaiziStyleWorkbench() {
   const batchPlan = useMemo(() => buildDemoCommerceRenderBatchPlan(), []);
   const cloudDrive = useMemo(() => buildDemoCommerceCloudDriveManifest(), []);
   const performanceReport = useMemo(() => buildDemoCommercePerformanceUploadReport(), []);
+  const templateBank = useMemo(() => buildDemoCommerceRemixTemplateBank(), []);
+  const qualityGate = useMemo(() => buildDemoCommerceRemixQualityGate(), []);
+  const servicePack = useMemo(() => buildDemoCommerceCustomerServicePack(), []);
   const queueSummary = useMemo(() => {
     const statuses = ['needs_material', 'ready', 'rendering', 'exported'] as const;
     return statuses.map(status => ({
@@ -433,6 +439,50 @@ export function KuaiziStyleWorkbench() {
                 </aside>
               </section>
 
+              <section className="grid gap-5 xl:grid-cols-[minmax(0,1fr)_380px]">
+                <div className="rounded-lg border border-[#e2e8f5] bg-white p-5 shadow-sm">
+                  <div className="flex flex-col gap-2 md:flex-row md:items-end md:justify-between">
+                    <div>
+                      <p className="text-xs font-black uppercase tracking-[0.18em] text-fuchsia-600">Template Bank</p>
+                      <h3 className="mt-1 text-lg font-black text-slate-950">混剪模板少而准：种草、模特证明、客服异议三条主线</h3>
+                      <p className="mt-1 text-sm leading-6 text-slate-500">参考开源剪辑器的时间线和转场方式，但收敛成电商人能直接选择的模板，不把客户丢进复杂编辑器。</p>
+                    </div>
+                    <div className="rounded-md bg-fuchsia-50 px-3 py-2 text-sm font-black text-fuchsia-700">质量分 {qualityGate.score}</div>
+                  </div>
+                  <div className="mt-5 grid gap-3 md:grid-cols-3">
+                    {templateBank.map(template => (
+                      <article className="min-w-0 rounded-md border border-slate-200 bg-slate-50 p-4" key={template.id}>
+                        <h4 className="text-sm font-black text-slate-950">{template.name}</h4>
+                        <p className="mt-1 text-xs font-bold leading-5 text-fuchsia-700">{template.bestFor}</p>
+                        <div className="mt-3 space-y-1">
+                          {template.sceneOrder.slice(0, 3).map(scene => (
+                            <div className="rounded bg-white px-2 py-1.5 text-xs font-bold leading-5 text-slate-600 ring-1 ring-slate-100" key={scene}>{scene}</div>
+                          ))}
+                        </div>
+                        <p className="mt-3 text-xs leading-5 text-slate-500">{template.captionSafeArea}</p>
+                      </article>
+                    ))}
+                  </div>
+                </div>
+
+                <aside className="rounded-lg border border-fuchsia-200 bg-fuchsia-50 p-5 shadow-sm">
+                  <p className="text-xs font-black uppercase tracking-[0.18em] text-fuchsia-700">Quality Gate</p>
+                  <h3 className="mt-2 text-xl font-black leading-snug text-slate-950">导出前先检查，不把不可用成片交给客户</h3>
+                  <div className="mt-4 space-y-2">
+                    {qualityGate.checks.map(check => (
+                      <div className="flex items-start gap-3 rounded-md bg-white px-3 py-2.5 text-xs ring-1 ring-fuchsia-100" key={check.id}>
+                        <span className={`mt-0.5 size-2.5 shrink-0 rounded-full ${check.passed ? 'bg-emerald-500' : 'bg-amber-500'}`} />
+                        <div className="min-w-0">
+                          <div className="font-black text-slate-800">{check.id}</div>
+                          <div className="mt-1 leading-5 text-slate-500">{check.evidence}</div>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                  <p className="mt-4 rounded-md bg-white p-3 text-sm font-bold leading-6 text-slate-700 ring-1 ring-fuchsia-100">{qualityGate.operatorSummary}</p>
+                </aside>
+              </section>
+
               <section className="grid gap-5 xl:grid-cols-[minmax(0,0.86fr)_minmax(360px,0.74fr)]">
                 <div className="rounded-lg border border-[#e2e8f5] bg-white p-5 shadow-sm">
                   <div className="flex flex-col gap-2 md:flex-row md:items-end md:justify-between">
@@ -480,6 +530,51 @@ export function KuaiziStyleWorkbench() {
                     ))}
                   </div>
                 </aside>
+              </section>
+
+              <section className="rounded-lg border border-[#e2e8f5] bg-white p-5 shadow-sm">
+                <div className="flex flex-col gap-3 md:flex-row md:items-end md:justify-between">
+                  <div>
+                    <p className="text-xs font-black uppercase tracking-[0.18em] text-rose-600">Customer Service Pack</p>
+                    <h3 className="mt-1 text-lg font-black text-slate-950">客服、售后和差评解释也进入商品增长包</h3>
+                    <p className="mt-1 text-sm leading-6 text-slate-500">电商人不只要视频，还要能回答客户问题。平台根据商品卖点生成 FAQ、异议处理和售后卡片，避免内容和客服话术断开。</p>
+                  </div>
+                </div>
+                <div className="mt-5 grid gap-3 lg:grid-cols-3">
+                  <article className="rounded-md border border-slate-200 bg-slate-50 p-4">
+                    <h4 className="text-sm font-black text-slate-950">常见问题</h4>
+                    <div className="mt-3 space-y-2">
+                      {servicePack.faq.map(item => (
+                        <div className="rounded bg-white p-2 text-xs leading-5 ring-1 ring-slate-100" key={item.question}>
+                          <div className="font-black text-slate-800">{item.question}</div>
+                          <div className="mt-1 text-slate-500">{item.answer}</div>
+                        </div>
+                      ))}
+                    </div>
+                  </article>
+                  <article className="rounded-md border border-slate-200 bg-slate-50 p-4">
+                    <h4 className="text-sm font-black text-slate-950">异议处理</h4>
+                    <div className="mt-3 space-y-2">
+                      {servicePack.objectionReplies.map(item => (
+                        <div className="rounded bg-white p-2 text-xs leading-5 ring-1 ring-slate-100" key={item.objection}>
+                          <div className="font-black text-slate-800">{item.objection}</div>
+                          <div className="mt-1 text-slate-500">{item.reply}</div>
+                        </div>
+                      ))}
+                    </div>
+                  </article>
+                  <article className="rounded-md border border-slate-200 bg-slate-50 p-4">
+                    <h4 className="text-sm font-black text-slate-950">售后卡片</h4>
+                    <div className="mt-3 space-y-2">
+                      {servicePack.afterSalesCards.map(item => (
+                        <div className="rounded bg-white p-2 text-xs leading-5 ring-1 ring-slate-100" key={item.title}>
+                          <div className="font-black text-slate-800">{item.title}</div>
+                          <div className="mt-1 text-slate-500">{item.body}</div>
+                        </div>
+                      ))}
+                    </div>
+                  </article>
+                </div>
               </section>
 
               <section className="rounded-lg border border-[#e2e8f5] bg-white p-5 shadow-sm">

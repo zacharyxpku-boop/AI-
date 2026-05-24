@@ -5,10 +5,13 @@ import {
   buildCommerceRenderBatchPlan,
   buildCommerceTimeline,
   buildCommerceCloudDriveManifest,
+  buildCommerceCustomerServicePack,
+  buildCommerceRemixTemplateBank,
   buildDemoCommerceRemixEnginePlan,
   buildFfmpegCommandManifest,
   buildCommerceRemixExportPackage,
   buildPlatformPublishingPacks,
+  evaluateCommerceRemixQuality,
   buildRemixRenderQueue,
   evaluateCommercePerformanceUploads,
   executeCommerceRenderBatches,
@@ -119,11 +122,13 @@ describe('commerce remix engine', () => {
     expect(plan.engineStack.map(item => item.id)).toEqual([
       'timeline-json',
       'remotion-template',
+      'commerce-template-bank',
       'ffmpeg-render',
       'queue-runner',
       'render-batch-planner',
       'handoff-package',
       'performance-return',
+      'quality-gate',
     ]);
     expect(plan.missingAssets.map(asset => asset.id)).toContain('missing-model');
     expect(plan.handoffMarkdown).toContain('Wenai 本地混剪任务包');
@@ -263,5 +268,42 @@ describe('commerce remix engine', () => {
     expect(execution.exportedCount).toBe(4);
     expect(execution.retryableCount).toBe(1);
     expect(execution.traces.join(' ')).toContain(`${readyPlan.queue[2].id}:failed_retryable`);
+  });
+
+  it('builds a compact ecommerce remix template bank with safe captions and quality checks', () => {
+    const templates = buildCommerceRemixTemplateBank(baseInput);
+
+    expect(templates.map(template => template.id)).toEqual(['hook-proof-cta', 'model-scene-proof', 'service-objection-loop']);
+    expect(templates[0].sceneOrder.join(' ')).toContain('stable feeding outside');
+    expect(templates[1].captionSafeArea).toContain('字幕最多两行');
+    expect(templates[2].qualityChecks.join(' ')).toContain('售后承诺不过度');
+  });
+
+  it('scores remix quality before customer export and exposes concrete fixes', () => {
+    const incomplete = evaluateCommerceRemixQuality(baseInput);
+    const completeInput: CommerceRemixPlanInput = {
+      ...baseInput,
+      assets: [
+        ...baseInput.assets,
+        { id: 'missing-model', kind: 'model_image', label: 'model image', uri: 'assets/model.png', rightsReady: true },
+      ],
+    };
+    const complete = evaluateCommerceRemixQuality(completeInput);
+
+    expect(incomplete.passed).toBe(false);
+    expect(incomplete.checks.find(check => check.id === 'material-ready')).toMatchObject({ passed: false });
+    expect(incomplete.operatorSummary).toContain('先补素材');
+    expect(complete.passed).toBe(true);
+    expect(complete.score).toBe(100);
+  });
+
+  it('builds customer service and after-sales material from ecommerce selling points', () => {
+    const pack = buildCommerceCustomerServicePack(baseInput);
+
+    expect(pack.faq[0].question).toContain('Travel Pet Bowl');
+    expect(pack.faq[0].answer).toContain('traveling pet owners');
+    expect(pack.objectionReplies.map(item => item.objection)).toEqual(['觉得价格高', '担心不好用', '物流或售后问题']);
+    expect(pack.afterSalesCards).toHaveLength(3);
+    expect(pack.escalationRules.join(' ')).toContain('退款');
   });
 });
