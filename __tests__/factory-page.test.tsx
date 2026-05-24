@@ -55,6 +55,9 @@ describe('factory page', () => {
     expect(html).toContain('Wenai 商品增长工作台');
     expect(html).not.toContain('provider 待配置');
     expect(html).not.toContain('小W 在线');
+    expect(html).toContain('回填收件箱');
+    expect(html).toContain('可复盘');
+    expect(html).toContain('已收');
     expect(html).not.toContain('fixed bottom-5 right-5');
     expect(html).not.toContain('86%');
   });

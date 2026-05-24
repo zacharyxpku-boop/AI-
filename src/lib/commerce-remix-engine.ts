@@ -146,6 +146,19 @@ export interface CommercePerformanceUploadReport {
   missingEvidence: string[];
 }
 
+export interface CommerceCustomerReturnIntakeBoard {
+  status: 'ready_for_review' | 'needs_evidence';
+  evidenceCards: Array<{
+    id: string;
+    label: string;
+    required: boolean;
+    state: 'received' | 'missing';
+    operatorAction: string;
+  }>;
+  reviewQueue: string[];
+  nextOwnerActions: string[];
+}
+
 export interface CommerceCloudDriveManifest {
   rootDir: string;
   folders: Array<{ path: string; owner: string; requiredFiles: string[] }>;
@@ -1196,6 +1209,50 @@ export function evaluateCommercePerformanceUploads(uploads: CommercePerformanceU
   };
 }
 
+export function buildCommerceCustomerReturnIntakeBoard(
+  report: CommercePerformanceUploadReport,
+  returnPlan: CommerceCloudDriveReturnPlan,
+): CommerceCustomerReturnIntakeBoard {
+  const hasLink = !report.missingEvidence.includes('缺发布链接');
+  const hasScreenshot = !report.missingEvidence.includes('缺发布截图');
+  const hasCsv = !report.missingEvidence.includes('缺表现 CSV');
+  const evidenceCards = returnPlan.intakeFields.map(field => {
+    const state = field.label === '发布平台链接'
+      ? hasLink
+      : field.label === '发布截图'
+        ? hasScreenshot
+        : field.label === '表现 CSV'
+          ? hasCsv
+          : true;
+    return {
+      id: field.label,
+      label: field.label,
+      required: field.required,
+      state: state ? 'received' as const : 'missing' as const,
+      operatorAction: state
+        ? `已收到，可用于${field.label === '表现 CSV' ? '计算标题表现' : '复核发布证据'}。`
+        : `请客户补交${field.label}，格式：${field.acceptedFormats.join(' / ')}。`,
+    };
+  });
+  const missingRequired = evidenceCards.filter(card => card.required && card.state === 'missing');
+  return {
+    status: missingRequired.length === 0 ? 'ready_for_review' : 'needs_evidence',
+    evidenceCards,
+    reviewQueue: [
+      ...returnPlan.reviewSignals,
+      ...report.nextRoundAdvice,
+    ],
+    nextOwnerActions: missingRequired.length > 0
+      ? missingRequired.map(card => `运营提醒客户补交：${card.label}`)
+      : [
+          '运营确认最佳标题和封面是否可复制',
+          '内容侧生成下一轮标题矩阵和重剪任务',
+          '客服侧补充 FAQ、差评解释和售后话术',
+          '交付侧把下一轮动作写回云盘或客户空间',
+        ],
+  };
+}
+
 export function buildCommerceRenderBatchPlan(queue: CommerceRemixQueueItem[], options: { maxConcurrency?: number; retryBudget?: number } = {}): CommerceRenderBatchPlan {
   const maxConcurrency = Math.max(1, Math.min(options.maxConcurrency || 4, 8));
   const retryBudget = Math.max(1, Math.min(options.retryBudget || 2, 3));
@@ -1861,6 +1918,14 @@ export function buildDemoCommercePerformanceUploadReport() {
       ],
     },
   ]);
+}
+
+export function buildDemoCommerceCustomerReturnIntakeBoard() {
+  const input = buildDemoCommerceRemixInput();
+  return buildCommerceCustomerReturnIntakeBoard(
+    buildDemoCommercePerformanceUploadReport(),
+    buildCommerceCloudDriveReturnPlan(input, buildCommerceCloudDriveManifest(input)),
+  );
 }
 
 export function buildDemoCommerceRenderBatchPlan() {

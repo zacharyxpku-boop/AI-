@@ -7,6 +7,7 @@ import {
   buildCommerceTimeline,
   buildCommerceCloudDriveManifest,
   buildCommerceCloudDriveReturnPlan,
+  buildCommerceCustomerReturnIntakeBoard,
   buildCommerceCustomerDeliveryMap,
   buildCommerceCustomerServicePack,
   buildCommerceCustomerSupportWorkflow,
@@ -224,6 +225,29 @@ describe('commerce remix engine', () => {
     expect(report.missingEvidence).toEqual([]);
     expect(report.nextRoundAdvice.join(' ')).toContain('Hook B');
     expect(missing.missingEvidence).toEqual(['缺发布链接', '缺发布截图', '缺表现 CSV']);
+  });
+
+  it('turns customer return evidence into an operator intake board', () => {
+    const returnPlan = buildCommerceCloudDriveReturnPlan(baseInput, buildCommerceCloudDriveManifest(baseInput));
+    const readyReport = evaluateCommercePerformanceUploads([
+      {
+        platform: 'xiaohongshu',
+        publishedUrl: 'https://example.test/post',
+        screenshotPath: '04-customer-return/post.png',
+        csvRows: [{ title: 'Hook B', impressions: 800, clicks: 90, orders: 4, revenue: 396 }],
+      },
+    ]);
+    const missingReport = evaluateCommercePerformanceUploads([{ platform: 'tiktok' }]);
+    const readyBoard = buildCommerceCustomerReturnIntakeBoard(readyReport, returnPlan);
+    const missingBoard = buildCommerceCustomerReturnIntakeBoard(missingReport, returnPlan);
+
+    expect(readyBoard.status).toBe('ready_for_review');
+    expect(readyBoard.evidenceCards.every(card => card.state === 'received')).toBe(true);
+    expect(readyBoard.reviewQueue.join(' ')).toContain('Hook B');
+    expect(readyBoard.nextOwnerActions.length).toBeGreaterThanOrEqual(4);
+    expect(missingBoard.status).toBe('needs_evidence');
+    expect(missingBoard.evidenceCards.filter(card => card.state === 'missing')).toHaveLength(3);
+    expect(missingBoard.nextOwnerActions).toHaveLength(3);
   });
 
   it('dry-runs ready render jobs into exported outputs without external providers', () => {

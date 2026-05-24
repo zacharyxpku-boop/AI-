@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import {
   buildCommerceCloudDriveManifest,
   buildCommerceCloudDriveReturnPlan,
+  buildCommerceCustomerReturnIntakeBoard,
   buildCommerceCustomerDeliveryMap,
   buildCommerceCustomerServicePack,
   buildCommerceCustomerSupportWorkflow,
@@ -20,6 +21,7 @@ import {
   buildCommerceRenderBatchPlan,
   buildDemoCommerceCloudDriveManifest,
   buildDemoCommerceCloudDriveReturnPlan,
+  buildDemoCommerceCustomerReturnIntakeBoard,
   buildDemoCommerceCustomerDeliveryMap,
   buildDemoCommerceCustomerServicePack,
   buildDemoCommerceCustomerSupportWorkflow,
@@ -97,6 +99,7 @@ function buildInputResponse(input: CommerceRemixPlanInput, body: CommerceRemixRe
   const publishingMatrix = buildCommercePublishingMatrixPlan(input, plan.publishingPacks);
   const creatorPersonaMatrix = buildCommerceCreatorPersonaMatrix(input, publishingMatrix);
   const cloudReturnPlan = buildCommerceCloudDriveReturnPlan(input, cloudDrive);
+  const customerReturnIntakeBoard = buildCommerceCustomerReturnIntakeBoard(performanceReport, cloudReturnPlan);
 
   return {
     mode: 'local_first',
@@ -124,6 +127,7 @@ function buildInputResponse(input: CommerceRemixPlanInput, body: CommerceRemixRe
     publishingMatrix,
     creatorPersonaMatrix,
     cloudReturnPlan,
+    customerReturnIntakeBoard,
   };
 }
 
@@ -152,6 +156,7 @@ export async function GET() {
     publishingMatrix: buildDemoCommercePublishingMatrixPlan(),
     creatorPersonaMatrix: buildDemoCommerceCreatorPersonaMatrix(),
     cloudReturnPlan: buildDemoCommerceCloudDriveReturnPlan(),
+    customerReturnIntakeBoard: buildDemoCommerceCustomerReturnIntakeBoard(),
   });
 }
 

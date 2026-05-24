@@ -5,6 +5,7 @@ import { useMemo, useState } from 'react';
 import {
   buildDemoCommerceCloudDriveManifest,
   buildDemoCommerceCloudDriveReturnPlan,
+  buildDemoCommerceCustomerReturnIntakeBoard,
   buildDemoCommerceCustomerDeliveryMap,
   buildDemoCommerceCustomerServicePack,
   buildDemoCommerceCustomerSupportWorkflow,
@@ -240,6 +241,7 @@ export function KuaiziStyleWorkbench() {
   const creatorPersonaMatrix = useMemo(() => buildDemoCommerceCreatorPersonaMatrix(), []);
   const renderCapacity = useMemo(() => buildDemoCommerceRenderCapacityPlan(), []);
   const cloudReturnPlan = useMemo(() => buildDemoCommerceCloudDriveReturnPlan(), []);
+  const customerReturnIntakeBoard = useMemo(() => buildDemoCommerceCustomerReturnIntakeBoard(), []);
   const queueSummary = useMemo(() => {
     const statuses = ['needs_material', 'ready', 'rendering', 'exported'] as const;
     return statuses.map(status => ({
@@ -865,6 +867,32 @@ export function KuaiziStyleWorkbench() {
                   </div>
                   <div className="mt-3 space-y-2">
                     {performanceReport.nextRoundAdvice.slice(0, 3).map(item => (
+                      <div className="rounded-md bg-white px-3 py-2 text-xs font-bold leading-5 text-slate-700 ring-1 ring-amber-100" key={item}>{item}</div>
+                    ))}
+                  </div>
+                  <div className="mt-4 rounded-md border border-amber-100 bg-white p-3">
+                    <div className="flex items-center justify-between gap-3">
+                      <span className="text-xs font-black text-amber-700">回填收件箱</span>
+                      <span className="rounded bg-amber-50 px-2 py-1 text-[11px] font-black text-amber-700">
+                        {customerReturnIntakeBoard.status === 'ready_for_review' ? '可复盘' : '待补证据'}
+                      </span>
+                    </div>
+                    <div className="mt-3 grid gap-2">
+                      {customerReturnIntakeBoard.evidenceCards.slice(0, 4).map(card => (
+                        <div className="flex items-start justify-between gap-2 rounded bg-amber-50 px-3 py-2 text-xs ring-1 ring-amber-100" key={card.id}>
+                          <div className="min-w-0">
+                            <div className="font-black text-slate-800">{card.label}</div>
+                            <p className="mt-1 line-clamp-2 leading-5 text-slate-600">{card.operatorAction}</p>
+                          </div>
+                          <span className={`shrink-0 rounded px-2 py-1 font-black ${card.state === 'received' ? 'bg-emerald-50 text-emerald-700' : 'bg-rose-50 text-rose-700'}`}>
+                            {card.state === 'received' ? '已收' : '缺'}
+                          </span>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                  <div className="mt-3 grid gap-2">
+                    {customerReturnIntakeBoard.nextOwnerActions.slice(0, 3).map(item => (
                       <div className="rounded-md bg-white px-3 py-2 text-xs font-bold leading-5 text-slate-700 ring-1 ring-amber-100" key={item}>{item}</div>
                     ))}
                   </div>

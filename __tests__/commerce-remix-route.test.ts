@@ -55,6 +55,8 @@ describe('/api/commerce-remix', () => {
     expect(body.renderCapacity.monitoringSignals.join(' ')).toContain('failed/blocked');
     expect(body.renderCapacity.storageHandoff.join(' ')).toContain('02-render-outputs');
     expect(body.cloudReturnPlan.intakeFields.map((field: { label: string }) => field.label)).toContain('表现 CSV');
+    expect(body.customerReturnIntakeBoard.status).toBe('ready_for_review');
+    expect(body.customerReturnIntakeBoard.evidenceCards.length).toBeGreaterThanOrEqual(3);
     expect(JSON.stringify(body)).not.toMatch(/apiKey|accessToken|Bearer|sk-/i);
   });
 
@@ -102,6 +104,8 @@ describe('/api/commerce-remix', () => {
     expect(body.creatorPersonaMatrix[0].personas[0].contentPillars).toContain('痛点场景');
     expect(body.creatorPersonaMatrix[0].personas[0].returnMetrics.length).toBeGreaterThanOrEqual(4);
     expect(body.cloudReturnPlan.nextRoundOutputs).toContain('重剪任务清单');
+    expect(body.customerReturnIntakeBoard.status).toBe('ready_for_review');
+    expect(body.customerReturnIntakeBoard.evidenceCards.every((card: { state: string }) => card.state === 'received')).toBe(true);
   });
 
   it('rejects incomplete remix requests with stable Chinese guidance', async () => {
