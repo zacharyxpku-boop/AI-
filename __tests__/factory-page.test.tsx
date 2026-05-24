@@ -44,6 +44,9 @@ describe('factory page', () => {
     expect(html).toContain('开源能力适配器');
     expect(html).toContain('执行配方');
     expect(html).toContain('每个开源能力都落到输入、步骤、输出和验收');
+    expect(html).toContain('开源混剪编排板');
+    expect(html).toContain('客户看到的是 5 步稳定流水线');
+    expect(html).toContain('平台自动登录不是首版 blocker');
     expect(html).toContain('客户看到的是一条商品增长流水线');
     expect(html).toContain('没有外部 provider 时的替代路径');
     expect(html).toContain('客户回填字段');

@@ -20,6 +20,7 @@ import {
   buildDemoCommerceRemixEnginePlan,
   buildDemoCommerceRemixExportPackage,
   buildDemoCommerceRemixExecutionRecipes,
+  buildDemoCommerceRemixOrchestrationBoard,
   buildDemoCommerceRemixWorkflowPlaybook,
   buildDemoCommerceRemixQualityGate,
   buildDemoCommerceRemixTemplateBank,
@@ -236,6 +237,7 @@ export function KuaiziStyleWorkbench() {
   const firstDeliveryChecklist = useMemo(() => buildDemoCommerceFirstDeliveryChecklist(), []);
   const openSourceAdapters = useMemo(() => buildCommerceOpenSourceAdapters(), []);
   const executionRecipes = useMemo(() => buildDemoCommerceRemixExecutionRecipes(), []);
+  const orchestrationBoard = useMemo(() => buildDemoCommerceRemixOrchestrationBoard(), []);
   const workflowPlaybook = useMemo(() => buildDemoCommerceRemixWorkflowPlaybook(), []);
   const publishingMatrix = useMemo(() => buildDemoCommercePublishingMatrixPlan(), []);
   const creatorPersonaMatrix = useMemo(() => buildDemoCommerceCreatorPersonaMatrix(), []);
@@ -684,6 +686,36 @@ export function KuaiziStyleWorkbench() {
                           <p className="mt-2 line-clamp-2 text-xs leading-5 text-slate-600">{recipe.operatorSteps[0]}</p>
                           <p className="mt-2 rounded bg-emerald-50 px-2 py-1 text-xs font-bold leading-5 text-emerald-700">{recipe.passCriteria[0]}</p>
                         </article>
+                      ))}
+                    </div>
+                  </div>
+                  <div className="mt-5 rounded-md border border-cyan-100 bg-cyan-50 p-4">
+                    <div className="flex flex-col gap-2 md:flex-row md:items-end md:justify-between">
+                      <div>
+                        <p className="text-xs font-black uppercase tracking-[0.18em] text-cyan-700">开源混剪编排板</p>
+                        <h4 className="mt-1 text-base font-black text-slate-950">客户看到的是 5 步稳定流水线，不是 GitHub 工具堆叠</h4>
+                        <p className="mt-2 max-w-3xl text-sm leading-6 text-slate-600">{orchestrationBoard.promise}</p>
+                      </div>
+                      <span className="rounded bg-white px-2.5 py-1 text-xs font-black text-cyan-700 ring-1 ring-cyan-100">{orchestrationBoard.routes.length} 个能力路由</span>
+                    </div>
+                    <div className="mt-4 grid gap-3 xl:grid-cols-5">
+                      {orchestrationBoard.routes.map(route => (
+                        <article className="min-w-0 rounded-md bg-white p-3 ring-1 ring-cyan-100" key={route.id}>
+                          <div className="text-[11px] font-black text-cyan-700">{route.phase}</div>
+                          <h5 className="mt-1 text-sm font-black leading-5 text-slate-950">{route.customerLabel}</h5>
+                          <p className="mt-2 line-clamp-3 text-xs leading-5 text-slate-600">{route.decisionRule}</p>
+                          <div className="mt-3 flex flex-wrap gap-1.5">
+                            {route.primaryAdapterIds.slice(0, 3).map(id => (
+                              <span className="rounded bg-cyan-50 px-2 py-1 text-[11px] font-black text-cyan-700" key={id}>{id}</span>
+                            ))}
+                          </div>
+                          <p className="mt-3 line-clamp-2 text-[11px] font-bold leading-4 text-emerald-700">{route.stabilityChecks[0]}</p>
+                        </article>
+                      ))}
+                    </div>
+                    <div className="mt-4 grid gap-2 md:grid-cols-4">
+                      {orchestrationBoard.notProviderBlockers.map(item => (
+                        <div className="rounded-md bg-white px-3 py-2 text-xs font-bold leading-5 text-slate-700 ring-1 ring-cyan-100" key={item}>{item}</div>
                       ))}
                     </div>
                   </div>

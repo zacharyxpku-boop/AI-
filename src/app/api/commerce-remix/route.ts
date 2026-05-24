@@ -15,6 +15,7 @@ import {
   buildCommerceRemixEnginePlan,
   buildCommerceRemixExportPackage,
   buildCommerceRemixExecutionRecipes,
+  buildCommerceRemixOrchestrationBoard,
   buildCommerceRemixTemplateBank,
   buildCommerceRemixWorkflowPlaybook,
   buildCommerceRenderCapacityPlan,
@@ -35,6 +36,7 @@ import {
   buildDemoCommerceRemixEnginePlan,
   buildDemoCommerceRemixExportPackage,
   buildDemoCommerceRemixExecutionRecipes,
+  buildDemoCommerceRemixOrchestrationBoard,
   buildDemoCommerceRemixWorkflowPlaybook,
   buildDemoCommerceRemixQualityGate,
   buildDemoCommerceRemixTemplateBank,
@@ -95,6 +97,7 @@ function buildInputResponse(input: CommerceRemixPlanInput, body: CommerceRemixRe
   const firstDeliveryChecklist = buildCommerceFirstDeliveryChecklist(input, plan, exportPackage, customerDeliveryMap, providerActivationPlan);
   const openSourceAdapters = buildCommerceOpenSourceAdapters();
   const executionRecipes = buildCommerceRemixExecutionRecipes(input, plan, openSourceAdapters);
+  const orchestrationBoard = buildCommerceRemixOrchestrationBoard(input, plan, openSourceAdapters);
   const workflowPlaybook = buildCommerceRemixWorkflowPlaybook(input, plan);
   const publishingMatrix = buildCommercePublishingMatrixPlan(input, plan.publishingPacks);
   const creatorPersonaMatrix = buildCommerceCreatorPersonaMatrix(input, publishingMatrix);
@@ -123,6 +126,7 @@ function buildInputResponse(input: CommerceRemixPlanInput, body: CommerceRemixRe
     firstDeliveryChecklist,
     openSourceAdapters,
     executionRecipes,
+    orchestrationBoard,
     workflowPlaybook,
     publishingMatrix,
     creatorPersonaMatrix,
@@ -152,6 +156,7 @@ export async function GET() {
     firstDeliveryChecklist: buildDemoCommerceFirstDeliveryChecklist(),
     openSourceAdapters: buildCommerceOpenSourceAdapters(),
     executionRecipes: buildDemoCommerceRemixExecutionRecipes(),
+    orchestrationBoard: buildDemoCommerceRemixOrchestrationBoard(),
     workflowPlaybook: buildDemoCommerceRemixWorkflowPlaybook(),
     publishingMatrix: buildDemoCommercePublishingMatrixPlan(),
     creatorPersonaMatrix: buildDemoCommerceCreatorPersonaMatrix(),

@@ -47,8 +47,10 @@ describe('/api/commerce-remix', () => {
     expect(body.templates.map((template: { id: string }) => template.id)).toContain('service-objection-loop');
     expect(body.servicePack.faq.length).toBeGreaterThan(0);
     expect(body.openSourceAdapters.map((adapter: { id: string }) => adapter.id)).toContain('ffmpeg');
+    expect(body.openSourceAdapters.map((adapter: { id: string }) => adapter.id)).toContain('mcp-video');
     expect(body.workflowPlaybook.stages.map((stage: { id: string }) => stage.id)).toContain('publishing-pack');
     expect(body.executionRecipes.map((recipe: { id: string }) => recipe.id)).toContain('recipe-local-render');
+    expect(body.orchestrationBoard.routes.map((route: { id: string }) => route.id)).toContain('render-export');
     expect(body.publishingMatrix[0].accountAngles.length).toBeGreaterThanOrEqual(3);
     expect(body.creatorPersonaMatrix[0].personas[0].titleFormulas.length).toBeGreaterThanOrEqual(3);
     expect(body.renderCapacity.queuePolicy.join(' ')).toContain('不自动登录');
@@ -98,6 +100,8 @@ describe('/api/commerce-remix', () => {
     expect(body.firstDeliveryChecklist.noWaitItems).toContain('平台自动登录');
     expect(body.openSourceAdapters.find((adapter: { id: string }) => adapter.id === 'queue-worker').readiness).toBe('ready_now');
     expect(body.executionRecipes.find((recipe: { adapterId: string }) => recipe.adapterId === 'ffmpeg').passCriteria.join(' ')).toContain('MP4 可播放');
+    expect(body.orchestrationBoard.routes.find((route: { id: string }) => route.id === 'template-compose').primaryAdapterIds).toContain('editly');
+    expect(body.orchestrationBoard.notProviderBlockers).toContain('平台自动登录不是首版 blocker');
     expect(body.workflowPlaybook.noProviderFallbacks.join(' ')).toContain('没有自动发布');
     expect(body.publishingMatrix[0].accountAngles[0].publishNote).toContain('客户自发');
     expect(body.creatorPersonaMatrix[0].personas[0].doNotClaim).toContain('不承诺平台自动登录或自动发布');

@@ -257,6 +257,26 @@ export interface CommerceRemixExecutionRecipe {
   fallbackWhenUnavailable: string;
 }
 
+export interface CommerceRemixCapabilityRoute {
+  id: string;
+  phase: '素材整理' | '片段挖掘' | '模板编排' | '稳定渲染' | '质检复盘';
+  customerLabel: string;
+  primaryAdapterIds: string[];
+  backupAdapterIds: string[];
+  input: string;
+  decisionRule: string;
+  outputs: string[];
+  stabilityChecks: string[];
+}
+
+export interface CommerceRemixOrchestrationBoard {
+  promise: string;
+  routes: CommerceRemixCapabilityRoute[];
+  fallbackOrder: string[];
+  customerVisibleOutputs: string[];
+  notProviderBlockers: string[];
+}
+
 export interface CommerceRemixWorkflowPlaybook {
   stages: Array<{
     id: string;
@@ -539,6 +559,36 @@ export function buildCommerceOpenSourceAdapters(): CommerceOpenSourceAdapter[] {
       guardrail: '只处理客户上传或授权素材；大批量最终导出仍回到队列和 FFmpeg，避免内存不稳定。',
     },
     {
+      id: 'editly',
+      name: 'Editly',
+      repositoryUrl: 'https://github.com/mifi/editly',
+      useFor: '配置式短视频拼接、图片动效、字幕层、转场和批量生成草稿',
+      integrationMode: 'task_manifest',
+      customerValue: '把“脚本到成片草稿”做成 JSON 配方，客户换商品后仍能复用同一套混剪结构。',
+      readiness: 'ready_now',
+      guardrail: '只生成客户授权素材的短视频草稿；最终导出仍进入 Wenai 质检、队列和人工抽检。',
+    },
+    {
+      id: 'libopenshot',
+      name: 'OpenShot / libopenshot',
+      repositoryUrl: 'https://github.com/OpenShot/libopenshot',
+      useFor: '成熟非编引擎的轨道、转场、关键帧、特效和导出范式参考',
+      integrationMode: 'task_manifest',
+      customerValue: '吸收传统剪辑软件的稳定时间线结构，但在 Wenai 里只暴露电商人能理解的任务流。',
+      readiness: 'later',
+      guardrail: '先作为时间线和转场能力参考，不把复杂剪辑器 UI 直接搬给客户。',
+    },
+    {
+      id: 'mcp-video',
+      name: 'MCP Video / AI video tool pattern',
+      repositoryUrl: 'https://github.com/KyaniteLabs/mcp-video',
+      useFor: '把裁切、拼接、字幕、转码、封面等视频操作包装成可编排工具调用',
+      integrationMode: 'task_manifest',
+      customerValue: '让混剪步骤更像稳定工单：每一步有输入、工具、输出和失败原因，而不是让客户猜 AI 在做什么。',
+      readiness: 'ready_now',
+      guardrail: '只调度本地或授权 worker，不请求客户平台账号、cookie 或自动登录权限。',
+    },
+    {
       id: 'pyscenedetect',
       name: 'PySceneDetect',
       repositoryUrl: 'https://github.com/Breakthrough/PySceneDetect',
@@ -672,6 +722,96 @@ export function buildCommerceRemixExecutionRecipes(
       fallbackWhenUnavailable: '没有队列服务时，按批次清单手动执行，每批最多 3 条。',
     },
   ];
+}
+
+export function buildCommerceRemixOrchestrationBoard(
+  input: CommerceRemixPlanInput,
+  plan = buildCommerceRemixEnginePlan(input),
+  adapters = buildCommerceOpenSourceAdapters(),
+): CommerceRemixOrchestrationBoard {
+  const adapterIds = new Set(adapters.map(adapter => adapter.id));
+  const availableIds = (ids: string[]) => ids.filter(id => adapterIds.has(id));
+  const packageRoot = `exports/commerce-remix-${slugify(input.productName)}`;
+  const platformCount = unique(input.platforms).length;
+  return {
+    promise: '把开源混剪能力收束成一条电商内容流水线：客户给商品和授权素材，Wenai 生成可发布成片、标题矩阵、发布包和复盘入口。',
+    routes: [
+      {
+        id: 'material-normalize',
+        phase: '素材整理',
+        customerLabel: '先把客户给的图、视频、口播整理成可混剪素材架',
+        primaryAdapterIds: availableIds(['imagemagick-libheif', 'lossless-cut', 'ffmpeg']),
+        backupAdapterIds: availableIds(['moviepy', 'mcp-video']),
+        input: `${input.assets.length} 个商品/模特/场景/口播素材`,
+        decisionRule: '格式不统一先标准化；长素材先无损抽段；缺素材则进入模特生图或客户补素材任务。',
+        outputs: [`${packageRoot}/01-source-assets`, `${packageRoot}/normalized-assets.json`, `${packageRoot}/material-gaps.json`],
+        stabilityChecks: ['素材必须有授权标记', '格式转换不改写商品事实', '缺素材任务不进入渲染队列'],
+      },
+      {
+        id: 'clip-mining',
+        phase: '片段挖掘',
+        customerLabel: '从长素材里自动找能证明卖点的短片段',
+        primaryAdapterIds: availableIds(['pyscenedetect', 'whisper', 'subtitle-edit']),
+        backupAdapterIds: availableIds(['lossless-cut', 'mcp-video']),
+        input: '客户上传的长视频、口播音频、直播切片或测评素材',
+        decisionRule: '有口播先转写分句；有长视频先按场景切点；低置信度片段只进候选，不直接出片。',
+        outputs: [`${packageRoot}/clip-candidates.json`, `${packageRoot}/subtitles.srt`, `${packageRoot}/caption-review.md`],
+        stabilityChecks: ['口播错字需人工复核', '切点建议保留时间戳', '只处理客户授权视频'],
+      },
+      {
+        id: 'template-compose',
+        phase: '模板编排',
+        customerLabel: '把卖点、模特图、片段和标题排成平台可发的视频结构',
+        primaryAdapterIds: availableIds(['remotion', 'opentimelineio', 'editly']),
+        backupAdapterIds: availableIds(['mlt-shotcut', 'libopenshot']),
+        input: `${plan.timeline.clips.length} 个时间线片段和 ${platformCount} 个平台发布方向`,
+        decisionRule: '平台决定尺寸和节奏；卖点决定镜头顺序；账号人设决定开头和标题，不让客户看到复杂剪辑器。',
+        outputs: [`${packageRoot}/timeline.json`, `${packageRoot}/template-composition.json`, `${packageRoot}/publishing-packs.json`],
+        stabilityChecks: ['每条视频有平台、尺寸、CTA', '字幕安全区明确', '标题矩阵和画面证明互相对应'],
+      },
+      {
+        id: 'render-export',
+        phase: '稳定渲染',
+        customerLabel: '大批量渲染时，失败单条隔离，不拖垮整批交付',
+        primaryAdapterIds: availableIds(['queue-worker', 'ffmpeg', 'mcp-video']),
+        backupAdapterIds: availableIds(['moviepy', 'gpac-packager']),
+        input: `${plan.queue.length} 个平台/尺寸渲染任务`,
+        decisionRule: '按平台和尺寸拆任务；并发受控；失败最多重试后进入人工检查；成功文件写回云盘结构。',
+        outputs: plan.ffmpegCommands.map(command => command.output),
+        stabilityChecks: ['单条失败不回滚已导出文件', '每条输出有日志和重试次数', 'MP4 可播放且音量标准化'],
+      },
+      {
+        id: 'qa-return-loop',
+        phase: '质检复盘',
+        customerLabel: '交付前做成片质检，发布后让客户回填数据进入下一轮优化',
+        primaryAdapterIds: availableIds(['opencv-mediapipe', 'subtitle-edit', 'gpac-packager']),
+        backupAdapterIds: availableIds(['ffmpeg', 'imagemagick-libheif']),
+        input: '成片、封面、字幕、发布链接、截图和表现 CSV',
+        decisionRule: '质检不过不交付；平台数据先不自动读取，客户上传证据后生成下一轮标题和重剪任务。',
+        outputs: [`${packageRoot}/quality-report.json`, `${packageRoot}/04-customer-return`, `${packageRoot}/05-next-round`],
+        stabilityChecks: ['字幕不压商品主体', '封面裁切不丢核心卖点', '回填缺证据时先补证据再复盘'],
+      },
+    ],
+    fallbackOrder: [
+      '优先走本地 FFmpeg / Remotion / 队列 worker，保证首版不用等外部 provider。',
+      '遇到复杂转写、视觉检测或封装，再接 Whisper、OpenCV、GPAC 等局部 worker。',
+      '图片、视频、数字人模型能力等你给 Key 后接入；没有 Key 时输出任务包和 prompt。',
+      '平台发布和账号登录不接管，客户自发；只交付标题、脚本、成片、封面和回填入口。',
+    ],
+    customerVisibleOutputs: [
+      '成片文件和封面',
+      '每个平台的标题/文案/标签/发布清单',
+      '账号人设和口播脚本矩阵',
+      '云盘交付结构和客户回填表',
+      '下一轮重剪任务和客服话术补充',
+    ],
+    notProviderBlockers: [
+      '平台自动登录不是首版 blocker',
+      '自动读取平台后台数据不是首版 blocker',
+      '图片/视频/数字人 Key 未配置时仍可生成任务包',
+      '大规模渲染先走本地批次和失败隔离，后续再扩 worker',
+    ],
+  };
 }
 
 export function buildCommerceTimeline(input: CommerceRemixPlanInput): CommerceRemixTimeline {
@@ -1965,6 +2105,11 @@ export function buildDemoCommerceRemixWorkflowPlaybook() {
 export function buildDemoCommerceRemixExecutionRecipes() {
   const input = buildDemoCommerceRemixInput();
   return buildCommerceRemixExecutionRecipes(input, buildCommerceRemixEnginePlan(input));
+}
+
+export function buildDemoCommerceRemixOrchestrationBoard() {
+  const input = buildDemoCommerceRemixInput();
+  return buildCommerceRemixOrchestrationBoard(input, buildCommerceRemixEnginePlan(input));
 }
 
 export function buildDemoCommercePublishingMatrixPlan() {

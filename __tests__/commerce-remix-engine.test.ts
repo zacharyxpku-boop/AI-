@@ -19,6 +19,7 @@ import {
   buildCommercePublishingMatrixPlan,
   buildCommerceRemixTemplateBank,
   buildCommerceRemixExecutionRecipes,
+  buildCommerceRemixOrchestrationBoard,
   buildCommerceRemixWorkflowPlaybook,
   buildDemoCommerceRemixEnginePlan,
   buildFfmpegCommandManifest,
@@ -378,6 +379,9 @@ describe('commerce remix engine', () => {
       'queue-worker',
       'opentimelineio',
       'moviepy',
+      'editly',
+      'libopenshot',
+      'mcp-video',
       'pyscenedetect',
       'lossless-cut',
       'subtitle-edit',
@@ -390,6 +394,8 @@ describe('commerce remix engine', () => {
     });
     expect(adapters.find(adapter => adapter.id === 'remotion')?.repositoryUrl).toBe('https://github.com/remotion-dev/remotion');
     expect(adapters.find(adapter => adapter.id === 'opentimelineio')?.repositoryUrl).toBe('https://github.com/AcademySoftwareFoundation/OpenTimelineIO');
+    expect(adapters.find(adapter => adapter.id === 'editly')?.repositoryUrl).toBe('https://github.com/mifi/editly');
+    expect(adapters.find(adapter => adapter.id === 'mcp-video')?.readiness).toBe('ready_now');
     expect(adapters.find(adapter => adapter.id === 'pyscenedetect')?.readiness).toBe('ready_now');
     expect(adapters.find(adapter => adapter.id === 'gpac-packager')?.readiness).toBe('later');
     expect(adapters.map(adapter => adapter.guardrail).join(' ')).toContain('不接收客户账号凭据');
@@ -437,6 +443,24 @@ describe('commerce remix engine', () => {
     expect(recipes.find(recipe => recipe.adapterId === 'ffmpeg')?.outputFiles).toContain('exports/travel-pet-bowl-9x16.mp4');
     expect(recipes.find(recipe => recipe.adapterId === 'queue-worker')?.passCriteria.join(' ')).toContain('缺素材任务不进入渲染');
     expect(JSON.stringify(recipes)).not.toMatch(/apiKey|accessToken|Bearer|sk-/i);
+  });
+
+  it('orchestrates open-source remix adapters into customer-readable capability routes', () => {
+    const plan = buildCommerceRemixEnginePlan(baseInput);
+    const board = buildCommerceRemixOrchestrationBoard(baseInput, plan);
+
+    expect(board.routes.map(route => route.id)).toEqual([
+      'material-normalize',
+      'clip-mining',
+      'template-compose',
+      'render-export',
+      'qa-return-loop',
+    ]);
+    expect(board.routes.find(route => route.id === 'template-compose')?.primaryAdapterIds).toEqual(expect.arrayContaining(['remotion', 'opentimelineio', 'editly']));
+    expect(board.routes.find(route => route.id === 'render-export')?.primaryAdapterIds).toEqual(expect.arrayContaining(['queue-worker', 'ffmpeg', 'mcp-video']));
+    expect(board.customerVisibleOutputs).toContain('每个平台的标题/文案/标签/发布清单');
+    expect(board.notProviderBlockers).toContain('平台自动登录不是首版 blocker');
+    expect(JSON.stringify(board)).not.toMatch(/apiKey|accessToken|Bearer|sk-/i);
   });
 
   it('builds a customer-readable remix workflow with no-provider fallbacks', () => {
