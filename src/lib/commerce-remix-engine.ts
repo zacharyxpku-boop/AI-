@@ -245,6 +245,21 @@ export interface CommercePublishingMatrixPlan {
   }>;
 }
 
+export interface CommerceCreatorPersonaMatrix {
+  platform: RemixPlatform;
+  platformLabel: string;
+  personas: Array<{
+    personaId: string;
+    accountType: string;
+    voiceStyle: string;
+    titleFormulas: string[];
+    openingLines: string[];
+    proofAssets: string[];
+    publishCadence: string;
+    doNotClaim: string[];
+  }>;
+}
+
 export interface CommerceRenderCapacityPlan {
   laneCount: number;
   recommendedConcurrency: number;
@@ -644,6 +659,69 @@ export function buildCommercePublishingMatrixPlan(
           : '用商品主图、售后承诺和店铺承接页做闭环',
       publishNote: `${PLATFORM_LABELS[pack.platform]}客户自发：复制标题和正文，上传对应成片，发布后回填链接、截图或 CSV。`,
     })),
+  }));
+}
+
+export function buildCommerceCreatorPersonaMatrix(
+  input: CommerceRemixPlanInput,
+  publishingMatrix = buildCommercePublishingMatrixPlan(input),
+): CommerceCreatorPersonaMatrix[] {
+  const product = safeText(input.productName, '商品');
+  const point = safeText(input.sellingPoints[0] || '', '核心卖点');
+  const audience = safeText(input.audience, '目标用户');
+  return publishingMatrix.map(plan => ({
+    platform: plan.platform,
+    platformLabel: PLATFORM_LABELS[plan.platform],
+    personas: plan.accountAngles.map((angle, index) => {
+      const isBuyer = index === 0;
+      const isReviewer = index === 1;
+      return {
+        personaId: `${plan.platform}-${index + 1}`,
+        accountType: angle.accountType,
+        voiceStyle: isBuyer
+          ? '像真实使用者，先讲痛点和场景，不像广告。'
+          : isReviewer
+            ? '像测评博主，按问题、证据、限制、适合人群说清楚。'
+            : '像店铺负责人，讲规格、售后、购买路径和客服承接。',
+        titleFormulas: plan.platform === 'tiktok'
+          ? [
+              `I tried ${product} for ${audience}`,
+              `3 seconds to see ${point}`,
+              `${product}: problem, proof, result`,
+            ]
+          : plan.platform === 'shopify'
+            ? [
+                `${product} for ${audience}`,
+                `${point}: specs, use case, FAQ`,
+                `Why customers choose ${product}`,
+              ]
+            : [
+                `${audience}先看这个${product}场景`,
+                `${point}到底有没有用？`,
+                `${product}适合谁，不适合谁`,
+              ],
+        openingLines: [
+          isBuyer ? `先说真实感受：${point}这个问题，我会先看这个场景。` : `这条只测一个问题：${product}能不能解决${point}。`,
+          isReviewer ? `别先看价格，先看它有没有把${point}讲清楚。` : `如果你是${audience}，这条可以直接照着选。`,
+          `发布后客户只需要回填链接、截图或 CSV，我们再判断下一轮怎么重剪。`,
+        ],
+        proofAssets: isBuyer
+          ? ['真实使用图', '手持或开箱图', '发布后评论截图']
+          : isReviewer
+            ? ['对比图', '细节图', '规格或材质证明']
+            : ['商品主图', 'FAQ 卡片', '售后承诺截图'],
+        publishCadence: plan.platform === 'tiktok'
+          ? '同一商品首轮 3 条：痛点、证明、反问，各隔 12-24 小时。'
+          : plan.platform === 'xiaohongshu'
+            ? '首轮 3 篇：场景种草、测评对比、避坑 FAQ，避免同一天连续刷屏。'
+            : '首轮 2-3 个版本：商品页承接、广告素材、客服 FAQ，同步记录表现。',
+        doNotClaim: [
+          '不承诺平台自动登录或自动发布',
+          '不虚构播放量、订单和转化',
+          '不使用未经授权的客户素材或账号身份',
+        ],
+      };
+    }),
   }));
 }
 
@@ -1374,6 +1452,11 @@ export function buildDemoCommerceRemixExecutionRecipes() {
 export function buildDemoCommercePublishingMatrixPlan() {
   const input = buildDemoCommerceRemixInput();
   return buildCommercePublishingMatrixPlan(input);
+}
+
+export function buildDemoCommerceCreatorPersonaMatrix() {
+  const input = buildDemoCommerceRemixInput();
+  return buildCommerceCreatorPersonaMatrix(input);
 }
 
 export function buildDemoCommerceRemixQualityGate() {

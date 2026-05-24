@@ -6,6 +6,7 @@ import {
   buildDemoCommerceCloudDriveManifest,
   buildDemoCommerceCloudDriveReturnPlan,
   buildDemoCommerceCustomerServicePack,
+  buildDemoCommerceCreatorPersonaMatrix,
   buildCommerceOpenSourceAdapters,
   buildDemoCommercePublishingMatrixPlan,
   buildDemoCommercePerformanceUploadReport,
@@ -217,6 +218,7 @@ export function KuaiziStyleWorkbench() {
   const executionRecipes = useMemo(() => buildDemoCommerceRemixExecutionRecipes(), []);
   const workflowPlaybook = useMemo(() => buildDemoCommerceRemixWorkflowPlaybook(), []);
   const publishingMatrix = useMemo(() => buildDemoCommercePublishingMatrixPlan(), []);
+  const creatorPersonaMatrix = useMemo(() => buildDemoCommerceCreatorPersonaMatrix(), []);
   const renderCapacity = useMemo(() => buildDemoCommerceRenderCapacityPlan(), []);
   const cloudReturnPlan = useMemo(() => buildDemoCommerceCloudDriveReturnPlan(), []);
   const queueSummary = useMemo(() => {
@@ -755,6 +757,34 @@ export function KuaiziStyleWorkbench() {
                       </div>
                     </article>
                   ))}
+                </div>
+                <div className="mt-5 rounded-md border border-sky-100 bg-sky-50 p-4">
+                  <div className="flex flex-col gap-2 md:flex-row md:items-end md:justify-between">
+                    <div>
+                      <p className="text-xs font-black uppercase tracking-[0.18em] text-sky-700">Creator Persona Matrix</p>
+                      <h4 className="mt-1 text-base font-black text-slate-950">超级 IP 和口播标题矩阵：先生成可复制脚本，客户自己发</h4>
+                    </div>
+                    <span className="rounded bg-white px-2.5 py-1 text-xs font-black text-sky-700 ring-1 ring-sky-100">
+                      {creatorPersonaMatrix.reduce((sum, plan) => sum + plan.personas.length, 0)} 个账号人设
+                    </span>
+                  </div>
+                  <div className="mt-4 grid gap-3 xl:grid-cols-5">
+                    {creatorPersonaMatrix.map(plan => (
+                      <article className="min-w-0 rounded-md bg-white p-3 ring-1 ring-sky-100" key={plan.platform}>
+                        <h5 className="text-sm font-black text-slate-950">{plan.platformLabel}</h5>
+                        <div className="mt-3 space-y-2">
+                          {plan.personas.slice(0, 3).map(persona => (
+                            <div className="rounded bg-slate-50 p-2 text-xs ring-1 ring-slate-100" key={persona.personaId}>
+                              <div className="font-black text-sky-700">{persona.accountType}</div>
+                              <p className="mt-1 line-clamp-2 leading-5 text-slate-600">{persona.voiceStyle}</p>
+                              <p className="mt-1 line-clamp-2 font-bold leading-5 text-slate-800">{persona.openingLines[0]}</p>
+                              <p className="mt-1 text-[11px] font-bold leading-4 text-slate-500">{persona.proofAssets.slice(0, 2).join(' / ')}</p>
+                            </div>
+                          ))}
+                        </div>
+                      </article>
+                    ))}
+                  </div>
                 </div>
               </section>
 

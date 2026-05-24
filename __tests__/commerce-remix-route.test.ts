@@ -50,6 +50,7 @@ describe('/api/commerce-remix', () => {
     expect(body.workflowPlaybook.stages.map((stage: { id: string }) => stage.id)).toContain('publishing-pack');
     expect(body.executionRecipes.map((recipe: { id: string }) => recipe.id)).toContain('recipe-local-render');
     expect(body.publishingMatrix[0].accountAngles.length).toBeGreaterThanOrEqual(3);
+    expect(body.creatorPersonaMatrix[0].personas[0].titleFormulas.length).toBeGreaterThanOrEqual(3);
     expect(body.renderCapacity.queuePolicy.join(' ')).toContain('不自动登录');
     expect(body.cloudReturnPlan.intakeFields.map((field: { label: string }) => field.label)).toContain('表现 CSV');
     expect(JSON.stringify(body)).not.toMatch(/apiKey|accessToken|Bearer|sk-/i);
@@ -88,6 +89,7 @@ describe('/api/commerce-remix', () => {
     expect(body.executionRecipes.find((recipe: { adapterId: string }) => recipe.adapterId === 'ffmpeg').passCriteria.join(' ')).toContain('MP4 可播放');
     expect(body.workflowPlaybook.noProviderFallbacks.join(' ')).toContain('没有自动发布');
     expect(body.publishingMatrix[0].accountAngles[0].publishNote).toContain('客户自发');
+    expect(body.creatorPersonaMatrix[0].personas[0].doNotClaim).toContain('不承诺平台自动登录或自动发布');
     expect(body.cloudReturnPlan.nextRoundOutputs).toContain('重剪任务清单');
   });
 

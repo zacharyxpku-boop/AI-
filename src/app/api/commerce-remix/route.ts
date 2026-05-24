@@ -3,6 +3,7 @@ import {
   buildCommerceCloudDriveManifest,
   buildCommerceCloudDriveReturnPlan,
   buildCommerceCustomerServicePack,
+  buildCommerceCreatorPersonaMatrix,
   buildCommerceOpenSourceAdapters,
   buildCommercePublishingMatrixPlan,
   buildCommerceRemixEnginePlan,
@@ -15,6 +16,7 @@ import {
   buildDemoCommerceCloudDriveManifest,
   buildDemoCommerceCloudDriveReturnPlan,
   buildDemoCommerceCustomerServicePack,
+  buildDemoCommerceCreatorPersonaMatrix,
   buildDemoCommercePublishingMatrixPlan,
   buildDemoCommercePerformanceUploadReport,
   buildDemoCommerceRemixDryRun,
@@ -78,6 +80,7 @@ function buildInputResponse(input: CommerceRemixPlanInput, body: CommerceRemixRe
   const executionRecipes = buildCommerceRemixExecutionRecipes(input, plan, openSourceAdapters);
   const workflowPlaybook = buildCommerceRemixWorkflowPlaybook(input, plan);
   const publishingMatrix = buildCommercePublishingMatrixPlan(input, plan.publishingPacks);
+  const creatorPersonaMatrix = buildCommerceCreatorPersonaMatrix(input, publishingMatrix);
   const cloudReturnPlan = buildCommerceCloudDriveReturnPlan(input, cloudDrive);
 
   return {
@@ -99,6 +102,7 @@ function buildInputResponse(input: CommerceRemixPlanInput, body: CommerceRemixRe
     executionRecipes,
     workflowPlaybook,
     publishingMatrix,
+    creatorPersonaMatrix,
     cloudReturnPlan,
   };
 }
@@ -121,6 +125,7 @@ export async function GET() {
     executionRecipes: buildDemoCommerceRemixExecutionRecipes(),
     workflowPlaybook: buildDemoCommerceRemixWorkflowPlaybook(),
     publishingMatrix: buildDemoCommercePublishingMatrixPlan(),
+    creatorPersonaMatrix: buildDemoCommerceCreatorPersonaMatrix(),
     cloudReturnPlan: buildDemoCommerceCloudDriveReturnPlan(),
   });
 }

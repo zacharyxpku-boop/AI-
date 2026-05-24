@@ -8,6 +8,7 @@ import {
   buildCommerceCloudDriveManifest,
   buildCommerceCloudDriveReturnPlan,
   buildCommerceCustomerServicePack,
+  buildCommerceCreatorPersonaMatrix,
   buildCommerceOpenSourceAdapters,
   buildCommercePublishingMatrixPlan,
   buildCommerceRemixTemplateBank,
@@ -370,11 +371,16 @@ describe('commerce remix engine', () => {
 
   it('plans platform title matrices for customer self-publishing', () => {
     const matrix = buildCommercePublishingMatrixPlan(baseInput);
+    const personas = buildCommerceCreatorPersonaMatrix(baseInput, matrix);
 
     expect(matrix).toHaveLength(3);
     expect(matrix[0].accountAngles.map(angle => angle.accountType)).toEqual(['真实买家号', '测评种草号', '店铺官方号']);
     expect(matrix[0].accountAngles[0].publishNote).toContain('客户自发');
     expect(matrix[1].accountAngles[1].assetHint).toContain('对比图');
+    expect(personas).toHaveLength(3);
+    expect(personas[0].personas).toHaveLength(3);
+    expect(personas[0].personas[0].openingLines.join(' ')).toContain('回填链接、截图或 CSV');
+    expect(personas[0].personas[0].doNotClaim).toContain('不承诺平台自动登录或自动发布');
   });
 
   it('summarizes render capacity without pretending platform automation', () => {
