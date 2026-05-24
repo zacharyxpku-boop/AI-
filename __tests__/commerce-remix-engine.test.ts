@@ -351,12 +351,22 @@ describe('commerce remix engine', () => {
       'opencv-mediapipe',
       'mlt-shotcut',
       'queue-worker',
+      'opentimelineio',
+      'moviepy',
+      'pyscenedetect',
+      'lossless-cut',
+      'subtitle-edit',
+      'imagemagick-libheif',
+      'gpac-packager',
     ]);
     expect(adapters.find(adapter => adapter.id === 'ffmpeg')).toMatchObject({
       integrationMode: 'local_worker',
       readiness: 'ready_now',
     });
     expect(adapters.find(adapter => adapter.id === 'remotion')?.repositoryUrl).toBe('https://github.com/remotion-dev/remotion');
+    expect(adapters.find(adapter => adapter.id === 'opentimelineio')?.repositoryUrl).toBe('https://github.com/AcademySoftwareFoundation/OpenTimelineIO');
+    expect(adapters.find(adapter => adapter.id === 'pyscenedetect')?.readiness).toBe('ready_now');
+    expect(adapters.find(adapter => adapter.id === 'gpac-packager')?.readiness).toBe('later');
     expect(adapters.map(adapter => adapter.guardrail).join(' ')).toContain('不接收客户账号凭据');
   });
 

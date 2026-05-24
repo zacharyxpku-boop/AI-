@@ -541,6 +541,7 @@ export function KuaiziStyleWorkbench() {
                   <div className="flex flex-col gap-2 md:flex-row md:items-end md:justify-between">
                     <div>
                       <p className="text-xs font-black uppercase tracking-[0.18em] text-indigo-500">Open Remix Engine</p>
+                      <p className="mt-2 max-w-3xl text-sm leading-6 text-slate-500">混剪底盘覆盖时间线交换、无损切片、场景检测、字幕校对、图片格式标准化、FFmpeg 合成和批量队列；客户看到的是稳定交付包，不需要理解这些开源项目。</p>
                       <h3 className="mt-1 text-lg font-black text-slate-950">混剪不等外部平台，先做成稳定的本地渲染系统</h3>
                     </div>
                     <Link className="text-sm font-black text-indigo-600" href="/factory/video?variant=friend_trial">查看视频 / 数字人流程</Link>
