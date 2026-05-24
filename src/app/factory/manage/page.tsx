@@ -8,7 +8,7 @@ import { getIndustrializationSnapshot } from '@/lib/industrial-chain-store';
 
 export const metadata: Metadata = {
   title: '交付管理工作台 | Wenai',
-  description: '把客户审核、CRM 交接、资产权限、安全策略、审计和表现回流串成可验证的 Manage 工作台。',
+  description: '把客户审核、交付权限、安全策略、操作记录和表现回流串成可验证的管理工作台。',
 };
 
 export default async function ManageFactoryPage({

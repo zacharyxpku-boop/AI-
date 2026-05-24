@@ -7,7 +7,7 @@ import { getChannelAccountSnapshot } from '@/lib/channel-account-ledger';
 
 export const metadata: Metadata = {
   title: '分发投放工作台 | Wenai',
-  description: '把账号矩阵、发布槽位、广告 campaign、平台证据和表现回流串成可验证的 Cast 工作台。',
+  description: '把账号安排、发布槽位、广告计划、平台证据和表现回流串成可验证的发布工作台。',
 };
 
 export default async function CastFactoryPage({

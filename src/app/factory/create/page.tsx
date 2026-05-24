@@ -7,7 +7,7 @@ import { getIndustrializationSnapshot } from '@/lib/industrial-chain-store';
 
 export const metadata: Metadata = {
   title: '素材生产工作台 | Wenai',
-  description: '把 brief、benchmark、script、visual asset、授权和客户验收串成可验证的 Create 工作台。',
+  description: '把商品资料、参考案例、脚本、图片素材、授权和客户验收串成可验证的素材工作台。',
 };
 
 export default async function CreateFactoryPage({

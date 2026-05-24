@@ -3,113 +3,151 @@
 import Link from 'next/link';
 import { useMemo, useState } from 'react';
 
-type Tool = {
-  id: string;
+type FlowId = 'brief' | 'asset' | 'image' | 'video' | 'publish' | 'review';
+
+type FlowStep = {
+  id: FlowId;
   label: string;
-  title: string;
-  desc: string;
+  short: string;
   href: string;
-  tag?: string;
+  title: string;
+  body: string;
+  output: string;
   accent: string;
 };
 
 type Project = {
   title: string;
-  type: string;
-  date: string;
+  category: string;
   status: string;
+  next: string;
   href: string;
   accent: string;
 };
 
-const workflowNav = [
-  { label: '开始工作', href: '/factory?variant=friend_trial', active: true },
-  { label: '编写灵感', href: '/factory/creative?variant=friend_trial' },
-  { label: '素材生产', href: '/factory/create?variant=friend_trial' },
-  { label: '合成量产', href: '/factory/video?variant=friend_trial' },
-  { label: '投放分发', href: '/factory/cast?variant=friend_trial' },
+const flowSteps: FlowStep[] = [
+  {
+    id: 'brief',
+    label: '写卖点脚本',
+    short: '卖点',
+    href: '/factory/creative?variant=friend_trial',
+    title: '把商品资料变成能拍、能发、能复用的脚本',
+    body: '输入商品卖点、目标平台和受众，生成标题、口播、图文草稿和审核提醒。',
+    output: '输出：标题 + 口播 + 图文脚本',
+    accent: 'from-violet-500 via-fuchsia-500 to-rose-400',
+  },
+  {
+    id: 'asset',
+    label: '整理素材库',
+    short: '素材',
+    href: '/factory/create?variant=friend_trial',
+    title: '把商品图、视频片段、授权说明整理成素材货架',
+    body: '客户知道缺哪张图、哪个授权、哪个规格，运营知道下一步该补什么。',
+    output: '输出：素材清单 + 缺口提示',
+    accent: 'from-emerald-500 via-cyan-500 to-sky-500',
+  },
+  {
+    id: 'image',
+    label: '生成商品图',
+    short: '图片',
+    href: '/factory/create?variant=friend_trial',
+    title: '用已有图片 API Key 生成主图、场景图、卖点图',
+    body: '已有图片 Key 就直接接入生成；暂时没有 Key 时，先导出 prompt 和素材包。',
+    output: '输出：商品图任务 + prompt 包',
+    accent: 'from-amber-400 via-orange-400 to-pink-500',
+  },
+  {
+    id: 'video',
+    label: '合成短视频',
+    short: '视频',
+    href: '/factory/video?variant=friend_trial',
+    title: '用视频 API / 开源混剪组件生成多版本短视频',
+    body: '按脚本、商品图、片段、尺寸和平台节奏组装任务，可接 API，也可导出给本地混剪执行。',
+    output: '输出：视频队列 + 分镜说明',
+    accent: 'from-indigo-500 via-purple-500 to-pink-500',
+  },
+  {
+    id: 'publish',
+    label: '发布与分发',
+    short: '分发',
+    href: '/factory/cast?variant=friend_trial',
+    title: '生成平台发布包，让客户直接发或授权执行',
+    body: '先把标题、正文、封面、素材、发布时间和回填字段准备好；需要代操作时只走客户授权范围内的辅助流程。',
+    output: '输出：发布包 + 回填表',
+    accent: 'from-sky-500 via-cyan-500 to-lime-400',
+  },
+  {
+    id: 'review',
+    label: '复盘下一轮',
+    short: '复盘',
+    href: '/factory/manage?variant=friend_trial',
+    title: '把发布结果和客户反馈变成下一轮动作',
+    body: '记录链接、截图、表现数据和客户反馈，判断继续放大、换角度，还是补素材。',
+    output: '输出：复盘建议 + 下一步',
+    accent: 'from-slate-700 via-blue-600 to-cyan-500',
+  },
 ];
 
 const serviceNav = [
-  { label: '筷子云盘', href: '/factory/create?variant=friend_trial' },
-  { label: '手机协同', href: '/factory/create?variant=friend_trial' },
-  { label: '直播切片', href: '/factory/video?variant=friend_trial' },
-  { label: '创意洞察', href: '/factory/creative?variant=friend_trial' },
-  { label: '视频翻译', href: '/factory/video?variant=friend_trial' },
-  { label: '评论管理', href: '/factory/manage?variant=friend_trial' },
-];
-
-const tools: Tool[] = [
-  {
-    id: 'script',
-    label: '01',
-    title: '编写脚本',
-    desc: '开场引入、产品卖点、保证护肤成分、总结推荐。',
-    href: '/factory/creative?variant=friend_trial',
-    accent: 'from-slate-100 to-indigo-100',
-  },
-  {
-    id: 'studio',
-    label: '02',
-    title: 'AI影棚',
-    desc: '把商品图和场景图整理成可审核素材，不直接伪造发布效果。',
-    href: '/factory/create?variant=friend_trial',
-    tag: 'New',
-    accent: 'from-pink-100 to-orange-100',
-  },
-  {
-    id: 'remix',
-    label: '03',
-    title: 'AI复刻',
-    desc: '只复用内容结构和节奏，不复制第三方品牌、素材或专有表达。',
-    href: '/factory/video?variant=friend_trial',
-    accent: 'from-emerald-100 to-sky-100',
-  },
-  {
-    id: 'replace',
-    label: '04',
-    title: '元素替换',
-    desc: '替换画面元素、卖点卡和口播段落，生成可交给客户审核的草稿。',
-    href: '/factory/video?variant=friend_trial',
-    accent: 'from-cyan-100 to-blue-100',
-  },
-  {
-    id: 'voice',
-    label: '05',
-    title: '多语言AI配音',
-    desc: '把脚本拆成可录制口播，保留平台节奏和审核说明。',
-    href: '/factory/video?variant=friend_trial',
-    tag: '100+ 音色',
-    accent: 'from-blue-100 to-violet-100',
-  },
-  {
-    id: 'cast',
-    label: '06',
-    title: '超级混剪 Pro',
-    desc: '按素材、镜头组和脚本策略输出可审版本，provider 配齐后进入生成。',
-    href: '/factory/cast?variant=friend_trial',
-    tag: 'New',
-    accent: 'from-amber-100 to-rose-100',
-  },
+  { label: '商品资料', href: '/factory/creative?variant=friend_trial' },
+  { label: '图片生成', href: '/factory/create?variant=friend_trial' },
+  { label: '视频混剪', href: '/factory/video?variant=friend_trial' },
+  { label: '数字人口播', href: '/factory/video?variant=friend_trial' },
+  { label: '发布包', href: '/factory/cast?variant=friend_trial' },
+  { label: '复盘跟进', href: '/factory/manage?variant=friend_trial' },
 ];
 
 const projects: Project[] = [
-  { title: '宠物口腔护理 10 SKU', type: '混剪', date: '2026-05-24 03:18', status: '待客户审核', href: '/factory/video?variant=friend_trial', accent: 'from-rose-200 to-pink-100' },
-  { title: '厨房收纳上新批次', type: '脚本', date: '2026-05-24 02:42', status: '卖点已确认', href: '/factory/creative?variant=friend_trial', accent: 'from-lime-200 to-emerald-100' },
-  { title: '香薰礼盒素材库', type: '影棚', date: '2026-05-23 21:09', status: '缺授权图', href: '/factory/create?variant=friend_trial', accent: 'from-orange-200 to-yellow-100' },
-  { title: '美妆口播多语版', type: '配音', date: '2026-05-23 18:30', status: '可进入合成', href: '/factory/video?variant=friend_trial', accent: 'from-indigo-200 to-sky-100' },
-  { title: 'TikTok Shop 首批排期', type: '分发', date: '2026-05-22 16:02', status: '等发布证据', href: '/factory/cast?variant=friend_trial', accent: 'from-violet-200 to-fuchsia-100' },
-  { title: '销售复盘交接包', type: 'CRM', date: '2026-05-22 11:56', status: '下一步已分配', href: '/factory/manage?variant=friend_trial', accent: 'from-slate-200 to-blue-100' },
+  { title: '宠物口腔护理新品上新', category: '短视频', status: '脚本已生成', next: '补 3 张商品图', href: '/factory/video?variant=friend_trial', accent: 'from-rose-200 to-pink-100' },
+  { title: '厨房收纳套装小红书种草', category: '图文', status: '素材已齐', next: '生成卖点图', href: '/factory/create?variant=friend_trial', accent: 'from-lime-200 to-emerald-100' },
+  { title: '香薰礼盒 TikTok Shop 首发', category: '视频', status: '待合成', next: '确认封面', href: '/factory/video?variant=friend_trial', accent: 'from-orange-200 to-yellow-100' },
+  { title: '美妆口播多语版本', category: '数字人', status: '可进入生成', next: '选择音色', href: '/factory/video?variant=friend_trial', accent: 'from-indigo-200 to-sky-100' },
+  { title: '家居清洁产品 Meta 素材包', category: '广告', status: '待发布', next: '导出发布包', href: '/factory/cast?variant=friend_trial', accent: 'from-violet-200 to-fuchsia-100' },
+  { title: '首轮内容表现复盘', category: '复盘', status: '待客户确认', next: '发下一轮建议', href: '/factory/manage?variant=friend_trial', accent: 'from-slate-200 to-blue-100' },
 ];
 
-const checks = ['商品和主渠道已确认', '素材授权边界已确认', '下一步负责人已明确'];
-
 const capabilityRows = [
-  ['商品任务', 'SKU、渠道、目标、负责人', '可用', '进入脚本'],
-  ['素材生产', '图片、视频片段、授权边界', 'provider-gated', '补齐素材'],
-  ['合成量产', '多版本脚本和短视频草稿', 'provider-gated', '配置生成服务'],
-  ['投放分发', '发布时间、证据、负责人', '可记录', '回填链接'],
+  ['图片生成', '接入已有图片 API Key，生成主图、场景图、卖点图', '可接入', '上传商品图'],
+  ['视频生成', '接入已有视频 API Key，批量生成不同平台尺寸', '可接入', '确认分镜'],
+  ['数字人/配音', '接入数字人或 TTS API，生成口播素材', '可接入', '选择人设和音色'],
+  ['开源混剪', '用开源剪辑组件把素材、字幕、封面拼成视频任务', '可本地执行', '导出任务包'],
+  ['账号分发', '先生成发布包和回填表；客户可自行发布，也可授权执行', '半自动', '选择发布方式'],
+  ['表现回流', '导入链接、截图、CSV 或手动数据，形成下一轮建议', '可用', '回填结果'],
 ] as const;
+
+function MiniIllustration({ step, large = false }: { step: FlowStep; large?: boolean }) {
+  return (
+    <div className={`relative overflow-hidden rounded-xl bg-gradient-to-br ${step.accent} ${large ? 'min-h-[260px] p-6' : 'h-24 p-3'}`}>
+      <div className="absolute -right-8 -top-8 size-36 rounded-full bg-white/25 blur-2xl" />
+      <div className="absolute -bottom-10 left-8 size-32 rounded-full bg-slate-950/18 blur-2xl" />
+      <div className="relative grid h-full grid-cols-[1fr_0.7fr] gap-3">
+        <div className="flex min-w-0 flex-col justify-between rounded-lg bg-white/86 p-3 shadow-sm">
+          <div className="flex items-center gap-2">
+            <span className="size-3 rounded-full bg-rose-400" />
+            <span className="h-2 w-16 rounded-full bg-slate-200" />
+          </div>
+          <div className="space-y-2">
+            <span className="block h-2 w-4/5 rounded-full bg-slate-900/80" />
+            <span className="block h-2 w-3/5 rounded-full bg-slate-400/70" />
+            {large ? <span className="block h-2 w-2/5 rounded-full bg-slate-300/80" /> : null}
+          </div>
+          {large ? (
+            <div className="grid grid-cols-3 gap-2">
+              <span className="h-7 rounded-md bg-indigo-500/15" />
+              <span className="h-7 rounded-md bg-pink-500/15" />
+              <span className="h-7 rounded-md bg-cyan-500/15" />
+            </div>
+          ) : null}
+        </div>
+        <div className="relative min-w-0 rounded-lg bg-white/60 p-2">
+          <div className={`absolute bottom-3 left-3 rounded-full bg-white/80 ${large ? 'size-20' : 'size-12'}`} />
+          <div className={`absolute bottom-7 right-5 rounded-md bg-slate-950/70 ${large ? 'h-24 w-10' : 'h-12 w-6'}`} />
+          <div className={`absolute right-3 top-3 rounded-lg bg-white/55 ${large ? 'size-16' : 'size-10'}`} />
+        </div>
+      </div>
+    </div>
+  );
+}
 
 function IconMark({ children }: { children: string }) {
   return (
@@ -120,16 +158,13 @@ function IconMark({ children }: { children: string }) {
 }
 
 export function KuaiziStyleWorkbench() {
-  const [mode, setMode] = useState<'tools' | 'assistant'>('tools');
-  const [selectedToolId, setSelectedToolId] = useState(tools[0].id);
+  const [selectedId, setSelectedId] = useState<FlowId>('brief');
   const [query, setQuery] = useState('');
-  const [checked, setChecked] = useState(checks.slice(0, 1));
-  const selectedTool = tools.find(tool => tool.id === selectedToolId) ?? tools[0];
-  const completion = useMemo(() => Math.round((checked.length / checks.length) * 100), [checked.length]);
+  const selectedStep = flowSteps.find(step => step.id === selectedId) ?? flowSteps[0];
   const filteredProjects = useMemo(() => {
     const value = query.trim().toLowerCase();
     if (!value) return projects;
-    return projects.filter(project => `${project.title} ${project.type} ${project.status}`.toLowerCase().includes(value));
+    return projects.filter(project => `${project.title} ${project.category} ${project.status} ${project.next}`.toLowerCase().includes(value));
   }, [query]);
 
   return (
@@ -141,28 +176,28 @@ export function KuaiziStyleWorkbench() {
               <div className="grid size-8 place-items-center rounded-md bg-gradient-to-br from-[#5a55ff] via-[#d92dfb] to-[#23d7ff] text-sm font-black text-white">W</div>
               <div className="min-w-0">
                 <div className="truncate text-[22px] font-black tracking-tight">wenai</div>
-                <div className="inline-flex rounded bg-[#6758ff] px-1.5 py-0.5 text-[10px] font-black text-white">5.5</div>
+                <div className="inline-flex rounded bg-[#6758ff] px-1.5 py-0.5 text-[10px] font-black text-white">电商增长工作台</div>
               </div>
             </div>
           </div>
 
           <nav className="flex-1 px-3 pb-4">
             <Link href="/factory?variant=friend_trial" className="mb-5 flex items-center gap-3 rounded-md bg-[#dfe7f8] px-3 py-2.5 text-sm font-black text-[#17223d]">
-              <IconMark>⌂</IconMark>
-              <span className="truncate">开始工作</span>
+              <IconMark>01</IconMark>
+              <span className="truncate">工作台总览</span>
             </Link>
 
-            <div className="px-3 pb-2 text-xs font-bold text-slate-400">工作流</div>
+            <div className="px-3 pb-2 text-xs font-bold text-slate-400">商品内容流程</div>
             <div className="space-y-1">
-              {workflowNav.slice(1).map((item, index) => (
-                <Link className="flex items-center gap-3 rounded-md px-3 py-2.5 text-sm font-bold text-slate-600 hover:bg-white/75 hover:text-slate-950" href={item.href} key={item.href}>
-                  <IconMark>{String(index + 1).padStart(2, '0')}</IconMark>
+              {flowSteps.slice(0, 5).map((item, index) => (
+                <Link className="flex items-center gap-3 rounded-md px-3 py-2.5 text-sm font-bold text-slate-600 hover:bg-white/75 hover:text-slate-950" href={item.href} key={item.id}>
+                  <IconMark>{String(index + 2).padStart(2, '0')}</IconMark>
                   <span className="min-w-0 flex-1 truncate">{item.label}</span>
                 </Link>
               ))}
             </div>
 
-            <div className="px-3 pb-2 pt-5 text-xs font-bold text-slate-400">服务</div>
+            <div className="px-3 pb-2 pt-5 text-xs font-bold text-slate-400">可交付能力</div>
             <div className="space-y-1">
               {serviceNav.map((item, index) => (
                 <Link className="flex items-center gap-3 rounded-md px-3 py-2.5 text-sm font-bold text-slate-600 hover:bg-white/75 hover:text-slate-950" href={item.href} key={`${item.label}-${item.href}`}>
@@ -172,23 +207,6 @@ export function KuaiziStyleWorkbench() {
               ))}
             </div>
           </nav>
-
-          <div className="space-y-3 p-4">
-            <Link href="/factory/manage?variant=friend_trial" className="flex min-h-10 items-center justify-center rounded-md bg-[#013f45] px-3 text-sm font-black text-white">
-              生产 Agent
-            </Link>
-            <div className="flex items-center justify-between rounded-md bg-white px-3 py-2.5 text-sm font-bold text-slate-600 shadow-sm">
-              <span>消息通知</span>
-              <span className="rounded-full bg-rose-500 px-1.5 text-[11px] text-white">1</span>
-            </div>
-            <div className="flex items-center gap-2 rounded-md bg-white p-3 shadow-sm ring-1 ring-slate-200">
-              <div className="grid size-8 place-items-center rounded-full bg-indigo-50 text-xs font-black text-indigo-600">WA</div>
-              <div className="min-w-0">
-                <div className="truncate text-sm font-black">Wenai Admin</div>
-                <div className="truncate text-xs text-slate-400">客户试用空间</div>
-              </div>
-            </div>
-          </div>
         </aside>
 
         <section className="flex min-w-0 flex-1 flex-col">
@@ -196,18 +214,18 @@ export function KuaiziStyleWorkbench() {
             <div className="flex flex-col gap-3 lg:flex-row lg:items-center lg:justify-between">
               <div className="min-w-0">
                 <div className="flex flex-wrap items-center gap-2">
-                  <h1 className="truncate text-lg font-black tracking-tight md:text-xl">Wenai 商品增长工作台</h1>
-                  <span className="rounded-md bg-blue-50 px-2 py-1 text-xs font-bold text-blue-700 ring-1 ring-blue-100">provider 待配置</span>
-                  <span className="rounded-md bg-emerald-50 px-2 py-1 text-xs font-bold text-emerald-700 ring-1 ring-emerald-100">内部链路可跑</span>
+                  <h1 className="text-lg font-black tracking-tight md:text-xl">Wenai 商品内容增长工作台</h1>
+                  <span className="rounded-md bg-blue-50 px-2 py-1 text-xs font-bold text-blue-700 ring-1 ring-blue-100">API Key 可接入</span>
+                  <span className="rounded-md bg-emerald-50 px-2 py-1 text-xs font-bold text-emerald-700 ring-1 ring-emerald-100">可先交付发布包</span>
                 </div>
                 <p className="mt-1 line-clamp-2 max-w-3xl text-sm leading-6 text-slate-500">
-                  按“商品资料 → 脚本 → 素材 → 合成 → 分发 → CRM”的顺序推进。现在不夸大外部发布能力，web provider 配齐后直接接入生成和回流。
+                  客户按“商品资料 - 卖点脚本 - 图片/视频/数字人 - 发布包 - 表现复盘”的顺序操作；能自动生成的直接接 API，最后发布可由客户自己完成，也可在授权后辅助执行。
                 </p>
               </div>
               <div className="flex flex-wrap items-center gap-2">
                 <button className="min-h-10 rounded-md border border-slate-200 bg-white px-4 text-sm font-bold text-slate-600" type="button">搜索工具 Ctrl K</button>
-                <Link className="min-h-10 rounded-md bg-gradient-to-r from-[#6b5cff] via-[#a63dff] to-[#ff6c8f] px-5 py-2.5 text-sm font-black text-white shadow-sm" href={selectedTool.href}>
-                  {selectedTool.title}
+                <Link className="min-h-10 rounded-md bg-gradient-to-r from-[#6b5cff] via-[#a63dff] to-[#ff6c8f] px-5 py-2.5 text-sm font-black text-white shadow-sm" href={selectedStep.href}>
+                  开始：{selectedStep.label}
                 </Link>
               </div>
             </div>
@@ -215,33 +233,38 @@ export function KuaiziStyleWorkbench() {
 
           <div className="flex-1 px-4 py-5 md:px-6">
             <div className="mx-auto max-w-[1560px] space-y-5 pb-16">
-              <section className="overflow-hidden rounded-lg border border-[#e2e8f5] bg-white shadow-sm">
-                <div className="relative min-h-[390px] bg-[radial-gradient(circle_at_18%_0%,#ddf7ff_0,transparent_24%),radial-gradient(circle_at_70%_0%,#f0e9ff_0,transparent_30%),linear-gradient(180deg,#fbfdff_0%,#ffffff_74%)] px-5 py-9">
-                  <div className="mx-auto max-w-4xl text-center">
-                    <h2 className="text-2xl font-black tracking-tight text-[#15213f] md:text-[30px]">Hi, what will we create today?</h2>
-                    <div className="mt-6 inline-flex rounded-full bg-white p-1 shadow-sm ring-1 ring-slate-200">
-                      <button className={`rounded-full px-6 py-2 text-sm font-black ${mode === 'tools' ? 'bg-white text-[#17223d] shadow-sm ring-1 ring-slate-100' : 'text-slate-400'}`} onClick={() => setMode('tools')} type="button">AI工具</button>
-                      <button className={`rounded-full px-6 py-2 text-sm font-black ${mode === 'assistant' ? 'bg-white text-[#17223d] shadow-sm ring-1 ring-slate-100' : 'text-slate-400'}`} onClick={() => setMode('assistant')} type="button">小W</button>
-                    </div>
-                    {mode === 'assistant' ? (
-                      <p className="mx-auto mt-4 max-w-2xl rounded-lg bg-white/80 px-4 py-3 text-sm font-bold leading-6 text-slate-600 shadow-sm ring-1 ring-slate-100">
-                        小W 会检查商品、素材、授权和目标渠道，缺关键资料时先拦住，不会把 demo 状态伪装成真实投放结果。
+              <section className="overflow-hidden rounded-lg border border-[#dbe6ff] bg-white shadow-sm">
+                <div className="relative bg-[radial-gradient(circle_at_18%_0%,#ddf7ff_0,transparent_24%),radial-gradient(circle_at_70%_0%,#ffe3f3_0,transparent_30%),linear-gradient(135deg,#fbfdff_0%,#f5f8ff_48%,#ffffff_100%)] px-5 py-9">
+                  <div className="mx-auto grid max-w-6xl gap-8 lg:grid-cols-[minmax(0,0.95fr)_minmax(360px,0.72fr)] lg:items-center">
+                    <div className="min-w-0 text-center lg:text-left">
+                      <p className="text-xs font-black uppercase tracking-[0.18em] text-indigo-600">Product Content Factory</p>
+                      <h2 className="mt-3 text-3xl font-black leading-tight tracking-tight text-[#15213f] md:text-5xl">从一个商品，生成一整套可发布内容</h2>
+                      <p className="mt-4 max-w-2xl text-sm leading-7 text-slate-600 lg:text-base">
+                        不让客户看一堆抽象模块。客户只要按步骤填商品资料、选卖点、生成图片和视频、导出发布包，再把发布结果回填，平台就能给出下一轮建议。
                       </p>
-                    ) : null}
+                      <div className="mt-6 flex flex-wrap justify-center gap-2 lg:justify-start">
+                        {['商品图', '短视频', '数字人口播', '多平台文案', '发布包', '复盘建议'].map(item => (
+                          <span className="rounded-full bg-white px-3 py-1.5 text-xs font-black text-slate-700 shadow-sm ring-1 ring-slate-200" key={item}>{item}</span>
+                        ))}
+                      </div>
+                    </div>
+                    <div className="mx-auto w-full max-w-[520px]">
+                      <MiniIllustration step={selectedStep} large />
+                    </div>
                   </div>
 
                   <div className="mx-auto mt-9 grid max-w-6xl gap-4 sm:grid-cols-2 lg:grid-cols-3 2xl:grid-cols-6">
-                    {tools.map(tool => (
+                    {flowSteps.map(step => (
                       <button
-                        className={`group relative min-h-[168px] rounded-lg border bg-white p-4 text-left shadow-sm transition hover:-translate-y-0.5 hover:shadow-md ${selectedTool.id === tool.id ? 'border-[#6b5cff] ring-2 ring-[#6b5cff]/15' : 'border-slate-200'}`}
-                        key={tool.id}
-                        onClick={() => setSelectedToolId(tool.id)}
+                        className={`group relative min-h-[228px] rounded-lg border bg-white p-3 text-left shadow-sm transition hover:-translate-y-0.5 hover:shadow-md ${selectedStep.id === step.id ? 'border-[#6b5cff] ring-2 ring-[#6b5cff]/15' : 'border-slate-200'}`}
+                        key={step.id}
+                        onClick={() => setSelectedId(step.id)}
                         type="button"
                       >
-                        {tool.tag ? <span className="absolute right-2 top-2 rounded bg-orange-500 px-1.5 py-0.5 text-[11px] font-black text-white">{tool.tag}</span> : null}
-                        <div className={`grid size-14 place-items-center rounded-lg bg-gradient-to-br ${tool.accent} text-base font-black text-slate-700`}>{tool.label}</div>
-                        <div className="mt-3 break-words text-sm font-black leading-5 text-slate-900">{tool.title}</div>
-                        <p className="mt-1 line-clamp-3 text-xs leading-5 text-slate-500">{tool.desc}</p>
+                        <MiniIllustration step={step} />
+                        <div className="mt-3 break-words text-sm font-black leading-5 text-slate-900">{step.label}</div>
+                        <p className="mt-1 line-clamp-3 text-xs leading-5 text-slate-500">{step.body}</p>
+                        <p className="mt-2 text-xs font-black text-indigo-600">{step.output}</p>
                       </button>
                     ))}
                   </div>
@@ -252,25 +275,26 @@ export function KuaiziStyleWorkbench() {
                 <div className="rounded-lg border border-[#e2e8f5] bg-white p-5 shadow-sm">
                   <div className="flex flex-col gap-3 md:flex-row md:items-center md:justify-between">
                     <div>
-                      <h3 className="text-lg font-black text-slate-950">最近工程</h3>
-                      <p className="mt-1 text-sm text-slate-500">客户能看懂的生产记录，每张卡片都有下一步入口。</p>
+                      <h3 className="text-lg font-black text-slate-950">最近商品项目</h3>
+                      <p className="mt-1 text-sm text-slate-500">每个项目都显示“现在处于哪一步、下一步做什么”，客户不用理解后台术语。</p>
                     </div>
                     <div className="flex flex-wrap gap-2">
-                      <input className="h-9 min-w-[220px] rounded-md border border-slate-200 bg-white px-3 text-sm font-bold text-slate-700 outline-none placeholder:text-slate-400" onChange={event => setQuery(event.target.value)} placeholder="搜索 SKU / 状态 / 类型" value={query} />
-                      <Link className="rounded-md border border-slate-200 px-3 py-2 text-sm font-black text-slate-700" href="/factory/create?variant=friend_trial">上传素材</Link>
+                      <input className="h-9 min-w-[220px] rounded-md border border-slate-200 bg-white px-3 text-sm font-bold text-slate-700 outline-none placeholder:text-slate-400" onChange={event => setQuery(event.target.value)} placeholder="搜索商品 / 平台 / 状态" value={query} />
+                      <Link className="rounded-md border border-slate-200 px-3 py-2 text-sm font-black text-slate-700" href="/factory/create?variant=friend_trial">上传商品素材</Link>
                     </div>
                   </div>
 
                   <div className="mt-5 grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
-                    {filteredProjects.map(project => (
+                    {filteredProjects.map((project, index) => (
                       <Link className="group overflow-hidden rounded-lg border border-slate-200 bg-slate-50 shadow-sm transition hover:-translate-y-0.5 hover:bg-white hover:shadow-md" href={project.href} key={project.title}>
-                        <div className={`relative aspect-video bg-gradient-to-br ${project.accent}`}>
-                          <span className="absolute left-3 top-3 rounded bg-slate-700/80 px-2 py-1 text-xs font-black text-white">{project.type}</span>
-                          <span className="absolute bottom-3 right-3 rounded bg-white/80 px-2 py-1 text-[11px] font-bold text-slate-600">{project.status}</span>
+                        <div className={`relative aspect-video bg-gradient-to-br ${project.accent} p-3`}>
+                          <MiniIllustration step={flowSteps[index % flowSteps.length]} />
+                          <span className="absolute left-3 top-3 rounded bg-slate-700/80 px-2 py-1 text-xs font-black text-white">{project.category}</span>
+                          <span className="absolute bottom-3 right-3 rounded bg-white/85 px-2 py-1 text-[11px] font-bold text-slate-600">{project.status}</span>
                         </div>
                         <div className="p-3">
                           <div className="line-clamp-2 min-h-10 break-words text-sm font-black leading-5 text-slate-950">{project.title}</div>
-                          <div className="mt-1 truncate text-xs font-bold text-slate-400">最后编辑于 {project.date}</div>
+                          <div className="mt-2 rounded-md bg-indigo-50 px-2 py-1 text-xs font-black text-indigo-700">下一步：{project.next}</div>
                         </div>
                       </Link>
                     ))}
@@ -280,41 +304,24 @@ export function KuaiziStyleWorkbench() {
                 <aside className="rounded-lg border border-[#e2e8f5] bg-white p-5 shadow-sm">
                   <div className="flex items-start justify-between gap-3">
                     <div className="min-w-0">
-                      <div className="text-xs font-bold uppercase tracking-wide text-slate-400">Current Task</div>
-                      <h3 className="mt-1 text-xl font-black leading-snug text-slate-950">今天先确认哪一个商品？</h3>
+                      <div className="text-xs font-bold uppercase tracking-wide text-slate-400">Today</div>
+                      <h3 className="mt-1 text-xl font-black leading-snug text-slate-950">今天先完成一个商品的首轮内容包</h3>
                     </div>
                     <span className="rounded-full bg-slate-100 px-2.5 py-1 text-xs font-black text-slate-600">1/6</span>
                   </div>
-                  <div className="mt-5">
-                    <div className="flex items-center justify-between text-xs font-black text-slate-500">
-                      <span>任务完成度</span>
-                      <span>{completion}%</span>
-                    </div>
-                    <div className="mt-2 h-2 overflow-hidden rounded-full bg-slate-100">
-                      <div className="h-full bg-gradient-to-r from-[#6b5cff] via-[#b538ff] to-[#ff6c8f]" style={{ width: `${completion}%` }} />
-                    </div>
-                  </div>
                   <p className="mt-5 text-sm leading-6 text-slate-600">
-                    先锁定一个 SKU、一个主渠道和一个负责人。资料不齐时先补资料，provider 未配置时只展示内部准备度和下一步。
+                    先选一个商品和一个主要平台，生成首轮标题、图片任务、视频任务和发布文案。最后一步可以导出给客户自己发，也可以在客户授权后辅助执行。
                   </p>
                   <div className="mt-5 grid gap-2">
-                    {checks.map(item => {
-                      const active = checked.includes(item);
-                      return (
-                        <button
-                          className={`flex items-center gap-3 rounded-md border px-3 py-2.5 text-left text-sm font-black transition ${active ? 'border-emerald-200 bg-emerald-50 text-emerald-900' : 'border-slate-200 bg-slate-50 text-slate-600 hover:bg-white'}`}
-                          key={item}
-                          onClick={() => setChecked(current => (current.includes(item) ? current.filter(value => value !== item) : [...current, item]))}
-                          type="button"
-                        >
-                          <span className={`grid size-5 shrink-0 place-items-center rounded-full text-xs ${active ? 'bg-emerald-600 text-white' : 'bg-white text-slate-400 ring-1 ring-slate-200'}`}>{active ? '✓' : '+'}</span>
-                          <span className="min-w-0 flex-1">{item}</span>
-                        </button>
-                      );
-                    })}
+                    {['商品和主平台已确认', '素材和授权边界已确认', '发布方式已选择：客户自发 / 授权辅助'].map((item, index) => (
+                      <div className="flex items-center gap-3 rounded-md border border-emerald-200 bg-emerald-50 px-3 py-2.5 text-sm font-black text-emerald-900" key={item}>
+                        <span className="grid size-5 shrink-0 place-items-center rounded-full bg-emerald-600 text-xs text-white">{index + 1}</span>
+                        <span className="min-w-0 flex-1">{item}</span>
+                      </div>
+                    ))}
                   </div>
                   <Link className="mt-5 flex min-h-11 items-center justify-center rounded-md bg-gradient-to-r from-[#6b5cff] via-[#a63dff] to-[#ff6c8f] px-4 text-sm font-black text-white shadow-sm" href="/factory/creative?variant=friend_trial">
-                    进入卖点选择
+                    开始生成卖点脚本
                   </Link>
                 </aside>
               </section>
@@ -322,10 +329,9 @@ export function KuaiziStyleWorkbench() {
               <section className="rounded-lg border border-[#e2e8f5] bg-white p-5 shadow-sm">
                 <div className="flex flex-col gap-3 md:flex-row md:items-end md:justify-between">
                   <div>
-                    <h3 className="text-lg font-black text-slate-950">能力呈现</h3>
-                    <p className="mt-1 text-sm text-slate-500">客户看到的是能执行的工序，而不是泛泛的 AI 能力清单。</p>
+                    <h3 className="text-lg font-black text-slate-950">能力分层：API 生成、本地混剪、发布包三条路</h3>
+                    <p className="mt-1 text-sm text-slate-500">能接 API 的直接接；能用开源组件完成的做成本地任务；最后发布环节给客户自发或授权辅助两条路。</p>
                   </div>
-                  <span className="text-xs font-bold text-slate-400">web provider 配齐后，生成、分发、回流会从 gated 变成可执行。</span>
                 </div>
                 <div className="mt-5 grid gap-3 md:hidden">
                   {capabilityRows.map(row => (
@@ -343,9 +349,9 @@ export function KuaiziStyleWorkbench() {
                   <table className="min-w-[760px] w-full border-collapse text-left text-sm">
                     <thead className="bg-[#f2f5fb] text-xs font-black text-slate-500">
                       <tr>
-                        <th className="px-4 py-3">模块</th>
-                        <th className="px-4 py-3">客户看到什么</th>
-                        <th className="px-4 py-3">当前状态</th>
+                        <th className="px-4 py-3">能力</th>
+                        <th className="px-4 py-3">客户能理解的说法</th>
+                        <th className="px-4 py-3">当前路径</th>
                         <th className="px-4 py-3">下一步</th>
                       </tr>
                     </thead>
@@ -353,7 +359,7 @@ export function KuaiziStyleWorkbench() {
                       {capabilityRows.map(row => (
                         <tr className="text-slate-700" key={row[0]}>
                           <td className="px-4 py-3 font-black text-slate-950">{row[0]}</td>
-                          <td className="max-w-[320px] px-4 py-3">{row[1]}</td>
+                          <td className="max-w-[420px] px-4 py-3">{row[1]}</td>
                           <td className="px-4 py-3"><span className="rounded bg-blue-50 px-2 py-1 text-xs font-black text-blue-700">{row[2]}</span></td>
                           <td className="px-4 py-3 font-bold text-indigo-600">{row[3]}</td>
                         </tr>
@@ -366,7 +372,6 @@ export function KuaiziStyleWorkbench() {
           </div>
         </section>
       </div>
-
     </main>
   );
 }

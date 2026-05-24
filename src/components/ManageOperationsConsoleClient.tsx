@@ -387,7 +387,7 @@ export function ManageOperationsConsoleClient({
     const performanceRows = [
       { item: '短视频内容', views: performanceCount > 0 ? '已导入表现表' : '等待表格导入', inquiries: '看真实反馈', decision: '确认后优化' },
       { item: '活动素材', views: scaleCount > 0 ? '已有复盘结论' : '等待复盘', inquiries: '看客户反馈', decision: '决定放大/重剪' },
-      { item: '门店/产品卖点', views: '等待平台数据', inquiries: '可继续导入', decision: '下轮创意参考' },
+      { item: '商品/产品卖点', views: '等待平台数据', inquiries: '可继续导入', decision: '下轮创意参考' },
     ];
     const readinessRows = [
       { module: '发布证明', source: '链接 / 截图 / 平台记录', ready: true, blocker: '已具备' },

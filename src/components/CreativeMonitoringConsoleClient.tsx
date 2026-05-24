@@ -699,7 +699,7 @@ export function CreativeMonitoringConsoleClient({
     }));
     const visibleOpportunities = opportunityCards.length ? opportunityCards : [
       { title: '价格锚点短视频', stage: '种草', score: 86, next: '写 15s 口播脚本' },
-      { title: '门店场景对比', stage: '转化', score: 78, next: '补产品实拍素材' },
+      { title: '商品场景对比', stage: '转化', score: 78, next: '补产品实拍素材' },
       { title: '客户痛点问答', stage: '认知', score: 74, next: '生成图文版本' },
       { title: '套装优惠卖点', stage: '复购', score: 69, next: '进入分发测试' },
     ];

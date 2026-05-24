@@ -7,7 +7,7 @@ import { getIndustrialVideoProductionQueue } from '@/lib/industrial-video-workfl
 
 export const metadata: Metadata = {
   title: '视频生产队列 | Wenai',
-  description: '把视频 brief、provider 门禁、生产交接、分发计划和表现回流串成可执行队列。',
+  description: '把视频脚本、素材任务、生成队列、发布计划和表现回流串成可执行队列。',
 };
 
 export default async function VideoFactoryPage({

@@ -16,7 +16,7 @@ import { buildReadinessInput } from '@/lib/readiness-input';
 
 export const metadata: Metadata = {
   title: 'Wenai Listing Factory',
-  description: '面向电商 SKU 的内容工厂控制台，覆盖卖点、素材、合成、分发和 CRM 交接。',
+  description: '面向电商商品的内容工厂控制台，覆盖卖点、素材、合成、发布和客户跟进。',
 };
 
 export default async function FactoryPage({
@@ -46,14 +46,14 @@ export default async function FactoryPage({
           <div className="mt-3 grid gap-6 lg:grid-cols-[1.05fr_0.95fr] lg:items-end">
             <div>
               <h1 className="max-w-4xl text-3xl font-black leading-tight sm:text-5xl">
-                从 SKU 上新到创意、视频、分发、审核和回流的一张工作台
+                从商品上新到创意、视频、发布、审核和回流的一张工作台
               </h1>
               <p className="mt-4 max-w-3xl text-[14px] leading-7 text-white/70">
                 这里是最终产品形态入口：把全链路工序收敛成可验收、可交接、可复盘的电商增长系统。
               </p>
             </div>
             <div className="rounded-md border border-amber-300/25 bg-amber-300/10 p-4 text-[13px] leading-6 text-amber-50">
-              当前边界：内部闭环可跑；真实 OAuth、自动发布、广告投放、视频 provider、平台数据同步和企业资产接入在 provider 配齐后开启；不宣称平台级规模执行。
+              当前边界：内部闭环可跑；图片、视频、数字人等 API Key 可按客户现有资源接入；发布先交付内容包和回填表，需要代操作时只做客户授权范围内的辅助执行。
             </div>
           </div>
 
@@ -139,7 +139,7 @@ export default async function FactoryPage({
                     <span className="rounded-sm border border-amber-200/30 px-2 py-1 text-[10px] font-black uppercase text-amber-100">{item.layer}</span>
                   </div>
                   <p className="mt-3 text-[12px] leading-5 text-emerald-100/85">内部可用：{item.internal}</p>
-                  <p className="mt-2 text-[12px] leading-5 text-amber-100/85">外部门禁：{item.external}</p>
+                  <p className="mt-2 text-[12px] leading-5 text-amber-100/85">补齐条件：{item.external}</p>
                 </article>
               ))}
             </div>
