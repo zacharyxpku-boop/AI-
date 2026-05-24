@@ -37,6 +37,10 @@ describe('factory page', () => {
     expect(html).toContain('云盘交付结构');
     expect(html).toContain('首批每个平台至少抽检');
     expect(html).toContain('多账号矩阵先不做自动登录');
+    expect(html).toContain('Self Publishing Command Center');
+    expect(html).toContain('客户自发布操作台');
+    expect(html).toContain('个发布槽');
+    expect(html).toContain('不代登规则');
     expect(html).toContain('超级 IP 和口播标题矩阵');
     expect(html).toContain('开源提词器思路');
     expect(html).toContain('回填：');

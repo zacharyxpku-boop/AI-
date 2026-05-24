@@ -29,6 +29,7 @@ import {
   buildDemoCommerceRemixTemplateBank,
   buildDemoCommerceRenderCapacityPlan,
   buildDemoCommerceRenderBatchPlan,
+  buildDemoCommerceSelfPublishingCommandCenter,
 } from '@/lib/commerce-remix-engine';
 
 type FlowId = 'brief' | 'asset' | 'image' | 'video' | 'publish' | 'review';
@@ -247,6 +248,7 @@ export function KuaiziStyleWorkbench() {
   const workflowPlaybook = useMemo(() => buildDemoCommerceRemixWorkflowPlaybook(), []);
   const publishingMatrix = useMemo(() => buildDemoCommercePublishingMatrixPlan(), []);
   const creatorPersonaMatrix = useMemo(() => buildDemoCommerceCreatorPersonaMatrix(), []);
+  const selfPublishingCommandCenter = useMemo(() => buildDemoCommerceSelfPublishingCommandCenter(), []);
   const renderCapacity = useMemo(() => buildDemoCommerceRenderCapacityPlan(), []);
   const cloudReturnPlan = useMemo(() => buildDemoCommerceCloudDriveReturnPlan(), []);
   const customerReturnIntakeBoard = useMemo(() => buildDemoCommerceCustomerReturnIntakeBoard(), []);
@@ -1165,6 +1167,62 @@ export function KuaiziStyleWorkbench() {
                       </div>
                     </article>
                   ))}
+                </div>
+                <div className="mt-5 rounded-md border border-emerald-100 bg-emerald-50 p-4">
+                  <div className="flex flex-col gap-3 lg:flex-row lg:items-end lg:justify-between">
+                    <div className="min-w-0">
+                      <p className="text-xs font-black uppercase tracking-[0.18em] text-emerald-700">Self Publishing Command Center</p>
+                      <h4 className="mt-1 text-base font-black leading-6 text-slate-950">{selfPublishingCommandCenter.headline}</h4>
+                      <p className="mt-2 max-w-4xl text-sm leading-6 text-slate-600">{selfPublishingCommandCenter.promise}</p>
+                    </div>
+                    <span className="w-fit rounded bg-white px-2.5 py-1 text-xs font-black text-emerald-700 ring-1 ring-emerald-100">
+                      {selfPublishingCommandCenter.slots.length} 个发布槽
+                    </span>
+                  </div>
+                  <div className="mt-4 grid gap-3 xl:grid-cols-5">
+                    {selfPublishingCommandCenter.slots.slice(0, 10).map(slot => (
+                      <article className="min-w-0 rounded-md bg-white p-3 ring-1 ring-emerald-100" key={slot.id}>
+                        <div className="flex items-start justify-between gap-2">
+                          <h5 className="text-sm font-black leading-5 text-slate-950">{slot.platformLabel}</h5>
+                          <span className="shrink-0 rounded bg-emerald-50 px-2 py-1 text-[11px] font-black text-emerald-700">{slot.publishWindow}</span>
+                        </div>
+                        <p className="mt-2 text-xs font-black leading-5 text-emerald-700">{slot.accountType}</p>
+                        <p className="mt-2 line-clamp-2 text-xs font-bold leading-5 text-slate-800">{slot.title}</p>
+                        <p className="mt-2 line-clamp-2 text-xs leading-5 text-slate-600">{slot.firstLine}</p>
+                        <p className="mt-3 line-clamp-2 rounded bg-slate-50 px-2 py-1.5 text-[11px] font-bold leading-4 text-slate-600">{slot.copyAction}</p>
+                        <p className="mt-2 line-clamp-2 text-[11px] font-bold leading-4 text-emerald-700">回填：{slot.evidenceRequired.slice(0, 3).join(' / ')}</p>
+                      </article>
+                    ))}
+                  </div>
+                  <div className="mt-4 grid gap-3 lg:grid-cols-3">
+                    <div className="rounded-md bg-white p-3 ring-1 ring-emerald-100">
+                      <h5 className="text-sm font-black text-slate-950">客户发布步骤</h5>
+                      <div className="mt-3 grid gap-2">
+                        {selfPublishingCommandCenter.customerSteps.map(step => (
+                          <div className="rounded bg-emerald-50 px-3 py-2 text-xs font-bold leading-5 text-slate-700" key={step}>{step}</div>
+                        ))}
+                      </div>
+                    </div>
+                    <div className="rounded-md bg-white p-3 ring-1 ring-emerald-100">
+                      <h5 className="text-sm font-black text-slate-950">回填证据箱</h5>
+                      <div className="mt-3 grid gap-2">
+                        {selfPublishingCommandCenter.evidenceInbox.slice(0, 4).map(item => (
+                          <div className="rounded bg-slate-50 px-3 py-2 text-xs leading-5" key={item.label}>
+                            <div className="font-black text-emerald-700">{item.label}</div>
+                            <div className="font-bold text-slate-600">{item.accepted}</div>
+                          </div>
+                        ))}
+                      </div>
+                    </div>
+                    <div className="rounded-md bg-white p-3 ring-1 ring-emerald-100">
+                      <h5 className="text-sm font-black text-slate-950">不代登规则</h5>
+                      <div className="mt-3 grid gap-2">
+                        {selfPublishingCommandCenter.noLoginRules.map(rule => (
+                          <div className="rounded bg-rose-50 px-3 py-2 text-xs font-bold leading-5 text-rose-800" key={rule}>{rule}</div>
+                        ))}
+                      </div>
+                    </div>
+                  </div>
                 </div>
                 <div className="mt-5 rounded-md border border-sky-100 bg-sky-50 p-4">
                   <div className="flex flex-col gap-2 md:flex-row md:items-end md:justify-between">

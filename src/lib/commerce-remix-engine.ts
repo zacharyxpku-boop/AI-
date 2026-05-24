@@ -358,6 +358,30 @@ export interface CommerceCreatorPersonaMatrix {
   }>;
 }
 
+export interface CommerceSelfPublishingSlot {
+  id: string;
+  platform: RemixPlatform;
+  platformLabel: string;
+  accountType: string;
+  publishWindow: string;
+  title: string;
+  firstLine: string;
+  assetToUpload: string;
+  copyAction: string;
+  evidenceRequired: string[];
+  nextReviewMove: string;
+}
+
+export interface CommerceSelfPublishingCommandCenter {
+  headline: string;
+  promise: string;
+  slots: CommerceSelfPublishingSlot[];
+  customerSteps: string[];
+  evidenceInbox: Array<{ label: string; accepted: string; why: string }>;
+  noLoginRules: string[];
+  nextRoundDecisions: string[];
+}
+
 export interface CommerceRenderCapacityPlan {
   laneCount: number;
   recommendedConcurrency: number;
@@ -1225,6 +1249,64 @@ export function buildCommerceCreatorPersonaMatrix(
       };
     }),
   }));
+}
+
+export function buildCommerceSelfPublishingCommandCenter(
+  input: CommerceRemixPlanInput,
+  publishingMatrix = buildCommercePublishingMatrixPlan(input),
+  creatorPersonaMatrix = buildCommerceCreatorPersonaMatrix(input, publishingMatrix),
+  cloudReturnPlan = buildCommerceCloudDriveReturnPlan(input),
+): CommerceSelfPublishingCommandCenter {
+  const personaByKey = new Map(
+    creatorPersonaMatrix.flatMap(plan => plan.personas.map(persona => [`${plan.platform}:${persona.accountType}`, persona])),
+  );
+  const slots = publishingMatrix.flatMap((plan, platformIndex) => plan.accountAngles.slice(0, 3).map((angle, angleIndex) => {
+    const persona = personaByKey.get(`${plan.platform}:${angle.accountType}`);
+    const slotNumber = platformIndex * 3 + angleIndex + 1;
+    return {
+      id: `${plan.platform}-slot-${angleIndex + 1}`,
+      platform: plan.platform,
+      platformLabel: PLATFORM_LABELS[plan.platform],
+      accountType: angle.accountType,
+      publishWindow: angleIndex === 0 ? '第 1 天首发' : angleIndex === 1 ? '第 2-3 天复测' : '第 4-5 天 FAQ/承接',
+      title: persona?.titleFormulas[0] || angle.title,
+      firstLine: persona?.openingLines[0] || angle.firstLine,
+      assetToUpload: angle.assetHint,
+      copyAction: `复制标题、首句和标签，上传第 ${slotNumber} 条成片；客户自己登录 ${PLATFORM_LABELS[plan.platform]} 发布。`,
+      evidenceRequired: ['发布链接', '发布截图', '标题截图', ...(plan.platform === 'shopify' ? ['商品页点击或加购 CSV'] : ['播放/阅读/互动截图'])],
+      nextReviewMove: persona
+        ? `回填 ${persona.returnMetrics.slice(0, 2).join('、')} 后，判断这个${angle.accountType}是否加码或重剪。`
+        : '回填链接和截图后，判断标题、封面和账号角度是否继续放大。',
+    };
+  }));
+  return {
+    headline: '客户自发布操作台：多账号标题矩阵到回填复盘',
+    promise: 'Wenai 不拿客户账号、不自动登录平台；系统交付可复制标题、首句、素材提示、发布时间和回填证据，客户自己发布后进入下一轮复盘。',
+    slots,
+    customerSteps: [
+      '先选主平台和账号人设，复制对应标题、首句、正文和标签。',
+      '上传 Wenai 导出的成片、封面或商品图，不改动素材授权边界。',
+      '客户自己登录平台发布；Wenai 不保存账号、密码、cookie 或平台后台权限。',
+      '发布后把链接、截图、CSV 或云盘目录回填，系统再生成下一轮标题、封面和重剪任务。',
+    ],
+    evidenceInbox: cloudReturnPlan.intakeFields.map(field => ({
+      label: field.label,
+      accepted: field.acceptedFormats.join(' / '),
+      why: field.required ? '复盘必填证据' : '有则提升判断质量',
+    })),
+    noLoginRules: [
+      '不代客户输入账号密码。',
+      '不保存 cookie、验证码、私信或后台会话。',
+      '不绕过平台发布流程。',
+      '不把未回填的播放、订单或转化写成真实表现。',
+    ],
+    nextRoundDecisions: [
+      '哪个账号人设值得继续发布。',
+      '哪个标题公式要改成下一轮主标题。',
+      '哪个封面或开头需要重剪。',
+      '哪些评论和客服问题要变成下一条内容。',
+    ],
+  };
 }
 
 export function buildAccountMatrixPublishingVariants(platform: RemixPlatform, productName: string, point: string, audience: string): PlatformPublishingPack['accountVariants'] {
@@ -2467,6 +2549,13 @@ export function buildDemoCommercePublishingMatrixPlan() {
 export function buildDemoCommerceCreatorPersonaMatrix() {
   const input = buildDemoCommerceRemixInput();
   return buildCommerceCreatorPersonaMatrix(input);
+}
+
+export function buildDemoCommerceSelfPublishingCommandCenter() {
+  const input = buildDemoCommerceRemixInput();
+  const publishingMatrix = buildCommercePublishingMatrixPlan(input);
+  const personaMatrix = buildCommerceCreatorPersonaMatrix(input, publishingMatrix);
+  return buildCommerceSelfPublishingCommandCenter(input, publishingMatrix, personaMatrix, buildCommerceCloudDriveReturnPlan(input));
 }
 
 export function buildDemoCommerceRemixQualityGate() {

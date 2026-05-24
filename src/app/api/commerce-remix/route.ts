@@ -23,6 +23,7 @@ import {
   buildCommerceRemixWorkflowPlaybook,
   buildCommerceRenderCapacityPlan,
   buildCommerceRenderBatchPlan,
+  buildCommerceSelfPublishingCommandCenter,
   buildDemoCommerceCloudDriveManifest,
   buildDemoCommerceCloudDriveReturnPlan,
   buildDemoCommerceCustomerReturnIntakeBoard,
@@ -48,6 +49,7 @@ import {
   buildDemoCommerceRemixTemplateBank,
   buildDemoCommerceRenderCapacityPlan,
   buildDemoCommerceRenderBatchPlan,
+  buildDemoCommerceSelfPublishingCommandCenter,
   evaluateCommercePerformanceUploads,
   evaluateCommerceRemixQuality,
   executeCommerceRenderBatches,
@@ -111,6 +113,7 @@ function buildInputResponse(input: CommerceRemixPlanInput, body: CommerceRemixRe
   const publishingMatrix = buildCommercePublishingMatrixPlan(input, plan.publishingPacks);
   const creatorPersonaMatrix = buildCommerceCreatorPersonaMatrix(input, publishingMatrix);
   const cloudReturnPlan = buildCommerceCloudDriveReturnPlan(input, cloudDrive);
+  const selfPublishingCommandCenter = buildCommerceSelfPublishingCommandCenter(input, publishingMatrix, creatorPersonaMatrix, cloudReturnPlan);
   const customerReturnIntakeBoard = buildCommerceCustomerReturnIntakeBoard(performanceReport, cloudReturnPlan);
 
   return {
@@ -142,6 +145,7 @@ function buildInputResponse(input: CommerceRemixPlanInput, body: CommerceRemixRe
     workflowPlaybook,
     publishingMatrix,
     creatorPersonaMatrix,
+    selfPublishingCommandCenter,
     cloudReturnPlan,
     customerReturnIntakeBoard,
   };
@@ -175,6 +179,7 @@ export async function GET() {
     workflowPlaybook: buildDemoCommerceRemixWorkflowPlaybook(),
     publishingMatrix: buildDemoCommercePublishingMatrixPlan(),
     creatorPersonaMatrix: buildDemoCommerceCreatorPersonaMatrix(),
+    selfPublishingCommandCenter: buildDemoCommerceSelfPublishingCommandCenter(),
     cloudReturnPlan: buildDemoCommerceCloudDriveReturnPlan(),
     customerReturnIntakeBoard: buildDemoCommerceCustomerReturnIntakeBoard(),
   });

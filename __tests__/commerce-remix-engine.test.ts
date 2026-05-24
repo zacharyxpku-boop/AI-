@@ -24,6 +24,7 @@ import {
   buildCommerceRemixExecutionRecipes,
   buildCommerceRemixOrchestrationBoard,
   buildCommerceRemixWorkflowPlaybook,
+  buildCommerceSelfPublishingCommandCenter,
   buildDemoCommerceRemixEnginePlan,
   buildFfmpegCommandManifest,
   buildCommerceRemixExportPackage,
@@ -546,6 +547,27 @@ describe('commerce remix engine', () => {
     expect(personas[0].personas[2].returnMetrics.length).toBeGreaterThanOrEqual(4);
     expect(personas[0].personas[0].sourcePatterns.join(' ')).toContain('开源提词器');
     expect(personas[0].personas[0].doNotClaim).toContain('不承诺平台自动登录或自动发布');
+  });
+
+  it('turns persona matrices into a customer self-publishing command center', () => {
+    const matrix = buildCommercePublishingMatrixPlan(baseInput);
+    const personas = buildCommerceCreatorPersonaMatrix(baseInput, matrix);
+    const commandCenter = buildCommerceSelfPublishingCommandCenter(baseInput, matrix, personas);
+
+    expect(commandCenter.headline).toContain('客户自发布操作台');
+    expect(commandCenter.slots).toHaveLength(9);
+    expect(commandCenter.slots.find(slot => slot.platform === 'xiaohongshu' && slot.accountType === '真实买家号')).toMatchObject({
+      platform: 'xiaohongshu',
+      accountType: '真实买家号',
+      publishWindow: '第 1 天首发',
+    });
+    expect(commandCenter.slots[0].copyAction).toContain('客户自己登录');
+    expect(commandCenter.slots[0].evidenceRequired).toContain('发布链接');
+    expect(commandCenter.customerSteps.join(' ')).toContain('不保存账号、密码、cookie');
+    expect(commandCenter.evidenceInbox.map(item => item.label)).toContain('表现 CSV');
+    expect(commandCenter.noLoginRules).toContain('不绕过平台发布流程。');
+    expect(commandCenter.nextRoundDecisions).toContain('哪个账号人设值得继续发布。');
+    expect(JSON.stringify(commandCenter)).not.toMatch(/apiKey|accessToken|Bearer|sk-/i);
   });
 
   it('summarizes render capacity without pretending platform automation', () => {
