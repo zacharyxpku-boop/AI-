@@ -7,6 +7,7 @@ import {
   buildDemoCommerceCloudDriveReturnPlan,
   buildDemoCommerceCustomerReturnIntakeBoard,
   buildDemoCommerceCustomerDeliveryMap,
+  buildDemoCommerceSalesConversationBoard,
   buildDemoCommerceCustomerServicePack,
   buildDemoCommerceCustomerSupportWorkflow,
   buildDemoCommerceCreatorPersonaMatrix,
@@ -233,6 +234,7 @@ export function KuaiziStyleWorkbench() {
   const servicePack = useMemo(() => buildDemoCommerceCustomerServicePack(), []);
   const modelImageTaskPack = useMemo(() => buildDemoCommerceModelImageTaskPack(), []);
   const customerSupportWorkflow = useMemo(() => buildDemoCommerceCustomerSupportWorkflow(), []);
+  const salesConversationBoard = useMemo(() => buildDemoCommerceSalesConversationBoard(), []);
   const providerActivationPlan = useMemo(() => buildDemoCommerceProviderActivationPlan(), []);
   const firstDeliveryChecklist = useMemo(() => buildDemoCommerceFirstDeliveryChecklist(), []);
   const openSourceAdapters = useMemo(() => buildCommerceOpenSourceAdapters(), []);
@@ -1011,6 +1013,31 @@ export function KuaiziStyleWorkbench() {
                       ))}
                     </div>
                   </article>
+                </div>
+                <div className="mt-5 rounded-md border border-rose-100 bg-rose-50 p-4">
+                  <div className="flex flex-col gap-2 md:flex-row md:items-end md:justify-between">
+                    <div>
+                      <p className="text-xs font-black uppercase tracking-[0.18em] text-rose-700">对话运营板</p>
+                      <h4 className="mt-1 text-base font-black text-slate-950">像 ChatCart 一样接住售前、推荐、售后和复购，但不接管账号</h4>
+                      <p className="mt-2 max-w-3xl text-sm leading-6 text-slate-600">{salesConversationBoard.promise}</p>
+                    </div>
+                    <span className="rounded bg-white px-2.5 py-1 text-xs font-black text-rose-700 ring-1 ring-rose-100">{salesConversationBoard.lanes.length} 条对话 lane</span>
+                  </div>
+                  <div className="mt-4 grid gap-3 xl:grid-cols-5">
+                    {salesConversationBoard.lanes.map(lane => (
+                      <article className="min-w-0 rounded-md bg-white p-3 ring-1 ring-rose-100" key={lane.id}>
+                        <div className="text-[11px] font-black text-rose-700">{lane.label}</div>
+                        <p className="mt-2 line-clamp-3 text-xs leading-5 text-slate-600">{lane.customerTrigger}</p>
+                        <p className="mt-3 line-clamp-2 text-xs font-bold leading-5 text-slate-800">{lane.operatorAction}</p>
+                        <p className="mt-3 rounded bg-rose-50 px-2 py-1 text-[11px] font-bold leading-4 text-rose-700">{lane.nextSystemStep}</p>
+                      </article>
+                    ))}
+                  </div>
+                  <div className="mt-4 grid gap-2 md:grid-cols-4">
+                    {salesConversationBoard.noAutomationBoundaries.map(item => (
+                      <div className="rounded-md bg-white px-3 py-2 text-xs font-bold leading-5 text-slate-700 ring-1 ring-rose-100" key={item}>{item}</div>
+                    ))}
+                  </div>
                 </div>
               </section>
 

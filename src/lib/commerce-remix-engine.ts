@@ -235,6 +235,22 @@ export interface CommerceCustomerSupportWorkflow {
   humanHandoffRules: string[];
 }
 
+export interface CommerceSalesConversationBoard {
+  promise: string;
+  lanes: Array<{
+    id: 'inquiry' | 'recommendation' | 'publish_followup' | 'after_sales' | 'repurchase';
+    label: string;
+    customerTrigger: string;
+    wenaiOutput: string[];
+    operatorAction: string;
+    proofToCollect: string[];
+    nextSystemStep: string;
+  }>;
+  inboxFields: Array<{ label: string; example: string; required: boolean }>;
+  noAutomationBoundaries: string[];
+  handoffSummary: string[];
+}
+
 export interface CommerceOpenSourceAdapter {
   id: string;
   name: string;
@@ -1784,6 +1800,104 @@ export function buildCommerceCustomerSupportWorkflow(
   };
 }
 
+export function buildCommerceSalesConversationBoard(
+  input: CommerceRemixPlanInput,
+  servicePack = buildCommerceCustomerServicePack(input),
+  supportWorkflow = buildCommerceCustomerSupportWorkflow(input, servicePack),
+): CommerceSalesConversationBoard {
+  const product = safeText(input.productName, '商品');
+  const point = safeText(input.sellingPoints[0] || '', '核心卖点');
+  const platforms = unique(input.platforms).map(platform => PLATFORM_LABELS[platform]).join(' / ');
+  return {
+    promise: '把电商对话运营做成一张板：售前问答、商品推荐、发布后追问、售后处理和复购内容都能接住，但不接管客户账号和支付。',
+    lanes: [
+      {
+        id: 'inquiry',
+        label: '售前咨询',
+        customerTrigger: `客户问 ${product} 是否适合自己，或追问 ${point} 是否真实。`,
+        wenaiOutput: [
+          servicePack.faq[0]?.answer || `${product} 适合关注 ${point} 的人群。`,
+          supportWorkflow.preSaleReplies[0]?.assetToSend || '商品适用人群图 + FAQ',
+          '一条可发给客户的短回复和一张证明卡',
+        ],
+        operatorAction: '客服先发克制版回答，再补商品证明图或详情页 FAQ，不做夸大承诺。',
+        proofToCollect: ['客户问题截图', '已发送素材', '是否转人工'],
+        nextSystemStep: '沉淀为 FAQ、详情页补充和下一条短视频脚本。',
+      },
+      {
+        id: 'recommendation',
+        label: '商品推荐',
+        customerTrigger: '客户描述预算、场景、规格或使用对象，需要快速判断推荐话术。',
+        wenaiOutput: [
+          `围绕 ${point} 生成 3 条推荐理由`,
+          '规格/场景/禁用边界说明',
+          '可发送的商品卡、对比卡和短视频片段',
+        ],
+        operatorAction: '只基于客户已给的商品资料推荐，不编造库存、疗效、认证或绝对化表现。',
+        proofToCollect: ['客户需求标签', '推荐商品', '客户是否继续询问'],
+        nextSystemStep: '把高频推荐问题回填到标题矩阵和商品详情页。',
+      },
+      {
+        id: 'publish_followup',
+        label: '发布后追问',
+        customerTrigger: `${platforms || '目标平台'} 发布后，客户或评论区追问价格、用法、物流、差异点。`,
+        wenaiOutput: [
+          '评论区首评和追评话术',
+          '短视频/图文二次解释角度',
+          '需要补拍或补图的素材清单',
+        ],
+        operatorAction: '运营把追问整理成下一轮内容选题，客户只需要继续上传链接、截图或 CSV。',
+        proofToCollect: ['发布链接', '评论截图', '高频追问'],
+        nextSystemStep: '进入客户回填收件箱，生成下一轮重剪任务。',
+      },
+      {
+        id: 'after_sales',
+        label: '售后处理',
+        customerTrigger: '客户反馈不会用、规格不匹配、物流或售后问题。',
+        wenaiOutput: [
+          supportWorkflow.afterSaleReplies[0]?.reply || '先确认订单和具体问题，再给使用说明或人工处理路径。',
+          '售后卡片和人工转接规则',
+          '差评挽回回复草稿',
+        ],
+        operatorAction: '涉及退款、投诉、平台处罚或安全风险时立即转人工，不让 AI 单独承诺处理结果。',
+        proofToCollect: ['订单号或平台工单', '客户截图', '处理结果'],
+        nextSystemStep: '更新售后 FAQ、差评解释卡和详情页风险提示。',
+      },
+      {
+        id: 'repurchase',
+        label: '复购唤醒',
+        customerTrigger: '客户已经购买或互动，需要做复购、搭配、会员或下一轮内容触达。',
+        wenaiOutput: [
+          '复购提醒文案',
+          '搭配商品内容角度',
+          '下一轮账号人设和口播标题',
+        ],
+        operatorAction: '先生成触达内容和素材包，由客户在自己的平台或私域里发布，不自动群发。',
+        proofToCollect: ['客户分层标签', '触达渠道', '复购反馈'],
+        nextSystemStep: '把复购反馈回流到账号矩阵和发布节奏建议。',
+      },
+    ],
+    inboxFields: [
+      { label: '客户问题截图', example: 'chat/inquiry-001.png', required: true },
+      { label: '客户所在平台', example: platforms || '小红书 / TikTok / Shopify', required: true },
+      { label: '推荐或处理结果', example: '已发 FAQ + 详情页链接，客户继续追问规格', required: true },
+      { label: '是否转人工', example: '涉及退款/投诉/平台处罚则转人工', required: true },
+      { label: '下一轮内容机会', example: '把规格问题做成 15 秒解释视频', required: false },
+    ],
+    noAutomationBoundaries: [
+      '不自动登录客户平台账号',
+      '不自动代客户付款、退款或改订单',
+      '不自动群发私信或评论',
+      '不承诺平台后台数据自动读取',
+    ],
+    handoffSummary: [
+      '客服看到的是问题、推荐答案、可发送素材和转人工规则。',
+      '运营看到的是高频问题、下一轮内容机会和发布后复盘证据。',
+      '客户看到的是商品内容、客服话术、发布包和回填入口在同一条电商增长流水线里。',
+    ],
+  };
+}
+
 export function buildCommerceCustomerDeliveryMap(input: CommerceRemixPlanInput): CommerceCustomerDeliveryMap {
   const product = safeText(input.productName, '商品');
   const platforms = input.platforms.map(platform => PLATFORM_LABELS[platform]).join(' / ');
@@ -2138,6 +2252,12 @@ export function buildDemoCommerceModelImageTaskPack() {
 export function buildDemoCommerceCustomerSupportWorkflow() {
   const input = buildDemoCommerceRemixInput();
   return buildCommerceCustomerSupportWorkflow(input, buildCommerceCustomerServicePack(input));
+}
+
+export function buildDemoCommerceSalesConversationBoard() {
+  const input = buildDemoCommerceRemixInput();
+  const servicePack = buildCommerceCustomerServicePack(input);
+  return buildCommerceSalesConversationBoard(input, servicePack, buildCommerceCustomerSupportWorkflow(input, servicePack));
 }
 
 export function buildDemoCommerceCustomerDeliveryMap() {

@@ -46,6 +46,8 @@ describe('/api/commerce-remix', () => {
     expect(body.exportPackage.artifacts.map((artifact: { kind: string }) => artifact.kind)).toContain('publishing_packs');
     expect(body.templates.map((template: { id: string }) => template.id)).toContain('service-objection-loop');
     expect(body.servicePack.faq.length).toBeGreaterThan(0);
+    expect(body.salesConversationBoard.lanes.map((lane: { id: string }) => lane.id)).toContain('repurchase');
+    expect(body.salesConversationBoard.noAutomationBoundaries).toContain('不自动登录客户平台账号');
     expect(body.openSourceAdapters.map((adapter: { id: string }) => adapter.id)).toContain('ffmpeg');
     expect(body.openSourceAdapters.map((adapter: { id: string }) => adapter.id)).toContain('mcp-video');
     expect(body.workflowPlaybook.stages.map((stage: { id: string }) => stage.id)).toContain('publishing-pack');
@@ -93,6 +95,7 @@ describe('/api/commerce-remix', () => {
     expect(body.servicePack.objectionReplies.map((item: { objection: string }) => item.objection)).toContain('担心不好用');
     expect(body.modelImageTaskPack.tasks.map((task: { id: string }) => task.id)).toContain('model-handheld-proof');
     expect(body.customerSupportWorkflow.preSaleReplies.map((item: { scenario: string }) => item.scenario)).toContain('客户觉得贵');
+    expect(body.salesConversationBoard.lanes.find((lane: { id: string }) => lane.id === 'after_sales').proofToCollect).toContain('处理结果');
     expect(body.customerDeliveryMap.phases.map((phase: { id: string }) => phase.id)).toContain('publish');
     expect(body.providerActivationPlan.lanes.map((lane: { id: string }) => lane.id)).toContain('image-key');
     expect(body.providerActivationPlan.notNeededForFirstDelivery).toContain('平台自动登录');

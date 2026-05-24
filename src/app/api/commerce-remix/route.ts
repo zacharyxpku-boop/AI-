@@ -4,6 +4,7 @@ import {
   buildCommerceCloudDriveReturnPlan,
   buildCommerceCustomerReturnIntakeBoard,
   buildCommerceCustomerDeliveryMap,
+  buildCommerceSalesConversationBoard,
   buildCommerceCustomerServicePack,
   buildCommerceCustomerSupportWorkflow,
   buildCommerceCreatorPersonaMatrix,
@@ -24,6 +25,7 @@ import {
   buildDemoCommerceCloudDriveReturnPlan,
   buildDemoCommerceCustomerReturnIntakeBoard,
   buildDemoCommerceCustomerDeliveryMap,
+  buildDemoCommerceSalesConversationBoard,
   buildDemoCommerceCustomerServicePack,
   buildDemoCommerceCustomerSupportWorkflow,
   buildDemoCommerceCreatorPersonaMatrix,
@@ -92,6 +94,7 @@ function buildInputResponse(input: CommerceRemixPlanInput, body: CommerceRemixRe
   const servicePack = buildCommerceCustomerServicePack(input);
   const modelImageTaskPack = buildCommerceModelImageTaskPack(input);
   const customerSupportWorkflow = buildCommerceCustomerSupportWorkflow(input, servicePack);
+  const salesConversationBoard = buildCommerceSalesConversationBoard(input, servicePack, customerSupportWorkflow);
   const customerDeliveryMap = buildCommerceCustomerDeliveryMap(input);
   const providerActivationPlan = buildCommerceProviderActivationPlan();
   const firstDeliveryChecklist = buildCommerceFirstDeliveryChecklist(input, plan, exportPackage, customerDeliveryMap, providerActivationPlan);
@@ -121,6 +124,7 @@ function buildInputResponse(input: CommerceRemixPlanInput, body: CommerceRemixRe
     servicePack,
     modelImageTaskPack,
     customerSupportWorkflow,
+    salesConversationBoard,
     customerDeliveryMap,
     providerActivationPlan,
     firstDeliveryChecklist,
@@ -151,6 +155,7 @@ export async function GET() {
     servicePack: buildDemoCommerceCustomerServicePack(),
     modelImageTaskPack: buildDemoCommerceModelImageTaskPack(),
     customerSupportWorkflow: buildDemoCommerceCustomerSupportWorkflow(),
+    salesConversationBoard: buildDemoCommerceSalesConversationBoard(),
     customerDeliveryMap: buildDemoCommerceCustomerDeliveryMap(),
     providerActivationPlan: buildDemoCommerceProviderActivationPlan(),
     firstDeliveryChecklist: buildDemoCommerceFirstDeliveryChecklist(),

@@ -9,6 +9,7 @@ import {
   buildCommerceCloudDriveReturnPlan,
   buildCommerceCustomerReturnIntakeBoard,
   buildCommerceCustomerDeliveryMap,
+  buildCommerceSalesConversationBoard,
   buildCommerceCustomerServicePack,
   buildCommerceCustomerSupportWorkflow,
   buildCommerceCreatorPersonaMatrix,
@@ -341,6 +342,7 @@ describe('commerce remix engine', () => {
   it('builds customer service and after-sales material from ecommerce selling points', () => {
     const pack = buildCommerceCustomerServicePack(baseInput);
     const workflow = buildCommerceCustomerSupportWorkflow(baseInput, pack);
+    const conversationBoard = buildCommerceSalesConversationBoard(baseInput, pack, workflow);
 
     expect(pack.faq[0].question).toContain('Travel Pet Bowl');
     expect(pack.faq[0].answer).toContain('traveling pet owners');
@@ -350,6 +352,10 @@ describe('commerce remix engine', () => {
     expect(workflow.preSaleReplies.map(item => item.scenario)).toContain('客户觉得贵');
     expect(workflow.negativeReviewRecovery.map(item => item.issue)).toContain('物流或售后不满');
     expect(workflow.humanHandoffRules.join(' ')).toContain('平台处罚风险');
+    expect(conversationBoard.lanes.map(lane => lane.id)).toEqual(['inquiry', 'recommendation', 'publish_followup', 'after_sales', 'repurchase']);
+    expect(conversationBoard.lanes.find(lane => lane.id === 'publish_followup')?.proofToCollect).toContain('发布链接');
+    expect(conversationBoard.noAutomationBoundaries).toContain('不自动登录客户平台账号');
+    expect(conversationBoard.inboxFields.map(field => field.label)).toContain('客户问题截图');
   });
 
   it('builds model image tasks without requiring image provider keys', () => {

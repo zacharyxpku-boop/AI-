@@ -55,6 +55,9 @@ describe('factory page', () => {
     expect(html).toContain('客服素材');
     expect(html).toContain('售前承接');
     expect(html).toContain('差评挽回');
+    expect(html).toContain('对话运营板');
+    expect(html).toContain('售前、推荐、售后和复购');
+    expect(html).toContain('不自动登录客户平台账号');
     expect(html).toContain('Wenai 商品增长工作台');
     expect(html).not.toContain('provider 待配置');
     expect(html).not.toContain('小W 在线');
