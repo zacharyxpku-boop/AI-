@@ -2,12 +2,16 @@ import { describe, expect, it } from 'vitest';
 
 import {
   buildCommerceRemixEnginePlan,
+  buildCommerceRenderBatchPlan,
   buildCommerceTimeline,
+  buildCommerceCloudDriveManifest,
   buildDemoCommerceRemixEnginePlan,
   buildFfmpegCommandManifest,
   buildCommerceRemixExportPackage,
   buildPlatformPublishingPacks,
   buildRemixRenderQueue,
+  evaluateCommercePerformanceUploads,
+  executeCommerceRenderBatches,
   executeCommerceRemixDryRun,
   transitionRemixQueueItem,
   type CommerceRemixPlanInput,
@@ -112,7 +116,15 @@ describe('commerce remix engine', () => {
   it('assembles the full local-first remix engine plan', () => {
     const plan = buildCommerceRemixEnginePlan(baseInput);
 
-    expect(plan.engineStack.map(item => item.id)).toEqual(['timeline-json', 'remotion-template', 'ffmpeg-render', 'queue-runner', 'handoff-package']);
+    expect(plan.engineStack.map(item => item.id)).toEqual([
+      'timeline-json',
+      'remotion-template',
+      'ffmpeg-render',
+      'queue-runner',
+      'render-batch-planner',
+      'handoff-package',
+      'performance-return',
+    ]);
     expect(plan.missingAssets.map(asset => asset.id)).toContain('missing-model');
     expect(plan.handoffMarkdown).toContain('Wenai 本地混剪任务包');
     expect(plan.handoffMarkdown).toContain('FFmpeg');
@@ -140,7 +152,7 @@ describe('commerce remix engine', () => {
     expect(pack.packageId).toBe('commerce-remix-travel-pet-bowl');
     expect(pack.noSecretScanPassed).toBe(true);
     expect(pack.customerPublishingBoundary).toContain('客户自己登录平台发布');
-    expect(pack.cloudDriveHandoff).toContain('表现 CSV');
+    expect(pack.cloudDriveHandoff).toContain('exports/commerce-remix-travel-pet-bowl/04-customer-return');
     expect(pack.artifacts.map(artifact => artifact.kind)).toEqual([
       'timeline',
       'ffmpeg_commands',
@@ -154,6 +166,43 @@ describe('commerce remix engine', () => {
     expect(pack.artifacts.find(artifact => artifact.kind === 'subtitles')?.content).toContain('00:00:00,000 --> 00:00:04,000');
     expect(pack.artifacts.find(artifact => artifact.kind === 'voiceover_script')?.content).toContain('Feeding outside gets easier');
     expect(JSON.stringify(pack)).not.toMatch(/apiKey|accessToken|Bearer|sk-/i);
+  });
+
+  it('builds a cloud-drive handoff map for customer self-publishing evidence', () => {
+    const manifest = buildCommerceCloudDriveManifest(baseInput, 'exports/demo');
+
+    expect(manifest.folders.map(folder => folder.path)).toEqual([
+      'exports/demo/01-source-assets',
+      'exports/demo/02-render-outputs',
+      'exports/demo/03-publishing-packs',
+      'exports/demo/04-customer-return',
+      'exports/demo/05-next-round',
+    ]);
+    expect(manifest.customerChecklist).toContain('发布平台链接');
+    expect(manifest.customerChecklist.join(' ')).toContain('表现 CSV');
+    expect(manifest.nextConfigurableProviders).toContain('企业云盘同步');
+  });
+
+  it('turns customer-uploaded links, screenshots, and CSV rows into next-round advice', () => {
+    const report = evaluateCommercePerformanceUploads([
+      {
+        platform: 'xiaohongshu',
+        publishedUrl: 'https://example.test/post',
+        screenshotPath: '04-customer-return/post.png',
+        csvRows: [
+          { title: 'Hook A', impressions: 1000, clicks: 50, orders: 1, revenue: 99 },
+          { title: 'Hook B', impressions: 800, clicks: 90, orders: 4, revenue: 396 },
+        ],
+      },
+    ]);
+    const missing = evaluateCommercePerformanceUploads([{ platform: 'tiktok' }]);
+
+    expect(report.rowCount).toBe(2);
+    expect(report.totalOrders).toBe(5);
+    expect(report.bestTitle).toBe('Hook B');
+    expect(report.missingEvidence).toEqual([]);
+    expect(report.nextRoundAdvice.join(' ')).toContain('Hook B');
+    expect(missing.missingEvidence).toEqual(['缺发布链接', '缺发布截图', '缺表现 CSV']);
   });
 
   it('dry-runs ready render jobs into exported outputs without external providers', () => {
@@ -194,5 +243,25 @@ describe('commerce remix engine', () => {
     expect(failedResult.exportedCount).toBe(2);
     expect(failedResult.blockedCount).toBe(1);
     expect(failedResult.queue.find(item => item.id === readyPlan.queue[1].id)?.status).toBe('failed_retryable');
+  });
+
+  it('plans large render queues as bounded batches and isolates failed items during execution', () => {
+    const readyPlan = buildCommerceRemixEnginePlan({
+      ...baseInput,
+      platforms: ['tiktok', 'xiaohongshu', 'shopify', 'meta', 'wechat_video'],
+      assets: [
+        ...baseInput.assets,
+        { id: 'missing-model', kind: 'model_image', label: 'model image', uri: 'assets/model.png', rightsReady: true },
+      ],
+    });
+    const batchPlan = buildCommerceRenderBatchPlan(readyPlan.queue, { maxConcurrency: 2, retryBudget: 2 });
+    const execution = executeCommerceRenderBatches(readyPlan.queue, batchPlan, { failQueueItemIds: [readyPlan.queue[2].id] });
+
+    expect(batchPlan.batches).toHaveLength(3);
+    expect(batchPlan.batches[0]).toMatchObject({ concurrency: 2, retryBudget: 2 });
+    expect(batchPlan.stabilityRules.join(' ')).toContain('缺素材的任务不进入渲染批次');
+    expect(execution.exportedCount).toBe(4);
+    expect(execution.retryableCount).toBe(1);
+    expect(execution.traces.join(' ')).toContain(`${readyPlan.queue[2].id}:failed_retryable`);
   });
 });

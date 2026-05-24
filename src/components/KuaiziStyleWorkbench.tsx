@@ -2,7 +2,14 @@
 
 import Link from 'next/link';
 import { useMemo, useState } from 'react';
-import { buildDemoCommerceRemixDryRun, buildDemoCommerceRemixEnginePlan, buildDemoCommerceRemixExportPackage } from '@/lib/commerce-remix-engine';
+import {
+  buildDemoCommerceCloudDriveManifest,
+  buildDemoCommercePerformanceUploadReport,
+  buildDemoCommerceRemixDryRun,
+  buildDemoCommerceRemixEnginePlan,
+  buildDemoCommerceRemixExportPackage,
+  buildDemoCommerceRenderBatchPlan,
+} from '@/lib/commerce-remix-engine';
 
 type FlowId = 'brief' | 'asset' | 'image' | 'video' | 'publish' | 'review';
 
@@ -191,6 +198,9 @@ export function KuaiziStyleWorkbench() {
   const remixPlan = useMemo(() => buildDemoCommerceRemixEnginePlan(), []);
   const remixPackage = useMemo(() => buildDemoCommerceRemixExportPackage(), []);
   const dryRun = useMemo(() => buildDemoCommerceRemixDryRun(), []);
+  const batchPlan = useMemo(() => buildDemoCommerceRenderBatchPlan(), []);
+  const cloudDrive = useMemo(() => buildDemoCommerceCloudDriveManifest(), []);
+  const performanceReport = useMemo(() => buildDemoCommercePerformanceUploadReport(), []);
   const queueSummary = useMemo(() => {
     const statuses = ['needs_material', 'ready', 'rendering', 'exported'] as const;
     return statuses.map(status => ({
@@ -410,7 +420,7 @@ export function KuaiziStyleWorkbench() {
                     ))}
                   </div>
                   <div className="mt-4 rounded-md border border-blue-100 bg-white p-3 text-xs leading-5 text-slate-600">
-                    当前样例已经生成 {remixPlan.timeline.clips.length} 个时间线片段、{remixPlan.ffmpegCommands.length} 条 FFmpeg 命令、{remixPlan.publishingPacks.length} 个平台发布包。
+                    当前样例已经生成 {remixPlan.timeline.clips.length} 个时间线片段、{remixPlan.ffmpegCommands.length} 条 FFmpeg 命令、{remixPlan.publishingPacks.length} 个平台发布包，并拆成 {batchPlan.batches.length} 个稳定渲染批次。
                   </div>
                   <div className="mt-3 space-y-2">
                     {remixPackage.artifacts.slice(0, 4).map(artifact => (
@@ -418,6 +428,55 @@ export function KuaiziStyleWorkbench() {
                         <span className="min-w-0 truncate font-black text-slate-700">{artifact.path.split('/').pop()}</span>
                         <span className="shrink-0 text-slate-500">{artifact.kind}</span>
                       </div>
+                    ))}
+                  </div>
+                </aside>
+              </section>
+
+              <section className="grid gap-5 xl:grid-cols-[minmax(0,0.86fr)_minmax(360px,0.74fr)]">
+                <div className="rounded-lg border border-[#e2e8f5] bg-white p-5 shadow-sm">
+                  <div className="flex flex-col gap-2 md:flex-row md:items-end md:justify-between">
+                    <div>
+                      <p className="text-xs font-black uppercase tracking-[0.18em] text-amber-600">Customer Return Loop</p>
+                      <h3 className="mt-1 text-lg font-black text-slate-950">客户自己发布后，用云盘和表现表回到下一轮</h3>
+                      <p className="mt-1 text-sm leading-6 text-slate-500">不要求平台自动登录，也不把表现读取当成首版阻塞。客户上传链接、截图、CSV，系统就能判断继续放大、换标题，还是重剪素材。</p>
+                    </div>
+                  </div>
+                  <div className="mt-5 grid gap-3 md:grid-cols-5">
+                    {cloudDrive.folders.map((folder, index) => (
+                      <article className="min-w-0 rounded-md border border-slate-200 bg-slate-50 p-3" key={folder.path}>
+                        <div className="text-[11px] font-black text-amber-600">{String(index + 1).padStart(2, '0')}</div>
+                        <h4 className="mt-1 text-sm font-black leading-5 text-slate-950">{folder.path.split('/').pop()}</h4>
+                        <p className="mt-2 text-xs font-bold text-slate-500">负责人：{folder.owner}</p>
+                        <p className="mt-2 line-clamp-3 text-xs leading-5 text-slate-600">{folder.requiredFiles.join(' / ')}</p>
+                      </article>
+                    ))}
+                  </div>
+                </div>
+
+                <aside className="rounded-lg border border-amber-200 bg-amber-50 p-5 shadow-sm">
+                  <p className="text-xs font-black uppercase tracking-[0.18em] text-amber-700">Performance Upload</p>
+                  <h3 className="mt-2 text-xl font-black leading-snug text-slate-950">表现数据先让客户上传，我们负责复盘和下一轮动作</h3>
+                  <div className="mt-4 grid grid-cols-3 gap-2">
+                    <div className="rounded-md bg-white p-3 ring-1 ring-amber-100">
+                      <div className="text-lg font-black text-slate-950">{performanceReport.totalImpressions.toLocaleString('zh-CN')}</div>
+                      <div className="mt-1 text-[11px] font-black text-slate-500">曝光</div>
+                    </div>
+                    <div className="rounded-md bg-white p-3 ring-1 ring-amber-100">
+                      <div className="text-lg font-black text-slate-950">{performanceReport.totalOrders}</div>
+                      <div className="mt-1 text-[11px] font-black text-slate-500">订单信号</div>
+                    </div>
+                    <div className="rounded-md bg-white p-3 ring-1 ring-amber-100">
+                      <div className="text-lg font-black text-slate-950">{performanceReport.rowCount}</div>
+                      <div className="mt-1 text-[11px] font-black text-slate-500">CSV 行</div>
+                    </div>
+                  </div>
+                  <div className="mt-4 rounded-md bg-white p-3 text-sm leading-6 text-slate-700 ring-1 ring-amber-100">
+                    最佳标题：<span className="font-black text-slate-950">{performanceReport.bestTitle}</span>
+                  </div>
+                  <div className="mt-3 space-y-2">
+                    {performanceReport.nextRoundAdvice.slice(0, 3).map(item => (
+                      <div className="rounded-md bg-white px-3 py-2 text-xs font-bold leading-5 text-slate-700 ring-1 ring-amber-100" key={item}>{item}</div>
                     ))}
                   </div>
                 </aside>

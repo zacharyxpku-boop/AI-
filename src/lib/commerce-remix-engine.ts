@@ -121,6 +121,60 @@ export interface CommerceRemixDryRunResult {
   queue: CommerceRemixQueueItem[];
 }
 
+export interface CommercePerformanceUpload {
+  platform: RemixPlatform;
+  publishedUrl?: string;
+  screenshotPath?: string;
+  csvRows?: Array<{
+    title: string;
+    impressions: number;
+    clicks: number;
+    orders: number;
+    revenue: number;
+  }>;
+}
+
+export interface CommercePerformanceUploadReport {
+  uploadChannels: string[];
+  rowCount: number;
+  totalImpressions: number;
+  totalClicks: number;
+  totalOrders: number;
+  totalRevenue: number;
+  bestTitle?: string;
+  nextRoundAdvice: string[];
+  missingEvidence: string[];
+}
+
+export interface CommerceCloudDriveManifest {
+  rootDir: string;
+  folders: Array<{ path: string; owner: string; requiredFiles: string[] }>;
+  customerChecklist: string[];
+  nextConfigurableProviders: string[];
+}
+
+export interface CommerceRenderBatchPlan {
+  batches: Array<{
+    id: string;
+    queueItemIds: string[];
+    concurrency: number;
+    retryBudget: number;
+    outputs: string[];
+  }>;
+  totalItems: number;
+  maxConcurrency: number;
+  retryPolicy: string;
+  stabilityRules: string[];
+}
+
+export interface CommerceRenderBatchExecution {
+  exportedCount: number;
+  retryableCount: number;
+  blockedCount: number;
+  traces: string[];
+  queue: CommerceRemixQueueItem[];
+}
+
 const PLATFORM_LABELS: Record<RemixPlatform, string> = {
   xiaohongshu: '小红书',
   tiktok: 'TikTok',
@@ -185,10 +239,22 @@ export function getCommerceRemixEngineStack(): CommerceRemixEnginePlan['engineSt
       reason: '每个 renderSize/platform 是独立任务，失败只重跑单条，不阻塞整批交付。',
     },
     {
+      id: 'render-batch-planner',
+      role: '大规模批处理层',
+      openSourceReference: 'Open-source render farm / worker queue patterns',
+      reason: '把几十到几百条短视频拆成可控批次，限制并发、记录输出、隔离失败，避免一次渲染拖垮整批。',
+    },
+    {
       id: 'handoff-package',
       role: '客户自发布交付包',
       openSourceReference: 'Open-source static export / manifest packaging pattern',
       reason: '把时间线、命令、字幕、配音稿、平台标题和回填表拆成可审计文件，客户不用理解后端实现也能交付。',
+    },
+    {
+      id: 'performance-return',
+      role: '客户回填复盘层',
+      openSourceReference: 'Open-source CSV import / cloud-drive handoff pattern',
+      reason: '自动抓平台数据先不作为前置条件；客户上传链接、截图、CSV 或云盘目录后，也能形成下一轮标题和素材建议。',
     },
   ];
 }
@@ -476,6 +542,7 @@ function hasNoSecretLeak(content: string) {
 export function buildCommerceRemixExportPackage(input: CommerceRemixPlanInput, plan = buildCommerceRemixEnginePlan(input)): CommerceRemixExportPackage {
   const packageId = `commerce-remix-${slugify(input.productName)}`;
   const rootDir = `exports/${packageId}`;
+  const cloudDriveManifest = buildCommerceCloudDriveManifest(input, rootDir);
   const artifacts: CommerceRemixPackageArtifact[] = [
     {
       path: `${rootDir}/timeline.json`,
@@ -523,14 +590,7 @@ export function buildCommerceRemixExportPackage(input: CommerceRemixPlanInput, p
       path: `${rootDir}/customer-upload-checklist.md`,
       kind: 'customer_upload',
       description: '客户发布后回填链接、截图、CSV 或云盘目录的说明。',
-      content: [
-        '# 客户发布回填清单',
-        '',
-        '- 发布平台链接',
-        '- 发布截图或后台表现截图',
-        '- CSV 表现数据：曝光、点击、互动、订单、退款',
-        '- 云盘目录：原始素材、最终视频、封面、字幕、发布记录',
-      ].join('\n'),
+      content: cloudDriveManifest.customerChecklist.map(item => `- ${item}`).join('\n'),
     },
   ];
   const serialized = artifacts.map(artifact => artifact.content).join('\n');
@@ -539,8 +599,127 @@ export function buildCommerceRemixExportPackage(input: CommerceRemixPlanInput, p
     rootDir,
     artifacts,
     customerPublishingBoundary: '客户自己登录平台发布；Wenai 只交付发布包、素材包、回填清单和复盘建议。',
-    cloudDriveHandoff: ['原始素材', '生成结果', '发布截图', '表现 CSV', '下一轮复盘建议'],
+    cloudDriveHandoff: cloudDriveManifest.folders.map(folder => folder.path),
     noSecretScanPassed: hasNoSecretLeak(serialized),
+  };
+}
+
+export function buildCommerceCloudDriveManifest(input: CommerceRemixPlanInput, rootDir = `exports/commerce-remix-${slugify(input.productName)}`): CommerceCloudDriveManifest {
+  return {
+    rootDir,
+    folders: [
+      { path: `${rootDir}/01-source-assets`, owner: '客户', requiredFiles: ['商品原图', '视频片段', '授权说明'] },
+      { path: `${rootDir}/02-render-outputs`, owner: 'Wenai', requiredFiles: ['MP4 成片', '封面图', '字幕文件'] },
+      { path: `${rootDir}/03-publishing-packs`, owner: 'Wenai', requiredFiles: ['平台标题正文', '账号矩阵角度', '发布检查清单'] },
+      { path: `${rootDir}/04-customer-return`, owner: '客户', requiredFiles: ['发布链接', '发布截图', '表现 CSV'] },
+      { path: `${rootDir}/05-next-round`, owner: 'Wenai', requiredFiles: ['复盘建议', '重剪任务', '下一轮素材缺口'] },
+    ],
+    customerChecklist: [
+      '发布平台链接',
+      '发布截图或后台表现截图',
+      '表现 CSV：曝光、点击、互动、订单、收入',
+      '云盘目录：原始素材、最终视频、封面、字幕、发布记录',
+      '客户备注：哪些内容想继续放大，哪些内容不符合品牌',
+    ],
+    nextConfigurableProviders: ['企业云盘同步', '对象存储签名链接', '平台 analytics API', '客户协作空间权限'],
+  };
+}
+
+export function evaluateCommercePerformanceUploads(uploads: CommercePerformanceUpload[]): CommercePerformanceUploadReport {
+  const rows = uploads.flatMap(upload => upload.csvRows || []);
+  const uploadChannels = unique(uploads.map(upload => PLATFORM_LABELS[upload.platform]));
+  const totalImpressions = rows.reduce((sum, row) => sum + Math.max(0, row.impressions), 0);
+  const totalClicks = rows.reduce((sum, row) => sum + Math.max(0, row.clicks), 0);
+  const totalOrders = rows.reduce((sum, row) => sum + Math.max(0, row.orders), 0);
+  const totalRevenue = rows.reduce((sum, row) => sum + Math.max(0, row.revenue), 0);
+  const best = rows
+    .map(row => ({ row, score: row.orders * 1000 + row.clicks * 3 + row.impressions / 100 }))
+    .sort((a, b) => b.score - a.score)[0]?.row;
+  const missingEvidence = [
+    uploads.some(upload => upload.publishedUrl) ? '' : '缺发布链接',
+    uploads.some(upload => upload.screenshotPath) ? '' : '缺发布截图',
+    rows.length > 0 ? '' : '缺表现 CSV',
+  ].filter(Boolean);
+  const nextRoundAdvice = [
+    best ? `优先保留「${best.title}」的开场结构，下一轮换商品图和封面继续测。` : '先让客户上传至少一份表现 CSV，再判断放大、重剪或暂停。',
+    totalOrders > 0 ? '已有订单信号，可以生成第二轮相似标题和素材变体。' : '订单信号不足，下一轮先重做前三秒钩子和封面。',
+    missingEvidence.length === 0 ? '链接、截图、CSV 已齐，可以进入复盘建议。' : `先补齐：${missingEvidence.join(' / ')}。`,
+  ];
+  return {
+    uploadChannels,
+    rowCount: rows.length,
+    totalImpressions,
+    totalClicks,
+    totalOrders,
+    totalRevenue,
+    bestTitle: best?.title,
+    nextRoundAdvice,
+    missingEvidence,
+  };
+}
+
+export function buildCommerceRenderBatchPlan(queue: CommerceRemixQueueItem[], options: { maxConcurrency?: number; retryBudget?: number } = {}): CommerceRenderBatchPlan {
+  const maxConcurrency = Math.max(1, Math.min(options.maxConcurrency || 4, 8));
+  const retryBudget = Math.max(1, Math.min(options.retryBudget || 2, 3));
+  const runnable = queue.filter(item => item.status === 'ready' || item.status === 'failed_retryable');
+  const batches: CommerceRenderBatchPlan['batches'] = [];
+  for (let index = 0; index < runnable.length; index += maxConcurrency) {
+    const items = runnable.slice(index, index + maxConcurrency);
+    batches.push({
+      id: `render-batch-${String(batches.length + 1).padStart(2, '0')}`,
+      queueItemIds: items.map(item => item.id),
+      concurrency: Math.min(maxConcurrency, items.length),
+      retryBudget,
+      outputs: items.map(item => item.outputPath),
+    });
+  }
+  return {
+    batches,
+    totalItems: runnable.length,
+    maxConcurrency,
+    retryPolicy: `单任务最多重试 ${retryBudget} 次；超过后标记 blocked，不影响其他视频导出。`,
+    stabilityRules: [
+      '缺素材的任务不进入渲染批次',
+      '每个平台和尺寸独立输出，失败只隔离单条',
+      'FFmpeg 参数以数组保存，执行层不拼接 shell 字符串',
+      '导出后由客户自行发布并上传链接、截图或 CSV',
+    ],
+  };
+}
+
+export function executeCommerceRenderBatches(queue: CommerceRemixQueueItem[], plan = buildCommerceRenderBatchPlan(queue), options: { failQueueItemIds?: string[] } = {}): CommerceRenderBatchExecution {
+  const failIds = new Set(options.failQueueItemIds || []);
+  const byId = new Map(queue.map(item => [item.id, item]));
+  const traces: string[] = [];
+  const nextQueue = queue.map(item => ({ ...item }));
+  const nextById = new Map(nextQueue.map(item => [item.id, item]));
+
+  plan.batches.forEach(batch => {
+    traces.push(`${batch.id}:start:${batch.queueItemIds.length}`);
+    batch.queueItemIds.forEach(id => {
+      const original = byId.get(id);
+      const current = nextById.get(id);
+      if (!original || !current) return;
+      if (original.missingAssetIds.length > 0) {
+        traces.push(`${id}:skip_missing_material`);
+        return;
+      }
+      const rendering = transitionRemixQueueItem({ ...current, status: 'ready' }, 'start');
+      const finished = failIds.has(id)
+        ? transitionRemixQueueItem(rendering, 'fail')
+        : transitionRemixQueueItem(rendering, 'export');
+      Object.assign(current, finished);
+      traces.push(`${id}:${finished.status}:${finished.outputPath}`);
+    });
+    traces.push(`${batch.id}:done`);
+  });
+
+  return {
+    exportedCount: nextQueue.filter(item => item.status === 'exported').length,
+    retryableCount: nextQueue.filter(item => item.status === 'failed_retryable').length,
+    blockedCount: nextQueue.filter(item => item.status === 'blocked').length,
+    traces,
+    queue: nextQueue,
   };
 }
 
@@ -608,6 +787,44 @@ export function buildDemoCommerceRemixDryRun() {
       : asset),
   };
   return executeCommerceRemixDryRun(buildCommerceRemixEnginePlan(input));
+}
+
+export function buildDemoCommerceCloudDriveManifest() {
+  return buildCommerceCloudDriveManifest(buildDemoCommerceRemixInput());
+}
+
+export function buildDemoCommercePerformanceUploadReport() {
+  return evaluateCommercePerformanceUploads([
+    {
+      platform: 'xiaohongshu',
+      publishedUrl: 'https://example.test/xhs/post',
+      screenshotPath: '04-customer-return/xhs-screenshot.png',
+      csvRows: [
+        { title: '外出喂食，先解决稳定和收纳', impressions: 18000, clicks: 920, orders: 28, revenue: 3360 },
+        { title: '旅行养宠人群真实会用到的便携宠物慢食碗', impressions: 12200, clicks: 610, orders: 13, revenue: 1560 },
+      ],
+    },
+    {
+      platform: 'tiktok',
+      publishedUrl: 'https://example.test/tiktok/video',
+      screenshotPath: '04-customer-return/tiktok-screenshot.png',
+      csvRows: [
+        { title: 'Stop scrolling: Travel pet bowl fixes outdoor feeding', impressions: 26400, clicks: 1180, orders: 34, revenue: 4080 },
+      ],
+    },
+  ]);
+}
+
+export function buildDemoCommerceRenderBatchPlan() {
+  const demoInput = buildDemoCommerceRemixInput();
+  const readyInput = {
+    ...demoInput,
+    assets: demoInput.assets.map(asset => asset.id === 'model-handheld'
+      ? { ...asset, missing: false, uri: 'assets/model-handheld.png', rightsReady: true }
+      : asset),
+  };
+  const plan = buildCommerceRemixEnginePlan(readyInput);
+  return buildCommerceRenderBatchPlan(plan.queue, { maxConcurrency: 3, retryBudget: 2 });
 }
 
 function buildDemoCommerceRemixInput(): CommerceRemixPlanInput {
