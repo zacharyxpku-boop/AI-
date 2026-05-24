@@ -1,15 +1,16 @@
 'use client';
 
+import Link from 'next/link';
 import { useState } from 'react';
 
 import clientConfig from '@/config/client.json';
 import modulesConfig from '@/config/modules.json';
 
 const catDotColors: Record<string, string> = {
-  execute: 'bg-cat-execute',
-  content: 'bg-cat-content',
-  intel: 'bg-cat-intel',
-  service: 'bg-cat-service',
+  execute: 'bg-emerald-500',
+  content: 'bg-violet-500',
+  intel: 'bg-sky-500',
+  service: 'bg-amber-500',
 };
 
 export default function SettingsPage() {
@@ -42,7 +43,7 @@ export default function SettingsPage() {
       setSaveError('');
       setTimeout(() => setSaved(false), 2000);
     } catch (error) {
-      setSaveError(`保存失败：${error instanceof Error ? error.message : '请手动修改 src/config/client.json'}`);
+      setSaveError(`保存失败：${error instanceof Error ? error.message : '请手动检查 src/config/client.json'}`);
     }
   };
 
@@ -50,129 +51,146 @@ export default function SettingsPage() {
   const totalCount = modulesConfig.modules.length;
 
   return (
-    <div className="max-w-[900px] animate-fade-up">
-      <div className="mb-7">
-        <div className="mb-2 flex items-center gap-3">
-          <div className="h-8 w-1 rounded-full bg-accent" />
-          <h1 className="font-[family-name:var(--font-outfit)] text-[16px] font-bold tracking-tight text-text-primary">
-            客户配置
-          </h1>
-        </div>
-        <p className="ml-4 text-[13px] text-text-secondary/90">
-          管理客户基础信息、启用模块和交付入口；这里不保存任何第三方平台密钥。
-        </p>
-      </div>
-
-      <div className="mb-4 rounded-md border border-border-default bg-bg-surface p-5 shadow-[0_2px_8px_rgba(0,0,0,0.2)]">
-        <div className="mb-4 flex items-center gap-2">
-          <span className="label-mono text-[10px] font-bold">基本信息</span>
-          <div className="h-px flex-1 bg-gradient-to-r from-border-subtle to-transparent" />
-        </div>
-        <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
-          <div>
-            <label className="label-mono mb-2 block text-[9px] font-semibold">客户名称</label>
-            <input
-              type="text"
-              value={config.clientName}
-              onChange={event => setConfig(prev => ({ ...prev, clientName: event.target.value }))}
-              className="w-full rounded-md border border-border-subtle bg-bg-raised px-4 py-3 text-[13px] text-text-primary transition-all focus:border-accent focus:bg-bg-surface focus:shadow-[0_0_0_2px_rgba(200,151,90,0.15)]"
-            />
+    <main className="min-h-screen bg-[#f4f6fb] px-4 py-5 text-[#15213f] sm:px-6 lg:px-8">
+      <div className="mx-auto max-w-[1120px]">
+        <header className="rounded-md border border-white bg-white/90 p-5 shadow-sm">
+          <div className="flex flex-col gap-4 lg:flex-row lg:items-end lg:justify-between">
+            <div className="min-w-0">
+              <p className="text-xs font-black uppercase tracking-[0.18em] text-slate-400">Settings</p>
+              <h1 className="mt-2 break-words text-3xl font-black text-slate-950">客户配置工作台</h1>
+              <p className="mt-2 max-w-3xl text-sm leading-6 text-slate-500">
+                管理客户基础信息、启用模块和交付入口。这里不保存第三方平台密钥，provider 授权统一走服务端配置页。
+              </p>
+            </div>
+            <div className="flex flex-wrap gap-2">
+              <Link href="/factory?variant=friend_trial" className="rounded-md bg-slate-950 px-4 py-3 text-sm font-black text-white">
+                打开商品增长工作台
+              </Link>
+              <Link href="/settings/kuaizi" className="rounded-md border border-slate-200 bg-white px-4 py-3 text-sm font-black text-slate-700">
+                Provider 配置
+              </Link>
+            </div>
           </div>
-          <div>
-            <label className="label-mono mb-2 block text-[9px] font-semibold">行业</label>
-            <input
-              type="text"
-              value={config.industry}
-              onChange={event => setConfig(prev => ({ ...prev, industry: event.target.value }))}
-              className="w-full rounded-md border border-border-subtle bg-bg-raised px-4 py-3 text-[13px] text-text-primary transition-all focus:border-accent focus:bg-bg-surface focus:shadow-[0_0_0_2px_rgba(200,151,90,0.15)]"
-            />
-          </div>
-        </div>
-      </div>
+        </header>
 
-      <div className="mb-4 rounded-md border border-border-default bg-bg-surface p-5 shadow-[0_2px_8px_rgba(0,0,0,0.2)]">
-        <div className="mb-5 flex items-center gap-2">
-          <span className="label-mono text-[10px] font-bold">AI 员工配置</span>
-          <div className="h-px flex-1 bg-gradient-to-r from-border-subtle to-transparent" />
-          <div className="flex items-center gap-2 rounded-md border border-border-subtle bg-bg-raised px-2.5 py-1.5">
-            <span className="text-[9px] font-mono text-text-tertiary">已启用</span>
-            <span className="text-[11px] font-mono font-bold tabular-nums text-accent">{enabledCount}</span>
-            <span className="text-[9px] font-mono text-text-tertiary/60">/</span>
-            <span className="text-[11px] font-mono tabular-nums text-text-secondary">{totalCount}</span>
-          </div>
-        </div>
-
-        {modulesConfig.categories.map(category => {
-          const catModules = modulesConfig.modules.filter(module => module.category === category.id);
-          const catEnabled = catModules.filter(module => config.enabledModules.includes(module.id)).length;
-          return (
-            <div key={category.id} className="mb-5 last:mb-0">
-              <div className="mb-2.5 flex items-center gap-2">
-                <div className={`h-1.5 w-1.5 rounded-full ${catDotColors[category.id] || 'bg-text-tertiary'} shadow-[0_0_4px_currentColor]`} style={{ color: `var(--color-cat-${category.id})` }} />
-                <span className="label-mono text-[9px] font-semibold">{category.label}</span>
-                <div className="h-px flex-1 bg-border-subtle/50" />
-                <span className="text-[8px] font-mono tabular-nums text-text-tertiary/70">
-                  {catEnabled}/{catModules.length}
-                </span>
+        <section className="mt-5 grid gap-5 lg:grid-cols-[minmax(0,1fr)_320px]">
+          <div className="min-w-0 space-y-5">
+            <section className="rounded-md border border-slate-200 bg-white p-5 shadow-sm">
+              <div className="mb-4 flex items-center gap-2">
+                <span className="text-xs font-black uppercase tracking-[0.16em] text-slate-400">Basic Info</span>
+                <div className="h-px flex-1 bg-slate-100" />
               </div>
-              <div className="grid grid-cols-1 gap-2 sm:grid-cols-2">
-                {catModules.map(module => {
-                  const isEnabled = config.enabledModules.includes(module.id);
+              <div className="grid gap-4 sm:grid-cols-2">
+                <label className="block">
+                  <span className="mb-2 block text-xs font-bold text-slate-500">客户名称</span>
+                  <input
+                    type="text"
+                    value={config.clientName}
+                    onChange={event => setConfig(prev => ({ ...prev, clientName: event.target.value }))}
+                    className="min-h-11 w-full rounded-md border border-slate-200 bg-slate-50 px-3 text-sm font-semibold text-slate-900 outline-none transition focus:border-blue-400 focus:bg-white focus:ring-4 focus:ring-blue-100"
+                  />
+                </label>
+                <label className="block">
+                  <span className="mb-2 block text-xs font-bold text-slate-500">行业</span>
+                  <input
+                    type="text"
+                    value={config.industry}
+                    onChange={event => setConfig(prev => ({ ...prev, industry: event.target.value }))}
+                    className="min-h-11 w-full rounded-md border border-slate-200 bg-slate-50 px-3 text-sm font-semibold text-slate-900 outline-none transition focus:border-blue-400 focus:bg-white focus:ring-4 focus:ring-blue-100"
+                  />
+                </label>
+              </div>
+            </section>
+
+            <section className="rounded-md border border-slate-200 bg-white p-5 shadow-sm">
+              <div className="mb-5 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+                <div>
+                  <p className="text-xs font-black uppercase tracking-[0.16em] text-slate-400">AI Modules</p>
+                  <h2 className="mt-1 text-xl font-black text-slate-950">AI 员工配置</h2>
+                </div>
+                <div className="inline-flex w-fit items-center gap-2 rounded-md bg-slate-100 px-3 py-2 text-xs font-black text-slate-600">
+                  <span>已启用</span>
+                  <span className="text-blue-700">{enabledCount}</span>
+                  <span>/</span>
+                  <span>{totalCount}</span>
+                </div>
+              </div>
+
+              <div className="space-y-5">
+                {modulesConfig.categories.map(category => {
+                  const catModules = modulesConfig.modules.filter(module => module.category === category.id);
+                  const catEnabled = catModules.filter(module => config.enabledModules.includes(module.id)).length;
                   return (
-                    <button
-                      key={module.id}
-                      type="button"
-                      onClick={() => toggleModule(module.id)}
-                      className={`group flex items-center justify-between rounded-md border px-3.5 py-2.5 text-[12px] transition-all duration-200 ${
-                        isEnabled
-                          ? 'border-accent/40 bg-accent/15 text-text-primary shadow-[0_2px_8px_rgba(200,151,90,0.15)]'
-                          : 'border-border-subtle bg-bg-raised text-text-tertiary hover:border-border-default hover:bg-bg-hover hover:text-text-primary'
-                      }`}
-                    >
-                      <span className="font-[family-name:var(--font-outfit)] font-semibold">{module.name}</span>
-                      <div className="flex items-center gap-2">
-                        <span className={`text-[8px] font-mono font-semibold uppercase tracking-[0.1em] ${isEnabled ? 'text-accent' : 'text-text-tertiary/70'}`}>
-                          {isEnabled ? '开' : '关'}
-                        </span>
-                        <div className={`relative h-4 w-8 rounded-full transition-all duration-200 ${
-                          isEnabled ? 'border border-accent/50 bg-accent/30' : 'border border-border-subtle bg-bg-surface'
-                        }`}>
-                          <div className={`absolute top-0.5 h-3 w-3 rounded-full transition-all duration-200 ${
-                            isEnabled ? 'left-4 bg-accent shadow-[0_0_6px_rgba(200,151,90,0.6)]' : 'left-0.5 bg-text-tertiary/50'
-                          }`} />
-                        </div>
+                    <div key={category.id}>
+                      <div className="mb-2 flex items-center gap-2">
+                        <span className={`size-2 rounded-full ${catDotColors[category.id] || 'bg-slate-400'}`} />
+                        <span className="text-sm font-black text-slate-800">{category.label}</span>
+                        <div className="h-px flex-1 bg-slate-100" />
+                        <span className="text-xs font-bold text-slate-400">{catEnabled}/{catModules.length}</span>
                       </div>
-                    </button>
+                      <div className="grid gap-2 sm:grid-cols-2">
+                        {catModules.map(module => {
+                          const isEnabled = config.enabledModules.includes(module.id);
+                          return (
+                            <button
+                              key={module.id}
+                              type="button"
+                              onClick={() => toggleModule(module.id)}
+                              className={`flex min-h-12 items-center justify-between gap-3 rounded-md border px-3 text-left text-sm font-bold transition ${
+                                isEnabled
+                                  ? 'border-blue-200 bg-blue-50 text-blue-950 shadow-sm'
+                                  : 'border-slate-200 bg-slate-50 text-slate-500 hover:border-slate-300 hover:bg-white hover:text-slate-900'
+                              }`}
+                            >
+                              <span className="min-w-0 break-words">{module.name}</span>
+                              <span className={`relative h-5 w-9 shrink-0 rounded-full transition ${isEnabled ? 'bg-blue-600' : 'bg-slate-300'}`}>
+                                <span className={`absolute top-0.5 size-4 rounded-full bg-white transition ${isEnabled ? 'left-4' : 'left-0.5'}`} />
+                              </span>
+                            </button>
+                          );
+                        })}
+                      </div>
+                    </div>
                   );
                 })}
               </div>
-            </div>
-          );
-        })}
-      </div>
+            </section>
+          </div>
 
-      <div className="flex items-center justify-between rounded-md border border-border-default bg-bg-surface p-4 shadow-[0_2px_8px_rgba(0,0,0,0.2)]">
-        <div>
-          <p className="text-[11px] font-mono font-semibold text-text-tertiary">系统提示</p>
-          <p className="mt-0.5 text-[9px] font-mono text-text-tertiary/70">修改后需要重启服务或重新部署才会对生产环境生效。</p>
-        </div>
-        <button
-          type="button"
-          onClick={handleSave}
-          className={`rounded-md px-6 py-2.5 font-[family-name:var(--font-outfit)] text-[12px] font-semibold transition-all duration-200 ${
-            saved
-              ? 'border border-success/40 bg-success/15 text-success shadow-[0_2px_8px_rgba(74,222,128,0.2)]'
-              : 'border border-accent bg-accent text-bg-root hover:bg-accent-hover hover:shadow-[0_4px_12px_rgba(200,151,90,0.3)] active:scale-95'
-          }`}
-        >
-          {saved ? '已保存' : '保存配置'}
-        </button>
+          <aside className="min-w-0 rounded-md border border-slate-200 bg-white p-5 shadow-sm lg:sticky lg:top-5 lg:self-start">
+            <p className="text-xs font-black uppercase tracking-[0.16em] text-slate-400">Release Gate</p>
+            <h2 className="mt-2 text-xl font-black text-slate-950">试用前检查</h2>
+            <div className="mt-4 space-y-3 text-sm">
+              {[
+                ['模块启用', `${enabledCount}/${totalCount}`],
+                ['Provider', '去服务端配置'],
+                ['客户入口', '商品增长工作台'],
+              ].map(([label, value]) => (
+                <div key={label} className="flex items-center justify-between gap-3 rounded-md bg-slate-50 px-3 py-2">
+                  <span className="font-bold text-slate-500">{label}</span>
+                  <span className="min-w-0 break-words text-right font-black text-slate-900">{value}</span>
+                </div>
+              ))}
+            </div>
+            <button
+              type="button"
+              onClick={handleSave}
+              className={`mt-5 min-h-11 w-full rounded-md px-4 text-sm font-black transition ${
+                saved
+                  ? 'bg-emerald-100 text-emerald-700 ring-1 ring-emerald-200'
+                  : 'bg-gradient-to-r from-[#6b5cff] via-[#a63dff] to-[#ff6c8f] text-white shadow-sm'
+              }`}
+            >
+              {saved ? '已保存' : '保存配置'}
+            </button>
+            {saveError && (
+              <div className="mt-3 rounded-md border border-red-200 bg-red-50 px-3 py-2 text-xs leading-5 text-red-700">
+                {saveError}
+              </div>
+            )}
+          </aside>
+        </section>
       </div>
-      {saveError && (
-        <div className="mt-3 rounded-md border border-error/40 bg-error/5 px-4 py-3 text-[11px] text-error">
-          {saveError}
-        </div>
-      )}
-    </div>
+    </main>
   );
 }

@@ -5,7 +5,7 @@ const ROUTES = [
     label: '首次使用',
     title: '从行业模板创建第一个实验项目',
     body: '选择 3C、服装或美妆模板，上传平台 CSV，直接生成第一轮内容实验决策。',
-    href: '/dashboard',
+    href: '/factory?variant=friend_trial',
     cta: '创建工作台',
   },
   {

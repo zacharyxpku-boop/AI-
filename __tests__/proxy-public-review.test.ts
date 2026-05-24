@@ -34,6 +34,23 @@ describe('proxy public review portal access', () => {
     expect(response.headers.get('location')).toBeNull();
   });
 
+  it('allows the customer trial entry pages through the proxy', async () => {
+    const paths = [
+      '/poc',
+      '/inquire?from=proxy-test',
+      '/docs',
+      '/enterprise',
+      '/product/video',
+      '/product/pipeline',
+    ];
+
+    for (const path of paths) {
+      const response = await proxy(request(path));
+      expect(response.status).toBe(200);
+      expect(response.headers.get('location')).toBeNull();
+    }
+  });
+
   it('allows token-scoped review API calls without exposing the review-link admin API', async () => {
     const publicReviewResponse = await proxy(request('/api/industrial-chain/review/wrv_browser_smoke'));
     const publicFeedbackResponse = await proxy(request('/api/industrial-chain/review/wrv_browser_smoke/feedback'));

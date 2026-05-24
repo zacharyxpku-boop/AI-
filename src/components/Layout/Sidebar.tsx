@@ -122,15 +122,15 @@ export default function Sidebar({ modules, categories, clientName, userRole }: S
       </div>
 
       <Link
-        href="/dashboard"
+        href="/factory?variant=friend_trial"
         className={`mx-3.5 mt-4 flex items-center gap-2.5 px-3 py-2.5 rounded-md text-[12px] transition-all duration-200 ${
-          pathname === '/dashboard'
+          pathname === '/factory'
             ? 'bg-accent text-bg-root border border-accent shadow-[0_2px_8px_rgba(200,151,90,0.3)] font-semibold'
             : 'text-text-secondary hover:text-text-primary hover:bg-bg-hover border border-transparent hover:border-border-subtle'
         }`}
       >
         <span className="w-4 flex-shrink-0 opacity-90"><IconGrid /></span>
-        <span className="font-[family-name:var(--font-outfit)] font-semibold">工作台</span>
+        <span className="font-[family-name:var(--font-outfit)] font-semibold">工厂台</span>
       </Link>
 
       {/* 快捷键提示 */}
@@ -155,8 +155,8 @@ export default function Sidebar({ modules, categories, clientName, userRole }: S
         </div>
         <div className="space-y-1">
           {[
-            { href: '/dashboard', label: '实验项目', badge: '01', tone: '开始' },
-            { href: '/factory', label: '增长工厂', badge: '02', tone: '闭环' },
+            { href: '/factory?variant=friend_trial', label: '客户试用', badge: '01', tone: '开始' },
+            { href: '/factory/creative?variant=friend_trial', label: '创意洞察', badge: '02', tone: '闭环' },
             { href: '/poc/report', label: '报告模板', badge: '03', tone: '分享' },
             { href: '/pricing', label: '订阅方案', badge: '04', tone: '权益' },
             { href: '/settings/kuaizi', label: '生产工具设置', badge: '05', tone: '可选' },

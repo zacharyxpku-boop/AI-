@@ -2,291 +2,130 @@ import type { Metadata } from 'next';
 import Link from 'next/link';
 import TopNav from '@/components/marketing/TopNav';
 import MarketingFooter from '@/components/marketing/MarketingFooter';
-import { Container, Section, PrimaryButton, SecondaryButton } from '@/components/marketing/Container';
-import FiveMinutePocOnboarding from '@/components/FiveMinutePocOnboarding';
-import PocLaunchChecklist from '@/components/PocLaunchChecklist';
-import { ListingFactoryPocConfigurator } from '@/components/marketing/ListingFactorySections';
-import { POC_EVIDENCE_CASES } from '@/lib/poc-case-studies';
 import { POC_STANDARD_PACK_ROUTE } from '@/lib/standard-pack-routing';
 
 export const metadata: Metadata = {
-  title: '10 SKU 试跑 | wenai',
-  description:
-    '给电商团队的 10 SKU 试跑：选类目、填 SKU、出标准包、出报告、提交商务跟进。',
+  title: '商品增长试用路径 | wenai',
+  description: '从一个 SKU 开始跑通卖点、素材、视频任务、分发证据和销售跟进，明确 provider 配置前后的交付边界。',
 };
 
-const STEPS = [
-  ['01', '准备 10 个真实 SKU', '收集商品名、类目、卖点、价格带、目标平台、现有图片和参考链接。'],
-  ['02', '生成上新包', '输出图片方向、详情页文案、合规红线、客服 FAQ 和验收清单。'],
-  ['03', '套入品牌规则', '写入品牌语气、禁用词、类目阈值、证据要求和复核负责人。'],
-  ['04', '生成验收报告', '把交付证据变成验收分、风险、下一步动作和商务推进建议。'],
+const steps = [
+  ['01', '选一个商品', '确认今天主推 SKU、目标渠道、素材现状和客户最关心的问题。'],
+  ['02', '生成卖点与脚本', '把商品资料变成口播、图文、短视频脚本和可审核任务。'],
+  ['03', '补齐素材和授权', '缺图、缺授权、缺口播资料时先补资料，不假装自动生成完成。'],
+  ['04', '进入视频和分发', 'provider 未配置前只展示任务队列、发布计划和手工证据回填。'],
+  ['05', '交给销售跟进', '把真实反馈、客户确认、负责人和下一步动作交给销售。'],
 ] as const;
 
-const DELIVERABLES = [
-  '01_SKU_intake.md',
-  '02_image_direction.md',
-  '03_listing_copy.md',
-  '04_compliance_redlines.md',
-  '05_customer_service_faq.md',
-  '06_content_marketing_pack.md',
-  '07_poc_acceptance_report.md',
+const gates = [
+  '没有视频 provider callback，不宣称一键成片或智能混剪已商用。',
+  '没有平台 OAuth、发布回执和账号授权，不宣称自动发布或矩阵分发完成。',
+  '没有广告账号授权、预算和 campaign 证据，不宣称自动投放或自动优化。',
+  '没有 analytics sync 和审计账本，不展示 Wenai 自有规模数字。',
 ] as const;
 
-const ACCEPTANCE = [
-  ['输入完整', '每个 SKU 都有商品背景、目标平台、品牌规则和复核负责人。'],
-  ['输出可复用', '交付包包含文案、图片方向、合规、常见问答、参考样例和报告材料。'],
-  ['边界清楚', '有风险的宣称会标成草稿、需复核或可交付，不混在一起。'],
-  ['能做决策', '报告会建议签约、扩量、补救冲刺或暂缓。'],
-] as const;
-
-const NOT_PROMISED = [
-  '不会跳过人工复核直接一键发布。',
-  '不会替代法律、商标、平台审核或医疗功效审批。',
-  '不会伪造客户评价、截图或增长数据。',
-  '本子站只承接体验和试跑，付款与合同仍由主站处理。',
-] as const;
-
-const SYSTEM_LAYERS = [
-  ['上新包', 'SKU 输入、图片方向、详情页文案、合规红线和 FAQ。'],
-  ['品牌规则', '品牌语气、禁用词、类目阈值和证据要求。'],
-  ['内容测试包', 'TikTok / Instagram 参考样例、开场句矩阵、轮播和短视频脚本。'],
-  ['验收报告', '验收分、阻塞项、买方跟进和老板版摘要。'],
-  ['商务推进', '询盘状态、合同阶段、报价状态、付款状态和响应时限。'],
+const deliverables = [
+  '商品增长任务板',
+  '卖点与脚本草稿',
+  '素材与授权清单',
+  '视频生产队列',
+  '分发证据面板',
+  '销售跟进清单',
 ] as const;
 
 export default function PocPage() {
   return (
-    <div className="min-h-screen bg-bg-root text-text-primary">
+    <div className="min-h-screen bg-[#f4f6fb] text-[#15213f]">
       <TopNav />
       <main>
-        <ListingFactoryPocConfigurator />
-        <Section spacing="loose">
-          <Container>
-            <div className="grid grid-cols-1 gap-10 lg:grid-cols-[1.08fr_0.92fr] lg:items-start">
-              <div>
-                <div className="mb-4 text-[10px] font-mono uppercase tracking-[0.22em] text-accent">
-                  10 SKU 试跑
-                </div>
-                <h1 className="max-w-4xl text-balance font-[family-name:var(--font-outfit)] text-4xl font-bold leading-[1.08] md:text-6xl">
-                  让客户 5 分钟看懂：这批 SKU 能不能交付，下一步值不值得签。
+        <section className="border-b border-slate-200">
+          <div className="mx-auto max-w-[1180px] px-5 py-14 sm:px-6 lg:px-8">
+            <div className="grid gap-8 lg:grid-cols-[minmax(0,1fr)_360px] lg:items-start">
+              <div className="min-w-0">
+                <p className="w-fit rounded-md bg-blue-50 px-3 py-2 text-xs font-black uppercase tracking-[0.18em] text-blue-700">Trial Runbook</p>
+                <h1 className="mt-4 max-w-4xl break-words text-4xl font-black leading-tight text-slate-950 md:text-6xl">
+                  从一个商品开始，验证整条内容增长交付链
                 </h1>
-                <p className="mt-6 max-w-2xl text-pretty text-base leading-relaxed text-text-secondary md:text-lg">
-                  wenai 不是文案玩具。它把 SKU 资料、类目规则、品牌禁区、内容营销、验收报告和商务跟进压成一条客户能直接使用的交付线。
+                <p className="mt-5 max-w-3xl text-sm leading-7 text-slate-600 md:text-base">
+                  试用目标不是展示一堆工具，而是让客户看清楚：商品怎么变成内容任务、哪些材料还缺、哪些外部 provider 必须配置、销售下一步怎么跟进。
                 </p>
-                <div className="mt-8 flex flex-col gap-3 sm:flex-row">
-                  <PrimaryButton href="/inquire?from=poc-hero" size="lg">
-                    提交试跑需求
-                  </PrimaryButton>
-                  <SecondaryButton href={POC_STANDARD_PACK_ROUTE} size="lg">
-                    生成标准包
-                  </SecondaryButton>
-                  <SecondaryButton href="/poc/report" size="lg">
-                    打开报告工作台
-                  </SecondaryButton>
+                <div className="mt-7 flex flex-col gap-3 sm:flex-row">
+                  <Link href="/factory?variant=friend_trial" className="inline-flex min-h-11 items-center justify-center rounded-md bg-gradient-to-r from-[#6b5cff] via-[#a63dff] to-[#ff6c8f] px-5 text-sm font-black text-white shadow-sm">
+                    打开商品增长工作台
+                  </Link>
+                  <Link href="/inquire?from=poc" className="inline-flex min-h-11 items-center justify-center rounded-md border border-slate-200 bg-white px-5 text-sm font-black text-slate-700">
+                    提交试用申请
+                  </Link>
+                  <Link href={POC_STANDARD_PACK_ROUTE} className="inline-flex min-h-11 items-center justify-center rounded-md border border-slate-200 bg-white px-5 text-sm font-black text-slate-700">
+                    生成试用标准包
+                  </Link>
                 </div>
               </div>
-              <div className="rounded-lg border border-accent/30 bg-accent/10 p-5">
-                <div className="mb-3 text-[10px] font-mono uppercase tracking-wider text-accent">
-                  一次好试跑要证明什么
-                </div>
-                <div className="space-y-3">
-                  {ACCEPTANCE.map(([title, body]) => (
-                    <div key={title} className="rounded-md border border-border-subtle bg-bg-root/35 p-3">
-                      <div className="text-[13px] font-semibold text-text-primary">{title}</div>
-                      <p className="mt-1 text-[12px] leading-relaxed text-text-secondary">{body}</p>
-                    </div>
-                  ))}
-                </div>
-              </div>
-            </div>
-          </Container>
-        </Section>
 
-        <Section className="border-t border-border-subtle" spacing="tight">
-          <Container>
-            <div className="grid grid-cols-1 gap-3 md:grid-cols-4">
-              {STEPS.map(([num, title, body]) => (
-                <div key={num} className="rounded-lg border border-border-subtle bg-bg-surface p-4">
-                  <div className="mb-3 text-[10px] font-mono text-accent">{num}</div>
-                  <h2 className="mb-2 text-[15px] font-bold text-text-primary">{title}</h2>
-                  <p className="text-[12px] leading-relaxed text-text-secondary">{body}</p>
-                </div>
-              ))}
-            </div>
-          </Container>
-        </Section>
-
-        <Section className="border-t border-border-subtle" spacing="tight">
-          <Container>
-            <FiveMinutePocOnboarding />
-          </Container>
-        </Section>
-
-        <Section className="border-t border-border-subtle" spacing="tight">
-          <Container>
-            <PocLaunchChecklist />
-          </Container>
-        </Section>
-
-        <Section className="border-t border-border-subtle">
-          <Container>
-            <div className="mb-6 flex flex-wrap items-end justify-between gap-4">
-              <div>
-                <div className="mb-3 text-[10px] font-mono uppercase tracking-wider text-accent">
-                  系统层
-                </div>
-                <h2 className="font-[family-name:var(--font-outfit)] text-2xl font-bold md:text-3xl">
-                  壁垒不是生成一段文案，而是让交付可复用、可验收、可推进。
-                </h2>
-                <p className="mt-3 max-w-2xl text-sm leading-relaxed text-text-secondary">
-                  竞品也能生成文本。wenai 要做的是把电商工作打包成验收标准、参考样例、风险边界和商务动作。
-                </p>
-              </div>
-              <SecondaryButton href="/pipelines/marketing-campaign">
-                打开内容营销包
-              </SecondaryButton>
-            </div>
-            <div className="grid grid-cols-1 gap-3 md:grid-cols-5">
-              {SYSTEM_LAYERS.map(([title, body]) => (
-                <div key={title} className="rounded-lg border border-border-subtle bg-bg-surface/45 p-4">
-                  <div className="mb-2 text-[11px] font-mono uppercase tracking-wider text-accent">{title}</div>
-                  <p className="text-[12px] leading-relaxed text-text-secondary">{body}</p>
-                </div>
-              ))}
-            </div>
-          </Container>
-        </Section>
-
-        <Section className="border-t border-border-subtle">
-          <Container>
-            <div className="mb-6 flex flex-wrap items-end justify-between gap-4">
-              <div>
-                <div className="mb-3 text-[10px] font-mono uppercase tracking-wider text-accent">
-                  样例层
-                </div>
-                <h2 className="font-[family-name:var(--font-outfit)] text-2xl font-bold md:text-3xl">
-                  从输入到商务判断的匿名试跑样例。
-                </h2>
-                <p className="mt-3 max-w-2xl text-sm leading-relaxed text-text-secondary">
-                  这些样例不承诺 ROI，只展示 wenai 如何把混乱的电商资料整理成标准包、复核边界和下一步动作。
-                </p>
-              </div>
-              <SecondaryButton href="/cases">
-                查看案例库
-              </SecondaryButton>
-            </div>
-
-            <div className="grid grid-cols-1 gap-4 lg:grid-cols-2">
-              {POC_EVIDENCE_CASES.map(item => (
-                <article key={item.slug} className="overflow-hidden rounded-lg border border-border-subtle bg-bg-surface/45">
-                  <div className="border-b border-border-subtle p-5">
-                    <div className="mb-2 text-[10px] font-mono uppercase tracking-wider text-accent">{item.segment}</div>
-                    <h3 className="text-[18px] font-semibold text-text-primary">{item.title}</h3>
-                    <p className="mt-2 text-[11px] leading-relaxed text-text-tertiary">{item.disclaimer}</p>
-                  </div>
-                  <div className="grid grid-cols-1 divide-y divide-border-subtle md:grid-cols-2 md:divide-x md:divide-y-0">
-                    <div className="p-4">
-                      <div className="mb-2 text-[10px] font-mono uppercase tracking-wider text-text-tertiary">输入</div>
-                      <ul className="space-y-2">
-                        {Object.values(item.input).map(line => (
-                          <li key={line} className="text-[12px] leading-relaxed text-text-secondary">{line}</li>
-                        ))}
-                      </ul>
-                    </div>
-                    <div className="p-4">
-                      <div className="mb-2 text-[10px] font-mono uppercase tracking-wider text-text-tertiary">就绪度</div>
-                      <p className="text-[12px] leading-relaxed text-text-primary">{item.standardPack.readiness}</p>
-                      <p className="mt-2 text-[12px] leading-relaxed text-accent">{item.standardPack.decision}</p>
-                    </div>
-                  </div>
-                  <div className="border-t border-border-subtle p-4">
-                    <div className="mb-2 text-[10px] font-mono uppercase tracking-wider text-text-tertiary">复核结果</div>
-                    <div className="grid grid-cols-1 gap-2 md:grid-cols-3">
-                      <Metric label="验收" value={item.review.acceptanceScore} />
-                      <Metric label="判断" value={item.review.decision} />
-                      <Metric label="下一步" value={item.review.nextStep} />
-                    </div>
-                  </div>
-                </article>
-              ))}
-            </div>
-          </Container>
-        </Section>
-
-        <Section className="border-t border-border-subtle">
-          <Container>
-            <div className="grid grid-cols-1 gap-8 lg:grid-cols-2">
-              <div>
-                <h2 className="mb-4 font-[family-name:var(--font-outfit)] text-2xl font-bold md:text-3xl">
-                  标准交付物
-                </h2>
-                <p className="mb-5 text-sm leading-relaxed text-text-secondary">
-                  每次试跑输出都应该能被运营、老板和外部合伙人直接复核。
-                </p>
-                <div className="overflow-hidden rounded-lg border border-border-subtle">
-                  {DELIVERABLES.map(item => (
-                    <div key={item} className="flex items-center justify-between gap-3 border-b border-border-subtle bg-bg-surface/45 px-4 py-3 last:border-b-0">
-                      <span className="text-[13px] font-mono text-text-primary">{item}</span>
-                      <span className="text-[10px] font-mono text-accent">试跑</span>
-                    </div>
-                  ))}
-                </div>
-              </div>
-              <div>
-                <h2 className="mb-4 font-[family-name:var(--font-outfit)] text-2xl font-bold md:text-3xl">
-                  边界
-                </h2>
-                <p className="mb-5 text-sm leading-relaxed text-text-secondary">
-                  真正能商业化的产品必须讲清楚边界。wenai 会把草稿、需复核和最终责任分开。
-                </p>
-                <div className="space-y-3">
-                  {NOT_PROMISED.map(item => (
-                    <div key={item} className="rounded-md border border-error/25 bg-error/5 p-3 text-[13px] leading-relaxed text-text-primary">
+              <aside className="min-w-0 rounded-md border border-slate-200 bg-white p-5 shadow-sm">
+                <p className="text-xs font-black uppercase tracking-[0.18em] text-slate-400">Acceptance</p>
+                <h2 className="mt-1 text-xl font-black text-slate-950">客户试用要拿走什么</h2>
+                <div className="mt-4 grid gap-2">
+                  {deliverables.map(item => (
+                    <div key={item} className="rounded-md bg-slate-50 px-3 py-2 text-sm font-bold text-slate-700">
                       {item}
                     </div>
                   ))}
                 </div>
-              </div>
+              </aside>
             </div>
-          </Container>
-        </Section>
+          </div>
+        </section>
 
-        <Section className="border-t border-border-subtle" spacing="tight">
-          <Container>
-            <div className="flex flex-col gap-5 rounded-lg border border-accent/35 bg-accent/10 p-6 md:flex-row md:items-center md:justify-between md:p-8">
+        <section className="mx-auto max-w-[1180px] px-5 py-12 sm:px-6 lg:px-8">
+          <div className="grid gap-3 md:grid-cols-5">
+            {steps.map(([num, title, body]) => (
+              <article key={num} className="rounded-md border border-slate-200 bg-white p-4 shadow-sm">
+                <p className="text-xs font-black text-blue-700">{num}</p>
+                <h2 className="mt-2 break-words text-lg font-black text-slate-950">{title}</h2>
+                <p className="mt-2 text-sm leading-6 text-slate-500">{body}</p>
+              </article>
+            ))}
+          </div>
+        </section>
+
+        <section className="border-y border-slate-200 bg-white">
+          <div className="mx-auto max-w-[1180px] px-5 py-12 sm:px-6 lg:px-8">
+            <div className="grid gap-5 lg:grid-cols-[360px_minmax(0,1fr)]">
               <div>
-                <div className="mb-2 text-[10px] font-mono uppercase tracking-wider text-accent">
-                  下一步
-                </div>
-                <h2 className="font-[family-name:var(--font-outfit)] text-2xl font-bold text-text-primary">
-                  准备 10 个 SKU，跑一次真实试跑。
-                </h2>
-                <p className="mt-2 text-[13px] leading-relaxed text-text-secondary">
-                  暂时没准备好？先用 <Link href="/demo" className="text-accent underline">演示 SKU</Link> 看完整流程。
+                <p className="text-xs font-black uppercase tracking-[0.18em] text-amber-700">Provider Gates</p>
+                <h2 className="mt-2 text-2xl font-black text-slate-950">补齐 web provider 前，页面必须停在哪里</h2>
+                <p className="mt-3 text-sm leading-6 text-slate-500">
+                  这些不是保守话术，而是客户试用时必须看到的交付边界。
                 </p>
               </div>
-              <div className="flex flex-col gap-3 sm:flex-row">
-                <PrimaryButton href="/inquire?from=poc-final" size="lg">
-                  提交试跑需求
-                </PrimaryButton>
-                <SecondaryButton href={POC_STANDARD_PACK_ROUTE} size="lg">
-                  生成试跑包
-                </SecondaryButton>
+              <div className="grid gap-3 md:grid-cols-2">
+                {gates.map(gate => (
+                  <p key={gate} className="rounded-md border border-amber-200 bg-amber-50 p-4 text-sm font-semibold leading-6 text-slate-700">
+                    {gate}
+                  </p>
+                ))}
               </div>
             </div>
-          </Container>
-        </Section>
+          </div>
+        </section>
+
+        <section className="mx-auto max-w-[1180px] px-5 py-12 sm:px-6 lg:px-8">
+          <div className="rounded-md bg-gradient-to-r from-[#17233f] via-[#244b73] to-[#6b5cff] p-5 text-white shadow-sm">
+            <div className="flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
+              <div className="min-w-0">
+                <p className="text-xs font-black uppercase tracking-[0.18em] text-white/60">Next</p>
+                <h2 className="mt-1 break-words text-2xl font-black">准备真实 SKU 后，直接进入试用申请</h2>
+                <p className="mt-2 text-sm leading-6 text-white/70">提交类目、平台、素材状态和当前卡点，我们只判断试用边界和下一步。</p>
+              </div>
+              <Link href="/inquire?from=poc-final" className="inline-flex min-h-11 shrink-0 items-center justify-center rounded-md bg-white px-5 text-sm font-black text-[#17233f]">
+                提交试用申请
+              </Link>
+            </div>
+          </div>
+        </section>
       </main>
       <MarketingFooter />
-    </div>
-  );
-}
-
-function Metric({ label, value }: { label: string; value: string }) {
-  return (
-    <div className="rounded-md border border-border-subtle bg-bg-root/45 p-3">
-      <div className="mb-1 text-[9px] font-mono uppercase tracking-wider text-text-tertiary">{label}</div>
-      <div className="text-[12px] leading-relaxed text-text-primary">{value}</div>
     </div>
   );
 }

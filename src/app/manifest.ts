@@ -37,7 +37,7 @@ export default function manifest(): MetadataRoute.Manifest {
         name: '实验项目',
         short_name: '项目',
         description: '创建项目或从行业模板开始',
-        url: '/dashboard',
+        url: '/factory?variant=friend_trial',
       },
       {
         name: '导入 CSV',

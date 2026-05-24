@@ -1,11 +1,11 @@
 'use client';
 
 import { Suspense, useEffect, useState } from 'react';
-import { useSearchParams } from 'next/navigation';
 import Link from 'next/link';
-import { ListingFactoryInquiryHandoff } from '@/components/marketing/ListingFactorySections';
-import { buildStandardPack } from '@/lib/sop-workflows';
-import { buildInquiryStandardPackPrefill, buildInquiryStandardPackRoute } from '@/lib/standard-pack-routing';
+import { useSearchParams } from 'next/navigation';
+import TopNav from '@/components/marketing/TopNav';
+import MarketingFooter from '@/components/marketing/MarketingFooter';
+import { buildInquiryStandardPackRoute } from '@/lib/standard-pack-routing';
 
 interface FormData {
   company: string;
@@ -41,6 +41,33 @@ const INITIAL: FormData = {
   timeline: '',
 };
 
+const fields: Array<{
+  key: keyof FormData;
+  label: string;
+  placeholder: string;
+  type?: 'input' | 'textarea' | 'select';
+  options?: Array<[string, string]>;
+}> = [
+  { key: 'company', label: '公司 / 品牌', placeholder: '例如：深圳 XX 跨境电商有限公司' },
+  { key: 'contact', label: '联系方式', placeholder: '邮箱、微信或手机号' },
+  {
+    key: 'channel',
+    label: '优先联系',
+    placeholder: '',
+    type: 'select',
+    options: [['email', '邮件'], ['wechat', '微信'], ['phone', '电话']],
+  },
+  { key: 'category', label: '主营类目', placeholder: '例如：家居收纳、宠物用品、美妆个护' },
+  { key: 'skuCount', label: '准备试用的 SKU 数', placeholder: '例如：1 个主推 SKU / 10 个 SKU 批次' },
+  { key: 'platforms', label: '目标平台', placeholder: '例如：TikTok Shop、Amazon、Shopify、小红书' },
+  { key: 'assetsReady', label: '素材状态', placeholder: '例如：有主图和包装图，缺授权达人图' },
+  { key: 'painPoint', label: '当前最卡的问题', placeholder: '例如：素材多但不知道先做哪条内容，发布后也没有复盘证据', type: 'textarea' },
+  { key: 'expectedDeliverables', label: '希望拿到什么', placeholder: '例如：脚本、视频任务、分发计划、客户报告', type: 'textarea' },
+  { key: 'benchmarkLinks', label: '参考链接', placeholder: '竞品账号、爆款视频、店铺链接，可先留空', type: 'textarea' },
+  { key: 'budget', label: '预算边界', placeholder: '例如：先小额试用 / 有正式接入预算' },
+  { key: 'timeline', label: '期望节奏', placeholder: '例如：本周看试用结果 / 两周内完成第一轮' },
+];
+
 function InquireInner() {
   const params = useSearchParams();
   const source = params.get('from') || 'direct';
@@ -52,45 +79,6 @@ function InquireInner() {
   const [submitted, setSubmitted] = useState(false);
   const [error, setError] = useState('');
 
-  const ready = form.company.trim() && form.contact.trim() && form.painPoint.trim().length > 10;
-  const submittedStandardPackHref = buildInquiryStandardPackRoute({
-    company: form.company,
-    scale: form.scale,
-    category: form.category,
-    skuCount: form.skuCount,
-    platforms: form.platforms,
-    assetsReady: form.assetsReady,
-    expectedDeliverables: form.expectedDeliverables,
-    creativeNeeds: form.creativeNeeds,
-    benchmarkLinks: form.benchmarkLinks,
-    painPoint: form.painPoint,
-  });
-  const prefill = buildInquiryStandardPackPrefill({
-    company: form.company,
-    scale: form.scale,
-    category: form.category,
-    skuCount: form.skuCount,
-    platforms: form.platforms,
-    assetsReady: form.assetsReady,
-    expectedDeliverables: form.expectedDeliverables,
-    creativeNeeds: form.creativeNeeds,
-    benchmarkLinks: form.benchmarkLinks,
-    painPoint: form.painPoint,
-  });
-  const readiness = buildStandardPack({
-    goal: prefill.goal,
-    brand: prefill.brand,
-    sku: prefill.sku,
-    links: prefill.links || '',
-    workflowId: prefill.workflow,
-  }).readiness;
-  const publicReadiness = {
-    label: toCustomerCopy(readiness.label),
-    stageLabel: toCustomerCopy(readiness.stageLabel),
-    nextStepLabel: toCustomerCopy(readiness.nextStepLabel),
-    contractBlockers: readiness.contractBlockers.map(toCustomerCopy),
-  };
-
   useEffect(() => {
     if (!skuCountFromUrl && !platformFromUrl) return;
     setForm(prev => ({
@@ -100,8 +88,30 @@ function InquireInner() {
     }));
   }, [skuCountFromUrl, platformFromUrl]);
 
+  const ready = form.company.trim() && form.contact.trim() && form.painPoint.trim().length > 10;
+  const standardPackHref = buildInquiryStandardPackRoute({
+    company: form.company,
+    scale: form.scale,
+    category: form.category,
+    skuCount: form.skuCount,
+    platforms: form.platforms,
+    assetsReady: form.assetsReady,
+    expectedDeliverables: form.expectedDeliverables,
+    creativeNeeds: form.creativeNeeds,
+    benchmarkLinks: form.benchmarkLinks,
+    painPoint: form.painPoint,
+  });
+
+  const setField = (key: keyof FormData, value: string) => {
+    setForm(prev => ({ ...prev, [key]: value }));
+    setError('');
+  };
+
   const handleSubmit = async () => {
-    if (!ready) return;
+    if (!ready) {
+      setError('请至少填写公司、联系方式，以及 10 个字以上的当前卡点。');
+      return;
+    }
     setSubmitting(true);
     setError('');
     try {
@@ -114,7 +124,7 @@ function InquireInner() {
       if (!res.ok) throw new Error(data.error || `HTTP ${res.status}`);
       setSubmitted(true);
     } catch (err) {
-      setError(err instanceof Error ? err.message : '提交失败,请稍后重试或邮件联系');
+      setError(err instanceof Error ? err.message : '提交失败，请稍后重试或邮件联系。');
     } finally {
       setSubmitting(false);
     }
@@ -122,376 +132,124 @@ function InquireInner() {
 
   if (submitted) {
     return (
-      <div className="max-w-md mx-auto py-20 px-6 text-center">
-        <div className="w-16 h-16 mx-auto mb-5 border-2 border-success rounded-full flex items-center justify-center text-success text-2xl">
-          ✓
-        </div>
-        <h1 className="text-xl font-bold text-text-primary mb-3 font-[family-name:var(--font-outfit)]">
-          已收到询盘
-        </h1>
-        <p className="text-[13px] text-text-secondary leading-relaxed mb-6">
-          我会在 <span className="text-accent font-semibold">24 小时内</span>主动联系
-          {form.channel === 'wechat' ? '加你微信' : form.channel === 'phone' ? '电话' : '邮件回复'}。
-          不走话术,不打骚扰电话,只确认类目、SKU、交付边界和下一步试跑节奏。
-        </p>
-        <div className="space-y-2 mb-6">
-          <Link href={submittedStandardPackHref} className="block px-4 py-2.5 border border-accent/40 bg-accent/10 rounded-md text-[12px] font-mono text-accent hover:bg-accent/15">
-            先生成试跑标准包
-          </Link>
-          <Link href="/poc" className="block px-4 py-2.5 border border-border-default rounded-md text-[12px] font-mono text-text-primary hover:border-accent/40">
-            查看 10 SKU 验收标准
-          </Link>
-          <Link href="/demo" className="block px-4 py-2.5 text-[11px] font-mono text-text-tertiary hover:text-accent">
-            再看一次演示流程
-          </Link>
-        </div>
-        <p className="text-[10px] font-mono text-text-tertiary">
-          催单或紧急: <a href="mailto:zachary.x.pku@gmail.com" className="text-accent">zachary.x.pku@gmail.com</a>
-        </p>
+      <div className="min-h-screen bg-[#f4f6fb] text-[#15213f]">
+        <TopNav />
+        <main className="px-4 py-12 sm:px-6">
+          <section className="mx-auto max-w-[720px] rounded-md border border-slate-200 bg-white p-6 text-center shadow-sm">
+            <div className="mx-auto grid size-16 place-items-center rounded-full bg-emerald-50 text-2xl font-black text-emerald-700 ring-1 ring-emerald-100">✓</div>
+            <h1 className="mt-5 text-2xl font-black text-slate-950">已收到试用申请</h1>
+            <p className="mt-3 text-sm leading-7 text-slate-600">
+              我们会按你选择的联系方式确认类目、SKU、素材状态、provider 边界和下一步试用节奏。
+            </p>
+            <div className="mt-6 grid gap-2 sm:grid-cols-3">
+              <Link href={standardPackHref} className="rounded-md bg-slate-950 px-4 py-3 text-sm font-black text-white">
+                先生成试用标准包
+              </Link>
+              <Link href="/factory?variant=friend_trial" className="rounded-md border border-slate-200 bg-white px-4 py-3 text-sm font-black text-slate-700">
+                打开工作台
+              </Link>
+              <Link href="/settings/kuaizi" className="rounded-md border border-slate-200 bg-white px-4 py-3 text-sm font-black text-slate-700">
+                看 Provider 材料
+              </Link>
+            </div>
+          </section>
+        </main>
+        <MarketingFooter />
       </div>
     );
   }
 
   return (
-    <div className="max-w-[720px] mx-auto py-10 px-6">
-      <ListingFactoryInquiryHandoff />
-      <div className="mb-8">
-        <div className="text-[10px] font-mono text-accent uppercase tracking-[0.2em] mb-3">
-          10 SKU 试跑申请
-        </div>
-        <h1 className="text-2xl lg:text-3xl font-bold text-text-primary mb-3 font-[family-name:var(--font-outfit)]">
-          提交 10 个 SKU 试跑需求
-        </h1>
-        <p className="text-[13px] text-text-secondary leading-relaxed">
-          你只要写清楚类目、平台和最卡的地方。系统会先生成一份标准包预览, 我再判断是否值得进入正式试跑。
-        </p>
-        <div className="mt-5 grid grid-cols-1 md:grid-cols-3 gap-2">
-          {[
-            ['准备', '选 10 个真实 SKU, 最好覆盖 2-3 个子类目'],
-            ['交付', '上新标准流程、主图方向、详情页文案、合规提醒、客服话术'],
-            ['验收', '看返工减少、人工终审通过率、内容测试和 30 天复评节奏'],
-          ].map(([title, body]) => (
-            <div key={title} className="border border-border-subtle rounded-md bg-bg-surface/40 p-3">
-              <div className="text-[10px] font-mono text-accent uppercase tracking-wider mb-1">{title}</div>
-              <div className="text-[11px] text-text-secondary leading-relaxed">{body}</div>
-            </div>
-          ))}
-        </div>
-        <div className="mt-5 border border-accent/30 rounded-lg bg-accent/10 p-4">
-          <div className="flex items-start justify-between gap-3 flex-wrap">
-            <div>
-              <div className="text-[10px] font-mono text-accent uppercase tracking-wider mb-1">
-                试跑匹配度预览
-              </div>
-              <div className="text-[14px] font-semibold text-text-primary">{publicReadiness.label}</div>
-              <p className="mt-1 text-[12px] text-text-secondary leading-relaxed">{publicReadiness.stageLabel}</p>
-            </div>
-            <div className="grid grid-cols-3 gap-2 min-w-[260px]">
-              <MiniScore label="线索" value={readiness.leadScore} />
-              <MiniScore label="验收" value={readiness.acceptanceScore} />
-              <MiniScore label="合同" value={readiness.contractReadiness} />
-            </div>
-          </div>
-          <div className="mt-3 break-words text-[12px] leading-relaxed text-text-primary [overflow-wrap:anywhere]">
-            {publicReadiness.nextStepLabel}
-          </div>
-          {publicReadiness.contractBlockers.length > 0 && (
-            <div className="mt-2 break-words text-[11px] leading-relaxed text-text-secondary [overflow-wrap:anywhere]">
-              当前阻塞: {publicReadiness.contractBlockers.slice(0, 2).join(' / ')}
-            </div>
-          )}
-        </div>
-      </div>
+    <div className="min-h-screen bg-[#f4f6fb] text-[#15213f]">
+      <TopNav />
+      <main className="px-4 py-8 sm:px-6 lg:px-8">
+      <div className="mx-auto grid max-w-[1180px] gap-6 lg:grid-cols-[minmax(0,1fr)_360px]">
+        <section className="min-w-0 rounded-md border border-white bg-white/90 p-5 shadow-sm">
+          <p className="text-xs font-black uppercase tracking-[0.18em] text-blue-700">Trial Inquiry</p>
+          <h1 className="mt-2 break-words text-3xl font-black text-slate-950 md:text-4xl">提交商品增长试用申请</h1>
+          <p className="mt-3 max-w-3xl text-sm leading-7 text-slate-600">
+            你只要写清楚类目、平台、素材状态和最卡的地方。我们先判断这条试用链路能不能跑通，再决定是否进入正式 provider 接入。
+          </p>
 
-      {/* Form */}
-      <div className="space-y-4">
-        {/* Step 1 · 公司基本信息 */}
-        <fieldset className="border border-border-subtle rounded-md p-4">
-          <legend className="text-[10px] font-mono text-text-tertiary uppercase tracking-wider px-2">
-            ① 你们是谁
-          </legend>
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-3 mt-2">
-            <div>
-              <label className="text-[11px] font-mono text-text-secondary mb-1 block">公司名 *</label>
-              <input
-                type="text"
-                value={form.company}
-                onChange={e => setForm({ ...form, company: e.target.value })}
-                placeholder="例: 深圳 XX 跨境电子商务有限公司"
-                className="w-full px-3 py-2 bg-bg-surface border border-border-default rounded text-[12px]"
-              />
-            </div>
-            <div>
-              <label className="text-[11px] font-mono text-text-secondary mb-1 block">规模</label>
-              <select
-                value={form.scale}
-                onChange={e => setForm({ ...form, scale: e.target.value })}
-                className="w-full px-3 py-2 bg-bg-surface border border-border-default rounded text-[12px]"
-              >
-                <option value="">不指定</option>
-                <option value="<50">{'<'} 50 人</option>
-                <option value="50-200">50-200 人</option>
-                <option value="200-1000">200-1000 人</option>
-                <option value="1000+">1000+ 人</option>
-              </select>
-            </div>
-            <div className="md:col-span-2">
-              <label className="text-[11px] font-mono text-text-secondary mb-1 block">主营品类</label>
-              <select
-                value={form.category}
-                onChange={e => setForm({ ...form, category: e.target.value })}
-                className="w-full px-3 py-2 bg-bg-surface border border-border-default rounded text-[12px]"
-              >
-                <option value="">不指定</option>
-                <option value="home">家居用品</option>
-                <option value="auto">汽摩配件</option>
-                <option value="digital">数码电子</option>
-                <option value="tool">工具工艺</option>
-                <option value="living">生活百货</option>
-                <option value="mixed">混合多品类</option>
-                <option value="other">其他</option>
-              </select>
-            </div>
-          </div>
-        </fieldset>
-
-        {/* Step 2 · 试跑输入资料 */}
-        <fieldset className="border border-border-subtle rounded-md p-4">
-          <legend className="text-[10px] font-mono text-text-tertiary uppercase tracking-wider px-2">
-            ② 试跑输入资料
-          </legend>
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-3 mt-2">
-            <div>
-              <label className="text-[11px] font-mono text-text-secondary mb-1 block">准备跑几个 SKU</label>
-              <input
-                type="text"
-                value={form.skuCount}
-                onChange={e => setForm({ ...form, skuCount: e.target.value })}
-                placeholder="例: 10 个真实 SKU / 先 5 个样品"
-                className="w-full px-3 py-2 bg-bg-surface border border-border-default rounded text-[12px]"
-              />
-            </div>
-            <div>
-              <label className="text-[11px] font-mono text-text-secondary mb-1 block">目标平台</label>
-              <input
-                type="text"
-                value={form.platforms}
-                onChange={e => setForm({ ...form, platforms: e.target.value })}
-                placeholder="例: Shopify + TikTok Shop / Amazon"
-                className="w-full px-3 py-2 bg-bg-surface border border-border-default rounded text-[12px]"
-              />
-            </div>
-            <div>
-              <label className="text-[11px] font-mono text-text-secondary mb-1 block">素材准备情况</label>
-              <select
-                value={form.assetsReady}
-                onChange={e => setForm({ ...form, assetsReady: e.target.value })}
-                className="w-full px-3 py-2 bg-bg-surface border border-border-default rounded text-[12px]"
-              >
-                <option value="">不指定</option>
-                <option value="ready">已有商品图/参数/卖点</option>
-                <option value="partial">只有部分图或参数</option>
-                <option value="none">还没有素材, 需要先整理</option>
-              </select>
-            </div>
-            <div>
-              <label className="text-[11px] font-mono text-text-secondary mb-1 block">最想验收什么</label>
-              <input
-                type="text"
-                value={form.expectedDeliverables}
-                onChange={e => setForm({ ...form, expectedDeliverables: e.target.value })}
-                placeholder="例: 主图方向 / 详情页 / 合规 / 客服话术 / 内容参考拆解 / 短视频脚本 / 轮播图测试"
-                className="w-full px-3 py-2 bg-bg-surface border border-border-default rounded text-[12px]"
-              />
-            </div>
-            <div>
-              <label className="text-[11px] font-mono text-text-secondary mb-1 block">创意生产需求</label>
-              <select
-                value={form.creativeNeeds}
-                onChange={e => setForm({ ...form, creativeNeeds: e.target.value })}
-                className="w-full px-3 py-2 bg-bg-surface border border-border-default rounded text-[12px]"
-              >
-                <option value="">先不做</option>
-                <option value="benchmark-only">只做内容参考拆解</option>
-                <option value="podcast-ugc">访谈感种草内容</option>
-                <option value="street-interview">街采感短视频</option>
-                <option value="slideshow-batch">轮播图 / 短视频批量测试</option>
-                <option value="batch-ugc">批量真人感短视频</option>
-                <option value="animated-ads">动画广告素材</option>
-                <option value="editing-only">只做粗剪 / 精剪优化</option>
-              </select>
-            </div>
-            <div>
-              <label className="text-[11px] font-mono text-text-secondary mb-1 block">参考链接 / 竞品账号</label>
-              <input
-                type="text"
-                value={form.benchmarkLinks}
-                onChange={e => setForm({ ...form, benchmarkLinks: e.target.value })}
-                placeholder="例: TikTok 链接 / Instagram 账号 / Amazon 商品页"
-                className="w-full px-3 py-2 bg-bg-surface border border-border-default rounded text-[12px]"
-              />
-            </div>
-          </div>
-        </fieldset>
-
-        {/* Step 3 · 痛点描述 */}
-        <fieldset className="border border-border-subtle rounded-md p-4">
-          <legend className="text-[10px] font-mono text-text-tertiary uppercase tracking-wider px-2">
-            ③ 最痛的一件事 *
-          </legend>
-          <textarea
-            value={form.painPoint}
-            onChange={e => setForm({ ...form, painPoint: e.target.value })}
-            placeholder={`举例:\n- 每月新品 200+, 商品图/详情页/合规要 5 个运营全职跟,慢且错率高\n- 摄影棚排队两周,新品上架慢错过流量窗口\n- 10 个 SKU 想先验证上新物料包能不能减少返工`}
-            rows={6}
-            className="w-full px-3 py-2 bg-bg-surface border border-border-default rounded text-[12px] resize-none mt-2"
-          />
-          <div className="text-[9px] font-mono text-text-tertiary mt-1">
-            {form.painPoint.length}/2000 · 越具体越好, 数字+场景比“想提效”更容易判断能否交付
-          </div>
-        </fieldset>
-
-        {/* Step 4 · 节奏 */}
-        <fieldset className="border border-border-subtle rounded-md p-4">
-          <legend className="text-[10px] font-mono text-text-tertiary uppercase tracking-wider px-2">
-            ④ 节奏 (可选)
-          </legend>
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-3 mt-2">
-            <div>
-              <label className="text-[11px] font-mono text-text-secondary mb-1 block">预算区间</label>
-              <input
-                type="text"
-                value={form.budget}
-                onChange={e => setForm({ ...form, budget: e.target.value })}
-                placeholder="例: 可先小额试跑 / 企业接入走合同"
-                className="w-full px-3 py-2 bg-bg-surface border border-border-default rounded text-[12px]"
-              />
-            </div>
-            <div>
-              <label className="text-[11px] font-mono text-text-secondary mb-1 block">期望落地时间</label>
-              <input
-                type="text"
-                value={form.timeline}
-                onChange={e => setForm({ ...form, timeline: e.target.value })}
-                placeholder="例: 2 周内完成试跑 / Q3 内接入"
-                className="w-full px-3 py-2 bg-bg-surface border border-border-default rounded text-[12px]"
-              />
-            </div>
-          </div>
-        </fieldset>
-
-        {/* Step 5 · 联系方式 */}
-        <fieldset className="border border-border-subtle rounded-md p-4">
-          <legend className="text-[10px] font-mono text-text-tertiary uppercase tracking-wider px-2">
-            ⑤ 怎么联系你 *
-          </legend>
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-3 mt-2">
-            <div className="md:col-span-1">
-              <label className="text-[11px] font-mono text-text-secondary mb-1 block">渠道</label>
-              <select
-                value={form.channel}
-                onChange={e => setForm({ ...form, channel: e.target.value })}
-                className="w-full px-3 py-2 bg-bg-surface border border-border-default rounded text-[12px]"
-              >
-                <option value="email">邮件</option>
-                <option value="wechat">微信</option>
-                <option value="phone">电话</option>
-              </select>
-            </div>
-            <div className="md:col-span-2">
-              <label className="text-[11px] font-mono text-text-secondary mb-1 block">
-                {form.channel === 'wechat' ? '微信号' : form.channel === 'phone' ? '手机号' : '邮箱'}
+          <div className="mt-6 grid gap-4 md:grid-cols-2">
+            {fields.map(field => (
+              <label key={field.key} className={field.type === 'textarea' ? 'block md:col-span-2' : 'block'}>
+                <span className="mb-2 block text-xs font-bold text-slate-500">{field.label}</span>
+                {field.type === 'select' ? (
+                  <select
+                    value={form[field.key]}
+                    onChange={event => setField(field.key, event.target.value)}
+                    className="min-h-11 w-full rounded-md border border-slate-200 bg-slate-50 px-3 text-sm font-semibold text-slate-900 outline-none focus:border-blue-400 focus:bg-white"
+                  >
+                    {field.options?.map(([value, label]) => <option key={value} value={value}>{label}</option>)}
+                  </select>
+                ) : field.type === 'textarea' ? (
+                  <textarea
+                    value={form[field.key]}
+                    onChange={event => setField(field.key, event.target.value)}
+                    placeholder={field.placeholder}
+                    rows={3}
+                    className="w-full rounded-md border border-slate-200 bg-slate-50 px-3 py-3 text-sm leading-6 text-slate-900 outline-none focus:border-blue-400 focus:bg-white"
+                  />
+                ) : (
+                  <input
+                    type="text"
+                    value={form[field.key]}
+                    onChange={event => setField(field.key, event.target.value)}
+                    placeholder={field.placeholder}
+                    className="min-h-11 w-full rounded-md border border-slate-200 bg-slate-50 px-3 text-sm text-slate-900 outline-none focus:border-blue-400 focus:bg-white"
+                  />
+                )}
               </label>
-              <input
-                type="text"
-                value={form.contact}
-                onChange={e => setForm({ ...form, contact: e.target.value })}
-                placeholder={form.channel === 'wechat' ? 'wxid_xxx' : form.channel === 'phone' ? '13800138000' : 'name@company.com'}
-                className="w-full px-3 py-2 bg-bg-surface border border-border-default rounded text-[12px]"
-              />
-            </div>
+            ))}
           </div>
-        </fieldset>
 
-        {error && (
-          <div className="p-3 border border-error/40 bg-error/5 rounded text-[11px] text-error">
-            ✗ {error}
+          {error ? <div className="mt-4 rounded-md border border-red-200 bg-red-50 px-3 py-2 text-sm font-semibold text-red-700">{error}</div> : null}
+
+          <div className="mt-6 flex flex-col gap-3 sm:flex-row">
+            <button
+              type="button"
+              onClick={handleSubmit}
+              disabled={submitting}
+              className="min-h-11 rounded-md bg-gradient-to-r from-[#6b5cff] via-[#a63dff] to-[#ff6c8f] px-5 text-sm font-black text-white shadow-sm disabled:opacity-60"
+            >
+              {submitting ? '提交中...' : '提交试用申请'}
+            </button>
+            <Link href={standardPackHref} className="inline-flex min-h-11 items-center justify-center rounded-md border border-slate-200 bg-white px-5 text-sm font-black text-slate-700">
+              预览试用标准包
+            </Link>
           </div>
-        )}
+        </section>
 
-        <button
-          onClick={handleSubmit}
-          disabled={!ready || submitting}
-          className="w-full py-3 bg-accent text-bg-root rounded-md text-[13px] font-semibold hover:bg-accent-hover disabled:opacity-40 disabled:cursor-not-allowed"
-        >
-          {submitting ? '提交中...' : '提交试跑需求 · 24h 内联系'}
-        </button>
-
-        <p className="text-[10px] font-mono text-text-tertiary text-center">
-          填完不强卖 · 只用于判断试跑边界 · 详见 <Link href="/privacy" className="text-accent underline">隐私政策</Link>
-        </p>
+        <aside className="min-w-0 rounded-md border border-slate-200 bg-white p-5 shadow-sm lg:sticky lg:top-5 lg:self-start">
+          <p className="text-xs font-black uppercase tracking-[0.18em] text-slate-400">What Happens Next</p>
+          <h2 className="mt-2 text-xl font-black text-slate-950">我们只确认三件事</h2>
+          <div className="mt-4 space-y-3">
+            {[
+              ['资料是否够跑', '商品、平台、素材和参考内容是否足够进入试用。'],
+              ['门禁在哪里', 'provider、OAuth、广告账号、云资产和回流数据缺什么。'],
+              ['下一步谁负责', '客户、运营、销售分别要做什么，避免只停在演示页面。'],
+            ].map(([title, body]) => (
+              <div key={title} className="rounded-md bg-slate-50 p-3">
+                <h3 className="text-sm font-black text-slate-950">{title}</h3>
+                <p className="mt-1 text-sm leading-6 text-slate-500">{body}</p>
+              </div>
+            ))}
+          </div>
+          <div className="mt-5 rounded-md border border-amber-200 bg-amber-50 p-3 text-sm font-semibold leading-6 text-slate-700">
+            不要在这里提交第三方密钥、cookie 或后台登录态。真实 provider 材料只进入服务端配置流程。
+          </div>
+        </aside>
       </div>
-
-      {/* 替代路径 */}
-      <div className="mt-10 pt-6 border-t border-border-subtle">
-        <div className="text-[10px] font-mono text-text-tertiary uppercase tracking-wider mb-3 text-center">
-          暂时不想填表?
-        </div>
-        <div className="flex flex-wrap gap-2 justify-center">
-          <a
-            href="mailto:zachary.x.pku@gmail.com?subject=Wenai%20Enterprise%20%E8%AF%A2%E7%9B%98"
-            className="px-4 py-2 border border-border-default rounded text-[11px] font-mono text-text-primary hover:border-accent/40"
-          >
-            直接邮件
-          </a>
-          <Link
-            href="/demo"
-            className="px-4 py-2 border border-border-default rounded text-[11px] font-mono text-text-primary hover:border-accent/40"
-          >
-            先看演示流程
-          </Link>
-          <Link
-            href="/cases"
-            className="px-4 py-2 border border-border-default rounded text-[11px] font-mono text-text-primary hover:border-accent/40"
-          >
-            看交付样例
-          </Link>
-        </div>
-      </div>
+      </main>
+      <MarketingFooter />
     </div>
   );
-}
-
-function MiniScore({ label, value }: { label: string; value: number }) {
-  return (
-    <div className="border border-border-subtle rounded-md bg-bg-root/45 p-2 text-center">
-      <div className="text-[9px] font-mono text-text-tertiary uppercase">{label}</div>
-      <div className="mt-1 text-[16px] font-bold text-accent font-mono tabular-nums">{value}</div>
-    </div>
-  );
-}
-
-function toCustomerCopy(value: string) {
-  return value
-    .replace(/缺少 benchmark 证据, 复盘时无法解释内容假设来源/gi, '缺少内容参考证据, 复盘解释不够稳')
-    .replace(/缺少 10 SKU\/批量范围, 更像一次性工具试用而不是标准 POC/gi, '缺少批量范围, 暂时不像标准试跑')
-    .replace(/先补 benchmark, 再决定是否进入 POC/gi, '先补内容参考, 再决定是否进入试跑')
-    .replace(/先跑 10 SKU POC, 同时补齐复盘与审核机制/gi, '先跑 10 SKU, 同时补齐复盘和审核机制')
-    .replace(/benchmark/gi, '内容参考')
-    .replace(/benchmark-to-campaign/gi, '内容参考到营销包')
-    .replace(/POC/g, '试跑')
-    .replace(/AI/g, '系统')
-    .replace(/SOP/g, '标准流程')
-    .replace(/Hook/gi, '开场句')
-    .replace(/Brief/gi, '执行说明')
-    .replace(/GMV/gi, '销售额')
-    .replace(/ROI/gi, '投入产出')
-    .replace(/10 SKU\/批量/g, '10 SKU 或批量');
 }
 
 export default function InquirePage() {
   return (
-    <Suspense fallback={<div className="p-12 text-center text-text-tertiary font-mono text-[12px]">加载中...</div>}>
+    <Suspense fallback={<div className="p-12 text-center text-sm font-bold text-slate-500">加载中...</div>}>
       <InquireInner />
     </Suspense>
   );

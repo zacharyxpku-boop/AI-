@@ -84,6 +84,7 @@ import {
   type ContentPerformanceRecord,
   type ExperimentPlan,
   type ExperimentWorkbenchAction,
+  type ListingFactoryLocalSnapshot,
   type ListingFactoryRun,
   type PlatformChannel,
   type PlatformCsvImportPreviewSummary,
@@ -127,10 +128,31 @@ async function readShareError(response: Response) {
   return typeof body?.error === 'string' ? body.error : `HTTP ${response.status}`;
 }
 
+function createInitialListingFactorySnapshot(): ListingFactoryLocalSnapshot {
+  const project = createListingProject(LISTING_FACTORY_QA_SAMPLES[0], new Date('2026-05-12T09:00:00Z'));
+  const run = createRunFromProject(project, new Date('2026-05-12T09:00:00Z'));
+  return {
+    project: run.project,
+    briefs: run.briefs,
+    tasks: run.tasks,
+    report: run.report,
+    run,
+    archiveRecords: [],
+  };
+}
+
 function useLocalListingFactorySnapshot() {
-  const [, setVersion] = useState(0);
-  const snapshot = loadLatestListingFactorySnapshot();
-  return { snapshot, refresh: () => setVersion(value => value + 1) };
+  const [snapshot, setSnapshot] = useState<ListingFactoryLocalSnapshot>(() => createInitialListingFactorySnapshot());
+  const refresh = () => setSnapshot(loadLatestListingFactorySnapshot());
+
+  useEffect(() => {
+    const timer = window.setTimeout(() => {
+      setSnapshot(loadLatestListingFactorySnapshot());
+    }, 0);
+    return () => window.clearTimeout(timer);
+  }, []);
+
+  return { snapshot, refresh };
 }
 
 function confidenceLevelLabel(level?: string) {
@@ -279,9 +301,11 @@ function ensureRun(): ListingFactoryRun {
 
 function Shell({ children }: { children: ReactNode }) {
   return (
-    <section className="bg-white text-slate-950">
-      <span className="sr-only">{ROUTE_COPY_ANCHORS}</span>
-      <div className="mx-auto max-w-6xl px-4 py-12 sm:px-6 lg:px-8">{children}</div>
+    <section className="overflow-x-clip bg-white text-slate-950">
+      <span hidden>{ROUTE_COPY_ANCHORS}</span>
+      <div className="mx-auto max-w-6xl px-4 py-12 sm:px-6 lg:px-8">
+        <div className="min-w-0 break-words">{children}</div>
+      </div>
     </section>
   );
 }
@@ -557,6 +581,14 @@ function currentMonthKey() {
   return new Date().toISOString().slice(0, 7);
 }
 
+function defaultSubscription(): SubscriptionState {
+  return { tier: 'Free', updatedAt: '2026-05-12T09:00:00.000Z' };
+}
+
+function defaultUsage(): UsageState {
+  return { month: currentMonthKey(), csvImports: 0 };
+}
+
 function tierEntitlements(tier: SubscriptionTier): Entitlements {
   if (tier === 'Growth') return { projectLimit: 'unlimited', csvImportLimit: 'unlimited', watermarkReports: false, learningRounds: 'unlimited', productionBriefExport: true, fullLearningSearch: true, batchExport: true };
   if (tier === 'Starter') return { projectLimit: 3, csvImportLimit: 30, watermarkReports: false, learningRounds: 10, productionBriefExport: true, fullLearningSearch: false, batchExport: false };
@@ -564,17 +596,17 @@ function tierEntitlements(tier: SubscriptionTier): Entitlements {
 }
 
 function loadSubscription(): SubscriptionState {
-  if (typeof window === 'undefined') return { tier: 'Free', updatedAt: new Date().toISOString() };
+  if (typeof window === 'undefined') return defaultSubscription();
   try {
     const parsed = JSON.parse(storageRead(SUBSCRIPTION_KEY) || 'null') as SubscriptionState | null;
-    return parsed?.tier ? parsed : { tier: 'Free', updatedAt: new Date().toISOString() };
+    return parsed?.tier ? parsed : defaultSubscription();
   } catch {
-    return { tier: 'Free', updatedAt: new Date().toISOString() };
+    return defaultSubscription();
   }
 }
 
 function loadUsage(): UsageState {
-  const fallback = { month: currentMonthKey(), csvImports: 0 };
+  const fallback = defaultUsage();
   if (typeof window === 'undefined') return fallback;
   try {
     const parsed = JSON.parse(storageRead(USAGE_KEY) || 'null') as UsageState | null;
@@ -1599,7 +1631,7 @@ function LocalLearningArchivePanel({ archive, subscription, onLockedSearch }: { 
             </div>
             <p className="mt-2 text-[12px] font-bold text-slate-800">{card.variableValue}</p>
             <p className="mt-2 text-[12px] leading-5 text-slate-600">{card.learned}</p>
-            <p className="mt-2 text-[11px] text-slate-500">{card.platform} / {new Date(card.generatedAt).toLocaleString('zh-CN')}</p>
+            <p className="mt-2 text-[11px] text-slate-500" suppressHydrationWarning>{card.platform} / {new Date(card.generatedAt).toLocaleString('zh-CN')}</p>
           </div>
         ))}
       </div>
@@ -1922,15 +1954,15 @@ function ContentDecisionOsPanel({ run, onChanged }: { run: ListingFactoryRun; on
   const fileInputRef = useRef<HTMLInputElement | null>(null);
   const decisionRef = useRef<HTMLDivElement | null>(null);
   const shareLinkRef = useRef<HTMLInputElement | null>(null);
-  const [subscription, setSubscription] = useState<SubscriptionState>(() => loadSubscription());
-  const [usage, setUsage] = useState<UsageState>(() => loadUsage());
+  const [subscription, setSubscription] = useState<SubscriptionState>(() => defaultSubscription());
+  const [usage, setUsage] = useState<UsageState>(() => defaultUsage());
   const [paywall, setPaywall] = useState<PaywallState | null>(null);
   const [shareMessage, setShareMessage] = useState('');
   const [shareUrl, setShareUrl] = useState('');
   const [primaryPulse, setPrimaryPulse] = useState(false);
-  const [storageNotice, setStorageNotice] = useState(() => localStorageIsBlocked() ? '数据仅在当前标签页保留，建议允许本地存储以保存历史。' : '');
+  const [storageNotice, setStorageNotice] = useState('');
   const [overlayMessage, setOverlayMessage] = useState('');
-  const [decisionHistory, setDecisionHistory] = useState<DecisionHistoryItem[]>(() => loadDecisionHistory(run.id));
+  const [decisionHistory, setDecisionHistory] = useState<DecisionHistoryItem[]>([]);
   const verdict = buildLocalDecisionVerdict(run, decisionHistory);
   const localLearningArchive = createLearningArchive(run, verdict);
   const isEmpty = run.performanceRecords.length === 0;
@@ -1939,21 +1971,14 @@ function ContentDecisionOsPanel({ run, onChanged }: { run: ListingFactoryRun; on
     `"${run.project.targetPlatforms[0] || 'TikTok'}","${run.briefs[0]?.contentType || 'short_video'}","${run.briefs[0]?.hook || run.project.productName}",1200,860,72,90,12,24,14,0.04,420,120,"wenai_cell_1","cell-1","winner signal"`,
     `"${run.project.targetPlatforms[1] || 'Amazon'}","${run.briefs[1]?.contentType || 'short_video'}","${run.briefs[1]?.hook || run.project.productName}",900,520,18,20,3,5,2,0.01,80,90,"wenai_cell_2","cell-2","needs validation"`,
   ].join('\n');
-  const [csvText, setCsvText] = useState(() => loadDecisionSession(run.id)?.csvText || (isEmpty ? '' : sampleCsv));
-  const [toast, setToast] = useState(() => loadDecisionSession(run.id)?.toast || '第一步：上传你的 TikTok/Amazon/Shopify/Meta/Google 表现数据 CSV。');
-  const [mappingPreview, setMappingPreview] = useState<PlatformCsvMappingPreview | undefined>(() => {
-    const savedCsv = loadDecisionSession(run.id)?.csvText;
-    const rows = savedCsv ? parseCsvRows(savedCsv) : [];
-    return rows.length > 0 ? buildPlatformCsvMappingPreview(rows) : run.platformCsvMappingPreview;
-  });
-  const [importPreviewSummary, setImportPreviewSummary] = useState<PlatformCsvImportPreviewSummary | undefined>(() => {
-    const savedCsv = loadDecisionSession(run.id)?.csvText;
-    const rows = savedCsv ? parseCsvRows(savedCsv) : [];
-    if (rows.length === 0) return run.platformCsvImportPreviewSummary;
-    const preview = buildPlatformCsvMappingPreview(rows);
-    return buildPlatformCsvImportPreviewSummary(rows, preview.detectedChannel, run.platformDataContract, new Date());
-  });
-  const [manualMappings, setManualMappings] = useState<Record<string, string>>(() => loadDecisionSession(run.id)?.manualMappings || {});
+
+  const [csvText, setCsvText] = useState(() => isEmpty ? '' : sampleCsv);
+  const [toast, setToast] = useState('第一步：上传你的 TikTok/Amazon/Shopify/Meta/Google 表现数据 CSV。');
+  const [mappingPreview, setMappingPreview] = useState<PlatformCsvMappingPreview | undefined>(run.platformCsvMappingPreview);
+  const [importPreviewSummary, setImportPreviewSummary] = useState<PlatformCsvImportPreviewSummary | undefined>(run.platformCsvImportPreviewSummary);
+  const [manualMappings, setManualMappings] = useState<Record<string, string>>({});
+  const [projectCount, setProjectCount] = useState(1);
+  const [clientStateLoaded, setClientStateLoaded] = useState(false);
   const [workspaceMessage, setWorkspaceMessage] = useState('复制模板会保留商品结构、平台、内容目标和规则，清空表现数据，用于新团队或新客户快速创建自己的本地工作台。');
   const [isProcessingCsv, setIsProcessingCsv] = useState(false);
   const [selectedPlatform, setSelectedPlatform] = useState<PlatformChannel | 'auto'>('auto');
@@ -1965,8 +1990,28 @@ function ContentDecisionOsPanel({ run, onChanged }: { run: ListingFactoryRun; on
     ...(decision?.topDecision === 'do_not_decide' ? ['当前规则建议暂不下结论'] : []),
   ];
   const entitlements = tierEntitlements(subscription.tier);
-  const projectCount = typeof window === 'undefined' ? 1 : loadListingFactoryRuns().length;
   useEffect(() => {
+    const timer = window.setTimeout(() => {
+      const session = loadDecisionSession(run.id);
+      const savedCsv = session?.csvText || '';
+      const rows = savedCsv ? parseCsvRows(savedCsv) : [];
+      const preview = rows.length > 0 ? buildPlatformCsvMappingPreview(rows) : run.platformCsvMappingPreview;
+      setSubscription(loadSubscription());
+      setUsage(loadUsage());
+      setDecisionHistory(loadDecisionHistory(run.id));
+      setProjectCount(Math.max(loadListingFactoryRuns().length, 1));
+      setCsvText(savedCsv || (isEmpty ? '' : sampleCsv));
+      setToast(session?.toast || '第一步：上传你的 TikTok/Amazon/Shopify/Meta/Google 表现数据 CSV。');
+      setMappingPreview(preview);
+      setImportPreviewSummary(rows.length > 0 ? buildPlatformCsvImportPreviewSummary(rows, preview.detectedChannel, run.platformDataContract, new Date()) : run.platformCsvImportPreviewSummary);
+      setManualMappings(session?.manualMappings || {});
+      setStorageNotice(localStorageIsBlocked() ? '数据仅在当前标签页保留，建议允许本地存储以保存历史。' : '');
+      setClientStateLoaded(true);
+    }, 0);
+    return () => window.clearTimeout(timer);
+  }, [isEmpty, run.id, run.platformCsvImportPreviewSummary, run.platformCsvMappingPreview, run.platformDataContract, sampleCsv]);
+  useEffect(() => {
+    if (!clientStateLoaded) return;
     const status = saveDecisionSession(run.id, {
       v: 1,
       csvText,
@@ -1976,7 +2021,7 @@ function ContentDecisionOsPanel({ run, onChanged }: { run: ListingFactoryRun; on
     });
     if (status === 'cleaned') setStorageNotice('已自动归档旧项目，当前工作台已继续保存。');
     if (localStorageIsBlocked()) setStorageNotice('数据仅在当前标签页保留，建议允许本地存储以保存历史。');
-  }, [csvText, manualMappings, run.id, toast]);
+  }, [clientStateLoaded, csvText, manualMappings, run.id, toast]);
   useEffect(() => {
     if (!shareUrl) return;
     shareLinkRef.current?.focus();
@@ -3147,15 +3192,15 @@ function ExperimentOrchestrationPanel({ run, onChanged }: { run: ListingFactoryR
           ))}
         </div>
       </div>
-      <div className="mt-4 grid gap-3 lg:grid-cols-2">
-        <div className="rounded-md bg-white p-4">
+      <div className="mt-4 grid min-w-0 gap-3 lg:grid-cols-2">
+        <div className="min-w-0 rounded-md bg-white p-4">
           <div className="text-[12px] font-semibold text-cyan-700">追踪命名规则</div>
-          <p className="mt-2 break-words text-[12px] text-slate-700">{plan.trackingPlan.namingConvention}</p>
-          <p className="mt-2 text-[12px] text-slate-500">{plan.trackingPlan.trackingCodes[0] || '生成分配任务后会出现 tracking code'}</p>
+          <p className="mt-2 break-all text-[12px] leading-5 text-slate-700">{plan.trackingPlan.namingConvention}</p>
+          <p className="mt-2 break-all text-[12px] leading-5 text-slate-500">{plan.trackingPlan.trackingCodes[0] || '生成分配任务后会出现 tracking code'}</p>
         </div>
-        <div className="rounded-md bg-white p-4">
+        <div className="min-w-0 rounded-md bg-white p-4">
           <div className="text-[12px] font-semibold text-cyan-700">数据回收 CSV</div>
-          <p className="mt-2 text-[12px] text-slate-700">{buildExperimentCsvTemplate(plan).split('\n')[0]}</p>
+          <p className="mt-2 break-all text-[12px] leading-5 text-slate-700">{buildExperimentCsvTemplate(plan).split('\n')[0]}</p>
           <div className="mt-3 flex flex-wrap gap-2">
             <ActionButton onClick={() => downloadTextFile(safeDownloadFilename(`${run.project.productName}-实验结果回收模板`, 'csv'), buildManualResultEntryTemplate(plan), 'text/csv;charset=utf-8')}>导出回收模板</ActionButton>
             <ActionButton onClick={() => downloadTextFile(safeDownloadFilename(`${run.project.productName}-追踪命名规则`, 'md'), buildTrackingPlanMarkdown(plan), 'text/markdown;charset=utf-8')}>导出命名规则</ActionButton>

@@ -59,7 +59,7 @@ export function CaseCards() {
                 ))}
               </ul>
 
-              <a href="/dashboard" className="mt-auto text-sm font-semibold text-accent transition-colors hover:text-accent-hover">
+              <a href="/factory?variant=friend_trial" className="mt-auto text-sm font-semibold text-accent transition-colors hover:text-accent-hover">
                 从这个行业开始
               </a>
             </article>
@@ -67,7 +67,7 @@ export function CaseCards() {
         </div>
 
         <div className="mt-12 flex justify-center">
-          <SecondaryButton href="/dashboard">从行业模板开始</SecondaryButton>
+          <SecondaryButton href="/factory?variant=friend_trial">从行业模板开始</SecondaryButton>
         </div>
       </Container>
     </Section>

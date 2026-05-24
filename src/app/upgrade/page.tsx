@@ -39,16 +39,16 @@ export default function UpgradePage({
               返回首页
             </Link>
             <Link
-              href="/dashboard"
+              href="/factory?variant=friend_trial"
               className="inline-flex min-h-11 items-center justify-center rounded-md bg-accent px-4 text-[13px] font-semibold text-bg-root transition-colors hover:bg-accent-hover"
             >
               进入工作台
             </Link>
             <Link
-              href="/factory"
+              href="/factory?variant=friend_trial"
               className="inline-flex min-h-11 items-center justify-center rounded-md border border-accent/40 px-4 text-[13px] font-semibold text-accent transition-colors hover:bg-accent/10"
             >
-              导入 CSV
+              进入工厂台
             </Link>
           </div>
         </section>

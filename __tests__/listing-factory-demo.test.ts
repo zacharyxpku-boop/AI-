@@ -430,7 +430,7 @@ describe('listing factory demo data', () => {
     expect(source).toContain('内容工厂控制台');
     expect(source).toContain('Wenai 电商增长作战台');
     expect(source).toContain('增长工厂');
-    expect(source).toContain('进入 Compose / Create / Cut / Cast / Manage 工作台');
+    expect(source).toContain('进入筷子式 Compose / Create / Cut / Cast / Manage 项目台');
     expect(source).toContain('内容工厂');
     expect(source).toContain('UI Variant Workflow');
     expect(source).toContain('Active Variant');

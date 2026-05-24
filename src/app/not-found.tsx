@@ -22,7 +22,7 @@ export default function NotFound() {
           <p className="text-[13px] text-text-secondary leading-relaxed">
             该功能正在升级，请前往首页体验新功能。
             <br />
-            你也可以直接进入内容决策工作台，继续导入 CSV 并生成下一轮行动建议。
+            你也可以直接进入客户试用工作台，继续完成商品增长交付流程。
           </p>
         </div>
 
@@ -36,16 +36,16 @@ export default function NotFound() {
           </Link>
           <div className="grid grid-cols-3 gap-2">
             <Link
-              href="/dashboard"
+              href="/factory?variant=friend_trial"
               className="py-2 text-[11px] font-mono text-text-secondary hover:text-accent border border-border-default rounded-md hover:border-accent/40 transition-colors"
             >
-              工作台
+              工厂台
             </Link>
             <Link
-              href="/factory"
+              href="/factory/creative?variant=friend_trial"
               className="py-2 text-[11px] font-mono text-text-secondary hover:text-accent border border-border-default rounded-md hover:border-accent/40 transition-colors"
             >
-              导入 CSV
+              洞察
             </Link>
             <Link
               href="/pricing"

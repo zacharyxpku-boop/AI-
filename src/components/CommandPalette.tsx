@@ -35,8 +35,8 @@ interface Item {
 }
 
 const CORE_ACTIONS: Item[] = [
-  { id: 'dashboard', type: 'core', label: '实验项目', hint: '创建项目或从行业模板开始', href: '/dashboard' },
-  { id: 'factory', type: 'core', label: '增长工厂', hint: '进入 Compose / Create / Cut / Cast / Manage 工作台，继续导入表现数据或生产 Brief', href: '/factory' },
+  { id: 'factory-trial', type: 'core', label: '客户试用工作台', hint: '进入筷子式 Compose / Create / Cut / Cast / Manage 项目台', href: '/factory?variant=friend_trial' },
+  { id: 'factory', type: 'core', label: '增长工厂', hint: '继续导入表现数据或生产 Brief', href: '/factory?variant=friend_trial' },
   { id: 'report', type: 'core', label: '报告模板', hint: '查看脱敏报告和复制模板链路', href: '/poc/report' },
   { id: 'pricing', type: 'core', label: '定价', hint: '查看 Free、Starter、Growth 权益', href: '/pricing' },
   { id: 'kuaizi', type: 'settings', label: '生产工具设置', hint: '配置外部生产工具后推送 Brief', href: '/settings/kuaizi' },

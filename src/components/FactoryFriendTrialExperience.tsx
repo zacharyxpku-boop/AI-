@@ -7,7 +7,6 @@ import { FactoryHeroCommandPanel } from './FactoryHeroCommandPanel';
 import { FactoryProductTaskPanel } from './FactoryProductTaskPanel';
 import { FactoryRecentProjectsPanel } from './FactoryRecentProjectsPanel';
 import { FactoryToolLauncherPanel } from './FactoryToolLauncherPanel';
-import { FactoryWorkbenchAssistant } from './FactoryWorkbenchAssistant';
 import { FactoryWorkbenchInteractionPanel } from './FactoryWorkbenchInteractionPanel';
 
 type Tone = 'slate' | 'emerald' | 'amber' | 'sky';
@@ -192,8 +191,8 @@ export function FactoryFriendTrialExperience({
       }));
 
   return (
-    <main className="h-dvh w-full overflow-hidden bg-[#f7f9ff] text-slate-950 antialiased">
-      <div className="flex h-full min-h-0">
+    <main className="min-h-screen w-full bg-[#f7f9ff] text-slate-950 antialiased">
+      <div className="flex min-h-screen">
         <aside className="hidden h-full w-[236px] shrink-0 flex-col border-r border-slate-200 bg-[#edf3ff] xl:flex">
           <div className="px-5 pb-4 pt-6">
             <div className="flex items-center gap-3">
@@ -205,7 +204,7 @@ export function FactoryFriendTrialExperience({
             </div>
           </div>
 
-          <nav className="flex-1 overflow-y-auto px-3 pb-4">
+          <nav className="flex-1 px-3 pb-4">
             <Link href="/factory?variant=friend_trial" className={`mb-5 flex items-center gap-3 rounded-lg px-3 py-3 text-sm font-black shadow-sm ${active === 'overview' ? 'bg-white text-slate-950' : 'text-slate-700 hover:bg-white/70'}`}>
               <span className="flex size-8 items-center justify-center rounded-md bg-slate-950 text-white">01</span>
               开始工作
@@ -255,7 +254,7 @@ export function FactoryFriendTrialExperience({
           </div>
         </aside>
 
-        <section className="flex min-w-0 flex-1 flex-col overflow-hidden">
+        <section className="flex min-w-0 flex-1 flex-col">
           <header className="shrink-0 border-b border-slate-200 bg-white px-5 py-4 md:px-8">
             <div className="flex flex-col gap-3 lg:flex-row lg:items-center lg:justify-between">
               <div className="min-w-0">
@@ -295,8 +294,8 @@ export function FactoryFriendTrialExperience({
             </div>
           </nav>
 
-          <div className="flex-1 overflow-y-auto px-4 py-5 md:px-8">
-            <div className="mx-auto max-w-[1500px] space-y-5 pb-10">
+          <div className="flex-1 px-4 py-5 md:px-8">
+            <div className="mx-auto max-w-[1500px] space-y-5 pb-16">
               <section className="overflow-hidden rounded-xl border border-slate-200 bg-white shadow-sm">
                 <div className="relative min-h-[470px] bg-[radial-gradient(circle_at_18%_0%,#ddf5ff_0,transparent_28%),radial-gradient(circle_at_68%_0%,#eee6ff_0,transparent_32%),linear-gradient(180deg,#fbfdff_0%,#fff_68%)] px-5 py-10 md:px-8">
                   <div className="mx-auto max-w-4xl text-center">
@@ -414,7 +413,6 @@ export function FactoryFriendTrialExperience({
           </div>
         </section>
       </div>
-      <FactoryWorkbenchAssistant primaryActionHref={primaryActionHref} />
     </main>
   );
 }

@@ -76,7 +76,7 @@ export function FactoryToolLauncherPanel({ tools, primaryActionHref }: FactoryTo
           ))}
         </div>
 
-        <div className="mt-4 grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+        <div className="mt-4 grid gap-4 sm:grid-cols-2 2xl:grid-cols-3">
           {filteredTools.map(tool => (
             <button
               className={`group flex min-h-[156px] flex-col justify-between rounded-xl border p-4 text-left shadow-sm transition hover:-translate-y-1 hover:shadow-md ${
@@ -91,8 +91,8 @@ export function FactoryToolLauncherPanel({ tools, primaryActionHref }: FactoryTo
                   <div className="absolute left-3 top-3 rounded-full bg-white/90 px-2 py-1 text-[11px] font-black text-slate-700">{tool.badge}</div>
                   <div className="absolute bottom-3 right-3 flex size-8 items-center justify-center rounded-full bg-white/90 text-sm font-black text-slate-950">+</div>
                 </div>
-                <h4 className="mt-3 text-base font-black text-slate-950">{tool.title}</h4>
-                <p className="mt-1 text-xs leading-5 text-slate-500">{tool.desc}</p>
+                <h4 className="mt-3 break-words text-base font-black leading-6 text-slate-950">{tool.title}</h4>
+                <p className="mt-1 line-clamp-3 text-xs leading-5 text-slate-500">{tool.desc}</p>
               </div>
               <div className="mt-4 text-xs font-black text-indigo-600 group-hover:text-indigo-800">查看预览 →</div>
             </button>
@@ -100,16 +100,16 @@ export function FactoryToolLauncherPanel({ tools, primaryActionHref }: FactoryTo
         </div>
       </section>
 
-      <aside className="rounded-2xl border border-slate-200 bg-slate-950 p-5 text-white shadow-sm">
-        <div className="text-xs font-bold uppercase tracking-[0.22em] text-white/40">Tool Preview</div>
-        <h3 className="mt-2 text-2xl font-black">{selected?.title ?? '选择工具'}</h3>
-        <p className="mt-3 text-sm leading-6 text-white/65">{selected?.desc ?? '选择一个工具后查看生产入口。'}</p>
-        <div className="mt-5 rounded-xl bg-white/10 p-4">
-          <div className="text-xs font-bold text-white/40">推荐工作流</div>
-          <div className="mt-1 break-all text-sm font-black">{selected?.href ?? primaryActionHref}</div>
+      <aside className="rounded-2xl border border-slate-200 bg-white p-5 text-slate-950 shadow-sm">
+        <div className="text-xs font-bold uppercase tracking-[0.22em] text-slate-400">Tool Preview</div>
+        <h3 className="mt-2 break-words text-2xl font-black">{selected?.title ?? '选择工具'}</h3>
+        <p className="mt-3 text-sm leading-6 text-slate-600">{selected?.desc ?? '选择一个工具后查看生产入口。'}</p>
+        <div className="mt-5 rounded-xl border border-slate-200 bg-slate-50 p-4">
+          <div className="text-xs font-bold text-slate-400">推荐工作流</div>
+          <div className="mt-1 break-all text-sm font-black text-slate-700">{selected?.href ?? primaryActionHref}</div>
         </div>
         <Link
-          className="mt-5 flex min-h-11 items-center justify-center rounded-xl bg-white px-4 text-sm font-black text-slate-950 transition hover:bg-indigo-50"
+          className="mt-5 flex min-h-11 items-center justify-center rounded-xl bg-slate-950 px-4 text-sm font-black text-white transition hover:bg-slate-800"
           href={selected?.href ?? primaryActionHref}
         >
           打开这个工具

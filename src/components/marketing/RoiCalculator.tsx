@@ -77,7 +77,7 @@ export function RoiCalculator() {
         </div>
 
         <div className="mt-10 flex flex-col justify-center gap-3 sm:flex-row">
-          <PrimaryButton href="/dashboard" size="lg">
+          <PrimaryButton href="/factory?variant=friend_trial" size="lg">
             {roi.primaryCta} <span aria-hidden>-&gt;</span>
           </PrimaryButton>
           <SecondaryButton href="/pricing" size="lg">

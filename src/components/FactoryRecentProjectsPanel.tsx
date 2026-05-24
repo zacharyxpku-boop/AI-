@@ -99,7 +99,7 @@ export function FactoryRecentProjectsPanel({
       </div>
 
       <div className="mt-5 grid gap-4 lg:grid-cols-[minmax(0,1fr)_280px]">
-        <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-3">
+        <div className="grid gap-4 sm:grid-cols-2">
           {filteredProjects.map((project, index) => (
             <button
               className={`overflow-hidden rounded-xl border text-left shadow-sm transition hover:-translate-y-0.5 hover:bg-white hover:shadow-md ${
@@ -114,27 +114,29 @@ export function FactoryRecentProjectsPanel({
                 <div className="absolute bottom-3 right-3 text-3xl font-black text-white/80">{String(index + 1).padStart(2, '0')}</div>
               </div>
               <div className="p-4">
-                <div className="truncate text-sm font-black text-slate-950">{project.title}</div>
-                <span className={`mt-3 inline-flex rounded-full px-2.5 py-1 text-xs font-bold ring-1 ${project.tone}`}>{project.status}</span>
+                <div className="line-clamp-2 min-h-10 break-words text-sm font-black leading-5 text-slate-950">{project.title}</div>
+                <span className={`mt-3 inline-flex max-w-full rounded-full px-2.5 py-1 text-xs font-bold ring-1 ${project.tone}`}>
+                  <span className="truncate">{project.status}</span>
+                </span>
               </div>
             </button>
           ))}
         </div>
 
-        <aside className="rounded-xl border border-slate-200 bg-slate-950 p-4 text-white shadow-sm">
-          <div className="text-xs font-bold uppercase tracking-[0.22em] text-white/40">Workspace Detail</div>
-          <h4 className="mt-2 text-lg font-black">{selected?.title ?? '暂无工程'}</h4>
+        <aside className="rounded-xl border border-slate-200 bg-white p-4 text-slate-950 shadow-sm">
+          <div className="text-xs font-bold uppercase tracking-[0.22em] text-slate-400">Workspace Detail</div>
+          <h4 className="mt-2 break-words text-lg font-black leading-6">{selected?.title ?? '暂无工程'}</h4>
           <div className="mt-4 grid gap-2 text-sm">
-            <div className="rounded-lg bg-white/10 p-3">
-              <div className="text-xs font-bold text-white/45">内容类型</div>
+            <div className="rounded-lg border border-slate-200 bg-slate-50 p-3">
+              <div className="text-xs font-bold text-slate-400">内容类型</div>
               <div className="mt-1 font-black">{selected?.type ?? '-'}</div>
             </div>
-            <div className="rounded-lg bg-white/10 p-3">
-              <div className="text-xs font-bold text-white/45">当前状态</div>
+            <div className="rounded-lg border border-slate-200 bg-slate-50 p-3">
+              <div className="text-xs font-bold text-slate-400">当前状态</div>
               <div className="mt-1 font-black">{selected?.status ?? '-'}</div>
             </div>
           </div>
-          <Link className="mt-4 flex min-h-10 items-center justify-center rounded-lg bg-white px-4 text-sm font-black text-slate-950 transition hover:bg-indigo-50" href={selectedHref}>
+          <Link className="mt-4 flex min-h-10 items-center justify-center rounded-lg bg-slate-950 px-4 text-sm font-black text-white transition hover:bg-slate-800" href={selectedHref}>
             打开这个工程
           </Link>
         </aside>

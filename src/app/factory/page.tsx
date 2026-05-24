@@ -1,7 +1,7 @@
 import type { Metadata } from 'next';
 import Link from 'next/link';
 
-import { FactoryFriendTrialExperience } from '@/components/FactoryFriendTrialExperience';
+import { KuaiziStyleWorkbench } from '@/components/KuaiziStyleWorkbench';
 import { ListingFactoryConsole } from '@/components/marketing/ListingFactorySections';
 import {
   buildFactoryMobileCapabilities,
@@ -15,8 +15,8 @@ import { evaluateProductReadiness } from '@/lib/product-readiness';
 import { buildReadinessInput } from '@/lib/readiness-input';
 
 export const metadata: Metadata = {
-  title: '内容工厂控制台 | Wenai Listing Factory',
-  description: '集中查看 SKU 上新进度、品牌边界、批量 Brief、内容任务和客户交付状态。',
+  title: 'Wenai Listing Factory',
+  description: '面向电商 SKU 的内容工厂控制台，覆盖卖点、素材、合成、分发和 CRM 交接。',
 };
 
 export default async function FactoryPage({
@@ -26,63 +26,17 @@ export default async function FactoryPage({
 }) {
   const params = searchParams ? await searchParams : {};
   const selectedVariantId = normalizeFactoryUiVariantId(params.variant);
+
+  if (selectedVariantId === 'friend_trial') {
+    return <KuaiziStyleWorkbench />;
+  }
+
   const readinessReport = evaluateProductReadiness(buildReadinessInput());
   const factoryOperatingLayers = buildFactoryOperatingLayers(readinessReport);
   const factoryUiVariants = orderFactoryUiVariants(buildFactoryUiVariants(readinessReport), selectedVariantId);
   const selectedVariant = factoryUiVariants[0];
   const factoryReadinessSlices = buildFactoryReadinessSlices(readinessReport);
   const mobileCapabilityStrips = buildFactoryMobileCapabilities(readinessReport);
-
-  if (selectedVariantId === 'friend_trial') {
-    const operatingLinks = [
-      { label: '第 1 步', title: '选择今天主推的卖点', href: '/factory/creative?variant=friend_trial', value: '先确认角度' },
-      { label: '第 2 步', title: '补齐商品图和授权', href: '/factory/create?variant=friend_trial', value: '避免素材不可用' },
-      { label: '第 3 步', title: '生成内容草稿', href: '/factory/video?variant=friend_trial', value: '客户先审核' },
-      { label: '第 4 步', title: '安排发布渠道', href: '/factory/cast?variant=friend_trial', value: '留下发布证明' },
-      { label: '第 5 步', title: '交给销售跟进', href: '/factory/manage?variant=friend_trial', value: '记录负责人' },
-    ];
-
-    return (
-      <FactoryFriendTrialExperience
-        active="overview"
-        title="从一个商品开始，生成可审核的内容任务"
-        subtitle="客户先录入商品和目标渠道，系统给出卖点、素材、内容、发布和销售跟进的下一步。"
-        metrics={[
-          { label: '商品资料', value: '待确认', detail: '客户可编辑', tone: 'slate' },
-          { label: '内容计划', value: '待生成', detail: '先审核后发布', tone: 'emerald' },
-          { label: '销售跟进', value: '待分配', detail: '不虚构线索', tone: 'amber' },
-        ]}
-        readiness={[
-          { label: '商品与目标', value: '已锁定 1 个 SKU', detail: '客户先确认今天主推什么，再进入卖点和内容生产。', tone: 'sky' },
-          { label: '素材与授权', value: '待补齐', detail: '缺图、缺授权或缺口播资料时，先补资料再生成内容。', tone: 'amber' },
-          { label: '内容审核', value: '先出草稿', detail: '短视频和图文先给客户审核，不直接假装已经发布。', tone: 'emerald' },
-          { label: '发布证明', value: '待回填', detail: '渠道链接、截图和负责人要回写，不能只停在任务卡。', tone: 'slate' },
-          { label: '销售跟进', value: '可交接', detail: '只把真实反馈、客户确认和负责人交给销售继续谈。', tone: 'emerald' },
-        ]}
-        actions={[
-          { role: '客户', title: '先填商品', value: '确认商品、目标和渠道', href: '/factory?variant=friend_trial' },
-          { role: '运营', title: '处理内容任务', value: '从卖点和素材开始', href: '/factory/creative?variant=friend_trial' },
-          { role: '销售', title: '接收跟进事项', value: '只接真实反馈和客户确认', href: '/factory/manage?variant=friend_trial' },
-        ]}
-        nextHref="/factory/creative?variant=friend_trial"
-        nextLabel="选择卖点"
-      >
-        <section className="grid gap-4 md:grid-cols-2 xl:grid-cols-5">
-          {operatingLinks.map(item => (
-            <Link
-              className="group rounded-2xl border border-stone-200 bg-white p-4 shadow-sm transition hover:-translate-y-0.5 hover:border-stone-300 hover:shadow-lg"
-              href={item.href}
-              key={item.href}
-            >
-              <div className="text-xs font-medium text-stone-500">{item.label}</div>
-              <h2 className="mt-2 text-base font-semibold text-stone-950">{item.title}</h2>
-              <p className="mt-4 rounded-xl bg-stone-50 px-3 py-2 text-sm font-medium text-stone-600">{item.value}</p>
-            </Link>
-          ))}
-        </section>
-      </FactoryFriendTrialExperience>
-    );
-  }
 
   return (
     <main>
@@ -95,11 +49,11 @@ export default async function FactoryPage({
                 从 SKU 上新到创意、视频、分发、审核和回流的一张工作台
               </h1>
               <p className="mt-4 max-w-3xl text-[14px] leading-7 text-white/70">
-                这里是最终产品形态入口：伙伴工具给出全链路工业化参照，Wenai 的目标是把它们收敛成可验收、可交接、可复盘的电商增长系统。
+                这里是最终产品形态入口：把全链路工序收敛成可验收、可交接、可复盘的电商增长系统。
               </p>
             </div>
             <div className="rounded-md border border-amber-300/25 bg-amber-300/10 p-4 text-[13px] leading-6 text-amber-50">
-              当前边界：内部闭环已可跑；真实 OAuth、自动发布、广告投放、视频 provider、平台数据同步和企业云资产接入前，不宣称平台级规模执行。
+              当前边界：内部闭环可跑；真实 OAuth、自动发布、广告投放、视频 provider、平台数据同步和企业资产接入在 provider 配齐后开启；不宣称平台级规模执行。
             </div>
           </div>
 
@@ -110,7 +64,7 @@ export default async function FactoryPage({
                 <h2 className="mt-1 text-2xl font-black">同一套工厂，按对象切三种视角</h2>
               </div>
               <p className="max-w-xl text-[12px] leading-6 text-white/60">
-                Variant 不是换颜色，而是决定用户先看到什么、能做什么、哪些能力必须被明确拦住。先把三种视角跑通，再继续加厚创意、视频、分发和管理页面。
+                Variant 不是换颜色，而是决定用户先看到什么、能做什么、哪些能力必须被明确拦住。
               </p>
             </div>
             <div className="mt-4 grid gap-3 lg:grid-cols-3">
@@ -174,7 +128,7 @@ export default async function FactoryPage({
                 <h2 className="mt-1 text-2xl font-black">移动端介绍要讲清楚的六个能力</h2>
               </div>
               <p className="max-w-xl text-[12px] leading-6 text-white/60">
-                这些是对外最容易被理解的入口：能展示内部闭环，但每张卡都必须带外部门禁，避免把竞品级规模能力误写成当前已商用。
+                对外展示的是能执行的工序，不是概念词；避免把竞品级规模能力误写成当前已商用。
               </p>
             </div>
             <div className="mt-4 grid gap-3 md:grid-cols-2 xl:grid-cols-3">

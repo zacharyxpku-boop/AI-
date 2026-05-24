@@ -1,11 +1,12 @@
 import type { Metadata } from 'next';
 
 import { CastDistributionConsoleClient } from '@/components/CastDistributionConsoleClient';
+import { KuaiziWorkflowConsole } from '@/components/KuaiziWorkflowConsole';
 import { normalizeFactoryUiVariantId } from '@/lib/factory-readiness-view';
 import { getChannelAccountSnapshot } from '@/lib/channel-account-ledger';
 
 export const metadata: Metadata = {
-  title: '分发投放控制台 | Wenai',
+  title: '分发投放工作台 | Wenai',
   description: '把账号矩阵、发布槽位、广告 campaign、平台证据和表现回流串成可验证的 Cast 工作台。',
 };
 
@@ -17,6 +18,11 @@ export default async function CastFactoryPage({
   const params = searchParams ? await searchParams : {};
   const projectId = params.projectId || 'default-project';
   const selectedVariantId = normalizeFactoryUiVariantId(params.variant);
+
+  if (selectedVariantId === 'friend_trial') {
+    return <KuaiziWorkflowConsole active="cast" />;
+  }
+
   const snapshot = await getChannelAccountSnapshot('anon', projectId);
 
   return (

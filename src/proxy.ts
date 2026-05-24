@@ -23,6 +23,9 @@ const PUBLIC_PAGE_PREFIXES = [
   '/upgrade',
   '/pricing',
   '/poc',
+  '/docs',
+  '/inquire',
+  '/product',
   '/share',
   '/review',
   '/invite',
@@ -34,6 +37,7 @@ const PUBLIC_PAGE_PREFIXES = [
   '/settings/kuaizi',
   '/unsubscribed',
   '/about',
+  '/enterprise',
 ];
 
 const PUBLIC_API_PREFIXES = [
@@ -68,17 +72,12 @@ export async function proxy(request: NextRequest) {
     isPageRoute &&
     (
       pathname === '/demo' ||
-      pathname === '/poc' ||
       pathname === '/tools' ||
-      pathname === '/docs' ||
       pathname === '/roadmap' ||
-      pathname === '/enterprise' ||
-      pathname === '/inquire' ||
       pathname === '/benchmark' ||
       pathname === '/me' ||
       pathname.startsWith('/pipelines/') ||
       pathname.startsWith('/tools/') ||
-      pathname.startsWith('/product/') ||
       pathname.startsWith('/benchmark/') ||
       pathname.startsWith('/me/')
     );

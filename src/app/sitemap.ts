@@ -18,12 +18,6 @@ export default function sitemap(): MetadataRoute.Sitemap {
       priority: 0.9,
     },
     {
-      url: `${BASE}/dashboard`,
-      lastModified: now,
-      changeFrequency: 'weekly',
-      priority: 0.9,
-    },
-    {
       url: `${BASE}/factory`,
       lastModified: now,
       changeFrequency: 'weekly',
@@ -40,6 +34,12 @@ export default function sitemap(): MetadataRoute.Sitemap {
       lastModified: now,
       changeFrequency: 'weekly',
       priority: 0.6,
+    },
+    {
+      url: `${BASE}/enterprise`,
+      lastModified: now,
+      changeFrequency: 'monthly',
+      priority: 0.55,
     },
     {
       url: `${BASE}/invite`,

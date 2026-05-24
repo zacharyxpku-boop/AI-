@@ -16,21 +16,21 @@ const plans: Plan[] = [
   {
     name: 'Free',
     price: '$0',
-    cta: '免费开始',
-    href: '/dashboard',
-    features: ['1 个项目', '每月 3 次 CSV 导入', '带水印脱敏报告'],
+    cta: '开始第一轮试用',
+    href: '/factory?variant=friend_trial',
+    features: ['1 个试用项目', '商品增长工作台', 'provider-gated 交付边界'],
   },
   {
     name: 'Starter',
     price: '$29/月',
     cta: '获取早鸟优惠',
-    features: ['3 个项目', '每月 30 次 CSV 导入', '无水印报告 + 生产 Brief'],
+    features: ['3 个项目', '无水印客户报告', '素材、视频和分发任务协同'],
   },
   {
     name: 'Growth',
     price: '$99/月',
     cta: '获取团队早鸟',
-    features: ['无限项目和导入', '完整跨轮学习搜索', '批量导出和团队协作入口'],
+    features: ['多项目与团队协作', '回流数据与复盘记录', '外部 provider 接入支持'],
   },
 ];
 
@@ -48,7 +48,7 @@ export function PricingIntentCards({ compact = false }: { compact?: boolean }) {
       setMessage(result.error);
       return;
     }
-    setMessage('已记录。Starter/Growth 上线后会优先通知你。当前仍为 Free 试用。');
+    setMessage('已记录。Starter/Growth 上线后会优先通知你；当前仍可先用 Free 试用路径。');
     setEmail('');
   };
 
@@ -56,21 +56,24 @@ export function PricingIntentCards({ compact = false }: { compact?: boolean }) {
     <div>
       <div className={compact ? 'grid gap-3 lg:grid-cols-3' : 'grid gap-4 lg:grid-cols-3'}>
         {plans.map(plan => (
-          <div key={plan.name} className="rounded-md border border-border-subtle bg-bg-surface p-5">
+          <div key={plan.name} className="rounded-md border border-slate-200 bg-white p-5 shadow-sm">
             <div className="flex items-start justify-between gap-3">
-              <div>
-                <div className="text-[12px] font-semibold text-text-primary">{plan.name}</div>
-                <div className="mt-2 text-3xl font-semibold text-text-primary">{plan.price}</div>
+              <div className="min-w-0">
+                <div className="text-sm font-black text-slate-950">{plan.name}</div>
+                <div className="mt-2 break-words text-3xl font-black text-slate-950">{plan.price}</div>
               </div>
-              {plan.name === 'Starter' && <span className="rounded-md bg-accent-dim px-2 py-1 text-[10px] font-mono text-accent">推荐</span>}
+              {plan.name === 'Starter' && <span className="rounded-md bg-blue-50 px-2 py-1 text-xs font-black text-blue-700">推荐</span>}
             </div>
-            <ul className="mt-5 space-y-2 text-[13px] leading-6 text-text-secondary">
+            <ul className="mt-5 space-y-2 text-sm leading-6 text-slate-600">
               {plan.features.map(feature => (
-                <li key={feature}>- {feature}</li>
+                <li key={feature} className="flex gap-2">
+                  <span className="mt-2 size-1.5 shrink-0 rounded-full bg-blue-500" />
+                  <span className="min-w-0 break-words">{feature}</span>
+                </li>
               ))}
             </ul>
             {plan.href ? (
-              <Link href={plan.href} className="mt-5 inline-flex w-full items-center justify-center rounded-md bg-accent px-4 py-2 text-[12px] font-semibold text-bg-root transition-colors hover:bg-accent-hover">
+              <Link href={plan.href} className="mt-5 inline-flex min-h-10 w-full items-center justify-center rounded-md bg-gradient-to-r from-[#6b5cff] via-[#a63dff] to-[#ff6c8f] px-4 text-sm font-black text-white">
                 {plan.cta}
               </Link>
             ) : (
@@ -80,7 +83,7 @@ export function PricingIntentCards({ compact = false }: { compact?: boolean }) {
                   setSelectedPlan(plan);
                   setMessage('即将上线，留下邮箱获取早鸟优惠。');
                 }}
-                className="mt-5 w-full rounded-md border border-accent/60 px-4 py-2 text-[12px] font-semibold text-accent transition-colors hover:bg-accent-dim"
+                className="mt-5 min-h-10 w-full rounded-md border border-slate-200 bg-slate-50 px-4 text-sm font-black text-slate-700 transition-colors hover:bg-white"
               >
                 {plan.cta}
               </button>
@@ -90,8 +93,8 @@ export function PricingIntentCards({ compact = false }: { compact?: boolean }) {
       </div>
 
       {selectedPlan && (
-        <form onSubmit={submit} className="mt-4 rounded-md border border-accent/40 bg-accent-dim p-4">
-          <div className="text-[13px] font-semibold text-text-primary">{selectedPlan.name} 即将上线，留下邮箱获取早鸟优惠</div>
+        <form onSubmit={submit} className="mt-4 rounded-md border border-blue-200 bg-blue-50 p-4">
+          <div className="text-sm font-black text-slate-950">{selectedPlan.name} 即将上线，留下邮箱获取早鸟优惠</div>
           <div className="mt-3 flex flex-col gap-2 sm:flex-row">
             <input
               type="email"
@@ -99,13 +102,13 @@ export function PricingIntentCards({ compact = false }: { compact?: boolean }) {
               value={email}
               onChange={event => setEmail(event.target.value)}
               placeholder="you@company.com"
-              className="min-h-10 flex-1 rounded-md border border-border-subtle bg-bg-raised px-3 text-[13px] text-text-primary outline-none focus:border-accent"
+              className="min-h-10 flex-1 rounded-md border border-slate-200 bg-white px-3 text-sm text-slate-900 outline-none focus:border-blue-400"
             />
-            <button type="submit" className="min-h-10 rounded-md bg-accent px-4 text-[12px] font-semibold text-bg-root transition-colors hover:bg-accent-hover">
+            <button type="submit" className="min-h-10 rounded-md bg-slate-950 px-4 text-sm font-black text-white">
               提交
             </button>
           </div>
-          {message && <p className="mt-2 text-[12px] text-accent">{message}</p>}
+          {message && <p className="mt-2 text-sm font-semibold text-blue-700">{message}</p>}
         </form>
       )}
     </div>
