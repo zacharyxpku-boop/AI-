@@ -6,10 +6,12 @@ import {
   buildCommerceRenderCapacityPlan,
   buildCommerceTimeline,
   buildCommerceCloudDriveManifest,
+  buildCommerceCloudDriveReturnPlan,
   buildCommerceCustomerServicePack,
   buildCommerceOpenSourceAdapters,
   buildCommercePublishingMatrixPlan,
   buildCommerceRemixTemplateBank,
+  buildCommerceRemixExecutionRecipes,
   buildCommerceRemixWorkflowPlaybook,
   buildDemoCommerceRemixEnginePlan,
   buildFfmpegCommandManifest,
@@ -179,6 +181,7 @@ describe('commerce remix engine', () => {
 
   it('builds a cloud-drive handoff map for customer self-publishing evidence', () => {
     const manifest = buildCommerceCloudDriveManifest(baseInput, 'exports/demo');
+    const returnPlan = buildCommerceCloudDriveReturnPlan(baseInput, manifest);
 
     expect(manifest.folders.map(folder => folder.path)).toEqual([
       'exports/demo/01-source-assets',
@@ -190,6 +193,9 @@ describe('commerce remix engine', () => {
     expect(manifest.customerChecklist).toContain('发布平台链接');
     expect(manifest.customerChecklist.join(' ')).toContain('表现 CSV');
     expect(manifest.nextConfigurableProviders).toContain('企业云盘同步');
+    expect(returnPlan.intakeFields.map(field => field.label)).toEqual(['发布平台链接', '发布截图', '表现 CSV', '客户备注']);
+    expect(returnPlan.folderRules.join(' ')).toContain('04-customer-return');
+    expect(returnPlan.nextRoundOutputs).toContain('重剪任务清单');
   });
 
   it('turns customer-uploaded links, screenshots, and CSV rows into next-round advice', () => {
@@ -326,7 +332,24 @@ describe('commerce remix engine', () => {
       integrationMode: 'local_worker',
       readiness: 'ready_now',
     });
+    expect(adapters.find(adapter => adapter.id === 'remotion')?.repositoryUrl).toBe('https://github.com/remotion-dev/remotion');
     expect(adapters.map(adapter => adapter.guardrail).join(' ')).toContain('不接收客户账号凭据');
+  });
+
+  it('turns adapters into executable remix recipes with clear pass criteria', () => {
+    const plan = buildCommerceRemixEnginePlan(baseInput);
+    const recipes = buildCommerceRemixExecutionRecipes(baseInput, plan);
+
+    expect(recipes.map(recipe => recipe.id)).toEqual([
+      'recipe-template-manifest',
+      'recipe-local-render',
+      'recipe-speech-caption',
+      'recipe-safe-crop',
+      'recipe-queue-runner',
+    ]);
+    expect(recipes.find(recipe => recipe.adapterId === 'ffmpeg')?.outputFiles).toContain('exports/travel-pet-bowl-9x16.mp4');
+    expect(recipes.find(recipe => recipe.adapterId === 'queue-worker')?.passCriteria.join(' ')).toContain('缺素材任务不进入渲染');
+    expect(JSON.stringify(recipes)).not.toMatch(/apiKey|accessToken|Bearer|sk-/i);
   });
 
   it('builds a customer-readable remix workflow with no-provider fallbacks', () => {

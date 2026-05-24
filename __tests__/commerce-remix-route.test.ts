@@ -48,8 +48,10 @@ describe('/api/commerce-remix', () => {
     expect(body.servicePack.faq.length).toBeGreaterThan(0);
     expect(body.openSourceAdapters.map((adapter: { id: string }) => adapter.id)).toContain('ffmpeg');
     expect(body.workflowPlaybook.stages.map((stage: { id: string }) => stage.id)).toContain('publishing-pack');
+    expect(body.executionRecipes.map((recipe: { id: string }) => recipe.id)).toContain('recipe-local-render');
     expect(body.publishingMatrix[0].accountAngles.length).toBeGreaterThanOrEqual(3);
     expect(body.renderCapacity.queuePolicy.join(' ')).toContain('不自动登录');
+    expect(body.cloudReturnPlan.intakeFields.map((field: { label: string }) => field.label)).toContain('表现 CSV');
     expect(JSON.stringify(body)).not.toMatch(/apiKey|accessToken|Bearer|sk-/i);
   });
 
@@ -83,8 +85,10 @@ describe('/api/commerce-remix', () => {
     expect(body.cloudDrive.folders.map((folder: { path: string }) => folder.path).join(' ')).toContain('04-customer-return');
     expect(body.servicePack.objectionReplies.map((item: { objection: string }) => item.objection)).toContain('担心不好用');
     expect(body.openSourceAdapters.find((adapter: { id: string }) => adapter.id === 'queue-worker').readiness).toBe('ready_now');
+    expect(body.executionRecipes.find((recipe: { adapterId: string }) => recipe.adapterId === 'ffmpeg').passCriteria.join(' ')).toContain('MP4 可播放');
     expect(body.workflowPlaybook.noProviderFallbacks.join(' ')).toContain('没有自动发布');
     expect(body.publishingMatrix[0].accountAngles[0].publishNote).toContain('客户自发');
+    expect(body.cloudReturnPlan.nextRoundOutputs).toContain('重剪任务清单');
   });
 
   it('rejects incomplete remix requests with stable Chinese guidance', async () => {

@@ -22,8 +22,12 @@ describe('factory page', () => {
     expect(html).toContain('大规模渲染队列');
     expect(html).toContain('多账号矩阵先不做自动登录');
     expect(html).toContain('开源能力适配器');
+    expect(html).toContain('执行配方');
+    expect(html).toContain('每个开源能力都落到输入、步骤、输出和验收');
     expect(html).toContain('客户看到的是一条商品增长流水线');
     expect(html).toContain('没有外部 provider 时的替代路径');
+    expect(html).toContain('客户回填字段');
+    expect(html).toContain('回填后系统看什么');
     expect(html).toContain('建议并发');
     expect(html).toContain('客服素材');
     expect(html).toContain('Wenai 商品增长工作台');

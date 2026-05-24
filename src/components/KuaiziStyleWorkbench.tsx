@@ -4,6 +4,7 @@ import Link from 'next/link';
 import { useMemo, useState } from 'react';
 import {
   buildDemoCommerceCloudDriveManifest,
+  buildDemoCommerceCloudDriveReturnPlan,
   buildDemoCommerceCustomerServicePack,
   buildCommerceOpenSourceAdapters,
   buildDemoCommercePublishingMatrixPlan,
@@ -11,6 +12,7 @@ import {
   buildDemoCommerceRemixDryRun,
   buildDemoCommerceRemixEnginePlan,
   buildDemoCommerceRemixExportPackage,
+  buildDemoCommerceRemixExecutionRecipes,
   buildDemoCommerceRemixWorkflowPlaybook,
   buildDemoCommerceRemixQualityGate,
   buildDemoCommerceRemixTemplateBank,
@@ -212,9 +214,11 @@ export function KuaiziStyleWorkbench() {
   const qualityGate = useMemo(() => buildDemoCommerceRemixQualityGate(), []);
   const servicePack = useMemo(() => buildDemoCommerceCustomerServicePack(), []);
   const openSourceAdapters = useMemo(() => buildCommerceOpenSourceAdapters(), []);
+  const executionRecipes = useMemo(() => buildDemoCommerceRemixExecutionRecipes(), []);
   const workflowPlaybook = useMemo(() => buildDemoCommerceRemixWorkflowPlaybook(), []);
   const publishingMatrix = useMemo(() => buildDemoCommercePublishingMatrixPlan(), []);
   const renderCapacity = useMemo(() => buildDemoCommerceRenderCapacityPlan(), []);
+  const cloudReturnPlan = useMemo(() => buildDemoCommerceCloudDriveReturnPlan(), []);
   const queueSummary = useMemo(() => {
     const statuses = ['needs_material', 'ready', 'rendering', 'exported'] as const;
     return statuses.map(status => ({
@@ -469,6 +473,25 @@ export function KuaiziStyleWorkbench() {
                       ))}
                     </div>
                   </div>
+                  <div className="mt-5 rounded-md border border-slate-200 bg-slate-50 p-4">
+                    <div className="flex flex-col gap-2 md:flex-row md:items-end md:justify-between">
+                      <div>
+                        <p className="text-xs font-black uppercase tracking-[0.18em] text-slate-500">执行配方</p>
+                        <h4 className="mt-1 text-base font-black text-slate-950">每个开源能力都落到输入、步骤、输出和验收</h4>
+                      </div>
+                      <span className="rounded bg-white px-2.5 py-1 text-xs font-black text-slate-700 ring-1 ring-slate-200">{executionRecipes.length} 条可执行配方</span>
+                    </div>
+                    <div className="mt-4 grid gap-3 xl:grid-cols-5">
+                      {executionRecipes.map(recipe => (
+                        <article className="min-w-0 rounded-md bg-white p-3 ring-1 ring-slate-200" key={recipe.id}>
+                          <h5 className="text-sm font-black leading-5 text-slate-950">{recipe.title}</h5>
+                          <p className="mt-2 text-[11px] font-black text-indigo-600">{recipe.adapterId}</p>
+                          <p className="mt-2 line-clamp-2 text-xs leading-5 text-slate-600">{recipe.operatorSteps[0]}</p>
+                          <p className="mt-2 rounded bg-emerald-50 px-2 py-1 text-xs font-bold leading-5 text-emerald-700">{recipe.passCriteria[0]}</p>
+                        </article>
+                      ))}
+                    </div>
+                  </div>
                 </div>
 
                 <aside className="rounded-lg border border-[#d8e4ff] bg-[#f4f8ff] p-5 text-slate-950 shadow-sm">
@@ -583,6 +606,30 @@ export function KuaiziStyleWorkbench() {
                         <p className="mt-2 line-clamp-3 text-xs leading-5 text-slate-600">{folder.requiredFiles.join(' / ')}</p>
                       </article>
                     ))}
+                  </div>
+                  <div className="mt-5 grid gap-3 lg:grid-cols-[0.85fr_1fr]">
+                    <div className="rounded-md border border-amber-100 bg-amber-50 p-4">
+                      <h4 className="text-sm font-black text-slate-950">客户回填字段</h4>
+                      <div className="mt-3 grid gap-2">
+                        {cloudReturnPlan.intakeFields.map(field => (
+                          <div className="rounded bg-white p-2 text-xs ring-1 ring-amber-100" key={field.label}>
+                            <div className="flex items-center justify-between gap-2">
+                              <span className="font-black text-slate-800">{field.label}</span>
+                              <span className="rounded bg-amber-50 px-2 py-0.5 font-black text-amber-700">{field.required ? '必填' : '选填'}</span>
+                            </div>
+                            <p className="mt-1 leading-5 text-slate-500">{field.acceptedFormats.join(' / ')} · {field.example}</p>
+                          </div>
+                        ))}
+                      </div>
+                    </div>
+                    <div className="rounded-md border border-slate-200 bg-slate-50 p-4">
+                      <h4 className="text-sm font-black text-slate-950">回填后系统看什么</h4>
+                      <div className="mt-3 grid gap-2 md:grid-cols-2">
+                        {cloudReturnPlan.reviewSignals.map(item => (
+                          <div className="rounded bg-white px-3 py-2 text-xs font-bold leading-5 text-slate-700 ring-1 ring-slate-100" key={item}>{item}</div>
+                        ))}
+                      </div>
+                    </div>
                   </div>
                 </div>
 

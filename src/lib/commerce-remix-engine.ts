@@ -202,11 +202,23 @@ export interface CommerceCustomerServicePack {
 export interface CommerceOpenSourceAdapter {
   id: string;
   name: string;
+  repositoryUrl: string;
   useFor: string;
   integrationMode: 'task_manifest' | 'local_worker' | 'optional_provider';
   customerValue: string;
   readiness: 'ready_now' | 'key_optional' | 'later';
   guardrail: string;
+}
+
+export interface CommerceRemixExecutionRecipe {
+  id: string;
+  adapterId: string;
+  title: string;
+  inputFiles: string[];
+  operatorSteps: string[];
+  outputFiles: string[];
+  passCriteria: string[];
+  fallbackWhenUnavailable: string;
 }
 
 export interface CommerceRemixWorkflowPlaybook {
@@ -240,6 +252,13 @@ export interface CommerceRenderCapacityPlan {
   queuePolicy: string[];
   failureIsolation: string[];
   scalePath: string[];
+}
+
+export interface CommerceCloudDriveReturnPlan {
+  intakeFields: Array<{ label: string; required: boolean; acceptedFormats: string[]; example: string }>;
+  folderRules: string[];
+  reviewSignals: string[];
+  nextRoundOutputs: string[];
 }
 
 const PLATFORM_LABELS: Record<RemixPlatform, string> = {
@@ -343,6 +362,7 @@ export function buildCommerceOpenSourceAdapters(): CommerceOpenSourceAdapter[] {
     {
       id: 'ffmpeg',
       name: 'FFmpeg / ffmpeg.wasm',
+      repositoryUrl: 'https://github.com/FFmpeg/FFmpeg',
       useFor: '转码、裁切、拼接、字幕烧录、音频响度标准化、多尺寸导出',
       integrationMode: 'local_worker',
       customerValue: '把商品图、视频片段、字幕和配音稳定合成 MP4，不依赖外部视频 provider。',
@@ -352,6 +372,7 @@ export function buildCommerceOpenSourceAdapters(): CommerceOpenSourceAdapter[] {
     {
       id: 'remotion',
       name: 'Remotion templates',
+      repositoryUrl: 'https://github.com/remotion-dev/remotion',
       useFor: '商品卡、价格锚点、模特证明、字幕版式、结尾 CTA 模板',
       integrationMode: 'task_manifest',
       customerValue: '让短视频像电商模板一样可复用，换商品后仍能稳定出片。',
@@ -361,6 +382,7 @@ export function buildCommerceOpenSourceAdapters(): CommerceOpenSourceAdapter[] {
     {
       id: 'whisper',
       name: 'Whisper.cpp / faster-whisper',
+      repositoryUrl: 'https://github.com/ggerganov/whisper.cpp',
       useFor: '客户上传口播或直播切片的转写、字幕切句、多语字幕底稿',
       integrationMode: 'optional_provider',
       customerValue: '把已有口播素材变成字幕、标题和重剪素材，不等数字人 Key。',
@@ -370,6 +392,7 @@ export function buildCommerceOpenSourceAdapters(): CommerceOpenSourceAdapter[] {
     {
       id: 'opencv-mediapipe',
       name: 'OpenCV / MediaPipe',
+      repositoryUrl: 'https://github.com/opencv/opencv',
       useFor: '画面主体检测、商品/人脸安全区、字幕遮挡预检、封面裁切建议',
       integrationMode: 'optional_provider',
       customerValue: '减少字幕压住商品、模特脸部或平台按钮的问题。',
@@ -379,6 +402,7 @@ export function buildCommerceOpenSourceAdapters(): CommerceOpenSourceAdapter[] {
     {
       id: 'mlt-shotcut',
       name: 'MLT / Shotcut / OpenShot patterns',
+      repositoryUrl: 'https://github.com/mltframework/mlt',
       useFor: '时间线、转场、滤镜、轨道和导出配置的开源剪辑器范式',
       integrationMode: 'task_manifest',
       customerValue: '吸收成熟剪辑器的稳定结构，但不把客户带进复杂编辑器。',
@@ -388,11 +412,95 @@ export function buildCommerceOpenSourceAdapters(): CommerceOpenSourceAdapter[] {
     {
       id: 'queue-worker',
       name: 'BullMQ-style worker queue',
+      repositoryUrl: 'https://github.com/taskforcesh/bullmq',
       useFor: '大批量渲染排队、并发限制、单条失败重试、输出记录',
       integrationMode: 'local_worker',
       customerValue: '几十到几百条视频可以分批跑，失败不拖垮整批交付。',
       readiness: 'ready_now',
       guardrail: '首版只执行本地任务和导出包；云端 worker、对象存储和监控后续可接。',
+    },
+  ];
+}
+
+export function buildCommerceRemixExecutionRecipes(
+  input: CommerceRemixPlanInput,
+  plan = buildCommerceRemixEnginePlan(input),
+  adapters = buildCommerceOpenSourceAdapters(),
+): CommerceRemixExecutionRecipe[] {
+  const packageRoot = `exports/commerce-remix-${slugify(input.productName)}`;
+  const adapterById = new Map(adapters.map(adapter => [adapter.id, adapter]));
+  return [
+    {
+      id: 'recipe-template-manifest',
+      adapterId: 'remotion',
+      title: '模板任务清单',
+      inputFiles: [`${packageRoot}/timeline.json`, `${packageRoot}/publishing-packs.json`, `${packageRoot}/voiceover-script.txt`],
+      operatorSteps: [
+        '读取商品时间线和发布包',
+        '套用商品卡、模特证明、字幕和结尾 CTA 模板',
+        '导出可交给渲染 worker 的 composition manifest',
+      ],
+      outputFiles: [`${packageRoot}/template-composition.json`, `${packageRoot}/cover-briefs.json`],
+      passCriteria: ['每条 composition 有平台、尺寸、字幕安全区和封面说明', '没有 API Key、账号 token 或客户登录信息'],
+      fallbackWhenUnavailable: adapterById.get('remotion')?.readiness === 'ready_now'
+        ? '如果模板 worker 暂时不可用，仍导出 timeline.json 给本地 FFmpeg 任务使用。'
+        : '先导出脚本和分镜，等待模板 worker。',
+    },
+    {
+      id: 'recipe-local-render',
+      adapterId: 'ffmpeg',
+      title: '本地稳定合成',
+      inputFiles: [`${packageRoot}/concat-manifest.txt`, `${packageRoot}/subtitles.srt`, `${packageRoot}/voiceover-script.txt`],
+      operatorSteps: [
+        '校验素材文件存在、授权已确认、字幕行不过长',
+        `按 ${plan.ffmpegCommands.length} 条 FFmpeg 参数数组逐条执行`,
+        '写入 MP4、封面和渲染日志',
+      ],
+      outputFiles: plan.ffmpegCommands.map(command => command.output),
+      passCriteria: ['MP4 可播放', '字幕没有压住底部按钮或商品主体', '音频响度已标准化', '输出路径写回队列'],
+      fallbackWhenUnavailable: '如果本机没有 FFmpeg，先导出参数数组和素材包，交给安装了 FFmpeg 的 worker 或剪辑机执行。',
+    },
+    {
+      id: 'recipe-speech-caption',
+      adapterId: 'whisper',
+      title: '口播转字幕和切句',
+      inputFiles: ['客户上传口播音频', '直播切片音轨', `${packageRoot}/voiceover-script.txt`],
+      operatorSteps: [
+        '优先使用客户上传音频生成字幕底稿',
+        '按 3-7 秒节奏切句，回填 timeline subtitle track',
+        '保留人工复核入口，避免噪声或口音导致错字直接发布',
+      ],
+      outputFiles: [`${packageRoot}/subtitles.srt`, `${packageRoot}/caption-review.md`],
+      passCriteria: ['字幕可人工复核', '敏感词和商品承诺进入审核', '未识别片段保留时间戳'],
+      fallbackWhenUnavailable: '没有转写 worker 时，直接使用系统生成的口播稿和人工字幕。',
+    },
+    {
+      id: 'recipe-safe-crop',
+      adapterId: 'opencv-mediapipe',
+      title: '封面裁切和字幕遮挡检查',
+      inputFiles: plan.ffmpegCommands.map(command => command.output),
+      operatorSteps: [
+        '抽取首帧、商品细节帧和 CTA 帧',
+        '检查商品主体、模特脸部、手部和字幕区域',
+        '生成封面裁切建议和字幕位置修正',
+      ],
+      outputFiles: [`${packageRoot}/cover-crop-suggestions.json`, `${packageRoot}/caption-safe-area-report.json`],
+      passCriteria: ['商品主体未被裁掉', '字幕不压平台按钮', '人物脸部和手部不被遮挡'],
+      fallbackWhenUnavailable: '没有视觉检测 worker 时，使用固定安全区模板和人工抽检截图。',
+    },
+    {
+      id: 'recipe-queue-runner',
+      adapterId: 'queue-worker',
+      title: '批量队列和失败隔离',
+      inputFiles: [`${packageRoot}/ffmpeg-commands.json`, `${packageRoot}/timeline.json`],
+      operatorSteps: [
+        '按平台和尺寸创建独立任务',
+        '限制并发，单条失败只重跑单条',
+        '连续失败后写入 blocked 原因，进入人工检查',
+      ],
+      outputFiles: [`${packageRoot}/render-log.json`, `${packageRoot}/failed-items.json`, `${packageRoot}/02-render-outputs`],
+      passCriteria: ['缺素材任务不进入渲染', '已导出任务不被失败任务回滚', '日志能追溯每条视频输出'],
+      fallbackWhenUnavailable: '没有队列服务时，按批次清单手动执行，每批最多 3 条。',
     },
   ];
 }
@@ -783,6 +891,39 @@ export function buildCommerceCloudDriveManifest(input: CommerceRemixPlanInput, r
   };
 }
 
+export function buildCommerceCloudDriveReturnPlan(
+  input: CommerceRemixPlanInput,
+  manifest = buildCommerceCloudDriveManifest(input),
+): CommerceCloudDriveReturnPlan {
+  return {
+    intakeFields: [
+      { label: '发布平台链接', required: true, acceptedFormats: ['URL'], example: 'https://平台/作品链接' },
+      { label: '发布截图', required: true, acceptedFormats: ['PNG', 'JPG', 'WEBP'], example: `${manifest.rootDir}/04-customer-return/xhs-screenshot.png` },
+      { label: '表现 CSV', required: true, acceptedFormats: ['CSV'], example: 'title,impressions,clicks,orders,revenue' },
+      { label: '客户备注', required: false, acceptedFormats: ['TXT', 'MD', '表单文本'], example: '这条适合继续放大，封面还要更清楚' },
+    ],
+    folderRules: [
+      '客户只把发布后证据放进 04-customer-return，不覆盖 01-source-assets 和 02-render-outputs',
+      '每个平台一个子目录：平台名-日期-商品名，方便下次复盘追踪',
+      '截图必须能看到发布时间或后台指标，CSV 必须包含标题列',
+      '云盘同步只是交付通道；没有云盘 provider 时仍可上传链接、截图和 CSV',
+    ],
+    reviewSignals: [
+      `${input.platforms.map(platform => PLATFORM_LABELS[platform]).join(' / ')} 哪个平台先出现点击或订单信号`,
+      '哪条标题点击更高，哪条封面需要重做',
+      '客户评论和客服问题是否暴露新 FAQ 或售后风险',
+      '是否需要补模特图、细节图、对比图或数字人口播',
+    ],
+    nextRoundOutputs: [
+      '下一轮标题矩阵',
+      '重剪任务清单',
+      '补素材任务',
+      '客服 FAQ 和差评解释',
+      '投放或自然发布节奏建议',
+    ],
+  };
+}
+
 export function evaluateCommercePerformanceUploads(uploads: CommercePerformanceUpload[]): CommercePerformanceUploadReport {
   const rows = uploads.flatMap(upload => upload.csvRows || []);
   const uploadChannels = unique(uploads.map(upload => PLATFORM_LABELS[upload.platform]));
@@ -1164,6 +1305,11 @@ export function buildDemoCommerceCloudDriveManifest() {
   return buildCommerceCloudDriveManifest(buildDemoCommerceRemixInput());
 }
 
+export function buildDemoCommerceCloudDriveReturnPlan() {
+  const input = buildDemoCommerceRemixInput();
+  return buildCommerceCloudDriveReturnPlan(input, buildCommerceCloudDriveManifest(input));
+}
+
 export function buildDemoCommercePerformanceUploadReport() {
   return evaluateCommercePerformanceUploads([
     {
@@ -1218,6 +1364,11 @@ export function buildDemoCommerceRemixTemplateBank() {
 export function buildDemoCommerceRemixWorkflowPlaybook() {
   const input = buildDemoCommerceRemixInput();
   return buildCommerceRemixWorkflowPlaybook(input, buildCommerceRemixEnginePlan(input));
+}
+
+export function buildDemoCommerceRemixExecutionRecipes() {
+  const input = buildDemoCommerceRemixInput();
+  return buildCommerceRemixExecutionRecipes(input, buildCommerceRemixEnginePlan(input));
 }
 
 export function buildDemoCommercePublishingMatrixPlan() {

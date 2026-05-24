@@ -1,22 +1,26 @@
 import { NextRequest, NextResponse } from 'next/server';
 import {
   buildCommerceCloudDriveManifest,
+  buildCommerceCloudDriveReturnPlan,
   buildCommerceCustomerServicePack,
   buildCommerceOpenSourceAdapters,
   buildCommercePublishingMatrixPlan,
   buildCommerceRemixEnginePlan,
   buildCommerceRemixExportPackage,
+  buildCommerceRemixExecutionRecipes,
   buildCommerceRemixTemplateBank,
   buildCommerceRemixWorkflowPlaybook,
   buildCommerceRenderCapacityPlan,
   buildCommerceRenderBatchPlan,
   buildDemoCommerceCloudDriveManifest,
+  buildDemoCommerceCloudDriveReturnPlan,
   buildDemoCommerceCustomerServicePack,
   buildDemoCommercePublishingMatrixPlan,
   buildDemoCommercePerformanceUploadReport,
   buildDemoCommerceRemixDryRun,
   buildDemoCommerceRemixEnginePlan,
   buildDemoCommerceRemixExportPackage,
+  buildDemoCommerceRemixExecutionRecipes,
   buildDemoCommerceRemixWorkflowPlaybook,
   buildDemoCommerceRemixQualityGate,
   buildDemoCommerceRemixTemplateBank,
@@ -71,8 +75,10 @@ function buildInputResponse(input: CommerceRemixPlanInput, body: CommerceRemixRe
   const performanceReport = evaluateCommercePerformanceUploads(body.performanceUploads || []);
   const servicePack = buildCommerceCustomerServicePack(input);
   const openSourceAdapters = buildCommerceOpenSourceAdapters();
+  const executionRecipes = buildCommerceRemixExecutionRecipes(input, plan, openSourceAdapters);
   const workflowPlaybook = buildCommerceRemixWorkflowPlaybook(input, plan);
   const publishingMatrix = buildCommercePublishingMatrixPlan(input, plan.publishingPacks);
+  const cloudReturnPlan = buildCommerceCloudDriveReturnPlan(input, cloudDrive);
 
   return {
     mode: 'local_first',
@@ -90,8 +96,10 @@ function buildInputResponse(input: CommerceRemixPlanInput, body: CommerceRemixRe
     performanceReport,
     servicePack,
     openSourceAdapters,
+    executionRecipes,
     workflowPlaybook,
     publishingMatrix,
+    cloudReturnPlan,
   };
 }
 
@@ -110,8 +118,10 @@ export async function GET() {
     performanceReport: buildDemoCommercePerformanceUploadReport(),
     servicePack: buildDemoCommerceCustomerServicePack(),
     openSourceAdapters: buildCommerceOpenSourceAdapters(),
+    executionRecipes: buildDemoCommerceRemixExecutionRecipes(),
     workflowPlaybook: buildDemoCommerceRemixWorkflowPlaybook(),
     publishingMatrix: buildDemoCommercePublishingMatrixPlan(),
+    cloudReturnPlan: buildDemoCommerceCloudDriveReturnPlan(),
   });
 }
 
