@@ -209,9 +209,6 @@ export function KuaiziWorkflowConsole({ active }: { active: WorkflowStep }) {
               <p className="text-xs font-black uppercase tracking-[0.18em] text-slate-400">{config.eyebrow}</p>
               <h1 className="mt-1 break-words text-2xl font-black text-[#15213f] md:text-[30px]">{config.title}</h1>
               <p className="mt-2 max-w-3xl text-sm leading-6 text-slate-500">{config.subtitle}</p>
-              {active === 'creative' ? (
-                <p className="sr-only">先找到能卖货的角度 创建一个商品增长任务 今日机会 来源健康度</p>
-              ) : null}
             </div>
             <div className="flex shrink-0 flex-wrap gap-2">
               <span className="rounded-md bg-blue-50 px-2.5 py-1 text-xs font-bold text-blue-700 ring-1 ring-blue-100">{config.status}</span>

@@ -18,10 +18,10 @@ describe('creative monitoring console page', () => {
     const html = renderToStaticMarkup(page);
 
     expect(html).toContain('Wenai 商品增长工作台');
-    expect(html).toContain('先找到能卖货的角度');
-    expect(html).toContain('创建一个商品增长任务');
-    expect(html).toContain('今日机会');
-    expect(html).toContain('来源健康度');
+    expect(html).toContain('先把商品卖点写成能拍、能发的内容脚本');
+    expect(html).toContain('商品利益点 / 平台话术 / 审核边界');
+    expect(html).toContain('这一步要完成的事');
+    expect(html).toContain('下一步怎么走');
     expect(html).toContain('/factory/create?variant=friend_trial');
     expect(html).not.toContain('automation-ready');
     expect(html).not.toContain('OAuth 已连接');
