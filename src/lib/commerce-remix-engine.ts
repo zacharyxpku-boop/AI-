@@ -299,6 +299,21 @@ export interface CommerceCloudDriveReturnPlan {
   nextRoundOutputs: string[];
 }
 
+export interface CommerceCustomerDeliveryMap {
+  headline: string;
+  oneLinePromise: string;
+  phases: Array<{
+    id: string;
+    label: string;
+    customerInput: string[];
+    wenaiOutput: string[];
+    customerAction: string;
+    acceptanceGate: string;
+    nextHref: string;
+  }>;
+  handoffRules: string[];
+}
+
 const PLATFORM_LABELS: Record<RemixPlatform, string> = {
   xiaohongshu: '小红书',
   tiktok: 'TikTok',
@@ -1425,6 +1440,77 @@ export function buildCommerceCustomerSupportWorkflow(
   };
 }
 
+export function buildCommerceCustomerDeliveryMap(input: CommerceRemixPlanInput): CommerceCustomerDeliveryMap {
+  const product = safeText(input.productName, '商品');
+  const platforms = input.platforms.map(platform => PLATFORM_LABELS[platform]).join(' / ');
+  return {
+    headline: `${product}从资料到发布回填的交付导航`,
+    oneLinePromise: '客户只按步骤补资料、拿发布包、自行发布并回填表现；Wenai 负责脚本、图片任务、混剪队列、标题矩阵、客服素材和复盘建议。',
+    phases: [
+      {
+        id: 'brief',
+        label: '商品资料',
+        customerInput: ['商品链接或主图', '卖点和禁用词', '目标人群', '参考竞品或账号'],
+        wenaiOutput: ['商品 brief', '首轮标题', '口播脚本', '素材缺口'],
+        customerAction: '确认一个主推商品和一个优先平台。',
+        acceptanceGate: '卖点能落到画面、客服回答或详情页，不只写抽象词。',
+        nextHref: '/factory/creative?variant=friend_trial',
+      },
+      {
+        id: 'image',
+        label: '模特和素材',
+        customerInput: ['商品原图', '授权说明', '场景偏好', '规格参数'],
+        wenaiOutput: ['模特生图任务包', '场景图 prompt', '细节证明图任务', '图片验收清单'],
+        customerAction: '有 Key 时直接生成；没有 Key 时先补参考图或确认 prompt。',
+        acceptanceGate: '商品不画错、授权明确、画面不遮挡平台按钮和商品主体。',
+        nextHref: '/factory/create?variant=friend_trial',
+      },
+      {
+        id: 'remix',
+        label: '混剪成片',
+        customerInput: ['商品图', '视频片段', '口播或配音稿', '主平台尺寸'],
+        wenaiOutput: ['时间线', '字幕', 'FFmpeg 命令', '渲染批次', '质量门禁'],
+        customerAction: '确认是否补素材，或先导出已有版本。',
+        acceptanceGate: '每条视频有字幕、安全区、输出路径和失败重试路径。',
+        nextHref: '/factory/video?variant=friend_trial',
+      },
+      {
+        id: 'publish',
+        label: '发布包',
+        customerInput: [`目标平台：${platforms}`, '账号类型', '发布时间偏好', '客服承接口径'],
+        wenaiOutput: ['平台标题矩阵', '口播开场', '封面建议', '发布检查清单'],
+        customerAction: '客户自己登录平台发布，发布后回填链接、截图或 CSV。',
+        acceptanceGate: '不代管账号、不自动登录、不虚构表现数据。',
+        nextHref: '/factory/cast?variant=friend_trial',
+      },
+      {
+        id: 'support',
+        label: '客服和售后',
+        customerInput: ['常见问题', '售后政策', '差评截图', '物流或规格争议'],
+        wenaiOutput: ['售前话术', '售后处理', '差评挽回', '人工升级规则'],
+        customerAction: '客服按场景发送对应素材，争议问题转人工。',
+        acceptanceGate: '所有承诺和详情页、物流政策、售后政策一致。',
+        nextHref: '/factory/manage?variant=friend_trial',
+      },
+      {
+        id: 'return',
+        label: '表现复盘',
+        customerInput: ['发布链接', '发布截图', '表现 CSV', '客户备注'],
+        wenaiOutput: ['最佳标题判断', '下一轮重剪任务', '补素材建议', '客服 FAQ 更新'],
+        customerAction: '把发布后的证据放进回填区，不覆盖原始素材和成片。',
+        acceptanceGate: '没有真实回填时不展示虚构播放量、订单或转化。',
+        nextHref: '/factory/manage?variant=friend_trial',
+      },
+    ],
+    handoffRules: [
+      '图片、视频、数字人 Key 到位后只替换执行层，不改变客户操作流程',
+      '平台发布由客户自行完成；Wenai 交付可复制的标题、素材、脚本和检查表',
+      '表现数据先走链接、截图、CSV 或云盘目录，后续再接 analytics provider',
+      '每次交付都必须能回答：客户给什么、Wenai 出什么、客户下一步做什么',
+    ],
+  };
+}
+
 export function executeCommerceRemixDryRun(plan: CommerceRemixEnginePlan, options: { failQueueItemIds?: string[] } = {}): CommerceRemixDryRunResult {
   const failIds = new Set(options.failQueueItemIds || []);
   const queue: CommerceRemixQueueItem[] = [];
@@ -1587,6 +1673,10 @@ export function buildDemoCommerceModelImageTaskPack() {
 export function buildDemoCommerceCustomerSupportWorkflow() {
   const input = buildDemoCommerceRemixInput();
   return buildCommerceCustomerSupportWorkflow(input, buildCommerceCustomerServicePack(input));
+}
+
+export function buildDemoCommerceCustomerDeliveryMap() {
+  return buildCommerceCustomerDeliveryMap(buildDemoCommerceRemixInput());
 }
 
 function buildDemoCommerceRemixInput(): CommerceRemixPlanInput {

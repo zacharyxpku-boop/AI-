@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import {
   buildCommerceCloudDriveManifest,
   buildCommerceCloudDriveReturnPlan,
+  buildCommerceCustomerDeliveryMap,
   buildCommerceCustomerServicePack,
   buildCommerceCustomerSupportWorkflow,
   buildCommerceCreatorPersonaMatrix,
@@ -17,6 +18,7 @@ import {
   buildCommerceRenderBatchPlan,
   buildDemoCommerceCloudDriveManifest,
   buildDemoCommerceCloudDriveReturnPlan,
+  buildDemoCommerceCustomerDeliveryMap,
   buildDemoCommerceCustomerServicePack,
   buildDemoCommerceCustomerSupportWorkflow,
   buildDemoCommerceCreatorPersonaMatrix,
@@ -82,6 +84,7 @@ function buildInputResponse(input: CommerceRemixPlanInput, body: CommerceRemixRe
   const servicePack = buildCommerceCustomerServicePack(input);
   const modelImageTaskPack = buildCommerceModelImageTaskPack(input);
   const customerSupportWorkflow = buildCommerceCustomerSupportWorkflow(input, servicePack);
+  const customerDeliveryMap = buildCommerceCustomerDeliveryMap(input);
   const openSourceAdapters = buildCommerceOpenSourceAdapters();
   const executionRecipes = buildCommerceRemixExecutionRecipes(input, plan, openSourceAdapters);
   const workflowPlaybook = buildCommerceRemixWorkflowPlaybook(input, plan);
@@ -106,6 +109,7 @@ function buildInputResponse(input: CommerceRemixPlanInput, body: CommerceRemixRe
     servicePack,
     modelImageTaskPack,
     customerSupportWorkflow,
+    customerDeliveryMap,
     openSourceAdapters,
     executionRecipes,
     workflowPlaybook,
@@ -131,6 +135,7 @@ export async function GET() {
     servicePack: buildDemoCommerceCustomerServicePack(),
     modelImageTaskPack: buildDemoCommerceModelImageTaskPack(),
     customerSupportWorkflow: buildDemoCommerceCustomerSupportWorkflow(),
+    customerDeliveryMap: buildDemoCommerceCustomerDeliveryMap(),
     openSourceAdapters: buildCommerceOpenSourceAdapters(),
     executionRecipes: buildDemoCommerceRemixExecutionRecipes(),
     workflowPlaybook: buildDemoCommerceRemixWorkflowPlaybook(),

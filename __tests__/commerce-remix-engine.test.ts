@@ -7,6 +7,7 @@ import {
   buildCommerceTimeline,
   buildCommerceCloudDriveManifest,
   buildCommerceCloudDriveReturnPlan,
+  buildCommerceCustomerDeliveryMap,
   buildCommerceCustomerServicePack,
   buildCommerceCustomerSupportWorkflow,
   buildCommerceCreatorPersonaMatrix,
@@ -377,6 +378,7 @@ describe('commerce remix engine', () => {
   it('builds a customer-readable remix workflow with no-provider fallbacks', () => {
     const plan = buildCommerceRemixEnginePlan(baseInput);
     const playbook = buildCommerceRemixWorkflowPlaybook(baseInput, plan);
+    const deliveryMap = buildCommerceCustomerDeliveryMap(baseInput);
 
     expect(playbook.stages.map(stage => stage.id)).toEqual([
       'brief',
@@ -388,6 +390,9 @@ describe('commerce remix engine', () => {
     ]);
     expect(playbook.stages.find(stage => stage.id === 'publishing-pack')?.qualityGate).toContain('不自动登录');
     expect(playbook.noProviderFallbacks.join(' ')).toContain('客户上传链接、截图、CSV');
+    expect(deliveryMap.phases.map(phase => phase.id)).toEqual(['brief', 'image', 'remix', 'publish', 'support', 'return']);
+    expect(deliveryMap.oneLinePromise).toContain('客户只按步骤补资料');
+    expect(deliveryMap.handoffRules.join(' ')).toContain('客户自行完成');
   });
 
   it('plans platform title matrices for customer self-publishing', () => {

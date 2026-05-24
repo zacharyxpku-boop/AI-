@@ -17,6 +17,9 @@ describe('factory page', () => {
     expect(html).toContain('/factory/manage?variant=friend_trial');
     expect(html).toContain('搜索工具 Ctrl K');
     expect(html).toContain('从一个商品，生成一整套可发布内容');
+    expect(html).toContain('交付导航');
+    expect(html).toContain('个交付节点');
+    expect(html).toContain('客户只按步骤补资料');
     expect(html).toContain('模特生图');
     expect(html).toContain('模特生图先做成任务包');
     expect(html).toContain('个图片任务');

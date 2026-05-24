@@ -5,6 +5,7 @@ import { useMemo, useState } from 'react';
 import {
   buildDemoCommerceCloudDriveManifest,
   buildDemoCommerceCloudDriveReturnPlan,
+  buildDemoCommerceCustomerDeliveryMap,
   buildDemoCommerceCustomerServicePack,
   buildDemoCommerceCustomerSupportWorkflow,
   buildDemoCommerceCreatorPersonaMatrix,
@@ -215,6 +216,7 @@ export function KuaiziStyleWorkbench() {
   const performanceReport = useMemo(() => buildDemoCommercePerformanceUploadReport(), []);
   const templateBank = useMemo(() => buildDemoCommerceRemixTemplateBank(), []);
   const qualityGate = useMemo(() => buildDemoCommerceRemixQualityGate(), []);
+  const customerDeliveryMap = useMemo(() => buildDemoCommerceCustomerDeliveryMap(), []);
   const servicePack = useMemo(() => buildDemoCommerceCustomerServicePack(), []);
   const modelImageTaskPack = useMemo(() => buildDemoCommerceModelImageTaskPack(), []);
   const customerSupportWorkflow = useMemo(() => buildDemoCommerceCustomerSupportWorkflow(), []);
@@ -335,6 +337,35 @@ export function KuaiziStyleWorkbench() {
                       </button>
                     ))}
                   </div>
+                </div>
+              </section>
+
+              <section className="rounded-lg border border-[#dbe6ff] bg-white p-5 shadow-sm">
+                <div className="flex flex-col gap-3 md:flex-row md:items-end md:justify-between">
+                  <div>
+                    <p className="text-xs font-black uppercase tracking-[0.18em] text-blue-600">交付导航</p>
+                    <h3 className="mt-1 text-lg font-black text-slate-950">{customerDeliveryMap.headline}</h3>
+                    <p className="mt-1 max-w-4xl text-sm leading-6 text-slate-500">{customerDeliveryMap.oneLinePromise}</p>
+                  </div>
+                  <span className="rounded-md bg-blue-50 px-3 py-2 text-sm font-black text-blue-700">{customerDeliveryMap.phases.length} 个交付节点</span>
+                </div>
+                <div className="mt-5 grid gap-3 lg:grid-cols-3 2xl:grid-cols-6">
+                  {customerDeliveryMap.phases.map((phase, index) => (
+                    <Link className="min-w-0 rounded-md border border-blue-100 bg-blue-50 p-3 transition hover:bg-white" href={phase.nextHref} key={phase.id}>
+                      <div className="flex items-start justify-between gap-2">
+                        <h4 className="text-sm font-black leading-5 text-slate-950">{phase.label}</h4>
+                        <span className="grid size-6 shrink-0 place-items-center rounded bg-white text-[11px] font-black text-blue-700 ring-1 ring-blue-100">{index + 1}</span>
+                      </div>
+                      <p className="mt-2 line-clamp-2 text-xs font-bold leading-5 text-blue-700">客户：{phase.customerAction}</p>
+                      <p className="mt-2 line-clamp-3 text-xs leading-5 text-slate-600">交付：{phase.wenaiOutput.join(' / ')}</p>
+                      <p className="mt-3 rounded bg-white p-2 text-xs font-bold leading-5 text-slate-700 ring-1 ring-blue-100">{phase.acceptanceGate}</p>
+                    </Link>
+                  ))}
+                </div>
+                <div className="mt-4 grid gap-2 md:grid-cols-4">
+                  {customerDeliveryMap.handoffRules.map(rule => (
+                    <div className="rounded-md border border-slate-200 bg-slate-50 px-3 py-2 text-xs font-bold leading-5 text-slate-600" key={rule}>{rule}</div>
+                  ))}
                 </div>
               </section>
 
