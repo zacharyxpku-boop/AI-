@@ -16,6 +16,7 @@ import {
   buildCommerceFirstDeliveryChecklist,
   buildCommerceModelImageTaskPack,
   buildCommerceOpenSourceAdapters,
+  buildCommerceOpenSourceCoverage,
   buildCommerceProviderActivationPlan,
   buildCommerceProviderNeedAssessment,
   buildCommercePublishingMatrixPlan,
@@ -390,10 +391,13 @@ describe('commerce remix engine', () => {
       'libopenshot',
       'mcp-video',
       'pyscenedetect',
+      'auto-editor',
       'lossless-cut',
       'subtitle-edit',
       'imagemagick-libheif',
+      'mediainfo',
       'gpac-packager',
+      'gstreamer',
     ]);
     expect(adapters.find(adapter => adapter.id === 'ffmpeg')).toMatchObject({
       integrationMode: 'local_worker',
@@ -404,8 +408,32 @@ describe('commerce remix engine', () => {
     expect(adapters.find(adapter => adapter.id === 'editly')?.repositoryUrl).toBe('https://github.com/mifi/editly');
     expect(adapters.find(adapter => adapter.id === 'mcp-video')?.readiness).toBe('ready_now');
     expect(adapters.find(adapter => adapter.id === 'pyscenedetect')?.readiness).toBe('ready_now');
+    expect(adapters.find(adapter => adapter.id === 'auto-editor')?.repositoryUrl).toBe('https://github.com/WyattBlue/auto-editor');
+    expect(adapters.find(adapter => adapter.id === 'mediainfo')?.readiness).toBe('ready_now');
+    expect(adapters.find(adapter => adapter.id === 'gstreamer')?.readiness).toBe('later');
     expect(adapters.find(adapter => adapter.id === 'gpac-packager')?.readiness).toBe('later');
     expect(adapters.map(adapter => adapter.guardrail).join(' ')).toContain('不接收客户账号凭据');
+  });
+
+  it('summarizes open-source remix coverage as customer-readable layers', () => {
+    const plan = buildCommerceRemixEnginePlan(baseInput);
+    const adapters = buildCommerceOpenSourceAdapters();
+    const coverage = buildCommerceOpenSourceCoverage(baseInput, plan, adapters);
+
+    expect(coverage.totalAdapterCount).toBe(adapters.length);
+    expect(coverage.readyNowCount).toBeGreaterThan(10);
+    expect(coverage.layers.map(layer => layer.id)).toEqual([
+      'source-ready',
+      'clip-ready',
+      'template-ready',
+      'render-ready',
+      'return-ready',
+    ]);
+    expect(coverage.layers.find(layer => layer.id === 'clip-ready')?.primaryAdapterIds).toEqual(expect.arrayContaining(['pyscenedetect', 'auto-editor', 'whisper']));
+    expect(coverage.layers.find(layer => layer.id === 'render-ready')?.primaryAdapterIds).toEqual(expect.arrayContaining(['queue-worker', 'ffmpeg', 'mediainfo']));
+    expect(coverage.customerPromise).toContain('自己发布');
+    expect(coverage.limits).toContain('不自动登录平台账号，不保存客户 cookie。');
+    expect(JSON.stringify(coverage)).not.toMatch(/apiKey|accessToken|Bearer|sk-/i);
   });
 
   it('separates first-delivery work from optional provider activation', () => {
@@ -451,11 +479,15 @@ describe('commerce remix engine', () => {
       'recipe-template-manifest',
       'recipe-local-render',
       'recipe-speech-caption',
+      'recipe-dead-air-cut',
       'recipe-safe-crop',
       'recipe-queue-runner',
+      'recipe-media-probe',
     ]);
     expect(recipes.find(recipe => recipe.adapterId === 'ffmpeg')?.outputFiles).toContain('exports/travel-pet-bowl-9x16.mp4');
+    expect(recipes.find(recipe => recipe.adapterId === 'auto-editor')?.passCriteria.join(' ')).toContain('原始时间戳');
     expect(recipes.find(recipe => recipe.adapterId === 'queue-worker')?.passCriteria.join(' ')).toContain('缺素材任务不进入渲染');
+    expect(recipes.find(recipe => recipe.adapterId === 'mediainfo')?.outputFiles).toContain('exports/commerce-remix-travel-pet-bowl/upload-ready-checklist.md');
     expect(JSON.stringify(recipes)).not.toMatch(/apiKey|accessToken|Bearer|sk-/i);
   });
 
@@ -472,6 +504,7 @@ describe('commerce remix engine', () => {
     ]);
     expect(board.routes.find(route => route.id === 'template-compose')?.primaryAdapterIds).toEqual(expect.arrayContaining(['remotion', 'opentimelineio', 'editly']));
     expect(board.routes.find(route => route.id === 'render-export')?.primaryAdapterIds).toEqual(expect.arrayContaining(['queue-worker', 'ffmpeg', 'mcp-video']));
+    expect(board.routes.find(route => route.id === 'qa-return-loop')?.primaryAdapterIds).toContain('mediainfo');
     expect(board.customerVisibleOutputs).toContain('每个平台的标题/文案/标签/发布清单');
     expect(board.notProviderBlockers).toContain('平台自动登录不是首版 blocker');
     expect(JSON.stringify(board)).not.toMatch(/apiKey|accessToken|Bearer|sk-/i);

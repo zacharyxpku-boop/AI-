@@ -104,7 +104,10 @@ describe('/api/commerce-remix', () => {
     expect(body.firstDeliveryChecklist.promise).toContain('不等图片/视频/数字人 Key');
     expect(body.firstDeliveryChecklist.noWaitItems).toContain('平台自动登录');
     expect(body.openSourceAdapters.find((adapter: { id: string }) => adapter.id === 'queue-worker').readiness).toBe('ready_now');
+    expect(body.openSourceCoverage.layers.find((layer: { id: string }) => layer.id === 'clip-ready').primaryAdapterIds).toContain('auto-editor');
+    expect(body.openSourceCoverage.customerPromise).toContain('自己发布');
     expect(body.executionRecipes.find((recipe: { adapterId: string }) => recipe.adapterId === 'ffmpeg').passCriteria.join(' ')).toContain('MP4 可播放');
+    expect(body.executionRecipes.find((recipe: { adapterId: string }) => recipe.adapterId === 'mediainfo').passCriteria.join(' ')).toContain('编码');
     expect(body.orchestrationBoard.routes.find((route: { id: string }) => route.id === 'template-compose').primaryAdapterIds).toContain('editly');
     expect(body.orchestrationBoard.notProviderBlockers).toContain('平台自动登录不是首版 blocker');
     expect(body.workflowPlaybook.noProviderFallbacks.join(' ')).toContain('没有自动发布');

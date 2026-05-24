@@ -293,6 +293,28 @@ export interface CommerceRemixOrchestrationBoard {
   notProviderBlockers: string[];
 }
 
+export interface CommerceOpenSourceCoverageLayer {
+  id: string;
+  label: string;
+  customerProblem: string;
+  primaryAdapterIds: string[];
+  backupAdapterIds: string[];
+  runNow: string;
+  outputProof: string;
+  scaleRule: string;
+}
+
+export interface CommerceOpenSourceCoverage {
+  headline: string;
+  summary: string;
+  readyNowCount: number;
+  totalAdapterCount: number;
+  layers: CommerceOpenSourceCoverageLayer[];
+  installOrder: string[];
+  customerPromise: string;
+  limits: string[];
+}
+
 export interface CommerceRemixWorkflowPlaybook {
   stages: Array<{
     id: string;
@@ -625,6 +647,16 @@ export function buildCommerceOpenSourceAdapters(): CommerceOpenSourceAdapter[] {
       guardrail: '只从客户授权视频中切片；切点建议必须进入人工抽检，不能直接发布。',
     },
     {
+      id: 'auto-editor',
+      name: 'Auto-Editor',
+      repositoryUrl: 'https://github.com/WyattBlue/auto-editor',
+      useFor: '自动去静音、删停顿、按音量和动静变化生成粗剪建议',
+      integrationMode: 'local_worker',
+      customerValue: '客户给口播、直播回放或测评长素材时，先剪掉无效停顿，再进入电商卖点模板。',
+      readiness: 'ready_now',
+      guardrail: '只输出粗剪建议和可复核片段，不直接发布，不剪掉商品承诺或售后限制。',
+    },
+    {
       id: 'lossless-cut',
       name: 'LosslessCut patterns',
       repositoryUrl: 'https://github.com/mifi/lossless-cut',
@@ -655,6 +687,16 @@ export function buildCommerceOpenSourceAdapters(): CommerceOpenSourceAdapter[] {
       guardrail: '只做格式和尺寸处理，不改写商品事实，不生成虚假效果对比。',
     },
     {
+      id: 'mediainfo',
+      name: 'MediaInfo',
+      repositoryUrl: 'https://github.com/MediaArea/MediaInfo',
+      useFor: '读取视频编码、分辨率、帧率、时长、音轨和码率，作为渲染前后的质量证据',
+      integrationMode: 'local_worker',
+      customerValue: '每条成片都有可检查的媒体参数，减少上传平台后才发现格式不对。',
+      readiness: 'ready_now',
+      guardrail: '只读取媒体技术信息，不读取客户账号、联系人或平台后台数据。',
+    },
+    {
       id: 'gpac-packager',
       name: 'GPAC packaging',
       repositoryUrl: 'https://github.com/gpac/gpac',
@@ -663,6 +705,16 @@ export function buildCommerceOpenSourceAdapters(): CommerceOpenSourceAdapter[] {
       customerValue: '在大规模队列后增加封装检查，减少客户下载后打不开或平台上传失败。',
       readiness: 'later',
       guardrail: '首版只做本地文件封装验证；平台上传和 CDN 分发后续再接客户授权配置。',
+    },
+    {
+      id: 'gstreamer',
+      name: 'GStreamer',
+      repositoryUrl: 'https://github.com/GStreamer/gstreamer',
+      useFor: '后续把转码、合成、预览和长任务拆成可监控的媒体管线',
+      integrationMode: 'local_worker',
+      customerValue: '当单机 FFmpeg 批处理不够稳时，把大规模任务升级成更细的媒体流水线。',
+      readiness: 'later',
+      guardrail: '只在大批量和工程化需求出现后接入；首版不增加客户操作复杂度。',
     },
   ];
 }
@@ -720,6 +772,20 @@ export function buildCommerceRemixExecutionRecipes(
       fallbackWhenUnavailable: '没有转写 worker 时，直接使用系统生成的口播稿和人工字幕。',
     },
     {
+      id: 'recipe-dead-air-cut',
+      adapterId: 'auto-editor',
+      title: '长口播去停顿粗剪',
+      inputFiles: ['客户授权口播视频', '直播回放切片', `${packageRoot}/clip-candidates.json`],
+      operatorSteps: [
+        '按静音、停顿和低运动片段生成粗剪候选',
+        '保留被删除片段的时间戳，方便人工追回商品承诺',
+        '把有效片段写回模板编排候选池',
+      ],
+      outputFiles: [`${packageRoot}/dead-air-cut.json`, `${packageRoot}/shortlisted-clips`],
+      passCriteria: ['每个候选片段有原始时间戳', '商品承诺和价格信息不自动删除', '人工抽检后才进入最终成片'],
+      fallbackWhenUnavailable: '没有自动粗剪 worker 时，按 15-30 秒人工片段清单进入模板编排。',
+    },
+    {
       id: 'recipe-safe-crop',
       adapterId: 'opencv-mediapipe',
       title: '封面裁切和字幕遮挡检查',
@@ -747,7 +813,103 @@ export function buildCommerceRemixExecutionRecipes(
       passCriteria: ['缺素材任务不进入渲染', '已导出任务不被失败任务回滚', '日志能追溯每条视频输出'],
       fallbackWhenUnavailable: '没有队列服务时，按批次清单手动执行，每批最多 3 条。',
     },
+    {
+      id: 'recipe-media-probe',
+      adapterId: 'mediainfo',
+      title: '成片参数和上传前验收',
+      inputFiles: plan.ffmpegCommands.map(command => command.output),
+      operatorSteps: [
+        '读取每条成片的编码、分辨率、帧率、音轨和时长',
+        '对照平台尺寸和文件要求生成上传前检查',
+        '把不合格文件退回单条重渲染，不影响已合格成片',
+      ],
+      outputFiles: [`${packageRoot}/media-probe-report.json`, `${packageRoot}/upload-ready-checklist.md`],
+      passCriteria: ['编码、尺寸、时长和音轨有记录', '不合格文件有单条返工原因', '客户拿到上传前检查表'],
+      fallbackWhenUnavailable: '没有媒体探测 worker 时，人工抽检成片属性和平台上传结果。',
+    },
   ];
+}
+
+export function buildCommerceOpenSourceCoverage(
+  input: CommerceRemixPlanInput,
+  plan = buildCommerceRemixEnginePlan(input),
+  adapters = buildCommerceOpenSourceAdapters(),
+): CommerceOpenSourceCoverage {
+  const adapterIds = new Set(adapters.map(adapter => adapter.id));
+  const availableIds = (ids: string[]) => ids.filter(id => adapterIds.has(id));
+  const readyNowCount = adapters.filter(adapter => adapter.readiness === 'ready_now').length;
+  const packageRoot = `exports/commerce-remix-${slugify(input.productName)}`;
+  return {
+    headline: '开源混剪能力地图：把 GitHub 能力收束成 5 层电商出片系统',
+    summary: `当前纳入 ${adapters.length} 个开源适配器，其中 ${readyNowCount} 个可先按本地 worker 或任务清单交付；图片、视频、数字人 Key 只增强生成层，不阻塞混剪交付。`,
+    readyNowCount,
+    totalAdapterCount: adapters.length,
+    layers: [
+      {
+        id: 'source-ready',
+        label: '素材先变干净',
+        customerProblem: '客户给的图片、长视频、口播和直播切片格式不统一，直接剪会失败。',
+        primaryAdapterIds: availableIds(['imagemagick-libheif', 'mediainfo', 'lossless-cut', 'ffmpeg']),
+        backupAdapterIds: availableIds(['moviepy', 'mcp-video']),
+        runNow: '标准化格式、抽取片段、记录媒体参数，缺素材进入补拍或生图任务。',
+        outputProof: `${packageRoot}/normalized-assets.json + media-probe-report.json`,
+        scaleRule: '素材超过 50 个时先分批入库，每批只放可授权、可追溯素材进队列。',
+      },
+      {
+        id: 'clip-ready',
+        label: '长素材自动找片段',
+        customerProblem: '客户不想手工翻长视频，也不知道哪几秒能证明卖点。',
+        primaryAdapterIds: availableIds(['pyscenedetect', 'auto-editor', 'whisper', 'subtitle-edit']),
+        backupAdapterIds: availableIds(['lossless-cut', 'mcp-video']),
+        runNow: '按场景变化、停顿、口播字幕和时间戳生成候选片段，低置信度只进复核池。',
+        outputProof: `${packageRoot}/clip-candidates.json + caption-review.md`,
+        scaleRule: '每条候选片段保留原始时间戳，人工抽检通过后才进入模板编排。',
+      },
+      {
+        id: 'template-ready',
+        label: '脚本变成可复用模板',
+        customerProblem: '同一个商品要发多个平台和多个人设，不能每条都重新剪。',
+        primaryAdapterIds: availableIds(['remotion', 'opentimelineio', 'editly', 'mlt-shotcut']),
+        backupAdapterIds: availableIds(['libopenshot', 'moviepy']),
+        runNow: '把卖点、模特证明、客服异议和 CTA 固化成时间线模板与发布包。',
+        outputProof: `${packageRoot}/timeline.json + template-composition.json`,
+        scaleRule: `按 ${unique(input.platforms).length} 个平台和 ${plan.publishingPacks.length} 个发布包复制变体，不复制复杂剪辑器 UI。`,
+      },
+      {
+        id: 'render-ready',
+        label: '批量渲染不互相拖垮',
+        customerProblem: '一批几十条视频里，只要一条失败就会拖慢交付。',
+        primaryAdapterIds: availableIds(['queue-worker', 'ffmpeg', 'mediainfo']),
+        backupAdapterIds: availableIds(['gpac-packager', 'gstreamer', 'moviepy']),
+        runNow: '按平台和尺寸拆任务、限并发、单条失败重试、成功文件写回输出目录。',
+        outputProof: `${packageRoot}/render-log.json + upload-ready-checklist.md`,
+        scaleRule: '首版并发保守；单客户每批超过 100 条或多人审核时再接对象存储和分布式 worker。',
+      },
+      {
+        id: 'return-ready',
+        label: '发布后回填再重剪',
+        customerProblem: '平台表现暂时难自动读取，但客户需要下一轮优化建议。',
+        primaryAdapterIds: availableIds(['subtitle-edit', 'opencv-mediapipe', 'mediainfo']),
+        backupAdapterIds: availableIds(['ffmpeg', 'imagemagick-libheif']),
+        runNow: '客户上传链接、截图、CSV 或云盘目录后，生成下一轮标题、封面和重剪任务。',
+        outputProof: `${packageRoot}/04-customer-return + 05-next-round`,
+        scaleRule: '没有真实回填不展示虚构播放量、订单或转化；有 API 授权后再接自动 analytics。',
+      },
+    ],
+    installOrder: [
+      '第一优先：FFmpeg、MediaInfo、ImageMagick、LosslessCut 范式，先保证素材和成片可检查。',
+      '第二优先：PySceneDetect、Auto-Editor、Whisper、Subtitle Edit，解决长素材切片和字幕复核。',
+      '第三优先：Remotion、OpenTimelineIO、Editly、MLT 范式，沉淀电商模板和跨工具时间线。',
+      '第四优先：队列 worker、GPAC、GStreamer，在大规模渲染和云端扩容时再加重工程化。',
+    ],
+    customerPromise: '客户看到的是“给素材 -> 出多平台成片包 -> 自己发布 -> 回填复盘”，不是一堆开源项目名。',
+    limits: [
+      '只处理客户上传或明确授权素材。',
+      '不自动登录平台账号，不保存客户 cookie。',
+      '不自动读取后台表现，先走链接、截图、CSV 或云盘回填。',
+      'AI 生图、AI 视频和数字人口播等你提供 Key 后接入生成层。',
+    ],
+  };
 }
 
 export function buildCommerceRemixOrchestrationBoard(
@@ -777,7 +939,7 @@ export function buildCommerceRemixOrchestrationBoard(
         id: 'clip-mining',
         phase: '片段挖掘',
         customerLabel: '从长素材里自动找能证明卖点的短片段',
-        primaryAdapterIds: availableIds(['pyscenedetect', 'whisper', 'subtitle-edit']),
+        primaryAdapterIds: availableIds(['pyscenedetect', 'auto-editor', 'whisper', 'subtitle-edit']),
         backupAdapterIds: availableIds(['lossless-cut', 'mcp-video']),
         input: '客户上传的长视频、口播音频、直播切片或测评素材',
         decisionRule: '有口播先转写分句；有长视频先按场景切点；低置信度片段只进候选，不直接出片。',
@@ -800,7 +962,7 @@ export function buildCommerceRemixOrchestrationBoard(
         phase: '稳定渲染',
         customerLabel: '大批量渲染时，失败单条隔离，不拖垮整批交付',
         primaryAdapterIds: availableIds(['queue-worker', 'ffmpeg', 'mcp-video']),
-        backupAdapterIds: availableIds(['moviepy', 'gpac-packager']),
+        backupAdapterIds: availableIds(['moviepy', 'gpac-packager', 'gstreamer']),
         input: `${plan.queue.length} 个平台/尺寸渲染任务`,
         decisionRule: '按平台和尺寸拆任务；并发受控；失败最多重试后进入人工检查；成功文件写回云盘结构。',
         outputs: plan.ffmpegCommands.map(command => command.output),
@@ -810,7 +972,7 @@ export function buildCommerceRemixOrchestrationBoard(
         id: 'qa-return-loop',
         phase: '质检复盘',
         customerLabel: '交付前做成片质检，发布后让客户回填数据进入下一轮优化',
-        primaryAdapterIds: availableIds(['opencv-mediapipe', 'subtitle-edit', 'gpac-packager']),
+        primaryAdapterIds: availableIds(['opencv-mediapipe', 'subtitle-edit', 'mediainfo', 'gpac-packager']),
         backupAdapterIds: availableIds(['ffmpeg', 'imagemagick-libheif']),
         input: '成片、封面、字幕、发布链接、截图和表现 CSV',
         decisionRule: '质检不过不交付；平台数据先不自动读取，客户上传证据后生成下一轮标题和重剪任务。',
@@ -2283,6 +2445,13 @@ export function buildDemoCommerceRemixWorkflowPlaybook() {
 export function buildDemoCommerceRemixExecutionRecipes() {
   const input = buildDemoCommerceRemixInput();
   return buildCommerceRemixExecutionRecipes(input, buildCommerceRemixEnginePlan(input));
+}
+
+export function buildDemoCommerceOpenSourceCoverage() {
+  const input = buildDemoCommerceRemixInput();
+  const plan = buildCommerceRemixEnginePlan(input);
+  const adapters = buildCommerceOpenSourceAdapters();
+  return buildCommerceOpenSourceCoverage(input, plan, adapters);
 }
 
 export function buildDemoCommerceRemixOrchestrationBoard() {

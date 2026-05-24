@@ -41,6 +41,10 @@ describe('factory page', () => {
     expect(html).toContain('开源提词器思路');
     expect(html).toContain('回填：');
     expect(html).toContain('个账号人设');
+    expect(html).toContain('Open Source Coverage');
+    expect(html).toContain('开源混剪能力地图');
+    expect(html).toContain('Auto-Editor');
+    expect(html).toContain('MediaInfo');
     expect(html).toContain('开源能力适配器');
     expect(html).toContain('执行配方');
     expect(html).toContain('每个开源能力都落到输入、步骤、输出和验收');

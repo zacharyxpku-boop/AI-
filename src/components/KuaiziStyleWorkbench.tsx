@@ -14,6 +14,7 @@ import {
   buildDemoCommerceFirstDeliveryChecklist,
   buildDemoCommerceModelImageTaskPack,
   buildCommerceOpenSourceAdapters,
+  buildDemoCommerceOpenSourceCoverage,
   buildDemoCommerceProviderActivationPlan,
   buildDemoCommerceProviderNeedAssessment,
   buildDemoCommercePublishingMatrixPlan,
@@ -240,6 +241,7 @@ export function KuaiziStyleWorkbench() {
   const providerNeedAssessment = useMemo(() => buildDemoCommerceProviderNeedAssessment(), []);
   const firstDeliveryChecklist = useMemo(() => buildDemoCommerceFirstDeliveryChecklist(), []);
   const openSourceAdapters = useMemo(() => buildCommerceOpenSourceAdapters(), []);
+  const openSourceCoverage = useMemo(() => buildDemoCommerceOpenSourceCoverage(), []);
   const executionRecipes = useMemo(() => buildDemoCommerceRemixExecutionRecipes(), []);
   const orchestrationBoard = useMemo(() => buildDemoCommerceRemixOrchestrationBoard(), []);
   const workflowPlaybook = useMemo(() => buildDemoCommerceRemixWorkflowPlaybook(), []);
@@ -684,6 +686,45 @@ export function KuaiziStyleWorkbench() {
                         <p className="mt-2 text-sm leading-6 text-slate-600">{row.reason}</p>
                       </article>
                     ))}
+                  </div>
+                  <div className="mt-5 rounded-md border border-sky-100 bg-sky-50 p-4">
+                    <div className="flex flex-col gap-3 lg:flex-row lg:items-end lg:justify-between">
+                      <div className="min-w-0">
+                        <p className="text-xs font-black uppercase tracking-[0.18em] text-sky-700">Open Source Coverage</p>
+                        <h4 className="mt-1 text-base font-black leading-6 text-slate-950">{openSourceCoverage.headline}</h4>
+                        <p className="mt-2 max-w-4xl text-sm leading-6 text-slate-600">{openSourceCoverage.summary}</p>
+                      </div>
+                      <div className="grid shrink-0 grid-cols-2 gap-2">
+                        <div className="rounded bg-white px-3 py-2 text-center ring-1 ring-sky-100">
+                          <div className="text-lg font-black text-slate-950">{openSourceCoverage.readyNowCount}</div>
+                          <div className="text-[11px] font-black text-sky-700">可先用</div>
+                        </div>
+                        <div className="rounded bg-white px-3 py-2 text-center ring-1 ring-sky-100">
+                          <div className="text-lg font-black text-slate-950">{openSourceCoverage.totalAdapterCount}</div>
+                          <div className="text-[11px] font-black text-sky-700">适配器</div>
+                        </div>
+                      </div>
+                    </div>
+                    <div className="mt-4 grid gap-3 xl:grid-cols-5">
+                      {openSourceCoverage.layers.map(layer => (
+                        <article className="min-w-0 rounded-md bg-white p-3 ring-1 ring-sky-100" key={layer.id}>
+                          <h5 className="text-sm font-black leading-5 text-slate-950">{layer.label}</h5>
+                          <p className="mt-2 line-clamp-2 text-xs font-bold leading-5 text-sky-700">{layer.customerProblem}</p>
+                          <p className="mt-2 line-clamp-3 text-xs leading-5 text-slate-600">{layer.runNow}</p>
+                          <div className="mt-3 flex flex-wrap gap-1.5">
+                            {layer.primaryAdapterIds.slice(0, 3).map(id => (
+                              <span className="rounded bg-sky-50 px-2 py-1 text-[11px] font-black text-sky-700" key={id}>{id}</span>
+                            ))}
+                          </div>
+                          <p className="mt-3 line-clamp-2 rounded bg-slate-50 px-2 py-1.5 text-[11px] font-bold leading-4 text-slate-600">{layer.outputProof}</p>
+                        </article>
+                      ))}
+                    </div>
+                    <div className="mt-4 grid gap-2 lg:grid-cols-4">
+                      {openSourceCoverage.installOrder.map(item => (
+                        <div className="rounded-md bg-white px-3 py-2 text-xs font-bold leading-5 text-slate-700 ring-1 ring-sky-100" key={item}>{item}</div>
+                      ))}
+                    </div>
                   </div>
                   <div className="mt-5 rounded-md border border-indigo-100 bg-indigo-50 p-4">
                     <div className="flex flex-col gap-2 md:flex-row md:items-end md:justify-between">
