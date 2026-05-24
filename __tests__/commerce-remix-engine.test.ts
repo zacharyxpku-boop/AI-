@@ -5,8 +5,10 @@ import {
   buildCommerceTimeline,
   buildDemoCommerceRemixEnginePlan,
   buildFfmpegCommandManifest,
+  buildCommerceRemixExportPackage,
   buildPlatformPublishingPacks,
   buildRemixRenderQueue,
+  executeCommerceRemixDryRun,
   transitionRemixQueueItem,
   type CommerceRemixPlanInput,
 } from '@/lib/commerce-remix-engine';
@@ -102,6 +104,7 @@ describe('commerce remix engine', () => {
 
     expect(packs.map(pack => pack.platform)).toEqual(['tiktok', 'xiaohongshu', 'shopify']);
     expect(packs[0].titles[0]).toContain('Stop scrolling');
+    expect(packs[0].accountVariants.map(variant => variant.accountType)).toEqual(['真实买家号', '测评种草号', '店铺官方号']);
     expect(packs[1].publishChecklist).toContain('发布后回填链接、截图或 CSV');
     expect(packs[2].cta).toBe('View product details');
   });
@@ -109,7 +112,7 @@ describe('commerce remix engine', () => {
   it('assembles the full local-first remix engine plan', () => {
     const plan = buildCommerceRemixEnginePlan(baseInput);
 
-    expect(plan.engineStack.map(item => item.id)).toEqual(['timeline-json', 'remotion-template', 'ffmpeg-render', 'queue-runner']);
+    expect(plan.engineStack.map(item => item.id)).toEqual(['timeline-json', 'remotion-template', 'ffmpeg-render', 'queue-runner', 'handoff-package']);
     expect(plan.missingAssets.map(asset => asset.id)).toContain('missing-model');
     expect(plan.handoffMarkdown).toContain('Wenai 本地混剪任务包');
     expect(plan.handoffMarkdown).toContain('FFmpeg');
@@ -122,5 +125,74 @@ describe('commerce remix engine', () => {
     expect(plan.publishingPacks).toHaveLength(5);
     expect(plan.queue.map(item => item.platform)).toEqual(['xiaohongshu', 'tiktok', 'shopify', 'meta', 'wechat_video']);
     expect(plan.missingAssets[0].label).toBe('手持模特图');
+  });
+
+  it('exports a customer-ready remix package with timeline, subtitles, voiceover, publishing packs, and upload checklist', () => {
+    const completeInput: CommerceRemixPlanInput = {
+      ...baseInput,
+      assets: [
+        ...baseInput.assets,
+        { id: 'missing-model', kind: 'model_image', label: 'model image', uri: 'assets/model.png', rightsReady: true },
+      ],
+    };
+    const pack = buildCommerceRemixExportPackage(completeInput);
+
+    expect(pack.packageId).toBe('commerce-remix-travel-pet-bowl');
+    expect(pack.noSecretScanPassed).toBe(true);
+    expect(pack.customerPublishingBoundary).toContain('客户自己登录平台发布');
+    expect(pack.cloudDriveHandoff).toContain('表现 CSV');
+    expect(pack.artifacts.map(artifact => artifact.kind)).toEqual([
+      'timeline',
+      'ffmpeg_commands',
+      'concat_manifest',
+      'subtitles',
+      'voiceover_script',
+      'publishing_packs',
+      'handoff',
+      'customer_upload',
+    ]);
+    expect(pack.artifacts.find(artifact => artifact.kind === 'subtitles')?.content).toContain('00:00:00,000 --> 00:00:04,000');
+    expect(pack.artifacts.find(artifact => artifact.kind === 'voiceover_script')?.content).toContain('Feeding outside gets easier');
+    expect(JSON.stringify(pack)).not.toMatch(/apiKey|accessToken|Bearer|sk-/i);
+  });
+
+  it('dry-runs ready render jobs into exported outputs without external providers', () => {
+    const completeInput: CommerceRemixPlanInput = {
+      ...baseInput,
+      assets: [
+        ...baseInput.assets,
+        { id: 'missing-model', kind: 'model_image', label: 'model image', uri: 'assets/model.png', rightsReady: true },
+      ],
+    };
+    const plan = buildCommerceRemixEnginePlan(completeInput);
+    const result = executeCommerceRemixDryRun(plan);
+
+    expect(result.exportedCount).toBe(3);
+    expect(result.needsMaterialCount).toBe(0);
+    expect(result.outputPaths).toEqual(expect.arrayContaining(['exports/travel-pet-bowl-9x16.mp4', 'exports/travel-pet-bowl-16x9.mp4']));
+    expect(result.traces[0].trace).toEqual(expect.arrayContaining([
+      expect.stringContaining('render:start'),
+      expect.stringContaining('render:exported'),
+    ]));
+  });
+
+  it('keeps dry-run material gaps and retryable failures isolated per queue item', () => {
+    const plan = buildCommerceRemixEnginePlan(baseInput);
+    const gapResult = executeCommerceRemixDryRun(plan);
+    const readyPlan = buildCommerceRemixEnginePlan({
+      ...baseInput,
+      assets: [
+        ...baseInput.assets,
+        { id: 'missing-model', kind: 'model_image', label: 'model image', uri: 'assets/model.png', rightsReady: true },
+      ],
+    });
+    const failedResult = executeCommerceRemixDryRun(readyPlan, { failQueueItemIds: [readyPlan.queue[1].id] });
+
+    expect(gapResult.exportedCount).toBe(0);
+    expect(gapResult.needsMaterialCount).toBe(3);
+    expect(gapResult.traces[0].trace.join(' ')).toContain('material_gap:missing-model');
+    expect(failedResult.exportedCount).toBe(2);
+    expect(failedResult.blockedCount).toBe(1);
+    expect(failedResult.queue.find(item => item.id === readyPlan.queue[1].id)?.status).toBe('failed_retryable');
   });
 });

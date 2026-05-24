@@ -2,7 +2,7 @@
 
 import Link from 'next/link';
 import { useMemo, useState } from 'react';
-import { buildDemoCommerceRemixEnginePlan } from '@/lib/commerce-remix-engine';
+import { buildDemoCommerceRemixDryRun, buildDemoCommerceRemixEnginePlan, buildDemoCommerceRemixExportPackage } from '@/lib/commerce-remix-engine';
 
 type FlowId = 'brief' | 'asset' | 'image' | 'video' | 'publish' | 'review';
 
@@ -189,6 +189,8 @@ export function KuaiziStyleWorkbench() {
     return projects.filter(project => `${project.title} ${project.category} ${project.status} ${project.next}`.toLowerCase().includes(value));
   }, [query]);
   const remixPlan = useMemo(() => buildDemoCommerceRemixEnginePlan(), []);
+  const remixPackage = useMemo(() => buildDemoCommerceRemixExportPackage(), []);
+  const dryRun = useMemo(() => buildDemoCommerceRemixDryRun(), []);
   const queueSummary = useMemo(() => {
     const statuses = ['needs_material', 'ready', 'rendering', 'exported'] as const;
     return statuses.map(status => ({
@@ -199,8 +201,8 @@ export function KuaiziStyleWorkbench() {
   }, [remixPlan]);
 
   return (
-    <main className="min-h-screen bg-[#f7f9ff] text-slate-950">
-      <div className="flex min-h-screen">
+    <main className="min-h-screen overflow-x-hidden bg-[#f7f9ff] text-slate-950">
+      <div className="flex min-h-screen min-w-0 overflow-x-hidden">
         <aside className="hidden w-[224px] shrink-0 flex-col border-r border-[#dbe4f3] bg-[#eef4ff] xl:flex">
           <div className="px-5 pb-5 pt-7">
             <div className="flex items-center gap-2">
@@ -240,7 +242,7 @@ export function KuaiziStyleWorkbench() {
           </nav>
         </aside>
 
-        <section className="flex min-w-0 flex-1 flex-col">
+        <section className="flex min-w-0 flex-1 flex-col overflow-x-hidden">
           <header className="shrink-0 border-b border-[#dbe4f3] bg-white/95 px-4 py-3 md:px-6">
             <div className="flex flex-col gap-3 lg:flex-row lg:items-center lg:justify-between">
               <div className="min-w-0">
@@ -368,10 +370,10 @@ export function KuaiziStyleWorkbench() {
                   </div>
                   <div className="mt-5 grid gap-3 md:grid-cols-2">
                     {remixPlan.engineStack.map(row => (
-                      <article className="rounded-md border border-slate-200 bg-slate-50 p-4" key={row.id}>
+                      <article className="min-w-0 rounded-md border border-slate-200 bg-slate-50 p-4" key={row.id}>
                         <div className="flex items-start justify-between gap-3">
-                          <h4 className="text-sm font-black text-slate-950">{row.role}</h4>
-                          <span className="shrink-0 rounded bg-indigo-50 px-2 py-1 text-[11px] font-black text-indigo-700">{row.openSourceReference}</span>
+                          <h4 className="min-w-0 text-sm font-black text-slate-950">{row.role}</h4>
+                          <span className="max-w-[54%] shrink rounded bg-indigo-50 px-2 py-1 text-right text-[11px] font-black leading-4 text-indigo-700 [overflow-wrap:anywhere]">{row.openSourceReference}</span>
                         </div>
                         <p className="mt-2 text-sm leading-6 text-slate-600">{row.reason}</p>
                       </article>
@@ -385,6 +387,20 @@ export function KuaiziStyleWorkbench() {
                   <p className="mt-3 text-sm leading-6 text-slate-600">
                     每条视频都有素材清单、模板、尺寸、字幕、封面和输出路径。失败时只回到缺口，不让客户看到复杂报错。
                   </p>
+                  <div className="mt-4 grid grid-cols-3 gap-2">
+                    <div className="rounded-md bg-white p-3 ring-1 ring-blue-100">
+                      <div className="text-lg font-black text-slate-950">{dryRun.exportedCount}</div>
+                      <div className="mt-1 text-[11px] font-black text-slate-500">可导出视频</div>
+                    </div>
+                    <div className="rounded-md bg-white p-3 ring-1 ring-blue-100">
+                      <div className="text-lg font-black text-slate-950">{remixPackage.artifacts.length}</div>
+                      <div className="mt-1 text-[11px] font-black text-slate-500">任务包文件</div>
+                    </div>
+                    <div className="rounded-md bg-white p-3 ring-1 ring-blue-100">
+                      <div className="text-lg font-black text-slate-950">{remixPlan.publishingPacks.reduce((sum, pack) => sum + pack.accountVariants.length, 0)}</div>
+                      <div className="mt-1 text-[11px] font-black text-slate-500">账号标题角度</div>
+                    </div>
+                  </div>
                   <div className="mt-5 grid gap-2">
                     {queueSummary.map(item => (
                       <div className="flex items-center justify-between rounded-md border border-blue-100 bg-white px-3 py-2 text-sm font-black text-slate-800" key={item.status}>
@@ -395,6 +411,14 @@ export function KuaiziStyleWorkbench() {
                   </div>
                   <div className="mt-4 rounded-md border border-blue-100 bg-white p-3 text-xs leading-5 text-slate-600">
                     当前样例已经生成 {remixPlan.timeline.clips.length} 个时间线片段、{remixPlan.ffmpegCommands.length} 条 FFmpeg 命令、{remixPlan.publishingPacks.length} 个平台发布包。
+                  </div>
+                  <div className="mt-3 space-y-2">
+                    {remixPackage.artifacts.slice(0, 4).map(artifact => (
+                      <div className="flex items-center justify-between gap-3 rounded-md bg-white px-3 py-2 text-xs ring-1 ring-blue-100" key={artifact.path}>
+                        <span className="min-w-0 truncate font-black text-slate-700">{artifact.path.split('/').pop()}</span>
+                        <span className="shrink-0 text-slate-500">{artifact.kind}</span>
+                      </div>
+                    ))}
                   </div>
                 </aside>
               </section>
