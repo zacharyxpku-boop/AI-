@@ -25,6 +25,9 @@ describe('factory friend trial workflow pages', () => {
     expect(html).toContain('Wenai 商品增长工作台');
     expect(html).toContain('Customer Next Step');
     expect(html).toContain('每个子页面都按同一条电商交付链路推进');
+    expect(html).toContain('Last Mile');
+    expect(html).toContain('每个子页面都保留同一个最后一公里边界');
+    expect(html).toContain('开源混剪做到可发布资产');
     expect(html).toContain('客户自己发布');
     expect(html).toContain('首版不碰：自动登录、代发、后台数据 API');
     expect(html).toContain(expected);

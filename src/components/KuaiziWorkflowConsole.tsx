@@ -60,6 +60,24 @@ const providerBoundaryChips = [
   '首版不碰：自动登录、代发、后台数据 API',
 ] as const;
 
+const lastMileCards = [
+  {
+    title: '开源/本地先交付',
+    body: '长素材切片、字幕口播、模板时间线、稳定渲染和发布包先跑起来。',
+    proof: '客户看到成片、标题、封面、发布清单和回填字段。',
+  },
+  {
+    title: '客户自己发布',
+    body: 'Wenai 不拿账号、密码、cookie、后台 token，也不绕过平台流程。',
+    proof: '客户登录自己的平台账号，复制发布包即可执行。',
+  },
+  {
+    title: '回填再复盘',
+    body: '表现数据先靠链接、截图、CSV 或云盘目录，不把平台 API 当首版阻塞。',
+    proof: '下一轮判断改图、重剪视频、换标题还是补客服话术。',
+  },
+] as const;
+
 const configs: Record<WorkflowStep, WorkflowConfig> = {
   creative: {
     eyebrow: 'Step 01',
@@ -330,6 +348,26 @@ export function KuaiziWorkflowConsole({ active }: { active: WorkflowStep }) {
                   <h3 className="mt-2 truncate text-sm font-black text-slate-950">{item.title}</h3>
                   <p className="mt-1 line-clamp-2 text-xs font-bold leading-5 text-slate-600">{item.body}</p>
                 </Link>
+              ))}
+            </div>
+          </section>
+
+          <section className="mt-5 rounded-md border border-emerald-100 bg-emerald-50 p-4 shadow-sm">
+            <div className="flex flex-col gap-2 sm:flex-row sm:items-end sm:justify-between">
+              <div className="min-w-0">
+                <p className="text-xs font-black uppercase tracking-[0.18em] text-emerald-700">Last Mile</p>
+                <h2 className="mt-1 text-lg font-black leading-6 text-slate-950">每个子页面都保留同一个最后一公里边界</h2>
+                <p className="mt-1 text-sm leading-6 text-slate-600">开源混剪做到可发布资产；平台发布和真实表现证据由客户回到工作台。</p>
+              </div>
+              <span className="w-fit rounded-md bg-white px-2.5 py-1 text-xs font-black text-emerald-700 ring-1 ring-emerald-100">不代登，不虚构</span>
+            </div>
+            <div className="mt-4 grid gap-3 lg:grid-cols-3">
+              {lastMileCards.map(card => (
+                <article className="min-w-0 rounded-md bg-white p-3 ring-1 ring-emerald-100" key={card.title}>
+                  <h3 className="text-sm font-black leading-5 text-slate-950">{card.title}</h3>
+                  <p className="mt-2 text-xs font-bold leading-5 text-emerald-800">{card.body}</p>
+                  <p className="mt-3 rounded bg-emerald-50 px-2 py-1.5 text-[11px] font-bold leading-4 text-slate-700">{card.proof}</p>
+                </article>
               ))}
             </div>
           </section>
