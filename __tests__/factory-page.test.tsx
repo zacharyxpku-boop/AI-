@@ -30,6 +30,10 @@ describe('factory page', () => {
     expect(html).toContain('客户今天只看这些命令');
     expect(html).toContain('首版交付清单');
     expect(html).toContain('不等 Key，也能先给客户一套可发布资产');
+    expect(html).toContain('Customer Launch Readiness');
+    expect(html).toContain('客户上线前总验收板');
+    expect(html).toContain('满足这些才给客户上线');
+    expect(html).toContain('不能对客户承诺');
     expect(html).toContain('首版不用等');
     expect(html).toContain('验收和下一轮');
     expect(html).toContain('交付导航');

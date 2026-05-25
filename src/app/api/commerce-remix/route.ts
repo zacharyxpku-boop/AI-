@@ -5,6 +5,7 @@ import {
   buildCommerceCustomerReturnIntakeBoard,
   buildCommerceCustomerDeliveryMap,
   buildCommerceCustomerEvidenceUploadGuide,
+  buildCommerceCustomerLaunchReadinessBoard,
   buildCommerceDailyOperatorCockpit,
   buildCommerceEvidenceReadinessBoard,
   buildCommerceSalesConversationBoard,
@@ -43,6 +44,7 @@ import {
   buildDemoCommerceCustomerReturnIntakeBoard,
   buildDemoCommerceCustomerDeliveryMap,
   buildDemoCommerceCustomerEvidenceUploadGuide,
+  buildDemoCommerceCustomerLaunchReadinessBoard,
   buildDemoCommerceDailyOperatorCockpit,
   buildDemoCommerceEvidenceReadinessBoard,
   buildDemoCommerceSalesConversationBoard,
@@ -139,6 +141,7 @@ function buildInputResponse(input: CommerceRemixPlanInput, body: CommerceRemixRe
   const providerNeedAssessment = buildCommerceProviderNeedAssessment(input, plan, providerActivationPlan);
   const providerEscalationBoard = buildCommerceProviderEscalationBoard(input, providerNeedAssessment);
   const firstDeliveryChecklist = buildCommerceFirstDeliveryChecklist(input, plan, exportPackage, customerDeliveryMap, providerActivationPlan);
+  const customerLaunchReadinessBoard = buildCommerceCustomerLaunchReadinessBoard(input, firstDeliveryChecklist, providerNeedAssessment, renderReliabilityBoard);
   const openSourceAdapters = buildCommerceOpenSourceAdapters();
   const openSourceCoverage = buildCommerceOpenSourceCoverage(input, plan, openSourceAdapters);
   const openSourceStackSelector = buildCommerceOpenSourceStackSelector(input, plan, openSourceAdapters);
@@ -186,6 +189,7 @@ function buildInputResponse(input: CommerceRemixPlanInput, body: CommerceRemixRe
     providerNeedAssessment,
     providerEscalationBoard,
     firstDeliveryChecklist,
+    customerLaunchReadinessBoard,
     openSourceAdapters,
     openSourceCoverage,
     openSourceStackSelector,
@@ -234,6 +238,7 @@ export async function GET() {
     providerNeedAssessment: buildDemoCommerceProviderNeedAssessment(),
     providerEscalationBoard: buildDemoCommerceProviderEscalationBoard(),
     firstDeliveryChecklist: buildDemoCommerceFirstDeliveryChecklist(),
+    customerLaunchReadinessBoard: buildDemoCommerceCustomerLaunchReadinessBoard(),
     openSourceAdapters: buildCommerceOpenSourceAdapters(),
     openSourceCoverage: buildDemoCommerceOpenSourceCoverage(),
     openSourceStackSelector: buildDemoCommerceOpenSourceStackSelector(),

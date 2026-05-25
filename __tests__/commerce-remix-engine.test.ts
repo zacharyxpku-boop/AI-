@@ -10,6 +10,7 @@ import {
   buildCommerceCustomerReturnIntakeBoard,
   buildCommerceCustomerDeliveryMap,
   buildCommerceCustomerEvidenceUploadGuide,
+  buildCommerceCustomerLaunchReadinessBoard,
   buildCommerceSalesConversationBoard,
   buildCommerceCustomerServicePack,
   buildCommerceCustomerSupportWorkflow,
@@ -611,6 +612,33 @@ describe('commerce remix engine', () => {
     expect(checklist.noWaitItems).toContain('平台自动登录');
     expect(checklist.acceptanceChecklist.join(' ')).toContain('客户发布后只需回填链接、截图、CSV');
     expect(checklist.nextRoundTrigger.join(' ')).toContain('多 worker');
+  });
+
+  it('builds a customer launch readiness board from the full ecommerce delivery system', () => {
+    const plan = buildCommerceRemixEnginePlan(baseInput);
+    const checklist = buildCommerceFirstDeliveryChecklist(baseInput, plan);
+    const board = buildCommerceCustomerLaunchReadinessBoard(baseInput, checklist);
+
+    expect(board.headline).toContain('客户上线前总验收板');
+    expect(board.verdict).toBe('needs_customer_material');
+    expect(board.score).toBeGreaterThanOrEqual(70);
+    expect(board.lanes.map(lane => lane.id)).toEqual([
+      'key-boundary',
+      'open-remix',
+      'title-matrix',
+      'self-publish',
+      'return-loop',
+      'support-after-sales',
+      'scale-provider',
+    ]);
+    expect(board.lanes.find(lane => lane.id === 'key-boundary')?.state).toBe('waiting_for_key');
+    expect(board.lanes.find(lane => lane.id === 'open-remix')?.state).toBe('customer_action');
+    expect(board.lanes.find(lane => lane.id === 'self-publish')?.customerSees).toContain('客户自己登录平台发布');
+    expect(board.lanes.find(lane => lane.id === 'return-loop')?.customerSees).toContain('链接、截图、CSV');
+    expect(board.mustNotPromise.join(' ')).toContain('自动登录');
+    expect(board.mustNotPromise.join(' ')).toContain('API Key');
+    expect(board.launchOnlyWhen.join(' ')).toContain('发布包');
+    expect(JSON.stringify(board)).not.toMatch(/apiKey|accessToken|Bearer|sk-/i);
   });
 
   it('turns adapters into executable remix recipes with clear pass criteria', () => {

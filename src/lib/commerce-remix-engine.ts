@@ -710,6 +710,23 @@ export interface CommerceFirstDeliveryChecklist {
   nextRoundTrigger: string[];
 }
 
+export interface CommerceCustomerLaunchReadinessBoard {
+  headline: string;
+  verdict: 'ready_for_customer_trial' | 'needs_customer_material' | 'needs_provider_before_sale';
+  customerPromise: string;
+  score: number;
+  lanes: Array<{
+    id: string;
+    label: string;
+    state: 'ready' | 'waiting_for_key' | 'customer_action' | 'scale_later';
+    customerSees: string;
+    proof: string;
+    doNext: string;
+  }>;
+  mustNotPromise: string[];
+  launchOnlyWhen: string[];
+}
+
 const PLATFORM_LABELS: Record<RemixPlatform, string> = {
   xiaohongshu: '小红书',
   tiktok: 'TikTok',
@@ -3795,6 +3812,95 @@ export function buildCommerceFirstDeliveryChecklist(
   };
 }
 
+export function buildCommerceCustomerLaunchReadinessBoard(
+  input: CommerceRemixPlanInput,
+  checklist = buildCommerceFirstDeliveryChecklist(input),
+  providerAssessment = buildCommerceProviderNeedAssessment(input),
+  renderBoard = buildCommerceRenderReliabilityBoard(buildCommerceRemixEnginePlan(input).queue),
+): CommerceCustomerLaunchReadinessBoard {
+  const product = safeText(input.productName, '商品');
+  const platforms = input.platforms.map(platform => PLATFORM_LABELS[platform]).join(' / ');
+  const hasMaterialGaps = renderBoard.status === 'needs_material';
+  const readyLanes = hasMaterialGaps ? 5 : 6;
+
+  return {
+    headline: '客户上线前总验收板',
+    verdict: hasMaterialGaps ? 'needs_customer_material' : 'ready_for_customer_trial',
+    customerPromise: `${product} 可以先按 ${platforms || '目标平台'} 交付可自发布内容包：混剪、标题矩阵、客服素材和回填复盘已成体系；图片/视频/数字人 Key 只增强生成层。`,
+    score: Math.round((readyLanes / 7) * 100),
+    lanes: [
+      {
+        id: 'key-boundary',
+        label: '图片/视频/数字人 Key 边界',
+        state: 'waiting_for_key',
+        customerSees: 'Key 到位后自动生成；Key 未到位先拿 prompt、脚本、字幕和本地混剪包。',
+        proof: providerAssessment.waitingForYourKeys.map(item => item.keyType).join(' / ') || '无需额外 Key 才能出首版发布包',
+        doNext: '等你提供 Key 后逐条接入任务 ID、输出和失败回退记录。',
+      },
+      {
+        id: 'open-remix',
+        label: '开源混剪和稳定队列',
+        state: hasMaterialGaps ? 'customer_action' : 'ready',
+        customerSees: hasMaterialGaps ? '先补缺失素材，再进入批量渲染。' : '每条视频有时间线、字幕、输出路径和单条重试。',
+        proof: renderBoard.customerPromise,
+        doNext: hasMaterialGaps ? '客户补齐主图、模特图、授权或口播素材。' : '按批次渲染并抽检字幕、商品主体和音频。',
+      },
+      {
+        id: 'title-matrix',
+        label: '多账号标题和口播矩阵',
+        state: 'ready',
+        customerSees: '真实买家号、测评种草号、店铺官方号各有标题、首句和发布角度。',
+        proof: checklist.acceptanceChecklist.find(item => item.includes('平台发布包')) || '平台发布包含标题、正文、标签和回填要求',
+        doNext: '发布前过标题质量门，避免同商品重复标题和证据不足。',
+      },
+      {
+        id: 'self-publish',
+        label: '客户自发布包',
+        state: 'ready',
+        customerSees: '客户自己登录平台发布，Wenai 只交付可复制发布包和检查表。',
+        proof: checklist.acceptanceChecklist.find(item => item.includes('客户发布后')) || '客户发布后回填链接、截图、CSV 或云盘目录',
+        doNext: '导出平台发布包，提醒客户回填证据。',
+      },
+      {
+        id: 'return-loop',
+        label: '云盘/CSV 表现回填',
+        state: 'customer_action',
+        customerSees: '没有平台 API 也能通过链接、截图、CSV 和云盘备注进入下一轮复盘。',
+        proof: checklist.nextRoundTrigger.find(item => item.includes('回填')) || '真实证据进入下一轮标题、封面和重剪建议',
+        doNext: '客户发布后上传四类证据，不用提供账号密码或 cookie。',
+      },
+      {
+        id: 'support-after-sales',
+        label: '客服和售后承接',
+        state: 'ready',
+        customerSees: 'FAQ、异议处理、差评挽回和售后卡片能接住内容带来的咨询。',
+        proof: checklist.acceptanceChecklist.find(item => item.includes('客服')) || '客服素材与商品详情和售后政策保持一致',
+        doNext: '把高频问题转成下一条口播开场和详情页 FAQ。',
+      },
+      {
+        id: 'scale-provider',
+        label: '规模化 provider 升级',
+        state: 'scale_later',
+        customerSees: '单批变大、多人协作或字段稳定后，再接云盘、对象存储、多 worker、analytics API。',
+        proof: checklist.nextRoundTrigger.find(item => item.includes('多 worker')) || '规模化后再升级 provider',
+        doNext: '先跑至少一轮真实客户素材、发布包和回填证据，再判断是否购买或接入。',
+      },
+    ],
+    mustNotPromise: [
+      '不承诺自动登录、自动发布或托管客户账号。',
+      '不在没有真实链接、截图、CSV 或云盘证据时展示虚构表现。',
+      '不把未通过 smoke test 的 GitHub 工具展示为可交付能力。',
+      '不在页面、日志或导出包展示 API Key、token、cookie 或客户私信。',
+    ],
+    launchOnlyWhen: [
+      '客户知道自己要补哪些素材，且发布包能独立复制使用。',
+      '混剪任务有时间线、字幕、输出路径、失败原因和重试路径。',
+      '标题、口播、客服话术和售后承诺口径一致。',
+      '客户发布后的回填入口已经清楚：链接、截图、CSV 或云盘目录。',
+    ],
+  };
+}
+
 export function executeCommerceRemixDryRun(plan: CommerceRemixEnginePlan, options: { failQueueItemIds?: string[] } = {}): CommerceRemixDryRunResult {
   const failIds = new Set(options.failQueueItemIds || []);
   const queue: CommerceRemixQueueItem[] = [];
@@ -4112,6 +4218,19 @@ export function buildDemoCommerceFirstDeliveryChecklist() {
   const input = buildDemoCommerceRemixInput();
   const plan = buildCommerceRemixEnginePlan(input);
   return buildCommerceFirstDeliveryChecklist(input, plan, buildCommerceRemixExportPackage(input, plan));
+}
+
+export function buildDemoCommerceCustomerLaunchReadinessBoard() {
+  const input = buildDemoCommerceRemixInput();
+  const plan = buildCommerceRemixEnginePlan(input);
+  const batchPlan = buildCommerceRenderBatchPlan(plan.queue, { maxConcurrency: 3, retryBudget: 2 });
+  const renderCapacity = buildCommerceRenderCapacityPlan(plan.queue, batchPlan);
+  return buildCommerceCustomerLaunchReadinessBoard(
+    input,
+    buildCommerceFirstDeliveryChecklist(input, plan, buildCommerceRemixExportPackage(input, plan)),
+    buildCommerceProviderNeedAssessment(input, plan, buildCommerceProviderActivationPlan()),
+    buildCommerceRenderReliabilityBoard(plan.queue, batchPlan, renderCapacity),
+  );
 }
 
 function buildDemoCommerceRemixInput(): CommerceRemixPlanInput {

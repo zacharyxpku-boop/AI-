@@ -8,6 +8,7 @@ import {
   buildDemoCommerceCustomerReturnIntakeBoard,
   buildDemoCommerceCustomerDeliveryMap,
   buildDemoCommerceCustomerEvidenceUploadGuide,
+  buildDemoCommerceCustomerLaunchReadinessBoard,
   buildDemoCommerceDailyOperatorCockpit,
   buildDemoCommerceEvidenceReadinessBoard,
   buildDemoCommerceSalesConversationBoard,
@@ -259,6 +260,7 @@ export function KuaiziStyleWorkbench() {
   const providerNeedAssessment = useMemo(() => buildDemoCommerceProviderNeedAssessment(), []);
   const providerEscalationBoard = useMemo(() => buildDemoCommerceProviderEscalationBoard(), []);
   const firstDeliveryChecklist = useMemo(() => buildDemoCommerceFirstDeliveryChecklist(), []);
+  const customerLaunchReadinessBoard = useMemo(() => buildDemoCommerceCustomerLaunchReadinessBoard(), []);
   const openSourceAdapters = useMemo(() => buildCommerceOpenSourceAdapters(), []);
   const openSourceCoverage = useMemo(() => buildDemoCommerceOpenSourceCoverage(), []);
   const openSourceStackSelector = useMemo(() => buildDemoCommerceOpenSourceStackSelector(), []);
@@ -440,6 +442,51 @@ export function KuaiziStyleWorkbench() {
                   {firstDeliveryChecklist.acceptanceChecklist.slice(0, 6).map(item => (
                     <div className="rounded-md border border-slate-200 bg-slate-50 px-3 py-2 text-xs font-bold leading-5 text-slate-700" key={item}>{item}</div>
                   ))}
+                </div>
+                <div className="mt-5 rounded-md border border-emerald-100 bg-emerald-50 p-4">
+                  <div className="flex flex-col gap-3 lg:flex-row lg:items-end lg:justify-between">
+                    <div className="min-w-0">
+                      <p className="text-xs font-black uppercase tracking-[0.18em] text-emerald-700">Customer Launch Readiness</p>
+                      <h4 className="mt-1 text-base font-black leading-6 text-slate-950">{customerLaunchReadinessBoard.headline}</h4>
+                      <p className="mt-2 max-w-4xl text-sm leading-6 text-slate-600">{customerLaunchReadinessBoard.customerPromise}</p>
+                    </div>
+                    <span className={`w-fit rounded bg-white px-2.5 py-1 text-xs font-black ring-1 ${customerLaunchReadinessBoard.verdict === 'ready_for_customer_trial' ? 'text-emerald-700 ring-emerald-100' : 'text-amber-700 ring-amber-100'}`}>
+                      验收分 {customerLaunchReadinessBoard.score}
+                    </span>
+                  </div>
+                  <div className="mt-4 grid gap-3 lg:grid-cols-4">
+                    {customerLaunchReadinessBoard.lanes.map(lane => (
+                      <article className="min-w-0 rounded-md bg-white p-3 ring-1 ring-emerald-100" key={lane.id}>
+                        <div className="flex items-start justify-between gap-2">
+                          <h5 className="text-sm font-black leading-5 text-slate-950">{lane.label}</h5>
+                          <span className={`shrink-0 rounded px-2 py-1 text-[11px] font-black ${lane.state === 'ready' ? 'bg-emerald-50 text-emerald-700' : lane.state === 'waiting_for_key' ? 'bg-blue-50 text-blue-700' : lane.state === 'scale_later' ? 'bg-slate-100 text-slate-600' : 'bg-amber-50 text-amber-700'}`}>
+                            {lane.state === 'ready' ? '已就绪' : lane.state === 'waiting_for_key' ? '等 Key' : lane.state === 'scale_later' ? '后续扩容' : '客户动作'}
+                          </span>
+                        </div>
+                        <p className="mt-2 text-xs font-bold leading-5 text-emerald-700">{lane.customerSees}</p>
+                        <p className="mt-2 line-clamp-2 rounded bg-slate-50 px-2 py-1.5 text-[11px] font-bold leading-4 text-slate-600">{lane.proof}</p>
+                        <p className="mt-2 line-clamp-2 text-[11px] font-bold leading-4 text-slate-500">下一步：{lane.doNext}</p>
+                      </article>
+                    ))}
+                  </div>
+                  <div className="mt-4 grid gap-3 lg:grid-cols-2">
+                    <div className="rounded-md bg-white p-3 ring-1 ring-emerald-100">
+                      <h5 className="text-sm font-black text-slate-950">满足这些才给客户上线</h5>
+                      <div className="mt-3 grid gap-2 sm:grid-cols-2">
+                        {customerLaunchReadinessBoard.launchOnlyWhen.map(item => (
+                          <div className="rounded bg-emerald-50 px-3 py-2 text-xs font-bold leading-5 text-slate-700" key={item}>{item}</div>
+                        ))}
+                      </div>
+                    </div>
+                    <div className="rounded-md bg-white p-3 ring-1 ring-emerald-100">
+                      <h5 className="text-sm font-black text-slate-950">不能对客户承诺</h5>
+                      <div className="mt-3 grid gap-2">
+                        {customerLaunchReadinessBoard.mustNotPromise.map(item => (
+                          <div className="rounded bg-rose-50 px-3 py-2 text-xs font-bold leading-5 text-rose-800 ring-1 ring-rose-100" key={item}>{item}</div>
+                        ))}
+                      </div>
+                    </div>
+                  </div>
                 </div>
               </section>
 

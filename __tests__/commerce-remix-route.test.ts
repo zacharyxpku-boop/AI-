@@ -127,6 +127,10 @@ describe('/api/commerce-remix', () => {
     expect(body.providerEscalationBoard.buyOnlyAfter.join(' ')).toContain('至少一轮');
     expect(body.firstDeliveryChecklist.promise).toContain('不等图片/视频/数字人 Key');
     expect(body.firstDeliveryChecklist.noWaitItems).toContain('平台自动登录');
+    expect(body.customerLaunchReadinessBoard.headline).toContain('客户上线前总验收板');
+    expect(body.customerLaunchReadinessBoard.lanes.map((lane: { id: string }) => lane.id)).toContain('self-publish');
+    expect(body.customerLaunchReadinessBoard.mustNotPromise.join(' ')).toContain('自动登录');
+    expect(body.customerLaunchReadinessBoard.launchOnlyWhen.join(' ')).toContain('回填入口');
     expect(body.openSourceAdapters.find((adapter: { id: string }) => adapter.id === 'queue-worker').readiness).toBe('ready_now');
     expect(body.openSourceCoverage.layers.find((layer: { id: string }) => layer.id === 'clip-ready').primaryAdapterIds).toContain('auto-editor');
     expect(body.openSourceCoverage.customerPromise).toContain('自己发布');
