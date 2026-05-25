@@ -51,13 +51,13 @@ describe('creative monitoring console page', () => {
     expect(html).toContain('可复用广告结构库');
     expect(html).toContain('Hook Bank');
     expect(html).toContain('UGC Script Spine');
-    expect(html).toContain('Offer Test Matrix');
-    expect(html).toContain('Compose Intelligence Stack');
-    expect(html).toContain('VidMob / Superads 参考层');
-    expect(html).toContain('AI 视频分析、创意疲劳和跨平台 performance signal 一起看');
-    expect(html).toContain('Creative analytics / fatigue 观察');
+    expect(html).toContain('卖点测试分发');
+    expect(html).toContain('创意生产链路');
+    expect(html).toContain('视频表现参考层');
+    expect(html).toContain('AI 视频分析、创意疲劳和跨平台表现信号一起看');
+    expect(html).toContain('创意表现与疲劳观察');
     expect(html).toContain('跨平台优化输入');
-    expect(html).toContain('Creative Harvest Acceptance Board');
+    expect(html).toContain('创意收口验收板');
     expect(html).toContain('创意收割商用品质验收板');
     expect(html).toContain('来源广度门禁');
     expect(html).toContain('重复采集门禁');
@@ -65,8 +65,8 @@ describe('creative monitoring console page', () => {
     expect(html).toContain('生产交接门禁');
     expect(html).toContain('复利学习门禁');
     expect(html).toContain('对标 Hookshot、Omneky、VidMob、Superads 的真实能力');
-    expect(html).toContain('Compose Action Playbook');
-    expect(html).toContain('Compose Variant Console');
+    expect(html).toContain('创意到生产动作剧本');
+    expect(html).toContain('创意视角切换');
     expect(html).toContain('/factory/creative?projectId=creative-launch&amp;variant=partner');
     expect(html).toContain('/factory/creative?projectId=creative-launch&amp;variant=friend_trial');
     expect(html).toContain('Compose 启动下一步');
@@ -93,16 +93,17 @@ describe('creative monitoring console page', () => {
     expect(html).toContain('先导入竞品账号、榜单或视频拆解信号');
     expect(html).toContain('只导入公开可用或已授权观察');
     expect(html).toContain('只复用结构和验证逻辑');
-    expect(html).toContain('没有广告账户和 analytics sync 前，只能生成投放方案');
+    expect(html).toContain('没有广告账户和表现回流前，只能生成投放方案');
     expect(html).toContain('平台授权、榜单/视频数据源、合法抓取或官方 API');
-    expect(html).toContain('多模态视频解析 provider、素材授权、下载/存储权限');
+    expect(html).toContain('多模态视频解析服务、素材授权、下载/存储权限');
     expect(html).toContain('投放回流和真实转化数据，验证哪个 hook 真正胜出');
-    expect(html).toContain('广告账户授权、自动建计划、平台 analytics sync');
+    expect(html).toContain('广告账户授权、自动建计划、平台表现回流');
     expect(html).toContain('开头钩子');
     expect(html).toContain('空结果只记录缺口，不生成洞察');
     expect(html).toContain('当前继续走人工运营回灌，不假装已完成未授权自动抓取。');
     expect(html).toContain('没有授权来源、公开证据或手工观察前，不生成伪洞察');
     expect(html).not.toContain('provider-gated');
+    expect(html).not.toContain('analytics sync');
     expect(html).not.toContain('automation-ready');
     expect(html).not.toContain('Manifest');
   });
@@ -186,7 +187,7 @@ describe('creative monitoring console page', () => {
     })).toEqual(expect.objectContaining({
       title: 'Compose 到生产的下一步',
       primaryAction: expect.stringContaining('脚本资产'),
-      proofToCheck: expect.stringContaining('creative_opportunity_id'),
+      proofToCheck: expect.stringContaining('创意机会编号'),
       handoffBoundary: expect.stringContaining('不宣称全网自动监控'),
       cards: expect.arrayContaining([
         expect.stringContaining('洞察 3 / 机会 2 / 模式簇 1'),
@@ -257,7 +258,7 @@ describe('creative monitoring console page', () => {
 
     expect(checks).toEqual(expect.arrayContaining([
       expect.objectContaining({ stage: 'AI 视频分析 / 多模态解析', ready: true }),
-      expect.objectContaining({ stage: 'Creative analytics / fatigue 观察', ready: true }),
+      expect.objectContaining({ stage: '创意表现与疲劳观察', ready: true }),
       expect.objectContaining({ stage: '品牌安全模板化生产', ready: true }),
       expect.objectContaining({ stage: '跨平台优化输入', ready: true }),
     ]));
@@ -348,7 +349,7 @@ describe('creative monitoring console page', () => {
     expect(buildCreativeFactoryVariantPlaybook(undefined, undefined, 'friend_trial')).toEqual(expect.objectContaining({
       label: '朋友试用版',
       proofFocus: expect.stringContaining('为什么可用'),
-      stopLine: expect.stringContaining('不暴露 provider'),
+      stopLine: expect.stringContaining('不暴露密钥'),
     }));
   });
 });

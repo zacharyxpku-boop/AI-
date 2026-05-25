@@ -115,10 +115,10 @@ const HOOKSHOT_STYLE_PLAYBOOK = [
     guardrail: '需要品牌授权素材、产品实拍或生成素材许可后才能进入真实成片',
   },
   {
-    title: 'Offer Test Matrix',
+    title: '卖点测试分发',
     signal: '折扣、套装、赠品、信任背书、稀缺性和平台活动节点',
     output: '把创意机会转成投放假设：受众、平台、预算、指标和停止条件',
-    guardrail: '没有广告账户和 analytics sync 前，只能生成投放方案，不能宣称自动优化',
+    guardrail: '没有广告账户和表现回流前，只能生成投放方案，不能宣称自动优化',
   },
 ];
 
@@ -126,30 +126,30 @@ const COMPOSE_INTELLIGENCE_STACK = [
   {
     stage: '全网灵感管理',
     input: '竞品账号、公开榜单、授权视频链接、客户历史素材和运营手工观察',
-    output: '统一沉淀到 insight ledger，保留来源、证据、风险边界和可复用角度',
+    output: '统一沉淀到创意证据账本，保留来源、证据、风险边界和可复用角度',
     internal: '内部可做：手动导入、周期任务、证据字段、缺口记录、机会地图',
     external: '外部需要：平台授权、榜单/视频数据源、合法抓取或官方 API',
   },
   {
     stage: '热门视频解析',
     input: '视频 URL、转写摘要、画面节奏、字幕、物体、评论区需求和互动指标',
-    output: '拆成 hook、scene beats、proof point、CTA、风险表达和可混剪素材需求',
+    output: '拆成开头钩子、画面节奏点、证据点、行动引导、风险表达和可混剪素材需求',
     internal: '内部可做：解析结果回灌、结构化字段、脚本约束和视频队列交接',
-    external: '外部需要：多模态视频解析 provider、素材授权、下载/存储权限',
+    external: '外部需要：多模态视频解析服务、素材授权、下载/存储权限',
   },
   {
     stage: 'Hook Bank',
     input: '前三秒钩子、反差句、痛点开场、结果承诺、价格锚点和信任背书',
     output: '生成可 A/B 测的中文脚本开头，并写入品牌学习档案',
-    internal: '内部可做：结构复用、禁用表达、胜出模式沉淀、下一轮 Brief 约束',
+    internal: '内部可做：结构复用、禁用表达、胜出模式沉淀、下一轮商品需求约束',
     external: '外部需要：投放回流和真实转化数据，验证哪个 hook 真正胜出',
   },
   {
-    stage: 'Offer Test Matrix',
+    stage: '卖点测试分发',
     input: '折扣、套装、赠品、稀缺性、达人背书、节日节点和平台活动',
     output: '变成分发计划、广告假设、预算门槛、停止条件和复盘口径',
-    internal: '内部可做：广告 campaign ledger、dispatch gate、表现 CSV 回流',
-    external: '外部需要：广告账户授权、自动建计划、平台 analytics sync',
+    internal: '内部可做：投放计划记录、发布检查、表现 CSV 回流',
+    external: '外部需要：广告账户授权、自动建计划、平台表现回流',
   },
 ];
 
@@ -168,8 +168,8 @@ const CREATIVE_FACTORY_VARIANTS: Record<FactoryUiVariantId, {
     title: 'Compose 商业验收剧本',
     firstScreen: '先看创意来源、结构化拆解、品牌学习和下一步生产交接，而不是只看灵感卡片。',
     primaryAction: '检查监控源、机会地图、模式簇和 apply-to-industrial-chain 是否能把洞察写入脚本/资产/分发计划。',
-    proofFocus: '证据必须能追到 source、insight_id、creative_opportunity_id、risk boundary 和后续生产资产。',
-    stopLine: '没有授权来源、多模态解析 provider 和表现回流前，不宣称全网自动洞察或爆款复制能力。',
+    proofFocus: '证据必须能追到来源、洞察编号、创意机会编号、风险边界和后续生产资产。',
+    stopLine: '没有授权来源、多模态解析服务和表现回流前，不宣称全网自动洞察或爆款复制能力。',
   },
   operator: {
     label: '运营工作台',
@@ -177,7 +177,7 @@ const CREATIVE_FACTORY_VARIANTS: Record<FactoryUiVariantId, {
     title: 'Compose 执行队列剧本',
     firstScreen: '先看缺口、到期任务、采集器状态、机会地图和下一步写入生产链路的动作。',
     primaryAction: '补齐账号/榜单/视频拆解三类监控，导入真实观察，结算采集，再把机会地图写入 Create/Cut/Cast。',
-    proofFocus: '每个动作要有 monitor_id、source_url、hook、proof point、reusable angle 和不能复制的表达边界。',
+    proofFocus: '每个动作要有监控编号、来源链接、开头钩子、证据点、可复用角度和不能复制的表达边界。',
     stopLine: '空结果只记录缺口，不生成伪洞察；未授权来源不抓取、不下载、不自动解析。',
   },
   friend_trial: {
@@ -187,7 +187,7 @@ const CREATIVE_FACTORY_VARIANTS: Record<FactoryUiVariantId, {
     firstScreen: '只保留一个入口：导入一个公开或已授权观察，系统告诉你能不能变成脚本和分发计划。',
     primaryAction: '从示例模板开始，填一个真实标题、链接、钩子和证据点，再查看系统如何沉淀为机会。',
     proofFocus: '朋友需要看到“为什么可用、哪里不能用、下一步去哪做视频/分发”。',
-    stopLine: '不暴露 provider、环境变量和内部队列术语；无法形成真实证据时要明确说还不能用。',
+    stopLine: '不暴露密钥、环境变量和内部队列术语；无法形成真实证据时要明确说还不能用。',
   },
 };
 
@@ -227,7 +227,7 @@ export function buildCreativeFactoryVariantPlaybook(
     ...config,
     nextAction,
     evidenceCards: [
-      `监控源 ${monitorCount} / provider-ready 来源 ${providerReadySources}`,
+      `监控源 ${monitorCount} / 已授权来源 ${providerReadySources}`,
       `机会 ${opportunityCount} / 模式簇 ${patternClusterCount}`,
       `采集覆盖 ${sourceCoverage} / ${sourceCoverage >= 100 ? '可进入生产复用' : '还需要补来源覆盖'}`,
     ],
@@ -256,10 +256,10 @@ export function buildCreativeIntelligenceChecks(
       evidence: `多模态解析 ${multimodalParsedCount} 条 / 覆盖 ${sourceCoverageScore} / 健康卡 ${readyHealthCards}`,
       next: multimodalParsedCount > 0
         ? '把解析结果继续写入 hook、节奏、证据点、可复用角度和风险边界。'
-        : '先补视频 URL、转写摘要和多模态 provider；没有解析就不能宣称 AI 视频分析已商用。',
+        : '先补视频 URL、转写摘要和多模态解析服务；没有解析就不能宣称 AI 视频分析已商用。',
     },
     {
-      stage: 'Creative analytics / fatigue 观察',
+      stage: '创意表现与疲劳观察',
       ready: insightCount > 0 && patternClusterCount > 0 && crossSourcePatternCount > 0,
       evidence: `洞察 ${insightCount} / 模式簇 ${patternClusterCount} / 跨来源模式 ${crossSourcePatternCount}`,
       next: crossSourcePatternCount > 0
@@ -277,7 +277,7 @@ export function buildCreativeIntelligenceChecks(
     {
       stage: '跨平台优化输入',
       ready: providerReadySources > 0,
-      evidence: `provider-ready 来源 ${providerReadySources} 条 / 观察 ${readyHealthCards} 张`,
+      evidence: `已授权来源 ${providerReadySources} 条 / 观察 ${readyHealthCards} 张`,
       next: providerReadySources > 0
         ? '把可用来源纳入周期采集和分发实验。'
         : '先补授权来源和采集器状态；没有数据源接入就不能宣称跨平台优化。',
@@ -309,7 +309,7 @@ export function buildCreativeHarvestAcceptanceChecks(
       evidence: `监控 ${monitorCount} / 来源 ${sourceCount} / 源规模 ${sourceScaleScore}`,
       internalMove: '继续把竞品账号、榜单趋势、视频拆解三类来源做成同一项目账本，先保证内部可追踪。',
       externalGate: providerReadySources > 0
-        ? '已有 provider-ready 来源，下一步验证授权采集稳定性。'
+        ? '已有授权来源，下一步验证授权采集稳定性。'
         : '还需要合法数据源、平台授权或官方 API，才能宣称全网灵感自动管理。',
     },
     {
@@ -317,28 +317,28 @@ export function buildCreativeHarvestAcceptanceChecks(
       ready: repeatObservationSources >= 2 && patternClusterCount > 0,
       evidence: `重复观察来源 ${repeatObservationSources} / 模式簇 ${patternClusterCount}`,
       internalMove: '同一类目至少沉淀两轮观察，避免把单条爆款误判成稳定打法。',
-      externalGate: '外部需要周期采集 provider 或运营导入节奏，否则只能做人工复盘。',
+      externalGate: '外部需要周期采集服务或运营导入节奏，否则只能做人工复盘。',
     },
     {
       gate: '多模态视频解析门禁',
       ready: multimodalParsedCount > 0 && coverageScore >= 100,
       evidence: `多模态解析 ${multimodalParsedCount} / 覆盖 ${coverageScore}`,
-      internalMove: '已能接收 scene beats、字幕摘要、物体、音频和贴字字段时，再把结果推给 Cut。',
-      externalGate: '真实 AI 视频分析仍需要视频解析 provider、授权素材和存储权限。',
+      internalMove: '已能接收画面节奏点、字幕摘要、物体、音频和贴字字段时，再把结果推给混剪工坊。',
+      externalGate: '真实 AI 视频分析仍需要视频解析服务、授权素材和存储权限。',
     },
     {
       gate: '生产交接门禁',
       ready: opportunityCount > 0 && crossSourcePatternCount > 0,
       evidence: `机会 ${opportunityCount} / 跨来源模式 ${crossSourcePatternCount}`,
       internalMove: '机会必须写入脚本资产、视频任务、分发计划和品牌学习档案，不能停在洞察报告。',
-      externalGate: '若要变成一键视频或智能混剪，还需要视频生成/剪辑 provider 的回调证据。',
+      externalGate: '若要变成一键视频或智能混剪，还需要视频生成或剪辑服务的回调证据。',
     },
     {
       gate: '复利学习门禁',
       ready: moatScore >= 75 && sourceDepthScore >= 75,
       evidence: `护城河分 ${moatScore} / 来源深度 ${sourceDepthScore}`,
       internalMove: '把胜出的 hook、节奏、offer 和禁用表达沉淀为下一轮生产约束。',
-      externalGate: '外部还需要广告账户、平台 analytics sync 和转化数据，才能证明哪个创意真正胜出。',
+      externalGate: '外部还需要广告账户、平台表现回流和转化数据，才能证明哪个创意真正胜出。',
     },
   ];
 }
@@ -370,10 +370,42 @@ function sourceMixLabel(values: string[]) {
 }
 
 function collectorStatusLabel(value?: string) {
-  if (value === 'provider_ready') return '真实采集器已接入';
-  if (value === 'not_configured') return '采集器待配置';
-  if (value === 'degraded') return '采集器异常';
+  if (value === 'provider_ready') return '授权采集服务已接入';
+  if (value === 'not_configured') return '采集服务待配置';
+  if (value === 'degraded') return '采集服务异常';
   return '人工采集模式';
+}
+
+function collectorServiceLabel(value?: string) {
+  const labels: Record<string, string> = {
+    'manual-creative-ops': '人工创意运营',
+    'external-collector': '外部授权采集服务',
+    'manual-account-watch': '人工账号观察',
+    'manual-rank-watch': '人工榜单观察',
+    'manual-video-teardown': '人工视频拆解',
+    'multimodal-video-parser': '多模态视频解析服务',
+    'platform-creative-source': '平台创意数据源',
+  };
+  return labels[value || ''] || value || '人工创意运营';
+}
+
+function readableCreativeSystemText(value: string) {
+  return value
+    .replace(/provider-ready/gi, '已授权')
+    .replace(/provider_ready/g, '已授权')
+    .replace(/provider-gated/gi, '等待授权接入')
+    .replace(/provider/gi, '授权服务')
+    .replace(/manual_ops/g, '人工运营')
+    .replace(/collector targets/gi, '采集目标')
+    .replace(/targets/gi, '目标')
+    .replace(/due/gi, '到期任务')
+    .replace(/sources/gi, '来源')
+    .replace(/active/gi, '启用中')
+    .replace(/opportunities/gi, '机会')
+    .replace(/pattern clusters/gi, '模式簇')
+    .replace(/cross-source patterns/gi, '跨来源模式')
+    .replace(/analytics sync/gi, '表现回流')
+    .replace(/scene beats/gi, '画面节奏点');
 }
 
 function formatTime(value?: string) {
@@ -401,10 +433,10 @@ export function buildCreativeComposeActionPlaybook(
     return {
       title: 'Compose 到生产的下一步',
       primaryAction: '把机会地图写入脚本资产、分发计划和视频工厂输入，不再停留在灵感收藏。',
-      proofToCheck: '必须能追踪 creative_opportunity_id、insight_id、来源组合、合规边界和回流指标。',
+      proofToCheck: '必须能追踪创意机会编号、洞察编号、来源组合、合规边界和回流指标。',
       handoffBoundary: providerReady
-        ? 'provider 可执行采集，但仍只能复用结构和验证逻辑，不能复制竞品表达。'
-        : '未接授权采集 provider 前，保持人工/授权来源回灌，不宣称全网自动监控。',
+        ? '授权采集服务可执行任务，但仍只能复用结构和验证逻辑，不能复制竞品表达。'
+        : '未接授权采集服务前，保持人工或授权来源回灌，不宣称全网自动监控。',
       cards: [
         `洞察 ${insightCount} / 机会 ${opportunityCount} / 模式簇 ${patternClusterCount}`,
         `采集覆盖 ${coverageScore} / 源规模 ${sourceScaleScore} / 护城河分 ${moatScore}`,
@@ -422,7 +454,7 @@ export function buildCreativeComposeActionPlaybook(
       cards: [
         `洞察 ${insightCount} / 机会 ${opportunityCount} / 模式簇 ${patternClusterCount}`,
         `监控项 ${monitorCount} / 到期任务 ${dueTaskCount}`,
-        '优先补齐 account、rank、video teardown 三类信号。',
+        '优先补齐竞品账号、榜单趋势、视频拆解三类信号。',
       ],
     };
   }
@@ -437,7 +469,7 @@ export function buildCreativeComposeActionPlaybook(
     cards: [
       `监控项 ${monitorCount} / 到期任务 ${dueTaskCount}`,
       `洞察 ${insightCount} / 机会 ${opportunityCount}`,
-      providerReady ? '采集 provider 已接入，可执行授权来源任务。' : '当前仍是人工/授权来源回灌模式。',
+      providerReady ? '授权采集服务已接入，可执行授权来源任务。' : '当前仍是人工或授权来源回灌模式。',
     ],
   };
 }
@@ -783,61 +815,61 @@ export function CreativeMonitoringConsoleClient({
         status: snapshot?.providerReadySourceCount ? '部分已配置' : '待配置',
       },
       {
-        title: '采集 provider',
+        title: '授权采集服务',
         detail: collectorPlan?.providerReady
-          ? '已具备 provider 调度证据，仍需持续观察稳定性。'
+          ? '已具备授权调度证据，仍需持续观察稳定性。'
           : '当前走人工运营回灌，不宣称自动抓取。',
-        status: collectorPlan?.providerReady ? '有证据' : 'provider-gated',
+        status: collectorPlan?.providerReady ? '有证据' : '等待授权接入',
       },
       {
         title: '多模态解析',
-        detail: '视频 scene beats、字幕、物体和画面证据需要真实解析 provider。',
+        detail: '视频画面节奏点、字幕、物体和画面证据需要真实解析服务。',
         status: (snapshot?.sourceSyncMultimodalParsedCount || 0) > 0 ? '已有回灌' : '待接入',
       },
       {
         title: '表现回流',
-        detail: '没有广告账户和 analytics sync 前，只能做结构假设。',
+        detail: '没有广告账户和表现回流前，只能做结构假设。',
         status: '外部门禁',
       },
       {
         title: '生产交接',
-        detail: '机会地图可以写入生产链，但最终投放仍受授权和 provider 限制。',
+        detail: '机会地图可以写入生产链；最终投放仍受账号授权和素材授权限制。',
         status: (creative?.opportunityCount || 0) > 0 ? '内部可走' : '等洞察',
       },
     ];
 
     const creativeLogs = [
-      `project=${projectId || 'default-project'} monitors=${snapshot?.monitorCount ?? 0} due=${snapshot?.dueTaskCount ?? 0}`,
-      `opportunities=${creative?.opportunityCount ?? 0} pattern_clusters=${creative?.patternClusterCount ?? 0} moat_score=${creative?.creativeMoatScore ?? 0}`,
-      `collector=${collectorPlan?.providerReady ? 'provider_ready' : 'manual_ops'} targets=${snapshot?.collectorTargetCount ?? 0}`,
-      `sources=${snapshot?.sourceCount ?? 0} provider_ready=${snapshot?.providerReadySourceCount ?? 0} multimodal=${snapshot?.sourceSyncMultimodalParsedCount ?? 0}`,
-      `guardrail=no unauthorized scraping, no fake OAuth, no fake analytics sync`,
+      `项目 ${projectId || 'default-project'}：监控源 ${snapshot?.monitorCount ?? 0}，到期任务 ${snapshot?.dueTaskCount ?? 0}`,
+      `创意机会 ${creative?.opportunityCount ?? 0}，可复用模式 ${creative?.patternClusterCount ?? 0}，护城河分 ${creative?.creativeMoatScore ?? 0}`,
+      `采集方式：${collectorPlan?.providerReady ? '授权采集服务' : '人工运营回灌'}，采集目标 ${snapshot?.collectorTargetCount ?? 0}`,
+      `来源 ${snapshot?.sourceCount ?? 0}，已授权来源 ${snapshot?.providerReadySourceCount ?? 0}，视频解析 ${snapshot?.sourceSyncMultimodalParsedCount ?? 0}`,
+      '边界：不抓未授权内容，不假装自动登录，不假装已有表现回流',
     ];
 
     const readinessRows = [
       {
         module: '创意监控源',
         readiness: snapshot?.monitorCount ? '可内部运行' : '待补充',
-        evidence: `${snapshot?.monitorCount ?? 0} sources / ${snapshot?.activeMonitorCount ?? 0} active`,
+        evidence: `${snapshot?.monitorCount ?? 0} 个来源 / ${snapshot?.activeMonitorCount ?? 0} 个启用中`,
         blocker: snapshot?.monitorCount ? '无' : '需要竞品账号、榜单或视频线索',
       },
       {
-        module: '采集队列',
-        readiness: collectorPlan?.providerReady ? 'provider ready' : '人工回灌',
-        evidence: `${snapshot?.collectorTargetCount ?? 0} targets / ${snapshot?.dueTaskCount ?? 0} due`,
-        blocker: collectorPlan?.providerReady ? '验证稳定性' : '外部 provider 与授权',
+        module: '采集任务',
+        readiness: collectorPlan?.providerReady ? '授权采集可用' : '人工回灌',
+        evidence: `${snapshot?.collectorTargetCount ?? 0} 个目标 / ${snapshot?.dueTaskCount ?? 0} 个到期任务`,
+        blocker: collectorPlan?.providerReady ? '验证稳定性' : '外部授权与数据源',
       },
       {
         module: '机会地图',
         readiness: creative?.opportunityCount ? '可交接生产' : '等待洞察',
-        evidence: `${creative?.opportunityCount ?? 0} opportunities / ${creative?.crossSourcePatternCount ?? 0} cross-source patterns`,
+        evidence: `${creative?.opportunityCount ?? 0} 个机会 / ${creative?.crossSourcePatternCount ?? 0} 个跨来源模式`,
         blocker: creative?.opportunityCount ? '继续验证表现回流' : '需要真实观察信号',
       },
       {
         module: '多模态拆解',
         readiness: (snapshot?.sourceSyncMultimodalParsedCount || 0) > 0 ? '有回灌证据' : '待接入',
-        evidence: `${snapshot?.sourceSyncMultimodalParsedCount ?? 0} parsed / coverage ${snapshot?.sourceSyncCoverageScore ?? 0}`,
-        blocker: '视频解析 provider、素材授权、存储权限',
+        evidence: `${snapshot?.sourceSyncMultimodalParsedCount ?? 0} 条解析 / 覆盖 ${snapshot?.sourceSyncCoverageScore ?? 0}`,
+        blocker: '视频解析服务、素材授权、存储权限',
       },
     ];
 
@@ -883,15 +915,15 @@ export function CreativeMonitoringConsoleClient({
             <header className="sticky top-0 z-20 border-b border-neutral-200 bg-white/95 px-5 py-4 backdrop-blur lg:px-8">
               <div className="flex flex-col gap-4 xl:flex-row xl:items-center xl:justify-between">
                 <div>
-                  <p className="text-xs font-semibold uppercase tracking-[0.18em] text-neutral-500">Creative Intelligence</p>
-                  <h1 className="mt-1 text-2xl font-semibold tracking-tight text-neutral-950">Wenai Creative 工厂</h1>
+                  <p className="text-xs font-semibold uppercase tracking-[0.18em] text-neutral-500">创意洞察到混剪生产</p>
+                  <h1 className="mt-1 text-2xl font-semibold tracking-tight text-neutral-950">Wenai 电商创意工厂</h1>
                   <p className="mt-1 max-w-3xl text-sm leading-6 text-neutral-600">
                     把竞品账号、榜单趋势和视频拆解沉淀成可追溯的脚本、资产、分发假设和品牌学习档案。
                   </p>
                 </div>
                 <div className="flex flex-wrap gap-2 text-xs font-medium">
                   <span className="rounded-md border border-emerald-200 bg-emerald-50 px-3 py-1.5 text-emerald-700">内部链路可验证</span>
-                  <span className="rounded-md border border-amber-200 bg-amber-50 px-3 py-1.5 text-amber-700">外部采集 provider-gated</span>
+                  <span className="rounded-md border border-amber-200 bg-amber-50 px-3 py-1.5 text-amber-700">授权采集待接入</span>
                   <a className="rounded-md border border-neutral-200 bg-white px-3 py-1.5 text-neutral-600 hover:text-neutral-950" href={`/factory/creative?projectId=${encodeURIComponent(projectId)}&variant=operator`}>
                     切换 operator
                   </a>
@@ -901,26 +933,26 @@ export function CreativeMonitoringConsoleClient({
 
             <div className="space-y-6 px-5 py-6 lg:px-8">
               <section className="grid gap-4 md:grid-cols-2 xl:grid-cols-4">
-                <LightMetric label="监控源" value={snapshot?.monitorCount ?? 0} detail={`${snapshot?.activeMonitorCount ?? 0} active`} />
-                <LightMetric label="待采集任务" value={snapshot?.dueTaskCount ?? 0} detail={`${snapshot?.collectorTargetCount ?? 0} collector targets`} tone="amber" />
-                <LightMetric label="机会地图" value={creative?.opportunityCount ?? 0} detail={`${creative?.patternClusterCount ?? 0} pattern clusters`} />
-                <LightMetric label="护城河分" value={creative?.creativeMoatScore ?? 0} detail={`${creative?.crossSourcePatternCount ?? 0} cross-source patterns`} />
+                <LightMetric label="监控源" value={snapshot?.monitorCount ?? 0} detail={`${snapshot?.activeMonitorCount ?? 0} 个启用中`} />
+                <LightMetric label="待采集任务" value={snapshot?.dueTaskCount ?? 0} detail={`${snapshot?.collectorTargetCount ?? 0} 个采集目标`} tone="amber" />
+                <LightMetric label="机会地图" value={creative?.opportunityCount ?? 0} detail={`${creative?.patternClusterCount ?? 0} 个模式簇`} />
+                <LightMetric label="护城河分" value={creative?.creativeMoatScore ?? 0} detail={`${creative?.crossSourcePatternCount ?? 0} 个跨来源模式`} />
               </section>
 
               <section className="grid gap-6 xl:grid-cols-[1.25fr_0.75fr]">
-                <LightPanel title="Terminal // Creative Logs" eyebrow="grounded system state">
+                <LightPanel title="创意证据日志" eyebrow="真实项目状态">
                   <div className="rounded-lg border border-neutral-200 bg-neutral-950 p-4 font-mono text-xs leading-6 text-neutral-200">
                     {creativeLogs.map((line, index) => (
                       <div key={line}>
                         <span className="mr-2 text-neutral-500">[{String(index + 1).padStart(2, '0')}]</span>
-                        <span className={line.includes('guardrail') ? 'text-amber-200' : 'text-neutral-100'}>{line}</span>
+                        <span className={line.includes('边界') ? 'text-amber-200' : 'text-neutral-100'}>{line}</span>
                       </div>
                     ))}
                     <div className="mt-3 text-emerald-300">creative@wenai-core:~# <span className="inline-block h-3 w-1.5 translate-y-0.5 bg-emerald-300" /></div>
                   </div>
                 </LightPanel>
 
-                <LightPanel title="Creative 外部门禁" eyebrow="no fake platform claims">
+                <LightPanel title="创意接入边界" eyebrow="不伪装平台能力">
                   <div className="space-y-3">
                     {externalGates.map(gate => (
                       <div className="rounded-lg border border-neutral-200 bg-white p-3" key={gate.title}>
@@ -980,7 +1012,7 @@ export function CreativeMonitoringConsoleClient({
                 </div>
 
                 <div className="space-y-6">
-                  <LightPanel title="模块准备度评估" eyebrow="readiness matrix">
+                  <LightPanel title="模块准备检查" eyebrow="客户可读验收">
                     <div className="overflow-x-auto">
                       <table className="w-full min-w-[720px] text-left text-sm">
                         <thead className="border-b border-neutral-200 text-xs text-neutral-500">
@@ -1005,13 +1037,13 @@ export function CreativeMonitoringConsoleClient({
                     </div>
                   </LightPanel>
 
-                  <LightPanel title="Creative Harvest Acceptance Board" eyebrow="commercial quality gates">
+                  <LightPanel title="创意收口验收板" eyebrow="商用品质检查">
                     <div className="grid gap-3 md:grid-cols-2">
                       {harvestAcceptanceChecks.map(item => (
                         <article className="rounded-lg border border-neutral-200 bg-white p-4" key={item.gate}>
                           <div className="flex items-center justify-between gap-3">
                             <h3 className="text-sm font-semibold text-neutral-950">{item.gate}</h3>
-                            <span className={`rounded-md px-2 py-1 text-[11px] font-medium ${item.ready ? 'bg-emerald-50 text-emerald-700' : 'bg-amber-50 text-amber-700'}`}>{item.ready ? 'ready' : 'gated'}</span>
+                            <span className={`rounded-md px-2 py-1 text-[11px] font-medium ${item.ready ? 'bg-emerald-50 text-emerald-700' : 'bg-amber-50 text-amber-700'}`}>{item.ready ? '已具备' : '补证据'}</span>
                           </div>
                           <div className="mt-2 text-xs leading-5 text-neutral-500">{item.evidence}</div>
                           <div className="mt-2 text-xs leading-5 text-neutral-700">{item.internalMove}</div>
@@ -1056,10 +1088,10 @@ export function CreativeMonitoringConsoleClient({
               </section>
 
               <section className="grid gap-6 xl:grid-cols-2">
-                <LightPanel title="采集器回灌" eyebrow="authorized collector result">
+                <LightPanel title="采集结果回灌" eyebrow="人工或授权来源">
                   <form onSubmit={ingestCollectorRun}>
                     <div className="flex flex-wrap items-center justify-between gap-2">
-                      <p className="text-sm leading-6 text-neutral-600">用于承接人工运营或已授权 provider 的非空 JSON 数组；空结果只记录缺口，不生成洞察。</p>
+                      <p className="text-sm leading-6 text-neutral-600">用于承接人工运营或已授权采集服务的非空 JSON 数组；空结果只记录缺口，不生成洞察。</p>
                       <button disabled={loading} className="rounded-md border border-neutral-300 bg-white px-3 py-2 text-xs font-semibold text-neutral-700 disabled:text-neutral-300" type="button" onClick={fillCollectorExample}>填入示例模板</button>
                     </div>
                     <textarea
@@ -1072,11 +1104,11 @@ export function CreativeMonitoringConsoleClient({
                   </form>
                 </LightPanel>
 
-                <LightPanel title="监控运营面板" eyebrow="queue controls">
+                <LightPanel title="监控运营面板" eyebrow="采集任务控制">
                   <div className="grid gap-3 sm:grid-cols-3">
-                    <LightMetric label="竞品账号" value={snapshot?.competitorAccountMonitorCount ?? 0} detail="account" compact />
-                    <LightMetric label="榜单趋势" value={snapshot?.trendRankMonitorCount ?? 0} detail="rank" compact />
-                    <LightMetric label="视频拆解" value={snapshot?.videoKeywordMonitorCount ?? 0} detail="teardown" compact />
+                    <LightMetric label="竞品账号" value={snapshot?.competitorAccountMonitorCount ?? 0} detail="账号观察" compact />
+                    <LightMetric label="榜单趋势" value={snapshot?.trendRankMonitorCount ?? 0} detail="榜单观察" compact />
+                    <LightMetric label="视频拆解" value={snapshot?.videoKeywordMonitorCount ?? 0} detail="拆解观察" compact />
                   </div>
                   <button disabled={loading} className="mt-4 rounded-md border border-neutral-300 bg-white px-4 py-2 text-sm font-semibold text-neutral-700 disabled:text-neutral-300" type="button" onClick={() => void runHarvest()}>
                     结算到期采集
@@ -1118,7 +1150,7 @@ export function CreativeMonitoringConsoleClient({
           accent="emerald"
           basePath="/factory/creative"
           evidenceCards={variantPlaybook.evidenceCards}
-          eyebrow="Compose Variant Console"
+          eyebrow="创意视角切换"
           firstScreen={variantPlaybook.firstScreen}
           nextAction={variantPlaybook.nextAction}
           primaryAction={variantPlaybook.primaryAction}
@@ -1137,7 +1169,7 @@ export function CreativeMonitoringConsoleClient({
               <h2 className="mt-2 text-xl font-semibold">从单条灵感升级为可复用广告结构库</h2>
             </div>
             <div className="max-w-sm text-xs leading-5 text-amber-100/80">
-              终局不是“看见一个爆款就仿一个”，而是把 hook、UGC 脚本骨架和 offer 测试矩阵持续沉淀，反哺视频生产和投放回流。
+              终局不是“看见一个爆款就仿一个”，而是把 hook、UGC 脚本骨架和卖点测试分发持续沉淀，反哺视频生产和投放回流。
             </div>
           </div>
           <div className="mt-4 grid gap-3 lg:grid-cols-3">
@@ -1155,11 +1187,11 @@ export function CreativeMonitoringConsoleClient({
         <section className="border border-white/10 bg-white/[0.035] p-5">
           <div className="flex flex-col gap-2 sm:flex-row sm:items-start sm:justify-between">
             <div>
-              <p className="text-xs uppercase tracking-[0.22em] text-emerald-200">Compose Intelligence Stack</p>
+              <p className="text-xs uppercase tracking-[0.22em] text-emerald-200">创意生产链路</p>
               <h2 className="mt-2 text-xl font-semibold">把灵感、视频、Hook 和投放假设串成一条生产约束链</h2>
             </div>
             <p className="max-w-md text-xs leading-5 text-white/55">
-              这层是 Wenai 的护城河入口：不是只保存素材，而是把每个外部信号转成可复用结构、品牌记忆和下一轮视频/分发动作。没有真实 provider 的部分继续标成外部门禁。
+              这层是 Wenai 的护城河入口：不是只保存素材，而是把每个外部信号转成可复用结构、品牌记忆和下一轮视频/分发动作。暂未接入的采集、解析和回流能力会明确标成外部门禁。
             </p>
           </div>
           <div className="mt-4 grid gap-3 lg:grid-cols-4">
@@ -1180,11 +1212,11 @@ export function CreativeMonitoringConsoleClient({
         <section className="border border-amber-300/20 bg-amber-300/[0.06] p-5">
           <div className="flex flex-col gap-2 sm:flex-row sm:items-start sm:justify-between">
             <div>
-              <p className="text-xs uppercase tracking-[0.22em] text-amber-200">VidMob / Superads 参考层</p>
-              <h2 className="mt-2 text-xl font-semibold">AI 视频分析、创意疲劳和跨平台 performance signal 一起看</h2>
+              <p className="text-xs uppercase tracking-[0.22em] text-amber-200">视频表现参考层</p>
+              <h2 className="mt-2 text-xl font-semibold">AI 视频分析、创意疲劳和跨平台表现信号一起看</h2>
             </div>
             <div className="max-w-sm text-xs leading-5 text-amber-100/80">
-              这层把多模态解析、创意分析和疲劳观察收成一块：没有平台数据和解析 provider 时，只能做结构复盘，不能宣称自动优化。
+              这层把多模态解析、创意分析和疲劳观察收成一块：没有平台数据和解析服务时，只能做结构复盘，不能宣称自动优化。
             </div>
           </div>
           <div className="mt-4 grid gap-3 lg:grid-cols-4">
@@ -1202,7 +1234,7 @@ export function CreativeMonitoringConsoleClient({
         <section className="border border-emerald-300/20 bg-emerald-950/20 p-5">
           <div className="flex flex-col gap-2 sm:flex-row sm:items-start sm:justify-between">
             <div>
-              <p className="text-xs uppercase tracking-[0.22em] text-emerald-200">Creative Harvest Acceptance Board</p>
+              <p className="text-xs uppercase tracking-[0.22em] text-emerald-200">创意收口验收板</p>
               <h2 className="mt-2 text-xl font-semibold">创意收割商用品质验收板</h2>
             </div>
             <p className="max-w-md text-xs leading-5 text-white/60">
@@ -1224,7 +1256,7 @@ export function CreativeMonitoringConsoleClient({
         <section className="border border-sky-300/20 bg-sky-950/20 p-5">
           <div className="flex flex-col gap-3 border-b border-sky-300/15 pb-4 sm:flex-row sm:items-start sm:justify-between">
             <div>
-              <p className="text-xs uppercase tracking-[0.22em] text-sky-200">Compose Action Playbook</p>
+              <p className="text-xs uppercase tracking-[0.22em] text-sky-200">创意到生产动作剧本</p>
               <h2 className="mt-2 text-xl font-semibold">{composePlaybook.title}</h2>
               <p className="mt-2 max-w-3xl text-sm leading-6 text-white/60">{composePlaybook.primaryAction}</p>
             </div>
@@ -1263,11 +1295,11 @@ export function CreativeMonitoringConsoleClient({
               </p>
             </div>
             <div className="grid gap-2 text-xs text-white/60 sm:min-w-72">
-              <div>服务：{collectorPlan?.adapterStatus.providerName || 'manual-creative-ops'}</div>
-              <div>模式：{collectorPlan?.dispatchMode === 'provider' ? '真实 provider' : '人工运营'}</div>
+              <div>服务：{collectorServiceLabel(collectorPlan?.adapterStatus.providerName)}</div>
+              <div>模式：{collectorPlan?.dispatchMode === 'provider' ? '授权采集' : '人工运营'}</div>
               <div>支持：{collectorPlan?.adapterStatus.supportedMonitorTypes?.map(typeLabel).join(' / ') || '竞品账号 / 榜单趋势 / 视频拆解'}</div>
               <div className={collectorPlan?.providerReady ? 'text-emerald-200' : 'text-amber-100'}>
-                缺口：{collectorPlan?.adapterStatus.missingLinks?.length ? collectorPlan.adapterStatus.missingLinks.join(' / ') : '无'}
+                缺口：{collectorPlan?.adapterStatus.missingLinks?.length ? collectorPlan.adapterStatus.missingLinks.map(readableCreativeSystemText).join(' / ') : '无'}
               </div>
             </div>
           </div>
