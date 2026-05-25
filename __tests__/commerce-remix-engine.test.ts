@@ -29,6 +29,7 @@ import {
   buildCommerceRemixOrchestrationBoard,
   buildCommerceRemixWorkflowPlaybook,
   buildCommerceRenderReliabilityBoard,
+  buildCommerceRenderOperationsRunbook,
   buildCommerceSelfPublishingCommandCenter,
   buildCommerceSuperIpTitleBoard,
   buildCommerceWorkbenchSystemMap,
@@ -360,6 +361,7 @@ describe('commerce remix engine', () => {
     const plan = buildCommerceRemixEnginePlan(baseInput);
     const batchPlan = buildCommerceRenderBatchPlan(plan.queue, { maxConcurrency: 2, retryBudget: 2 });
     const board = buildCommerceRenderReliabilityBoard(plan.queue, batchPlan);
+    const runbook = buildCommerceRenderOperationsRunbook(plan.queue, batchPlan);
 
     expect(board.status).toBe('needs_material');
     expect(board.customerPromise).toContain('失败只重跑单条');
@@ -370,6 +372,13 @@ describe('commerce remix engine', () => {
     expect(board.operatorRules.join(' ')).toContain('不自动登录客户平台');
     expect(board.scaleDecision.currentMode).toContain('本地批次');
     expect(board.scaleDecision.notNeededYet).toContain('首版不需要客户平台自动发布权限');
+    expect(runbook.headline).toContain('稳定渲染运行手册');
+    expect(runbook.preflightChecks.join(' ')).toContain('不拼接 shell 字符串');
+    expect(runbook.batchSteps.map(step => step.id)).toEqual(['material-gate', 'batch-run', 'single-retry', 'quality-sampling', 'publish-pack']);
+    expect(runbook.batchSteps.find(step => step.id === 'single-retry')?.failureFallback).toContain('人工复核');
+    expect(runbook.escalationMatrix.map(item => item.trigger).join(' ')).toContain('平台自动发布');
+    expect(runbook.customerHandoff.join(' ')).toContain('客户自己登录平台发布');
+    expect(JSON.stringify(runbook)).not.toMatch(/apiKey|accessToken|Bearer|sk-/i);
   });
 
   it('builds a compact ecommerce remix template bank with safe captions and quality checks', () => {

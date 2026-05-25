@@ -62,6 +62,8 @@ describe('/api/commerce-remix', () => {
     expect(body.renderCapacity.queuePolicy.join(' ')).toContain('不自动登录');
     expect(body.renderCapacity.monitoringSignals.join(' ')).toContain('failed/blocked');
     expect(body.renderCapacity.storageHandoff.join(' ')).toContain('02-render-outputs');
+    expect(body.renderOperationsRunbook.batchSteps.map((step: { id: string }) => step.id)).toContain('single-retry');
+    expect(body.renderOperationsRunbook.customerHandoff.join(' ')).toContain('客户自己登录平台发布');
     expect(body.cloudReturnPlan.intakeFields.map((field: { label: string }) => field.label)).toContain('表现 CSV');
     expect(body.customerReturnIntakeBoard.status).toBe('ready_for_review');
     expect(body.customerReturnIntakeBoard.evidenceCards.length).toBeGreaterThanOrEqual(3);
@@ -97,6 +99,8 @@ describe('/api/commerce-remix', () => {
     expect(body.renderReliabilityBoard.customerPromise).toContain('失败只重跑单条');
     expect(body.renderReliabilityBoard.lanes.map((lane: { id: string }) => lane.id)).toContain('material-gate');
     expect(body.renderReliabilityBoard.operatorRules.join(' ')).toContain('不自动登录客户平台');
+    expect(body.renderOperationsRunbook.preflightChecks.join(' ')).toContain('缺素材');
+    expect(body.renderOperationsRunbook.escalationMatrix.map((item: { trigger: string }) => item.trigger).join(' ')).toContain('平台自动发布');
     expect(body.performanceReport.bestTitle).toBe('Hook A');
     expect(body.cloudDrive.folders.map((folder: { path: string }) => folder.path).join(' ')).toContain('04-customer-return');
     expect(body.servicePack.objectionReplies.map((item: { objection: string }) => item.objection)).toContain('担心不好用');

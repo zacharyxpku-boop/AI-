@@ -27,6 +27,7 @@ import {
   buildCommerceRemixWorkflowPlaybook,
   buildCommerceRenderCapacityPlan,
   buildCommerceRenderBatchPlan,
+  buildCommerceRenderOperationsRunbook,
   buildCommerceRenderReliabilityBoard,
   buildCommerceSelfPublishingCommandCenter,
   buildCommerceSuperIpTitleBoard,
@@ -60,6 +61,7 @@ import {
   buildDemoCommerceRemixTemplateBank,
   buildDemoCommerceRenderCapacityPlan,
   buildDemoCommerceRenderBatchPlan,
+  buildDemoCommerceRenderOperationsRunbook,
   buildDemoCommerceRenderReliabilityBoard,
   buildDemoCommerceSelfPublishingCommandCenter,
   buildDemoCommerceSuperIpTitleBoard,
@@ -108,6 +110,7 @@ function buildInputResponse(input: CommerceRemixPlanInput, body: CommerceRemixRe
   });
   const renderCapacity = buildCommerceRenderCapacityPlan(plan.queue, batchPlan);
   const renderReliabilityBoard = buildCommerceRenderReliabilityBoard(plan.queue, batchPlan, renderCapacity);
+  const renderOperationsRunbook = buildCommerceRenderOperationsRunbook(plan.queue, batchPlan, renderCapacity, renderReliabilityBoard);
   const dryRun = executeCommerceRemixDryRun(plan, {
     failQueueItemIds: body.failQueueItemIds,
   });
@@ -150,6 +153,7 @@ function buildInputResponse(input: CommerceRemixPlanInput, body: CommerceRemixRe
     batchExecution,
     renderCapacity,
     renderReliabilityBoard,
+    renderOperationsRunbook,
     dryRun,
     performanceReport,
     servicePack,
@@ -191,6 +195,7 @@ export async function GET() {
     batchPlan: buildDemoCommerceRenderBatchPlan(),
     renderCapacity: buildDemoCommerceRenderCapacityPlan(),
     renderReliabilityBoard: buildDemoCommerceRenderReliabilityBoard(),
+    renderOperationsRunbook: buildDemoCommerceRenderOperationsRunbook(),
     dryRun: buildDemoCommerceRemixDryRun(),
     performanceReport: buildDemoCommercePerformanceUploadReport(),
     servicePack: buildDemoCommerceCustomerServicePack(),

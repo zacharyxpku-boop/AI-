@@ -33,6 +33,7 @@ import {
   buildDemoCommerceRemixTemplateBank,
   buildDemoCommerceRenderCapacityPlan,
   buildDemoCommerceRenderBatchPlan,
+  buildDemoCommerceRenderOperationsRunbook,
   buildDemoCommerceRenderReliabilityBoard,
   buildDemoCommerceSelfPublishingCommandCenter,
   buildDemoCommerceSuperIpTitleBoard,
@@ -262,6 +263,7 @@ export function KuaiziStyleWorkbench() {
   const selfPublishingCommandCenter = useMemo(() => buildDemoCommerceSelfPublishingCommandCenter(), []);
   const renderCapacity = useMemo(() => buildDemoCommerceRenderCapacityPlan(), []);
   const renderReliabilityBoard = useMemo(() => buildDemoCommerceRenderReliabilityBoard(), []);
+  const renderOperationsRunbook = useMemo(() => buildDemoCommerceRenderOperationsRunbook(), []);
   const cloudReturnPlan = useMemo(() => buildDemoCommerceCloudDriveReturnPlan(), []);
   const customerReturnIntakeBoard = useMemo(() => buildDemoCommerceCustomerReturnIntakeBoard(), []);
   const evidenceReadinessBoard = useMemo(() => buildDemoCommerceEvidenceReadinessBoard(), []);
@@ -932,6 +934,33 @@ export function KuaiziStyleWorkbench() {
                             <span className="shrink-0 rounded bg-white px-2 py-1 text-[11px] font-black text-blue-700">{lane.count}</span>
                           </div>
                           <p className="mt-1 line-clamp-2 text-[11px] font-bold leading-4 text-slate-600">{lane.customerMeaning}</p>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                  <div className="mt-4 rounded-md border border-indigo-100 bg-white p-3 ring-1 ring-indigo-50">
+                    <div className="flex flex-col gap-2 sm:flex-row sm:items-start sm:justify-between">
+                      <div className="min-w-0">
+                        <div className="text-xs font-black uppercase tracking-[0.16em] text-indigo-600">Render Operations Runbook</div>
+                        <p className="mt-1 text-sm font-black leading-5 text-slate-950">{renderOperationsRunbook.headline}</p>
+                        <p className="mt-2 text-xs leading-5 text-slate-600">{renderOperationsRunbook.operatingMode}</p>
+                      </div>
+                      <span className="w-fit rounded bg-indigo-50 px-2.5 py-1 text-xs font-black text-indigo-700">{renderOperationsRunbook.batchSteps.length} 步</span>
+                    </div>
+                    <div className="mt-3 grid gap-2">
+                      {renderOperationsRunbook.batchSteps.slice(0, 3).map(step => (
+                        <div className="rounded bg-indigo-50 px-3 py-2" key={step.id}>
+                          <div className="text-xs font-black leading-5 text-slate-900">{step.title}</div>
+                          <p className="mt-1 line-clamp-2 text-[11px] font-bold leading-4 text-slate-600">{step.action}</p>
+                          <p className="mt-1 line-clamp-1 text-[11px] font-black leading-4 text-indigo-700">{step.proof}</p>
+                        </div>
+                      ))}
+                    </div>
+                    <div className="mt-3 grid gap-2 sm:grid-cols-2">
+                      {renderOperationsRunbook.escalationMatrix.slice(0, 2).map(item => (
+                        <div className="rounded bg-slate-50 px-3 py-2 text-[11px] font-bold leading-4 text-slate-700" key={item.trigger}>
+                          <span className="font-black text-indigo-700">{item.trigger}</span>
+                          <span className="block mt-1">{item.decision}</span>
                         </div>
                       ))}
                     </div>

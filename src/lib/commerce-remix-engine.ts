@@ -506,6 +506,25 @@ export interface CommerceRenderReliabilityBoard {
   };
 }
 
+export interface CommerceRenderOperationsRunbook {
+  headline: string;
+  operatingMode: string;
+  preflightChecks: string[];
+  batchSteps: Array<{
+    id: string;
+    title: string;
+    action: string;
+    proof: string;
+    failureFallback: string;
+  }>;
+  escalationMatrix: Array<{
+    trigger: string;
+    decision: string;
+    ownerAction: string;
+  }>;
+  customerHandoff: string[];
+}
+
 export interface CommerceCloudDriveReturnPlan {
   intakeFields: Array<{ label: string; required: boolean; acceptedFormats: string[]; example: string }>;
   folderRules: string[];
@@ -2255,6 +2274,94 @@ export function buildCommerceRenderReliabilityBoard(
   };
 }
 
+export function buildCommerceRenderOperationsRunbook(
+  queue: CommerceRemixQueueItem[],
+  batchPlan = buildCommerceRenderBatchPlan(queue),
+  capacity = buildCommerceRenderCapacityPlan(queue, batchPlan),
+  board = buildCommerceRenderReliabilityBoard(queue, batchPlan, capacity),
+): CommerceRenderOperationsRunbook {
+  const runnableCount = queue.filter(item => item.status === 'ready' || item.status === 'failed_retryable').length;
+  const blockedCount = queue.filter(item => item.status === 'needs_material' || item.status === 'blocked').length;
+  const exportedCount = queue.filter(item => item.status === 'exported').length;
+
+  return {
+    headline: '稳定渲染运行手册：先预检，再分批跑，失败只隔离单条',
+    operatingMode: `当前 ${queue.length} 条任务中 ${runnableCount} 条可运行、${blockedCount} 条待补素材、${exportedCount} 条已导出；默认按 ${batchPlan.maxConcurrency} 并发分成 ${Math.max(1, batchPlan.batches.length)} 个批次。`,
+    preflightChecks: [
+      '素材必须有授权标记、文件路径、尺寸、时长和用途说明。',
+      '每条任务必须有平台、尺寸、模板、字幕、安全区和输出路径。',
+      'FFmpeg 参数必须保存为数组或 manifest，不拼接 shell 字符串。',
+      '缺素材、blocked、待人工复核任务不进入本批渲染。',
+      '发布动作只进入客户自发布包，不请求账号、密码、cookie 或平台后台权限。',
+    ],
+    batchSteps: [
+      {
+        id: 'material-gate',
+        title: '素材门禁',
+        action: '先扫描 needs_material 和 blocked 项，把缺图、缺授权、字幕过长、音频响度问题写回任务。',
+        proof: 'material-gaps.json、blocked-items.json、客户补素材清单',
+        failureFallback: '不渲染该条任务，只让客户补素材或让运营复核。',
+      },
+      {
+        id: 'batch-run',
+        title: '按批渲染',
+        action: `按每批最多 ${batchPlan.maxConcurrency} 条执行，记录 batch id、queue item id、attempt、输出路径和开始/结束时间。`,
+        proof: 'render-log.json、ffmpeg-commands.json、02-render-outputs',
+        failureFallback: '单条失败只进入 retry-lane，已成功 MP4 不回滚。',
+      },
+      {
+        id: 'single-retry',
+        title: '单条重试',
+        action: `同一条最多重试 ${batchPlan.batches[0]?.retryBudget || 2} 次；先降并发，再检查编码、字幕、音频和素材路径。`,
+        proof: 'failed-items.json、attempt log、失败原因',
+        failureFallback: '超过预算标记 blocked，进入人工复核，不继续占用渲染并发。',
+      },
+      {
+        id: 'quality-sampling',
+        title: '抽检验收',
+        action: '每个平台至少抽检 1 条，检查可播放、字幕安全区、商品主体、封面和售后承诺。',
+        proof: 'upload-ready-checklist.md、media-probe-report.json、人工抽检记录',
+        failureFallback: '只返工不合格条目，并把问题写回模板或素材缺口。',
+      },
+      {
+        id: 'publish-pack',
+        title: '交付发布包',
+        action: '把 MP4、封面、字幕、标题矩阵、发布清单和客户回填字段放进云盘目录。',
+        proof: '03-publishing-packs、04-customer-return、客户自发布清单',
+        failureFallback: '如果云盘或对象存储未接入，先导出本地 ZIP/目录结构。',
+      },
+    ],
+    escalationMatrix: [
+      {
+        trigger: '单批超过 30 条或连续两批失败率超过 15%',
+        decision: '降低并发，先查素材质量；仍不稳定再进入多 worker 评估。',
+        ownerAction: '运营把失败原因归类，技术检查编码、字幕、音频和模板。',
+      },
+      {
+        trigger: '单客户单批超过 100 条或需要多人审核',
+        decision: '接对象存储、企业云盘、分布式 worker 和签名下载链接。',
+        ownerAction: '先确认客户是否需要长期素材托管，再决定是否接云端队列。',
+      },
+      {
+        trigger: '客户要求平台自动发布或后台表现自动读取',
+        decision: '不放进渲染队列；另走授权/API 评估。',
+        ownerAction: '继续交付自发布包和回填入口，避免账号托管风险。',
+      },
+      {
+        trigger: board.status === 'needs_material' ? '当前存在待补素材任务' : '当前批次可运行',
+        decision: board.scaleDecision.currentMode,
+        ownerAction: board.status === 'needs_material' ? '先补素材，再开批次。' : '按运行手册执行并保留日志。',
+      },
+    ],
+    customerHandoff: [
+      '客户只看到：待补素材、渲染中、需复核、可发布四类状态。',
+      '客户拿到：MP4、封面、字幕、标题/正文/标签、发布清单和回填表。',
+      '客户自己登录平台发布，发布后上传链接、截图、CSV 或云盘目录。',
+      '没有真实回填证据时，不生成虚构播放、订单或转化判断。',
+    ],
+  };
+}
+
 export function executeCommerceRenderBatches(queue: CommerceRemixQueueItem[], plan = buildCommerceRenderBatchPlan(queue), options: { failQueueItemIds?: string[] } = {}): CommerceRenderBatchExecution {
   const failIds = new Set(options.failQueueItemIds || []);
   const byId = new Map(queue.map(item => [item.id, item]));
@@ -3225,6 +3332,20 @@ export function buildDemoCommerceRenderReliabilityBoard() {
   const plan = buildCommerceRemixEnginePlan(readyInput);
   const batchPlan = buildCommerceRenderBatchPlan(plan.queue, { maxConcurrency: 3, retryBudget: 2 });
   return buildCommerceRenderReliabilityBoard(plan.queue, batchPlan, buildCommerceRenderCapacityPlan(plan.queue, batchPlan));
+}
+
+export function buildDemoCommerceRenderOperationsRunbook() {
+  const demoInput = buildDemoCommerceRemixInput();
+  const readyInput = {
+    ...demoInput,
+    assets: demoInput.assets.map(asset => asset.id === 'model-handheld'
+      ? { ...asset, missing: false, uri: 'assets/model-handheld.png', rightsReady: true }
+      : asset),
+  };
+  const plan = buildCommerceRemixEnginePlan(readyInput);
+  const batchPlan = buildCommerceRenderBatchPlan(plan.queue, { maxConcurrency: 3, retryBudget: 2 });
+  const capacity = buildCommerceRenderCapacityPlan(plan.queue, batchPlan);
+  return buildCommerceRenderOperationsRunbook(plan.queue, batchPlan, capacity, buildCommerceRenderReliabilityBoard(plan.queue, batchPlan, capacity));
 }
 
 export function buildDemoCommerceRemixTemplateBank() {
