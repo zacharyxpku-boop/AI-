@@ -113,8 +113,8 @@ const configs: Record<WorkflowStep, WorkflowConfig> = {
   },
   create: {
     eyebrow: 'Step 02',
-    title: '把商品图、模特图、场景图和授权说明整理成素材货架',
-    subtitle: '图片、模特生图、卖点图和授权边界放在同一个货架里。你的图片 Key 到位后直接生成；暂时没有 Key 时先输出 prompt 和素材任务。',
+    title: '把商品图、模特图、证明图和客服素材整理成货架',
+    subtitle: '图片生成等你的 Key；当前先把商品素材、模特生图 prompt、授权检查和客服 FAQ 做成可执行生产包。',
     primaryLabel: '去生成视频',
     primaryHref: '/factory/video?variant=friend_trial',
     toolName: '素材与图片生成',
@@ -124,13 +124,13 @@ const configs: Record<WorkflowStep, WorkflowConfig> = {
     outcome: '电商人最关心的不是“生成图片”，而是主图、穿搭图、手持图、使用场景图能不能批量补齐。',
     cards: [
       { label: '可用素材', value: '6 个', detail: '主图、包装图、场景图、视频片段归档。' },
-      { label: '模特生图', value: 'Key 到位即接', detail: '支持模特图、穿搭图、手持图、局部细节图的任务拆解。' },
-      { label: '缺口', value: '1 项待补', detail: '缺授权图或高清商品图时直接提示客户。' },
+      { label: '模特生图', value: '等 Key', detail: '先输出模特、姿态、场景和构图 prompt。' },
+      { label: '客服素材', value: '可生成', detail: '尺码、材质、物流、售后和 FAQ 同步整理。' },
     ],
     systemPillars: [
       { title: '模特生图任务包', body: 'Key 到位后接图片生成；Key 未到位先导出 prompt、构图和补图清单。', proof: '每张图都有用途、输入、质量检查和回退路径。' },
-      { title: '商品证明图', body: '主图、细节图、对比图、使用场景图和规格图按发布用途归档。', proof: '素材进入视频和发布包前先检查授权。' },
-      { title: '客服可用素材', body: '把材质、尺码、物流、售后承诺同步给客服和 FAQ。', proof: '素材不只服务内容，也承接咨询。' },
+      { title: '商品证明图', body: '主图、细节图、材质图、规格图、对比图和使用场景图按发布用途归档。', proof: '素材进入视频和发布包前先检查授权。' },
+      { title: '客服与售后承接', body: '把材质、尺码、物流、售后承诺、评论区异议同步给客服和 FAQ。', proof: '内容带来的咨询能被接住。' },
     ],
     tasks: [
       { title: '上传缺失的商品高清图', owner: '客户', status: '待上传' },
@@ -140,7 +140,7 @@ const configs: Record<WorkflowStep, WorkflowConfig> = {
     deliverables: [
       { title: '商品影棚', body: '主图、白底图、场景图、卖点图、规格图和对比图按用途归档。', status: '可用' },
       { title: '模特与人群', body: '用商品和人群定位生成模特风格、年龄、动作、场景和构图任务。', status: '等 Key' },
-      { title: '授权检查', body: '缺 logo、素材授权或真人肖像授权时先卡在素材缺口，不让它进入量产。', status: '已内置' },
+      { title: '客服素材包', body: '把尺码、材质、物流、售后、常见异议整理成客服话术和售后卡片。', status: '可生成' },
     ],
   },
   video: {

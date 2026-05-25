@@ -14,7 +14,7 @@ describe('kuaizi workflow console', () => {
     },
     {
       active: 'create' as const,
-      title: '把商品图、模特图、场景图和授权说明整理成素材货架',
+      title: '把商品图、模特图、证明图和客服素材整理成货架',
       pillar: '模特生图任务包',
       proof: '每张图都有用途、输入、质量检查和回退路径。',
       next: '/factory/video?variant=friend_trial',

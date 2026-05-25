@@ -9,7 +9,7 @@ import VideoFactoryPage from '@/app/factory/video/page';
 
 const pages = [
   { name: 'creative', page: CreativeFactoryPage, expected: '先把商品资料变成客户能直接选择的卖点脚本', next: '/factory/create?variant=friend_trial' },
-  { name: 'create', page: CreateFactoryPage, expected: '把商品图、模特图、场景图和授权说明整理成素材货架', next: '/factory/video?variant=friend_trial' },
+  { name: 'create', page: CreateFactoryPage, expected: '把商品图、模特图、证明图和客服素材整理成货架', next: '/factory/video?variant=friend_trial' },
   { name: 'video', page: VideoFactoryPage, expected: '本地混剪先稳定出片，视频和数字人 Key 到位后增强', next: '/factory/cast?variant=friend_trial' },
   { name: 'cast', page: CastFactoryPage, expected: '把内容变成客户自己能发布的多平台发布包', next: '/factory/manage?variant=friend_trial' },
   { name: 'manage', page: ManageFactoryPage, expected: '把表现数据、客服反馈和售后问题变成下一轮增长动作', next: '/factory?variant=friend_trial' },

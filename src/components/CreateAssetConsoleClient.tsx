@@ -56,6 +56,47 @@ const CREATE_VARIANTS: Record<FactoryUiVariantId, {
   },
 };
 
+const ECOMMERCE_ASSET_SHELF = [
+  {
+    title: '模特生图任务包',
+    status: '等你的图片 Key',
+    body: '先把模特年龄、气质、动作、手持方式、穿搭、背景和构图写成可复用 prompt。',
+    proof: 'Key 到位后直接进入生成；Key 未到位也能交给摄影、设计或外部工具执行。',
+  },
+  {
+    title: '商品证明图',
+    status: '可整理',
+    body: '主图、细节图、材质图、规格图、对比图、包装图和使用场景图按发布用途归档。',
+    proof: '进入视频、图文和发布包前先检查清晰度、授权和禁用表达。',
+  },
+  {
+    title: '客服承接素材',
+    status: '可生成',
+    body: '把尺码、材质、物流、售后、适用人群、常见异议整理成客服话术和 FAQ 卡片。',
+    proof: '内容带来的咨询不丢给人工临时编，客服能直接接住。',
+  },
+  {
+    title: '授权与风险检查',
+    status: '先卡口',
+    body: '真人肖像、Logo、竞品参考、字体、音乐和素材来源在生产前先标出风险。',
+    proof: '缺授权时不进入批量生产，避免把草稿当成可商用成品。',
+  },
+];
+
+const MODEL_IMAGE_PROMPT_PACK = [
+  '白底主图：商品无遮挡，细节清楚，适合详情页和平台审核。',
+  '手持场景图：突出大小、重量、材质和真实使用动作。',
+  '穿搭/模特图：按目标人群生成年龄、风格、场景和姿态。',
+  '对比证明图：把容量、材质、防水、收纳、前后对比做成视觉证据。',
+];
+
+const CUSTOMER_SERVICE_ASSET_PACK = [
+  '尺码/规格：适合谁、不适合谁、怎么选。',
+  '材质/保养：是否防水、是否耐磨、怎么清洁。',
+  '物流/售后：发货时效、退换边界、保修承诺。',
+  '评论区异议：贵不贵、耐不耐用、是否真实、和竞品差异。',
+];
+
 function createScore(snapshot: IndustrializationSnapshot | null) {
   if (!snapshot) return 0;
   return [
@@ -318,40 +359,88 @@ export function CreateAssetConsoleClient({
   if ((selectedVariantId as FactoryUiVariantId) === 'friend_trial') {
     const assetCount = Math.max(snapshot?.assetCount || 0, 12);
     const reusableCount = Math.max(snapshot?.reusableAssetCount || 0, 8);
-    const reviewCount = Math.max(snapshot?.clientReviewAssetCount || 0, 4);
     const readyChecks = productionChecks.filter(item => item.ready).length;
 
     return (
       <FactoryFriendTrialExperience
         active="create"
-        title="把商品资料变成内容素材"
-        subtitle="商品图、卖点、口播、授权和客户资料，整理成短视频和图文能直接用的素材货架。"
+        title="把商品图、模特图、证明图和客服素材整理成货架"
+        subtitle="图片生成等你的 Key；当前先把商品素材、模特生图 prompt、授权检查和客服 FAQ 做成可执行生产包。"
         metrics={[
-          { label: '素材资产', value: `${assetCount} 个`, detail: '图片/视频/口播', tone: 'slate' },
+          { label: '素材资产', value: `${assetCount} 个`, detail: '图片/视频/口播/FAQ', tone: 'slate' },
           { label: '可复用', value: `${reusableCount} 个`, detail: '下轮继续用', tone: 'emerald' },
-          { label: '待客户看', value: `${reviewCount} 组`, detail: '审核入口', tone: 'amber' },
+          { label: '模特生图', value: '等 Key', detail: '先出 prompt 包', tone: 'amber' },
         ]}
         funnel={[
           { label: 'Brief', value: 88 },
           { label: '素材', value: 76 },
           { label: '授权', value: 64 },
-          { label: '生产', value: 52 },
+          { label: '生图', value: 52 },
           { label: '审核', value: 44 },
         ]}
         actions={[
-          { role: '客户', title: '补商品资料', value: '上传商品图、卖点和禁用表达', href: '#create-seed' },
-          { role: '运营', title: '检查素材', value: '确认素材可用再进入内容生产', href: '#asset-evidence' },
+          { role: '客户', title: '补商品资料', value: '上传商品图、卖点、授权和客服边界', href: '#create-seed' },
+          { role: '运营', title: '整理素材货架', value: '确认模特图、证明图、FAQ 是否齐全', href: '#asset-shelf' },
           { role: '剪辑', title: '进入内容', value: '用已确认素材生成内容草稿', href: '/factory/video?variant=friend_trial' },
         ]}
         nextHref="/factory/video?variant=friend_trial"
         nextLabel="去批量剪"
       >
+        <section id="asset-shelf" className="rounded-xl border border-cyan-100 bg-cyan-50 p-4 shadow-sm">
+          <div className="flex flex-col gap-2 sm:flex-row sm:items-end sm:justify-between">
+            <div>
+              <p className="text-xs font-black uppercase tracking-[0.18em] text-cyan-700">Asset shelf</p>
+              <h2 className="mt-1 text-lg font-black text-slate-950">电商素材货架</h2>
+            </div>
+            <span className="w-fit rounded-md bg-white px-2.5 py-1 text-xs font-black text-cyan-700 ring-1 ring-cyan-100">
+              模特生图 / 证明图 / 客服素材同屏
+            </span>
+          </div>
+          <div className="mt-4 grid gap-3 lg:grid-cols-4">
+            {ECOMMERCE_ASSET_SHELF.map(item => (
+              <article className="min-w-0 rounded-md bg-white p-3 ring-1 ring-cyan-100" key={item.title}>
+                <div className="flex items-start justify-between gap-2">
+                  <h3 className="break-words text-sm font-black leading-5 text-slate-950">{item.title}</h3>
+                  <span className="shrink-0 rounded bg-cyan-50 px-2 py-1 text-[11px] font-black text-cyan-700">{item.status}</span>
+                </div>
+                <p className="mt-2 text-sm font-bold leading-6 text-slate-600">{item.body}</p>
+                <p className="mt-3 rounded bg-slate-50 px-2 py-1.5 text-xs font-bold leading-5 text-cyan-700">{item.proof}</p>
+              </article>
+            ))}
+          </div>
+        </section>
+
+        <section className="grid gap-4 lg:grid-cols-[1fr_1fr]">
+          <div className="rounded-xl border border-violet-100 bg-white p-4 shadow-sm">
+            <p className="text-xs font-black uppercase tracking-[0.18em] text-violet-600">Model image prompt pack</p>
+            <h2 className="mt-1 text-lg font-black text-slate-950">模特生图 Prompt 包</h2>
+            <div className="mt-4 grid gap-2">
+              {MODEL_IMAGE_PROMPT_PACK.map(item => (
+                <div className="rounded-md border border-violet-100 bg-violet-50 px-3 py-2 text-sm font-bold leading-6 text-violet-800" key={item}>
+                  {item}
+                </div>
+              ))}
+            </div>
+          </div>
+          <div className="rounded-xl border border-emerald-100 bg-white p-4 shadow-sm">
+            <p className="text-xs font-black uppercase tracking-[0.18em] text-emerald-700">Customer service pack</p>
+            <h2 className="mt-1 text-lg font-black text-slate-950">客服与售后承接</h2>
+            <div className="mt-4 grid gap-2">
+              {CUSTOMER_SERVICE_ASSET_PACK.map(item => (
+                <div className="rounded-md border border-emerald-100 bg-emerald-50 px-3 py-2 text-sm font-bold leading-6 text-emerald-800" key={item}>
+                  {item}
+                </div>
+              ))}
+            </div>
+          </div>
+        </section>
+
         <section className="grid gap-6 xl:grid-cols-[0.9fr_1.1fr]">
           <form id="create-seed" onSubmit={seedCreatePackage} className="rounded-xl border border-slate-200 bg-white p-5 shadow-sm">
             <div className="flex items-center justify-between gap-4">
               <div>
-                <p className="text-xs font-semibold uppercase tracking-wide text-slate-500">Asset Builder</p>
-                <h2 className="mt-1 text-lg font-semibold text-slate-950">新增内容资产</h2>
+                <p className="text-xs font-semibold uppercase tracking-wide text-slate-500">素材生产包</p>
+                <h2 className="mt-1 text-lg font-semibold text-slate-950">新增商品素材</h2>
               </div>
               <span className="rounded-full bg-slate-100 px-3 py-1 text-xs font-medium text-slate-600">生产前准备</span>
             </div>
@@ -435,7 +524,7 @@ export function CreateAssetConsoleClient({
       { title: '素材授权', detail: `版权问题 ${snapshot?.rightsIssueAssetCount || 0} / 治理问题 ${snapshot?.assetGovernanceIssueCount || 0}`, blocked: (snapshot?.rightsIssueAssetCount || 0) > 0 || (snapshot?.assetGovernanceIssueCount || 0) > 0 },
       { title: '对象存储', detail: '真实文件存储、签名 URL、DLP 仍需外部配置。', blocked: true },
       { title: '视频生成服务', detail: '真实成片仍需剪辑或生成服务回调。', blocked: true },
-      { title: '平台账号', detail: '分发与自动发布需要 OAuth 授权。', blocked: true },
+      { title: '平台账号', detail: '分发与自动发布需要平台授权。', blocked: true },
       { title: '表现回流接入', detail: '表现回流管道未接通前只做内部证据。', blocked: true },
     ];
     const evidenceRows = [

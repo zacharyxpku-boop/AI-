@@ -88,10 +88,13 @@ describe('create asset console page', () => {
     expect(partnerHtml).toContain('一键视频、智能混剪和批量生成');
 
     expect(friendHtml).toContain('Wenai 商品增长工作台');
-    expect(friendHtml).toContain('把商品资料变成内容素材');
+    expect(friendHtml).toContain('把商品图、模特图、证明图和客服素材整理成货架');
     expect(friendHtml).toContain('创建一个商品增长任务');
-    expect(friendHtml).toContain('Asset Builder');
-    expect(friendHtml).toContain('新增内容资产');
+    expect(friendHtml).toContain('电商素材货架');
+    expect(friendHtml).toContain('模特生图任务包');
+    expect(friendHtml).toContain('客服与售后承接');
+    expect(friendHtml).toContain('素材生产包');
+    expect(friendHtml).toContain('新增商品素材');
     expect(friendHtml).toContain('资产状态');
     expect(friendHtml).toContain('/factory/video?variant=friend_trial');
   });
