@@ -411,6 +411,8 @@ describe('commerce remix engine', () => {
     expect(board.lanes.find(lane => lane.id === 'material-gate')?.count).toBe(3);
     expect(board.batchControls.join(' ')).toContain('缺素材、blocked 和人工复核任务不占用渲染并发');
     expect(board.customerVisibleStatuses.join(' ')).toContain('客户自己登录平台发布');
+    expect(board.statusRecoveryGuide.map(item => item.status)).toEqual(['待补素材', '可渲染', '需复核', '可发布']);
+    expect(board.statusRecoveryGuide.find(item => item.status === '需复核')?.wenaiAction).toContain('单条重试');
     expect(board.operatorRules.join(' ')).toContain('不自动登录客户平台');
     expect(board.scaleDecision.currentMode).toContain('本地批次');
     expect(board.scaleDecision.notNeededYet).toContain('首版不需要客户平台自动发布权限');
@@ -923,6 +925,8 @@ describe('commerce remix engine', () => {
     expect(playbook.stages.find(stage => stage.id === 'publishing-pack')?.qualityGate).toContain('不自动登录');
     expect(playbook.noProviderFallbacks.join(' ')).toContain('客户上传链接、截图、CSV');
     expect(chatCutConsole.headline).toContain('chat Cut 式精简混剪控制台');
+    expect(chatCutConsole.quickActions.map(action => action.label)).toEqual(['改前三秒', '换证明素材', '批量换标题', '只重跑失败条']);
+    expect(chatCutConsole.quickActions.find(action => action.label === '只重跑失败条')?.systemDoes).toContain('只重跑单条');
     expect(chatCutConsole.cutFlow.map(step => step.id)).toEqual(['source', 'cut', 'script', 'compose', 'qa', 'queue']);
     expect(chatCutConsole.defaultRecipes.map(recipe => recipe.id)).toEqual(['proof-first', 'model-scene', 'support-objection']);
     expect(chatCutConsole.defaultRecipes[0].openSourceStack).toContain('pyscenedetect');

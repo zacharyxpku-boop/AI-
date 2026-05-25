@@ -1330,6 +1330,16 @@ export function KuaiziStyleWorkbench() {
                     <span className="w-fit rounded bg-white px-2.5 py-1 text-xs font-black text-cyan-700 ring-1 ring-cyan-100">{chatCutRemixConsole.cutFlow.length} 步混剪流</span>
                   </div>
                   <p className="mt-3 rounded bg-white px-3 py-2 text-xs font-bold leading-5 text-cyan-800 ring-1 ring-cyan-100">{chatCutRemixConsole.operatingMode}</p>
+                  <div className="mt-4 grid gap-3 lg:grid-cols-4">
+                    {chatCutRemixConsole.quickActions.map(action => (
+                      <article className="min-w-0 rounded-md bg-white p-3 ring-1 ring-cyan-100" key={action.label}>
+                        <h5 className="text-sm font-black leading-5 text-slate-950">{action.label}</h5>
+                        <p className="mt-2 line-clamp-2 text-xs font-bold leading-5 text-cyan-700">{action.customerClick}</p>
+                        <p className="mt-2 line-clamp-3 text-xs leading-5 text-slate-600">{action.systemDoes}</p>
+                        <p className="mt-3 rounded bg-cyan-50 px-2 py-1.5 text-[11px] font-bold leading-4 text-cyan-800">{action.output}</p>
+                      </article>
+                    ))}
+                  </div>
                   <div className="mt-4 grid gap-3 xl:grid-cols-6">
                     {chatCutRemixConsole.cutFlow.map((step, index) => (
                       <article className="min-w-0 rounded-md bg-white p-3 ring-1 ring-cyan-100" key={step.id}>
@@ -2021,6 +2031,17 @@ export function KuaiziStyleWorkbench() {
                     <div className="mt-3 grid gap-2">
                       {renderReliabilityBoard.customerVisibleStatuses.slice(0, 4).map(item => (
                         <div className="rounded bg-slate-50 px-3 py-2 text-xs font-bold leading-5 text-slate-700" key={item}>{item}</div>
+                      ))}
+                    </div>
+                  </div>
+                  <div className="mt-3 rounded-md border border-slate-200 bg-white p-3">
+                    <div className="text-xs font-black tracking-[0.16em] text-slate-600">状态恢复规则</div>
+                    <div className="mt-3 grid gap-2">
+                      {renderReliabilityBoard.statusRecoveryGuide.map(item => (
+                        <div className="rounded bg-slate-50 px-3 py-2 text-xs leading-5 text-slate-700" key={item.status}>
+                          <span className="font-black text-slate-950">{item.status}</span>
+                          <span className="block mt-1 font-bold">{item.wenaiAction}</span>
+                        </div>
                       ))}
                     </div>
                   </div>

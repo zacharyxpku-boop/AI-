@@ -609,6 +609,13 @@ export interface CommerceChatCutRemixConsole {
   headline: string;
   promise: string;
   operatingMode: string;
+  quickActions: Array<{
+    label: string;
+    customerClick: string;
+    systemDoes: string;
+    output: string;
+    fallback: string;
+  }>;
   cutFlow: Array<{
     id: 'source' | 'cut' | 'script' | 'compose' | 'qa' | 'queue';
     label: string;
@@ -769,6 +776,12 @@ export interface CommerceRenderReliabilityBoard {
   }>;
   batchControls: string[];
   customerVisibleStatuses: string[];
+  statusRecoveryGuide: Array<{
+    status: string;
+    customerMeaning: string;
+    wenaiAction: string;
+    exitCriteria: string;
+  }>;
   operatorRules: string[];
   scaleDecision: {
     currentMode: string;
@@ -3456,6 +3469,32 @@ export function buildCommerceRenderReliabilityBoard(
       '需复核：只说明要检查素材/字幕/音频，不把底层报错甩给客户',
       '可发布：客户自己登录平台发布并回填链接、截图或 CSV',
     ],
+    statusRecoveryGuide: [
+      {
+        status: '待补素材',
+        customerMeaning: '客户只需要补一张图、一段口播、授权说明或商品链接，不需要理解渲染错误。',
+        wenaiAction: '把缺口写进素材货架和客户回填字段，阻止该条进入渲染并发。',
+        exitCriteria: '素材路径、授权状态、尺寸或口播脚本补齐后，自动回到可渲染队列。',
+      },
+      {
+        status: '可渲染',
+        customerMeaning: '素材、模板、字幕、尺寸和输出路径都齐了，可以进入本地/开源混剪。',
+        wenaiAction: `按每批 ${batchPlan.maxConcurrency} 条执行，先跑 smoke test，再放大到整批。`,
+        exitCriteria: 'MP4、封面、字幕、render-log 和媒体参数报告都生成成功。',
+      },
+      {
+        status: '需复核',
+        customerMeaning: '这条不是整批失败，只需要检查字幕、编码、音频、封面或商品主体。',
+        wenaiAction: '降低并发或单条重试；超过重试预算后转人工复核，不占用其他任务。',
+        exitCriteria: '失败原因被归类，修复后只重跑该条，已导出成片不回滚。',
+      },
+      {
+        status: '可发布',
+        customerMeaning: '客户拿到成片、封面、标题、正文、标签和回填表，自己登录平台发布。',
+        wenaiAction: '把文件放入 03-publishing-packs 和 04-customer-return，等待真实表现证据。',
+        exitCriteria: '客户回填链接、截图、CSV 或云盘目录后，进入下一轮标题、封面、重剪和客服优化。',
+      },
+    ],
     operatorRules: [
       '首批每个平台至少抽检 1 条成片。',
       '连续失败先降并发，再检查素材编码、字幕长度、音频响度和封面安全区。',
@@ -3721,6 +3760,36 @@ export function buildCommerceChatCutRemixConsole(
     headline: 'chat Cut 式精简混剪控制台',
     promise: `把 ${product} 的长素材、商品图、口播稿和平台要求切成可复核的小任务：先找可用片段，再压缩成短脚本，最后进入稳定渲染队列；客户看到的是成片包、标题矩阵和下一步，不需要操作复杂剪辑器。`,
     operatingMode: `首版本地/开源执行：${visualClipCount} 个视觉片段、${subtitleClipCount} 段字幕、${plan.ffmpegCommands.length} 条渲染命令，覆盖 ${platformText}；图片/视频/数字人 Key 到位后只补生成层。`,
+    quickActions: [
+      {
+        label: '改前三秒',
+        customerClick: '客户觉得开头不吸引人，只点“改前三秒”。',
+        systemDoes: '保留后半段证明素材，只重写钩子、字幕前两行和封面提示。',
+        output: '新版 opening-hook、字幕片段和单条重渲染任务。',
+        fallback: '没有可用素材时，退回补拍/补图清单，不动已通过成片。',
+      },
+      {
+        label: '换证明素材',
+        customerClick: '客户觉得画面不够有说服力，只点“换证明素材”。',
+        systemDoes: '从候选片段、模特图、细节图和对比卡里替换证明段。',
+        output: '新版 timeline.json、素材引用差异和质检清单。',
+        fallback: '没有新证明素材时，生成模特生图 prompt 或客户补拍要求。',
+      },
+      {
+        label: '批量换标题',
+        customerClick: '客户要同一成片发多个账号，只点“批量换标题”。',
+        systemDoes: '按平台、人设、前三句口播和证据素材生成标题矩阵。',
+        output: '小红书/TikTok/视频号/独立站标题、首句和标签包。',
+        fallback: '平台字段不够时，先按客户自发布表导出，不接平台登录。',
+      },
+      {
+        label: '只重跑失败条',
+        customerClick: '客户看到某条需要复核，只点“重跑这一条”。',
+        systemDoes: '定位 queue item、失败原因、素材和输出路径，只重跑单条。',
+        output: '新的 MP4、render-log、attempt 记录和上传前检查表。',
+        fallback: '超过重试预算后转人工复核，不影响其他已导出成片。',
+      },
+    ],
     cutFlow: [
       {
         id: 'source',

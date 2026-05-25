@@ -159,10 +159,16 @@ describe('factory page', () => {
     expect(html).toContain('按批渲染');
     expect(html).toContain('单条重试');
     expect(html).toContain('客户看到的状态');
+    expect(html).toContain('状态恢复规则');
+    expect(html).toContain('单条重试');
     expect(html).toContain('客户看到的是一条商品增长流水线');
     expect(html).toContain('没有外部接入时的替代路径');
     expect(html).toContain('chat Cut Remix Console');
     expect(html).toContain('chat Cut 式精简混剪控制台');
+    expect(html).toContain('改前三秒');
+    expect(html).toContain('换证明素材');
+    expect(html).toContain('批量换标题');
+    expect(html).toContain('只重跑失败条');
     expect(html).toContain('步混剪流');
     expect(html).toContain('证明优先');
     expect(html).toContain('客户只看这些');
