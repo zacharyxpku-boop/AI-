@@ -145,7 +145,7 @@ const configs: Record<WorkflowStep, WorkflowConfig> = {
   },
   video: {
     eyebrow: 'Step 03',
-    title: '用视频 API、数字人 API 和本地混剪引擎生成稳定内容版本',
+    title: '本地混剪先稳定出片，视频和数字人 Key 到位后增强',
     subtitle: '图片视频数字人等 Key 等你给；混剪先走开源/本地工作流，把脚本、素材、字幕、封面、BGM 和尺寸封成稳定渲染任务。',
     primaryLabel: '去生成发布包',
     primaryHref: '/factory/cast?variant=friend_trial',

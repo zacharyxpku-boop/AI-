@@ -21,7 +21,7 @@ describe('kuaizi workflow console', () => {
     },
     {
       active: 'video' as const,
-      title: '用视频 API、数字人 API 和本地混剪引擎生成稳定内容版本',
+      title: '本地混剪先稳定出片，视频和数字人 Key 到位后增强',
       pillar: 'GitHub 开源混剪蓝图',
       proof: '单条失败只重跑单条，不拖垮整批。',
       next: '/factory/cast?variant=friend_trial',
