@@ -19,6 +19,7 @@ import {
   buildCommerceOpenSourceAdapters,
   buildDemoCommerceOpenSourceCoverage,
   buildDemoCommerceOpenSourceInstallMatrix,
+  buildDemoCommerceOpenSourceRemixBlueprint,
   buildDemoCommerceOpenSourceStackSelector,
   buildDemoCommerceProviderActivationRunbook,
   buildDemoCommerceProviderActivationPlan,
@@ -262,6 +263,7 @@ export function KuaiziStyleWorkbench() {
   const openSourceCoverage = useMemo(() => buildDemoCommerceOpenSourceCoverage(), []);
   const openSourceStackSelector = useMemo(() => buildDemoCommerceOpenSourceStackSelector(), []);
   const openSourceInstallMatrix = useMemo(() => buildDemoCommerceOpenSourceInstallMatrix(), []);
+  const openSourceRemixBlueprint = useMemo(() => buildDemoCommerceOpenSourceRemixBlueprint(), []);
   const executionRecipes = useMemo(() => buildDemoCommerceRemixExecutionRecipes(), []);
   const orchestrationBoard = useMemo(() => buildDemoCommerceRemixOrchestrationBoard(), []);
   const workflowPlaybook = useMemo(() => buildDemoCommerceRemixWorkflowPlaybook(), []);
@@ -896,6 +898,50 @@ export function KuaiziStyleWorkbench() {
                       {openSourceCoverage.installOrder.map(item => (
                         <div className="rounded-md bg-white px-3 py-2 text-xs font-bold leading-5 text-slate-700 ring-1 ring-sky-100" key={item}>{item}</div>
                       ))}
+                    </div>
+                  </div>
+                  <div className="mt-5 rounded-md border border-violet-100 bg-violet-50 p-4">
+                    <div className="flex flex-col gap-3 lg:flex-row lg:items-end lg:justify-between">
+                      <div className="min-w-0">
+                        <p className="text-xs font-black uppercase tracking-[0.18em] text-violet-700">GitHub Remix Blueprint</p>
+                        <h4 className="mt-1 text-base font-black leading-6 text-slate-950">{openSourceRemixBlueprint.headline}</h4>
+                        <p className="mt-2 max-w-4xl text-sm leading-6 text-slate-600">{openSourceRemixBlueprint.promise}</p>
+                      </div>
+                      <span className="w-fit rounded bg-white px-2.5 py-1 text-xs font-black text-violet-700 ring-1 ring-violet-100">{openSourceRemixBlueprint.githubPatternGroups.length} 组开源范式</span>
+                    </div>
+                    <div className="mt-4 grid gap-3 xl:grid-cols-5">
+                      {openSourceRemixBlueprint.githubPatternGroups.map(group => (
+                        <article className="min-w-0 rounded-md bg-white p-3 ring-1 ring-violet-100" key={group.id}>
+                          <div className="text-[11px] font-black uppercase tracking-[0.12em] text-violet-700">{group.id}</div>
+                          <h5 className="mt-1 text-sm font-black leading-5 text-slate-950">{group.label}</h5>
+                          <p className="mt-2 line-clamp-2 text-xs font-bold leading-5 text-violet-700">{group.whatBorrow}</p>
+                          <p className="mt-2 line-clamp-3 text-xs leading-5 text-slate-600">{group.wenaiImplementation}</p>
+                          <div className="mt-3 flex flex-wrap gap-1.5">
+                            {group.referenceAdapterIds.slice(0, 4).map(id => (
+                              <span className="rounded bg-violet-50 px-2 py-1 text-[11px] font-black text-violet-700" key={id}>{id}</span>
+                            ))}
+                          </div>
+                          <p className="mt-3 line-clamp-2 rounded bg-slate-50 px-2 py-1.5 text-[11px] font-bold leading-4 text-slate-600">{group.customerOutput}</p>
+                        </article>
+                      ))}
+                    </div>
+                    <div className="mt-4 grid gap-3 lg:grid-cols-[minmax(0,1fr)_minmax(280px,0.55fr)]">
+                      <div className="rounded-md bg-white p-3 ring-1 ring-violet-100">
+                        <h5 className="text-sm font-black text-slate-950">进入交付的规则</h5>
+                        <div className="mt-3 grid gap-2 sm:grid-cols-2">
+                          {openSourceRemixBlueprint.deliveryRules.map(rule => (
+                            <div className="rounded bg-violet-50 px-3 py-2 text-xs font-bold leading-5 text-slate-700 ring-1 ring-violet-100" key={rule}>{rule}</div>
+                          ))}
+                        </div>
+                      </div>
+                      <div className="rounded-md bg-white p-3 ring-1 ring-violet-100">
+                        <h5 className="text-sm font-black text-slate-950">什么时候再升级</h5>
+                        <div className="mt-3 grid gap-2">
+                          {openSourceRemixBlueprint.scaleDecision.map(rule => (
+                            <div className="rounded bg-slate-50 px-3 py-2 text-xs font-bold leading-5 text-slate-700 ring-1 ring-slate-100" key={rule}>{rule}</div>
+                          ))}
+                        </div>
+                      </div>
                     </div>
                   </div>
                   <div className="mt-5 rounded-md border border-emerald-100 bg-emerald-50 p-4">

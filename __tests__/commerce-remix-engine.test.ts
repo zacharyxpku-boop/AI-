@@ -21,6 +21,7 @@ import {
   buildCommerceOpenSourceAdapters,
   buildCommerceOpenSourceCoverage,
   buildCommerceOpenSourceInstallMatrix,
+  buildCommerceOpenSourceRemixBlueprint,
   buildCommerceOpenSourceStackSelector,
   buildCommercePostPublishActionBoard,
   buildCommerceProviderActivationRunbook,
@@ -480,6 +481,12 @@ describe('commerce remix engine', () => {
     expect(adapters.map(adapter => adapter.id)).toEqual([
       'ffmpeg',
       'remotion',
+      'vanta-video-engine',
+      'openmontage-agent',
+      'openshorts-platform',
+      'revideo',
+      'twick-sdk',
+      'vidosy',
       'whisper',
       'opencv-mediapipe',
       'mlt-shotcut',
@@ -493,6 +500,7 @@ describe('commerce remix engine', () => {
       'auto-editor',
       'lossless-cut',
       'subtitle-edit',
+      'auto-subtitles',
       'imagemagick-libheif',
       'mediainfo',
       'gpac-packager',
@@ -503,11 +511,18 @@ describe('commerce remix engine', () => {
       readiness: 'ready_now',
     });
     expect(adapters.find(adapter => adapter.id === 'remotion')?.repositoryUrl).toBe('https://github.com/remotion-dev/remotion');
+    expect(adapters.find(adapter => adapter.id === 'vanta-video-engine')?.repositoryUrl).toBe('https://github.com/itsjwill/vanta');
+    expect(adapters.find(adapter => adapter.id === 'openmontage-agent')?.repositoryUrl).toBe('https://github.com/calesthio/OpenMontage');
+    expect(adapters.find(adapter => adapter.id === 'openshorts-platform')?.repositoryUrl).toBe('https://github.com/mutonby/openshorts');
+    expect(adapters.find(adapter => adapter.id === 'revideo')?.repositoryUrl).toBe('https://github.com/redotvideo/revideo');
+    expect(adapters.find(adapter => adapter.id === 'twick-sdk')?.repositoryUrl).toBe('https://github.com/ncounterspecialist/twick');
+    expect(adapters.find(adapter => adapter.id === 'vidosy')?.repositoryUrl).toBe('https://github.com/aaurelions/vidosy');
     expect(adapters.find(adapter => adapter.id === 'opentimelineio')?.repositoryUrl).toBe('https://github.com/AcademySoftwareFoundation/OpenTimelineIO');
     expect(adapters.find(adapter => adapter.id === 'editly')?.repositoryUrl).toBe('https://github.com/mifi/editly');
     expect(adapters.find(adapter => adapter.id === 'mcp-video')?.readiness).toBe('ready_now');
     expect(adapters.find(adapter => adapter.id === 'pyscenedetect')?.readiness).toBe('ready_now');
     expect(adapters.find(adapter => adapter.id === 'auto-editor')?.repositoryUrl).toBe('https://github.com/WyattBlue/auto-editor');
+    expect(adapters.find(adapter => adapter.id === 'auto-subtitles')?.repositoryUrl).toBe('https://github.com/Eyevinn/auto-subtitles');
     expect(adapters.find(adapter => adapter.id === 'mediainfo')?.readiness).toBe('ready_now');
     expect(adapters.find(adapter => adapter.id === 'gstreamer')?.readiness).toBe('later');
     expect(adapters.find(adapter => adapter.id === 'gpac-packager')?.readiness).toBe('later');
@@ -695,6 +710,38 @@ describe('commerce remix engine', () => {
     expect(matrix.scaleLaterStack).toEqual(expect.arrayContaining(['gstreamer', 'gpac-packager']));
     expect(matrix.providerBoundary).toContain('不把未通过 smoke test 的工具展示为可交付能力。');
     expect(JSON.stringify(matrix)).not.toMatch(/apiKey|accessToken|Bearer|sk-/i);
+  });
+
+  it('turns GitHub video project patterns into one guarded ecommerce remix blueprint', () => {
+    const plan = buildCommerceRemixEnginePlan(baseInput);
+    const adapters = buildCommerceOpenSourceAdapters();
+    const blueprint = buildCommerceOpenSourceRemixBlueprint(baseInput, plan, adapters);
+
+    expect(blueprint.headline).toContain('GitHub 开源混剪蓝图');
+    expect(blueprint.promise).toContain('可发布资产');
+    expect(blueprint.githubPatternGroups.map(group => group.id)).toEqual([
+      'one-pipeline-many-tools',
+      'clip-first-remix',
+      'caption-voiceover-loop',
+      'programmatic-render',
+      'self-publish-return',
+    ]);
+    expect(blueprint.githubPatternGroups.find(group => group.id === 'one-pipeline-many-tools')?.referenceAdapterIds).toEqual(expect.arrayContaining([
+      'vanta-video-engine',
+      'openmontage-agent',
+      'remotion',
+    ]));
+    expect(blueprint.githubPatternGroups.find(group => group.id === 'programmatic-render')?.referenceAdapterIds).toEqual(expect.arrayContaining([
+      'revideo',
+      'twick-sdk',
+      'vidosy',
+      'queue-worker',
+    ]));
+    expect(blueprint.githubPatternGroups.find(group => group.id === 'caption-voiceover-loop')?.whatNotCopy).toContain('声音克隆');
+    expect(blueprint.deliveryRules.join(' ')).toContain('不能把未验证仓库直接展示为客户可用功能');
+    expect(blueprint.deliveryRules.join(' ')).toContain('不保存账号、密码、cookie');
+    expect(blueprint.scaleDecision.join(' ')).toContain('超过 100 条');
+    expect(JSON.stringify(blueprint)).not.toMatch(/apiKey|accessToken|Bearer|sk-/i);
   });
 
   it('builds a customer-readable remix workflow with no-provider fallbacks', () => {

@@ -444,6 +444,23 @@ export interface CommerceOpenSourceInstallMatrix {
   providerBoundary: string[];
 }
 
+export interface CommerceOpenSourceRemixBlueprint {
+  headline: string;
+  promise: string;
+  githubPatternGroups: Array<{
+    id: string;
+    label: string;
+    referenceAdapterIds: string[];
+    whatBorrow: string;
+    whatNotCopy: string;
+    wenaiImplementation: string;
+    customerOutput: string;
+    validationGate: string;
+  }>;
+  deliveryRules: string[];
+  scaleDecision: string[];
+}
+
 export interface CommerceRemixWorkflowPlaybook {
   stages: Array<{
     id: string;
@@ -812,6 +829,66 @@ export function buildCommerceOpenSourceAdapters(): CommerceOpenSourceAdapter[] {
       guardrail: '先导出模板任务包；真实渲染可走本地 worker 或后续队列。',
     },
     {
+      id: 'vanta-video-engine',
+      name: 'Vanta open AI video engine pattern',
+      repositoryUrl: 'https://github.com/itsjwill/vanta',
+      useFor: '把 Remotion、字幕、头像、转场、图像处理和时间线收束成一个本地视频生成管线',
+      integrationMode: 'task_manifest',
+      customerValue: '借鉴“一条渲染管线统一多种开源能力”的方式，但只暴露电商发布包和验收状态。',
+      readiness: 'later',
+      guardrail: '只借鉴管线分层和模块边界；不直接承诺克隆音色、头像或第三方模型能力。',
+    },
+    {
+      id: 'openmontage-agent',
+      name: 'OpenMontage production pipeline pattern',
+      repositoryUrl: 'https://github.com/calesthio/OpenMontage',
+      useFor: '参考脚本、素材检索、镜头规划、成本预估、剪辑和质检的端到端制作流水线',
+      integrationMode: 'task_manifest',
+      customerValue: '把“想法到成片”拆成客户能审核的制作阶段，减少 prompt 一把梭的不稳定。',
+      readiness: 'later',
+      guardrail: '只用于客户授权素材和自有商品资料；不自动抓取或搬运来源不清的视频素材。',
+    },
+    {
+      id: 'openshorts-platform',
+      name: 'OpenShorts self-hosted shorts pattern',
+      repositoryUrl: 'https://github.com/mutonby/openshorts',
+      useFor: '参考自托管短视频生成、UGC 角色、Remotion 渲染服务和无水印交付结构',
+      integrationMode: 'task_manifest',
+      customerValue: '把短视频生产做成可复用项目，而不是一次性手工剪辑。',
+      readiness: 'later',
+      guardrail: '只借鉴自托管结构和渲染服务边界；发布仍由客户自己完成。',
+    },
+    {
+      id: 'revideo',
+      name: 'Revideo programmatic editor',
+      repositoryUrl: 'https://github.com/redotvideo/revideo',
+      useFor: 'TypeScript 模板、实时预览、API 渲染端点和并行渲染范式',
+      integrationMode: 'task_manifest',
+      customerValue: '后续可把商品模板做成可预览、可参数化、可并行渲染的程序化视频。',
+      readiness: 'later',
+      guardrail: '首版不引入新运行时；先把 Revideo 模式映射到 Wenai 时间线和验收门。',
+    },
+    {
+      id: 'twick-sdk',
+      name: 'Twick React video editor SDK',
+      repositoryUrl: 'https://github.com/ncounterspecialist/twick',
+      useFor: 'React 时间线、AI 字幕、Canvas 编辑、WebCodecs/browser render 和 serverless MP4 导出范式',
+      integrationMode: 'task_manifest',
+      customerValue: '后续需要浏览器内轻编辑时，可把客户复核做成轻量时间线，而不是复杂剪辑软件。',
+      readiness: 'later',
+      guardrail: '不把半成品编辑器直接暴露给客户；必须先通过 Wenai 发布包和字幕质检。',
+    },
+    {
+      id: 'vidosy',
+      name: 'Vidosy declarative Remotion generator',
+      repositoryUrl: 'https://github.com/aaurelions/vidosy',
+      useFor: 'JSON 配置驱动的视频结构、背景、音频层、场景节奏和 Remotion 输出',
+      integrationMode: 'task_manifest',
+      customerValue: '把“换商品就换参数”的电商视频做成可复用配置，降低批量出片成本。',
+      readiness: 'ready_now',
+      guardrail: '只生成 Wenai 可审计 JSON 配方，不直接绕过质量门禁批量发布。',
+    },
+    {
       id: 'whisper',
       name: 'Whisper.cpp / faster-whisper',
       repositoryUrl: 'https://github.com/ggerganov/whisper.cpp',
@@ -940,6 +1017,16 @@ export function buildCommerceOpenSourceAdapters(): CommerceOpenSourceAdapter[] {
       customerValue: '把自动口播、人工录音和数字人脚本统一成可复核字幕，减少错字直接出片。',
       readiness: 'ready_now',
       guardrail: '自动字幕只作为底稿，商品承诺、价格、售后和敏感词必须人工复核。',
+    },
+    {
+      id: 'auto-subtitles',
+      name: 'Auto subtitles pattern',
+      repositoryUrl: 'https://github.com/Eyevinn/auto-subtitles',
+      useFor: '把音视频输入转成字幕文件和字幕生成 API 范式',
+      integrationMode: 'task_manifest',
+      customerValue: '客户给口播、直播切片或数字人口播结果后，能稳定产出可复核字幕。',
+      readiness: 'later',
+      guardrail: '字幕生成不等于事实审核；商品价格、功效、售后和平台敏感词必须进入人工复核。',
     },
     {
       id: 'imagemagick-libheif',
@@ -1373,6 +1460,85 @@ export function buildCommerceOpenSourceInstallMatrix(
       '不保存客户平台账号、密码、cookie 或后台 token。',
       '不自动下载来源不明素材。',
       '不把未通过 smoke test 的工具展示为可交付能力。',
+    ],
+  };
+}
+
+export function buildCommerceOpenSourceRemixBlueprint(
+  input: CommerceRemixPlanInput,
+  plan = buildCommerceRemixEnginePlan(input),
+  adapters = buildCommerceOpenSourceAdapters(),
+): CommerceOpenSourceRemixBlueprint {
+  const adapterIds = new Set(adapters.map(adapter => adapter.id));
+  const requireExisting = (ids: string[]) => ids.filter(id => adapterIds.has(id));
+  const platformText = unique(input.platforms.map(platform => PLATFORM_LABELS[platform])).join('、');
+
+  return {
+    headline: 'GitHub 开源混剪蓝图：强能力收束成一条电商稳定出片线',
+    promise: `参考开源视频引擎、程序化剪辑器、字幕工具和队列模式，但 Wenai 只交付 ${platformText} 可发布资产、标题矩阵、客服素材和客户回填复盘。`,
+    githubPatternGroups: [
+      {
+        id: 'one-pipeline-many-tools',
+        label: '一个商品项目统一多种开源能力',
+        referenceAdapterIds: requireExisting(['vanta-video-engine', 'openmontage-agent', 'remotion', 'ffmpeg']),
+        whatBorrow: '借鉴多工具统一进一条生产管线的思路：脚本、素材、字幕、头像/数字人、转场和渲染都写回同一个任务包。',
+        whatNotCopy: '不把不稳定大仓库直接变成客户入口，不承诺本地已有所有模型或 GPU 能力。',
+        wenaiImplementation: `以 ${slugify(input.productName)} 为项目根目录，统一输出 brief、timeline.json、render queue、publishing pack 和 return folder。`,
+        customerOutput: '客户看到一个商品项目的所有成片、标题、封面、客服话术和复盘入口。',
+        validationGate: '任何工具进入交付前必须有 install check、15 秒冒烟视频、MediaInfo 参数和人工抽检记录。',
+      },
+      {
+        id: 'clip-first-remix',
+        label: '先切片再混剪，减少整条长视频失败',
+        referenceAdapterIds: requireExisting(['lossless-cut', 'pyscenedetect', 'auto-editor', 'opencv-mediapipe']),
+        whatBorrow: '借鉴无损切片、场景检测、去停顿和主体安全区检测，把长素材拆成可复核片段。',
+        whatNotCopy: '不从平台自动下载素材，不处理来源不清或未授权的视频。',
+        wenaiImplementation: '先生成 clip-candidates.json，低置信度片段进入人工复核，再进入模特证明、痛点种草和客服异议模板。',
+        customerOutput: '客户能看到哪些片段会被用、为什么用、哪段需要补拍或删除。',
+        validationGate: '每个片段保留原始时间戳、授权状态和用途，字幕不能遮挡商品主体。',
+      },
+      {
+        id: 'caption-voiceover-loop',
+        label: '字幕、口播、数字人先统一成可审核文本',
+        referenceAdapterIds: requireExisting(['whisper', 'subtitle-edit', 'auto-subtitles', 'vanta-video-engine']),
+        whatBorrow: '借鉴自动字幕、字幕校对、口播切句和头像/数字人口播管线。',
+        whatNotCopy: '不把自动转写当成最终文案，不生成未经客户确认的声音克隆或人设。',
+        wenaiImplementation: '图片/视频/数字人 Key 到位前先交付口播稿、字幕底稿和人工录音说明；Key 到位后再把结果写回字幕轨和人设矩阵。',
+        customerOutput: '客户拿到每个平台可读的开场、口播、字幕和标题，不需要理解语音模型。',
+        validationGate: '前三句必须能被普通电商客户读懂，价格、功效、售后和禁用词必须复核。',
+      },
+      {
+        id: 'programmatic-render',
+        label: '程序化模板 + 稳定队列批量出片',
+        referenceAdapterIds: requireExisting(['remotion', 'revideo', 'twick-sdk', 'vidosy', 'queue-worker', 'mediainfo']),
+        whatBorrow: '借鉴 React/TypeScript 视频模板、JSON 配置、浏览器预览、并行渲染和媒体参数验收。',
+        whatNotCopy: '不把编辑器复杂度推给客户，不让单条失败拖垮整批。',
+        wenaiImplementation: `按 ${plan.queue.length} 条队列任务拆批；每条有尺寸、标题角度、输出路径、重试次数和 blocked reason。`,
+        customerOutput: '客户只看“待补素材、可渲染、已导出、需复核”四类状态。',
+        validationGate: '失败只重跑单条；导出前检查可播放、时长、分辨率、字幕安全区和发布包字段。',
+      },
+      {
+        id: 'self-publish-return',
+        label: '发布包和表现回填，不碰客户登录态',
+        referenceAdapterIds: requireExisting(['opentimelineio', 'editly', 'mcp-video', 'mediainfo']),
+        whatBorrow: '借鉴可移植时间线、配置式视频草稿和工具化 QA，把输出组织成客户可执行发布包。',
+        whatNotCopy: '不复制自动上传、自动登录、保存 cookie 或托管平台账号的功能。',
+        wenaiImplementation: '导出标题、正文、标签、封面、MP4、客服 FAQ、发布检查表和 04-customer-return 云盘目录。',
+        customerOutput: '客户自己登录平台发布，回传链接、截图、CSV 或云盘备注后进入下一轮优化。',
+        validationGate: '没有发布证据就不虚构表现；API 同步只在客户授权和字段稳定后升级。',
+      },
+    ],
+    deliveryRules: [
+      '开源项目只作为能力参考和可替换适配器，不能把未验证仓库直接展示为客户可用功能。',
+      '图片、视频、数字人 Key 只增强生成层；混剪、发布包、客服素材和复盘入口不等待 Key。',
+      '客户看结果、缺口和下一步，不看 GitHub 仓库名、命令行和内部报错。',
+      '所有批量渲染必须先过素材授权、字幕安全区、MediaInfo 参数和单条失败隔离。',
+      '客户自行发布；Wenai 不保存账号、密码、cookie 或浏览器登录态。',
+    ],
+    scaleDecision: [
+      '首版用本地 worker、任务包和云盘回填即可交付。',
+      '单客户连续多批超过 100 条且本地队列排队明显时，再接多 worker、对象存储和监控。',
+      '平台 API、自动读取表现和自动发布只在客户授权、字段稳定、失败可回退到 CSV 后再接。',
     ],
   };
 }
@@ -3842,6 +4008,13 @@ export function buildDemoCommerceOpenSourceInstallMatrix() {
   const plan = buildCommerceRemixEnginePlan(input);
   const adapters = buildCommerceOpenSourceAdapters();
   return buildCommerceOpenSourceInstallMatrix(input, plan, adapters);
+}
+
+export function buildDemoCommerceOpenSourceRemixBlueprint() {
+  const input = buildDemoCommerceRemixInput();
+  const plan = buildCommerceRemixEnginePlan(input);
+  const adapters = buildCommerceOpenSourceAdapters();
+  return buildCommerceOpenSourceRemixBlueprint(input, plan, adapters);
 }
 
 export function buildDemoCommerceRemixOrchestrationBoard() {

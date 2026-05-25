@@ -62,6 +62,11 @@ describe('factory page', () => {
     expect(html).toContain('开源混剪能力地图');
     expect(html).toContain('Auto-Editor');
     expect(html).toContain('MediaInfo');
+    expect(html).toContain('GitHub Remix Blueprint');
+    expect(html).toContain('GitHub 开源混剪蓝图');
+    expect(html).toContain('一个商品项目统一多种开源能力');
+    expect(html).toContain('程序化模板 + 稳定队列批量出片');
+    expect(html).toContain('进入交付的规则');
     expect(html).toContain('Open Source Stack Selector');
     expect(html).toContain('开源混剪栈选择器');
     expect(html).toContain('long-material-slicing');

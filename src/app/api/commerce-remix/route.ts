@@ -16,6 +16,7 @@ import {
   buildCommerceOpenSourceAdapters,
   buildCommerceOpenSourceCoverage,
   buildCommerceOpenSourceInstallMatrix,
+  buildCommerceOpenSourceRemixBlueprint,
   buildCommerceOpenSourceStackSelector,
   buildCommercePostPublishActionBoard,
   buildCommerceProviderActivationRunbook,
@@ -52,6 +53,7 @@ import {
   buildDemoCommerceModelImageTaskPack,
   buildDemoCommerceOpenSourceCoverage,
   buildDemoCommerceOpenSourceInstallMatrix,
+  buildDemoCommerceOpenSourceRemixBlueprint,
   buildDemoCommerceOpenSourceStackSelector,
   buildDemoCommercePostPublishActionBoard,
   buildDemoCommerceProviderActivationRunbook,
@@ -141,6 +143,7 @@ function buildInputResponse(input: CommerceRemixPlanInput, body: CommerceRemixRe
   const openSourceCoverage = buildCommerceOpenSourceCoverage(input, plan, openSourceAdapters);
   const openSourceStackSelector = buildCommerceOpenSourceStackSelector(input, plan, openSourceAdapters);
   const openSourceInstallMatrix = buildCommerceOpenSourceInstallMatrix(input, plan, openSourceAdapters);
+  const openSourceRemixBlueprint = buildCommerceOpenSourceRemixBlueprint(input, plan, openSourceAdapters);
   const executionRecipes = buildCommerceRemixExecutionRecipes(input, plan, openSourceAdapters);
   const orchestrationBoard = buildCommerceRemixOrchestrationBoard(input, plan, openSourceAdapters);
   const workflowPlaybook = buildCommerceRemixWorkflowPlaybook(input, plan);
@@ -187,6 +190,7 @@ function buildInputResponse(input: CommerceRemixPlanInput, body: CommerceRemixRe
     openSourceCoverage,
     openSourceStackSelector,
     openSourceInstallMatrix,
+    openSourceRemixBlueprint,
     executionRecipes,
     orchestrationBoard,
     workflowPlaybook,
@@ -234,6 +238,7 @@ export async function GET() {
     openSourceCoverage: buildDemoCommerceOpenSourceCoverage(),
     openSourceStackSelector: buildDemoCommerceOpenSourceStackSelector(),
     openSourceInstallMatrix: buildDemoCommerceOpenSourceInstallMatrix(),
+    openSourceRemixBlueprint: buildDemoCommerceOpenSourceRemixBlueprint(),
     executionRecipes: buildDemoCommerceRemixExecutionRecipes(),
     orchestrationBoard: buildDemoCommerceRemixOrchestrationBoard(),
     workflowPlaybook: buildDemoCommerceRemixWorkflowPlaybook(),
