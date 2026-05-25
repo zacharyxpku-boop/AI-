@@ -328,7 +328,7 @@ export function KuaiziWorkflowConsole({ active }: { active: WorkflowStep }) {
           <section className="mt-5 rounded-md border border-slate-200 bg-white p-4 shadow-sm">
             <div className="flex flex-col gap-3 xl:flex-row xl:items-start xl:justify-between">
               <div className="min-w-0">
-                <div className="text-xs font-black uppercase tracking-[0.18em] text-indigo-600">Customer Next Step</div>
+                <div className="text-xs font-black uppercase tracking-[0.18em] text-indigo-600">客户下一步</div>
                 <h2 className="mt-1 text-lg font-black leading-6 text-slate-950">每个子页面都按同一条电商交付链路推进</h2>
                 <p className="mt-1 text-sm leading-6 text-slate-500">客户不需要理解内部工具名，只要知道现在补什么、Wenai 交付什么、自己发布后回传什么。</p>
               </div>

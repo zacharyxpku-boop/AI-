@@ -23,7 +23,8 @@ describe('factory friend trial workflow pages', () => {
     const html = renderToStaticMarkup(element);
 
     expect(html).toContain('Wenai 商品增长工作台');
-    expect(html).toContain('Customer Next Step');
+    expect(html).toContain('客户下一步');
+    expect(html).not.toContain('Customer Next Step');
     expect(html).toContain('每个子页面都按同一条电商交付链路推进');
     expect(html).toContain('Last Mile');
     expect(html).toContain('每个子页面都保留同一个最后一公里边界');
