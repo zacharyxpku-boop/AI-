@@ -25,6 +25,9 @@ describe('factory page', () => {
     expect(html).toContain('表现 CSV');
     expect(html).toContain('发布不代登');
     expect(html).toContain('数据回下一轮');
+    expect(html).toContain('Daily Operator Cockpit');
+    expect(html).toContain('电商人每日运营驾驶舱');
+    expect(html).toContain('客户今天只看这些命令');
     expect(html).toContain('首版交付清单');
     expect(html).toContain('不等 Key，也能先给客户一套可发布资产');
     expect(html).toContain('首版不用等');

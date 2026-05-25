@@ -50,6 +50,8 @@ describe('/api/commerce-remix', () => {
     expect(body.salesConversationBoard.noAutomationBoundaries).toContain('不自动登录客户平台账号');
     expect(body.workbenchSystemMap.lanes.map((lane: { id: string }) => lane.id)).toContain('model_image');
     expect(body.workbenchSystemMap.primaryRoute).toContain('客户自己发布');
+    expect(body.dailyOperatorCockpit.headline).toContain('电商人每日运营驾驶舱');
+    expect(body.dailyOperatorCockpit.todayFocus.map((item: { id: string }) => item.id)).toContain('support');
     expect(body.openSourceAdapters.map((adapter: { id: string }) => adapter.id)).toContain('ffmpeg');
     expect(body.openSourceAdapters.map((adapter: { id: string }) => adapter.id)).toContain('mcp-video');
     expect(body.workflowPlaybook.stages.map((stage: { id: string }) => stage.id)).toContain('publishing-pack');

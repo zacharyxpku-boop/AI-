@@ -5,6 +5,7 @@ import {
   buildCommerceCustomerReturnIntakeBoard,
   buildCommerceCustomerDeliveryMap,
   buildCommerceCustomerEvidenceUploadGuide,
+  buildCommerceDailyOperatorCockpit,
   buildCommerceEvidenceReadinessBoard,
   buildCommerceSalesConversationBoard,
   buildCommerceCustomerServicePack,
@@ -39,6 +40,7 @@ import {
   buildDemoCommerceCustomerReturnIntakeBoard,
   buildDemoCommerceCustomerDeliveryMap,
   buildDemoCommerceCustomerEvidenceUploadGuide,
+  buildDemoCommerceDailyOperatorCockpit,
   buildDemoCommerceEvidenceReadinessBoard,
   buildDemoCommerceSalesConversationBoard,
   buildDemoCommerceCustomerServicePack,
@@ -124,6 +126,7 @@ function buildInputResponse(input: CommerceRemixPlanInput, body: CommerceRemixRe
   const customerSupportWorkflow = buildCommerceCustomerSupportWorkflow(input, servicePack);
   const salesConversationBoard = buildCommerceSalesConversationBoard(input, servicePack, customerSupportWorkflow);
   const workbenchSystemMap = buildCommerceWorkbenchSystemMap(input, plan);
+  const dailyOperatorCockpit = buildCommerceDailyOperatorCockpit(input, plan, workbenchSystemMap);
   const customerDeliveryMap = buildCommerceCustomerDeliveryMap(input);
   const providerActivationPlan = buildCommerceProviderActivationPlan();
   const providerActivationRunbook = buildCommerceProviderActivationRunbook(providerActivationPlan);
@@ -167,6 +170,7 @@ function buildInputResponse(input: CommerceRemixPlanInput, body: CommerceRemixRe
     customerSupportWorkflow,
     salesConversationBoard,
     workbenchSystemMap,
+    dailyOperatorCockpit,
     customerDeliveryMap,
     providerActivationPlan,
     providerActivationRunbook,
@@ -211,6 +215,7 @@ export async function GET() {
     customerSupportWorkflow: buildDemoCommerceCustomerSupportWorkflow(),
     salesConversationBoard: buildDemoCommerceSalesConversationBoard(),
     workbenchSystemMap: buildDemoCommerceWorkbenchSystemMap(),
+    dailyOperatorCockpit: buildDemoCommerceDailyOperatorCockpit(),
     customerDeliveryMap: buildDemoCommerceCustomerDeliveryMap(),
     providerActivationPlan: buildDemoCommerceProviderActivationPlan(),
     providerActivationRunbook: buildDemoCommerceProviderActivationRunbook(),

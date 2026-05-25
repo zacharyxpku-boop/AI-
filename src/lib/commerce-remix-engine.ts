@@ -326,6 +326,22 @@ export interface CommerceWorkbenchSystemMap {
   notInScope: string[];
 }
 
+export interface CommerceDailyOperatorCockpit {
+  headline: string;
+  promise: string;
+  todayFocus: Array<{
+    id: CommerceWorkbenchSystemLane['id'];
+    label: string;
+    customerNeed: string;
+    wenaiDoes: string;
+    customerDoes: string;
+    visibleProof: string;
+    nextHref: string;
+  }>;
+  commandStrip: string[];
+  customerCanIgnore: string[];
+}
+
 export interface CommerceOpenSourceAdapter {
   id: string;
   name: string;
@@ -3169,6 +3185,46 @@ export function buildCommerceWorkbenchSystemMap(
   };
 }
 
+export function buildCommerceDailyOperatorCockpit(
+  input: CommerceRemixPlanInput,
+  plan = buildCommerceRemixEnginePlan(input),
+  systemMap = buildCommerceWorkbenchSystemMap(input, plan),
+): CommerceDailyOperatorCockpit {
+  const product = safeText(input.productName, '商品');
+  const routeByLane = new Map(systemMap.lanes.map(lane => [lane.id, lane]));
+  const focusIds: CommerceWorkbenchSystemLane['id'][] = ['brief', 'model_image', 'remix', 'publish_pack', 'support', 'review'];
+
+  return {
+    headline: '电商人每日运营驾驶舱',
+    promise: `客户打开工作台时先看到 ${product} 今天要补什么、Wenai 正在产出什么、交付后怎么发布和复盘；复杂工具、Key 和开源栈都收在第二层。`,
+    todayFocus: focusIds.map(id => {
+      const lane = routeByLane.get(id);
+      return {
+        id,
+        label: lane?.title || id,
+        customerNeed: lane?.customerQuestion || '确认今天的商品增长任务。',
+        wenaiDoes: lane?.wenaiOutput.slice(0, 3).join(' / ') || '生成可交付任务。',
+        customerDoes: lane?.customerAction || '按提示补充资料。',
+        visibleProof: lane?.proofToCollect.slice(0, 3).join(' / ') || '交付证据',
+        nextHref: lane?.routeHref || '/factory?variant=friend_trial',
+      };
+    }),
+    commandStrip: [
+      '先看商品资料缺口，再看今天能交付的图、视频、标题和客服素材。',
+      '生图/视频/数字人 Key 未配置时，仍然导出 prompt、时间线、发布包和补素材任务。',
+      '混剪队列只展示客户能理解的状态：待补素材、可渲染、渲染中、已导出、需重试。',
+      '发布由客户自己完成；Wenai 给复制包、检查表和回填入口。',
+      '表现数据先靠链接、截图、CSV、云盘目录，后续再接正式授权 API。',
+    ],
+    customerCanIgnore: [
+      '不用理解 FFmpeg、Remotion、OpenTimelineIO、PySceneDetect 这些工具名。',
+      '不用把账号、密码、cookie 或后台 token 交给 Wenai。',
+      '不用等所有 provider 接完才拿第一版发布包。',
+      '不用在多个页面猜下一步，驾驶舱直接给今天的动作。',
+    ],
+  };
+}
+
 export function buildCommerceProviderActivationPlan(): CommerceProviderActivationPlan {
   return {
     currentMode: '本地优先：混剪、发布包、云盘回填、客服素材和复盘建议不依赖外部 provider。',
@@ -3675,6 +3731,12 @@ export function buildDemoCommerceSalesConversationBoard() {
 export function buildDemoCommerceWorkbenchSystemMap() {
   const input = buildDemoCommerceRemixInput();
   return buildCommerceWorkbenchSystemMap(input, buildCommerceRemixEnginePlan(input));
+}
+
+export function buildDemoCommerceDailyOperatorCockpit() {
+  const input = buildDemoCommerceRemixInput();
+  const plan = buildCommerceRemixEnginePlan(input);
+  return buildCommerceDailyOperatorCockpit(input, plan, buildCommerceWorkbenchSystemMap(input, plan));
 }
 
 export function buildDemoCommerceCustomerDeliveryMap() {

@@ -8,6 +8,7 @@ import {
   buildDemoCommerceCustomerReturnIntakeBoard,
   buildDemoCommerceCustomerDeliveryMap,
   buildDemoCommerceCustomerEvidenceUploadGuide,
+  buildDemoCommerceDailyOperatorCockpit,
   buildDemoCommerceEvidenceReadinessBoard,
   buildDemoCommerceSalesConversationBoard,
   buildDemoCommerceCustomerServicePack,
@@ -249,6 +250,7 @@ export function KuaiziStyleWorkbench() {
   const customerSupportWorkflow = useMemo(() => buildDemoCommerceCustomerSupportWorkflow(), []);
   const salesConversationBoard = useMemo(() => buildDemoCommerceSalesConversationBoard(), []);
   const workbenchSystemMap = useMemo(() => buildDemoCommerceWorkbenchSystemMap(), []);
+  const dailyOperatorCockpit = useMemo(() => buildDemoCommerceDailyOperatorCockpit(), []);
   const providerActivationPlan = useMemo(() => buildDemoCommerceProviderActivationPlan(), []);
   const providerActivationRunbook = useMemo(() => buildDemoCommerceProviderActivationRunbook(), []);
   const providerNeedAssessment = useMemo(() => buildDemoCommerceProviderNeedAssessment(), []);
@@ -480,6 +482,48 @@ export function KuaiziStyleWorkbench() {
                   {workbenchSystemMap.dailyOperatingRules.map(rule => (
                     <div className="rounded-md border border-slate-200 bg-slate-50 px-3 py-2 text-xs font-bold leading-5 text-slate-600" key={rule}>{rule}</div>
                   ))}
+                </div>
+                <div className="mt-5 rounded-md border border-emerald-100 bg-emerald-50 p-4">
+                  <div className="flex flex-col gap-3 lg:flex-row lg:items-end lg:justify-between">
+                    <div className="min-w-0">
+                      <p className="text-xs font-black uppercase tracking-[0.18em] text-emerald-700">Daily Operator Cockpit</p>
+                      <h4 className="mt-1 text-base font-black leading-6 text-slate-950">{dailyOperatorCockpit.headline}</h4>
+                      <p className="mt-2 max-w-4xl text-sm leading-6 text-slate-600">{dailyOperatorCockpit.promise}</p>
+                    </div>
+                    <span className="w-fit rounded bg-white px-2.5 py-1 text-xs font-black text-emerald-700 ring-1 ring-emerald-100">{dailyOperatorCockpit.todayFocus.length} 个今日动作</span>
+                  </div>
+                  <div className="mt-4 grid gap-3 xl:grid-cols-3">
+                    {dailyOperatorCockpit.todayFocus.map(item => (
+                      <Link className="min-w-0 rounded-md bg-white p-3 ring-1 ring-emerald-100 transition hover:bg-emerald-50" href={item.nextHref} key={item.id}>
+                        <div className="text-[11px] font-black uppercase tracking-[0.12em] text-emerald-700">{item.id}</div>
+                        <h5 className="mt-1 text-sm font-black leading-5 text-slate-950">{item.label}</h5>
+                        <p className="mt-2 line-clamp-2 text-xs font-bold leading-5 text-emerald-700">{item.customerNeed}</p>
+                        <div className="mt-3 grid gap-2">
+                          <p className="rounded bg-emerald-50 px-3 py-2 text-xs font-bold leading-5 text-slate-700">Wenai：{item.wenaiDoes}</p>
+                          <p className="rounded bg-slate-50 px-3 py-2 text-xs font-bold leading-5 text-slate-700">客户：{item.customerDoes}</p>
+                          <p className="truncate rounded bg-white px-3 py-2 text-[11px] font-black text-emerald-700 ring-1 ring-emerald-100">证据：{item.visibleProof}</p>
+                        </div>
+                      </Link>
+                    ))}
+                  </div>
+                  <div className="mt-4 grid gap-3 lg:grid-cols-[minmax(0,1fr)_minmax(280px,0.55fr)]">
+                    <div className="rounded-md bg-white p-3 ring-1 ring-emerald-100">
+                      <h5 className="text-sm font-black text-slate-950">客户今天只看这些命令</h5>
+                      <div className="mt-3 grid gap-2 sm:grid-cols-2">
+                        {dailyOperatorCockpit.commandStrip.map(item => (
+                          <div className="rounded bg-emerald-50 px-3 py-2 text-xs font-bold leading-5 text-slate-700" key={item}>{item}</div>
+                        ))}
+                      </div>
+                    </div>
+                    <div className="rounded-md bg-white p-3 ring-1 ring-emerald-100">
+                      <h5 className="text-sm font-black text-slate-950">客户不用管</h5>
+                      <div className="mt-3 grid gap-2">
+                        {dailyOperatorCockpit.customerCanIgnore.map(item => (
+                          <div className="rounded bg-slate-50 px-3 py-2 text-xs font-bold leading-5 text-slate-700 ring-1 ring-slate-100" key={item}>{item}</div>
+                        ))}
+                      </div>
+                    </div>
+                  </div>
                 </div>
               </section>
 

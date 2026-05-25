@@ -14,6 +14,7 @@ import {
   buildCommerceCustomerServicePack,
   buildCommerceCustomerSupportWorkflow,
   buildCommerceCreatorPersonaMatrix,
+  buildCommerceDailyOperatorCockpit,
   buildCommerceEvidenceReadinessBoard,
   buildCommerceFirstDeliveryChecklist,
   buildCommerceModelImageTaskPack,
@@ -713,6 +714,14 @@ describe('commerce remix engine', () => {
     expect(systemMap.lanes.find(lane => lane.id === 'review')?.proofToCollect).toContain('表现 CSV');
     expect(systemMap.notInScope.join(' ')).toContain('cookie');
     expect(JSON.stringify(systemMap)).not.toMatch(/apiKey|accessToken|Bearer|sk-/i);
+
+    const cockpit = buildCommerceDailyOperatorCockpit(baseInput, plan, systemMap);
+    expect(cockpit.headline).toContain('电商人每日运营驾驶舱');
+    expect(cockpit.todayFocus.map(item => item.id)).toEqual(['brief', 'model_image', 'remix', 'publish_pack', 'support', 'review']);
+    expect(cockpit.todayFocus.find(item => item.id === 'support')?.wenaiDoes).toContain('FAQ');
+    expect(cockpit.commandStrip.join(' ')).toContain('今天能交付的图、视频、标题和客服素材');
+    expect(cockpit.customerCanIgnore.join(' ')).toContain('不用理解 FFmpeg');
+    expect(JSON.stringify(cockpit)).not.toMatch(/apiKey|accessToken|Bearer|sk-/i);
   });
 
   it('plans platform title matrices for customer self-publishing', () => {
