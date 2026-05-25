@@ -23,6 +23,7 @@ import {
   buildCommerceOpenSourceAdapters,
   buildDemoCommerceOpenSourceCoverage,
   buildDemoCommerceOpenSourceInstallMatrix,
+  buildDemoCommerceOpenSourceQueueConsole,
   buildDemoCommerceOpenSourceRemixBlueprint,
   buildDemoCommerceOpenSourceStackSelector,
   buildDemoCommercePersonaPublishingConsole,
@@ -272,6 +273,7 @@ export function KuaiziStyleWorkbench() {
   const openSourceInstallMatrix = useMemo(() => buildDemoCommerceOpenSourceInstallMatrix(), []);
   const openSourceRemixBlueprint = useMemo(() => buildDemoCommerceOpenSourceRemixBlueprint(), []);
   const githubRemixRadar = useMemo(() => buildDemoCommerceGitHubRemixRadar(), []);
+  const openSourceQueueConsole = useMemo(() => buildDemoCommerceOpenSourceQueueConsole(), []);
   const chatCutRemixConsole = useMemo(() => buildDemoCommerceChatCutRemixConsole(), []);
   const executionRecipes = useMemo(() => buildDemoCommerceRemixExecutionRecipes(), []);
   const orchestrationBoard = useMemo(() => buildDemoCommerceRemixOrchestrationBoard(), []);
@@ -1111,6 +1113,65 @@ export function KuaiziStyleWorkbench() {
                           ))}
                         </div>
                       </div>
+                    </div>
+                  </div>
+                  <div className="mt-5 rounded-md border border-teal-100 bg-teal-50 p-4">
+                    <div className="flex flex-col gap-3 lg:flex-row lg:items-end lg:justify-between">
+                      <div className="min-w-0">
+                        <p className="text-xs font-black uppercase tracking-[0.18em] text-teal-700">Open Source Queue Console</p>
+                        <h4 className="mt-1 text-base font-black leading-6 text-slate-950">{openSourceQueueConsole.headline}</h4>
+                        <p className="mt-2 max-w-4xl text-sm leading-6 text-slate-600">{openSourceQueueConsole.promise}</p>
+                      </div>
+                      <span className="w-fit rounded bg-white px-2.5 py-1 text-xs font-black text-teal-700 ring-1 ring-teal-100">
+                        {openSourceQueueConsole.stages.length} 段混剪队列
+                      </span>
+                    </div>
+                    <div className="mt-4 grid gap-3 xl:grid-cols-5">
+                      {openSourceQueueConsole.stages.map(stage => (
+                        <article className="min-w-0 rounded-md bg-white p-3 ring-1 ring-teal-100" key={stage.id}>
+                          <div className="text-[11px] font-black uppercase tracking-[0.12em] text-teal-700">{stage.id}</div>
+                          <h5 className="mt-1 text-sm font-black leading-5 text-slate-950">{stage.label}</h5>
+                          <p className="mt-2 line-clamp-3 text-xs leading-5 text-slate-600">{stage.customerJob}</p>
+                          <p className="mt-3 rounded bg-teal-50 px-2 py-1.5 text-[11px] font-bold leading-4 text-teal-800">{stage.queueLane}</p>
+                          <div className="mt-3 flex flex-wrap gap-1.5">
+                            {stage.adapterIds.slice(0, 5).map(id => (
+                              <span className="rounded bg-slate-50 px-2 py-1 text-[11px] font-black text-slate-700 ring-1 ring-slate-100" key={id}>{id}</span>
+                            ))}
+                          </div>
+                          <p className="mt-3 line-clamp-2 text-[11px] font-bold leading-4 text-emerald-700">{stage.passGate}</p>
+                        </article>
+                      ))}
+                    </div>
+                    <div className="mt-4 grid gap-3 lg:grid-cols-3">
+                      <div className="rounded-md bg-white p-3 ring-1 ring-teal-100">
+                        <h5 className="text-sm font-black text-slate-950">批量控制</h5>
+                        <div className="mt-3 grid gap-2">
+                          {openSourceQueueConsole.batchControls.map(item => (
+                            <div className="rounded bg-teal-50 px-3 py-2 text-xs font-bold leading-5 text-slate-700" key={item}>{item}</div>
+                          ))}
+                        </div>
+                      </div>
+                      <div className="rounded-md bg-white p-3 ring-1 ring-teal-100">
+                        <h5 className="text-sm font-black text-slate-950">失败策略</h5>
+                        <div className="mt-3 grid gap-2">
+                          {openSourceQueueConsole.failurePolicy.map(item => (
+                            <div className="rounded bg-rose-50 px-3 py-2 text-xs font-bold leading-5 text-rose-800" key={item}>{item}</div>
+                          ))}
+                        </div>
+                      </div>
+                      <div className="rounded-md bg-white p-3 ring-1 ring-teal-100">
+                        <h5 className="text-sm font-black text-slate-950">客户可见证据</h5>
+                        <div className="mt-3 flex flex-wrap gap-2">
+                          {openSourceQueueConsole.customerVisibleProof.map(item => (
+                            <span className="rounded bg-slate-50 px-2.5 py-1 text-xs font-black text-slate-700 ring-1 ring-slate-100" key={item}>{item}</span>
+                          ))}
+                        </div>
+                      </div>
+                    </div>
+                    <div className="mt-4 grid gap-2 md:grid-cols-4">
+                      {openSourceQueueConsole.scaleUpgradePath.map(item => (
+                        <div className="rounded-md bg-white px-3 py-2 text-xs font-bold leading-5 text-slate-700 ring-1 ring-teal-100" key={item}>{item}</div>
+                      ))}
                     </div>
                   </div>
                   <div className="mt-5 rounded-md border border-emerald-100 bg-emerald-50 p-4">

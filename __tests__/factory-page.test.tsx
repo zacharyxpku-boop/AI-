@@ -78,6 +78,10 @@ describe('factory page', () => {
     expect(html).toContain('moneyprinterturbo');
     expect(html).toContain('short-video-maker');
     expect(html).toContain('video-wizard');
+    expect(html).toContain('Open Source Queue Console');
+    expect(html).toContain('开源混剪队列控制台');
+    expect(html).toContain('稳定渲染和单条重试');
+    expect(html).toContain('客户可见证据');
     expect(html).toContain('Open Source Stack Selector');
     expect(html).toContain('开源混剪栈选择器');
     expect(html).toContain('long-material-slicing');

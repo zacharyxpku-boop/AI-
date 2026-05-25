@@ -507,6 +507,26 @@ export interface CommerceGitHubRemixRadar {
   notProviderDependency: string[];
 }
 
+export interface CommerceOpenSourceQueueConsole {
+  headline: string;
+  promise: string;
+  stages: Array<{
+    id: string;
+    label: string;
+    customerJob: string;
+    adapterIds: string[];
+    queueLane: string;
+    taskCount: number;
+    customerOutput: string;
+    passGate: string;
+    fallback: string;
+  }>;
+  batchControls: string[];
+  failurePolicy: string[];
+  customerVisibleProof: string[];
+  scaleUpgradePath: string[];
+}
+
 export interface CommerceRemixWorkflowPlaybook {
   stages: Array<{
     id: string;
@@ -1779,6 +1799,122 @@ export function buildCommerceGitHubRemixRadar(
       '开源混剪、字幕、模板、队列和质检不是外部 provider 阻塞项。',
       '图片、视频、数字人 Key 只增强生成层；没有 Key 仍能导出 prompt、时间线、发布包和回填清单。',
       '自动登录、cookie 托管、平台后台读取和自动发布不纳入首版交付。',
+    ],
+  };
+}
+
+export function buildCommerceOpenSourceQueueConsole(
+  input: CommerceRemixPlanInput,
+  adapters = buildCommerceOpenSourceAdapters(),
+  recipes = buildCommerceRemixExecutionRecipes(input, buildCommerceRemixEnginePlan(input), adapters),
+  renderBoard = buildCommerceRenderReliabilityBoard(buildCommerceRemixEnginePlan(input).queue),
+): CommerceOpenSourceQueueConsole {
+  const adapterIds = new Set(adapters.map(adapter => adapter.id));
+  const recipeByAdapter = new Map(recipes.map(recipe => [recipe.adapterId, recipe]));
+  const stage = (
+    id: string,
+    label: string,
+    customerJob: string,
+    wantedAdapterIds: string[],
+    queueLane: string,
+    customerOutput: string,
+    passGate: string,
+    fallback: string,
+  ) => {
+    const availableAdapterIds = wantedAdapterIds.filter(adapterId => adapterIds.has(adapterId));
+    return {
+      id,
+      label,
+      customerJob,
+      adapterIds: availableAdapterIds,
+      queueLane,
+      taskCount: Math.max(1, availableAdapterIds.filter(adapterId => recipeByAdapter.has(adapterId)).length),
+      customerOutput,
+      passGate,
+      fallback,
+    };
+  };
+
+  return {
+    headline: '开源混剪队列控制台：把 GitHub 能力收束成稳定出片工单',
+    promise: `Wenai 不把 GitHub 仓库堆给客户看，而是把 ${safeText(input.productName, '商品')} 的素材清洗、切片、字幕、模板、渲染、质检和回填证明放进一条可重试队列；图片、视频、数字人 Key 不到位时也能先交付混剪任务包。`,
+    stages: [
+      stage(
+        'source-slicing',
+        '长素材切片和瘦身',
+        '客户上传直播、测评、口播或商品长视频后，先切出可用片段。',
+        ['lossless-cut', 'pyscenedetect', 'auto-editor', 'mediainfo'],
+        '素材预处理队列',
+        '可复核片段池、原始时间戳、删除停顿记录和素材缺口表。',
+        '每个片段有来源、时长、授权状态和进入/淘汰原因。',
+        '自动切片不可用时，退回 15-30 秒人工片段清单，不影响后续标题和发布包。',
+      ),
+      stage(
+        'caption-script',
+        '口播脚本和字幕底稿',
+        '把客户口播、直播音轨或系统脚本拆成前三句、字幕和标题素材。',
+        ['whisper', 'subtitle-edit', 'auto-subtitles', 'short-video-maker'],
+        '字幕口播队列',
+        '前三句口播、SRT/ASS 字幕底稿、人工复核清单和标题候选。',
+        '商品承诺、价格、售后和敏感词必须进入人工复核。',
+        '转写 worker 不可用时，使用 Wenai 生成脚本和人工字幕，不阻塞成片包。',
+      ),
+      stage(
+        'template-compose',
+        '模板时间线编排',
+        '把商品图、模特图、证明片段、字幕和 CTA 组装成平台尺寸时间线。',
+        ['remotion', 'vidosy', 'editly', 'opentimelineio', 'vanta-video-engine'],
+        '模板编排队列',
+        'timeline.json、composition manifest、封面 brief 和每个平台版本。',
+        '每条时间线都有平台、尺寸、字幕安全区、素材引用和输出路径。',
+        '模板 worker 不可用时，保留 OpenTimelineIO/JSON 任务包给 FFmpeg 或人工剪辑机执行。',
+      ),
+      stage(
+        'stable-render',
+        '稳定渲染和单条重试',
+        '把每个平台、每个人设、每种尺寸拆成独立渲染任务，失败只重跑单条。',
+        ['ffmpeg', 'queue-worker', 'moviepy', 'gpac-packager', 'gstreamer'],
+        '渲染 worker 队列',
+        'MP4、封面、render-log.json、failed-items.json 和上传前检查表。',
+        renderBoard.customerPromise,
+        '队列服务不可用时，每批最多 3 条本地执行；失败任务写 blocked 原因，已成功成片不回滚。',
+      ),
+      stage(
+        'qa-handoff',
+        '上传前质检和客户回填',
+        '检查画面、字幕、编码和回填字段，客户自己发布后上传证据。',
+        ['mediainfo', 'opencv-mediapipe', 'mcp-video'],
+        '质检交付队列',
+        '媒体参数报告、封面/字幕遮挡报告、发布包和回填字段。',
+        '客户拿到的是可上传成片、标题口播、证明素材和回填要求，不是内部报错。',
+        '视觉检测不可用时，固定安全区模板加人工抽检截图；平台表现仍由客户上传链接、截图或 CSV。',
+      ),
+    ],
+    batchControls: [
+      '默认并发 2-3 条，按平台和尺寸分批，不把几十条视频塞进同一个失败点。',
+      '缺素材任务进入 blocked，不进入渲染；素材补齐后只重放对应任务。',
+      '每条任务记录输入文件、adapter、输出路径、验收结果和下一步动作。',
+      '同一批次先跑 1 条 smoke test，再放大到整批。',
+    ],
+    failurePolicy: [
+      '单条失败只重跑单条，不回滚已合格成片。',
+      '连续失败时把原因转成客户能看懂的缺口：缺素材、字幕过长、尺寸不对、编码不合格。',
+      '未通过 smoke test 的 GitHub 项目只放在后续能力池，不展示为可交付能力。',
+      '不因为没有平台自动登录、图片 Key、视频 Key 或数字人 Key 而阻塞本地混剪交付。',
+    ],
+    customerVisibleProof: [
+      'clip-candidates.json',
+      'timeline.json',
+      'render-log.json',
+      'media-probe-report.json',
+      'upload-ready-checklist.md',
+      '04-customer-return 回填目录',
+    ],
+    scaleUpgradePath: [
+      '先用本地 FFmpeg/Remotion/MediaInfo 跑通 10 条以内交付。',
+      '当单批超过 30 条时增加 queue worker 和对象存储。',
+      '当连续客户都需要长素材切片时，把 LosslessCut/PySceneDetect/Auto-Editor 固化成预处理 worker。',
+      '当客户要求平台表现自动读取时，再评估平台 API 或云盘自动导入，不接账号密码和 cookie。',
     ],
   };
 }
@@ -4624,6 +4760,20 @@ export function buildDemoCommerceOpenSourceRemixBlueprint() {
 
 export function buildDemoCommerceGitHubRemixRadar() {
   return buildCommerceGitHubRemixRadar(buildDemoCommerceRemixInput(), buildCommerceOpenSourceAdapters());
+}
+
+export function buildDemoCommerceOpenSourceQueueConsole() {
+  const input = buildDemoCommerceRemixInput();
+  const plan = buildCommerceRemixEnginePlan(input);
+  const adapters = buildCommerceOpenSourceAdapters();
+  const batchPlan = buildCommerceRenderBatchPlan(plan.queue, { maxConcurrency: 3, retryBudget: 2 });
+  const renderCapacity = buildCommerceRenderCapacityPlan(plan.queue, batchPlan);
+  return buildCommerceOpenSourceQueueConsole(
+    input,
+    adapters,
+    buildCommerceRemixExecutionRecipes(input, plan, adapters),
+    buildCommerceRenderReliabilityBoard(plan.queue, batchPlan, renderCapacity),
+  );
 }
 
 export function buildDemoCommerceRemixOrchestrationBoard() {

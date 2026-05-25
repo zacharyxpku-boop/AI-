@@ -25,6 +25,7 @@ import {
   buildCommerceOpenSourceAdapters,
   buildCommerceOpenSourceCoverage,
   buildCommerceOpenSourceInstallMatrix,
+  buildCommerceOpenSourceQueueConsole,
   buildCommerceOpenSourceRemixBlueprint,
   buildCommerceOpenSourceStackSelector,
   buildCommercePostPublishActionBoard,
@@ -816,6 +817,28 @@ describe('commerce remix engine', () => {
     expect(radar.customerReadyDefinition.join(' ')).toContain('客户自己发布');
     expect(radar.notProviderDependency.join(' ')).toContain('自动登录');
     expect(JSON.stringify(radar)).not.toMatch(/apiKey|accessToken|Bearer|sk-/i);
+  });
+
+  it('turns open-source remix tools into a stable customer-visible queue console', () => {
+    const plan = buildCommerceRemixEnginePlan(baseInput);
+    const adapters = buildCommerceOpenSourceAdapters();
+    const recipes = buildCommerceRemixExecutionRecipes(baseInput, plan, adapters);
+    const batchPlan = buildCommerceRenderBatchPlan(plan.queue, { maxConcurrency: 2, retryBudget: 2 });
+    const renderBoard = buildCommerceRenderReliabilityBoard(plan.queue, batchPlan);
+    const console = buildCommerceOpenSourceQueueConsole(baseInput, adapters, recipes, renderBoard);
+
+    expect(console.headline).toContain('开源混剪队列控制台');
+    expect(console.stages.map(stage => stage.id)).toEqual(['source-slicing', 'caption-script', 'template-compose', 'stable-render', 'qa-handoff']);
+    expect(console.stages.find(stage => stage.id === 'source-slicing')?.adapterIds).toEqual(expect.arrayContaining(['lossless-cut', 'pyscenedetect', 'auto-editor']));
+    expect(console.stages.find(stage => stage.id === 'caption-script')?.adapterIds).toContain('short-video-maker');
+    expect(console.stages.find(stage => stage.id === 'template-compose')?.adapterIds).toEqual(expect.arrayContaining(['remotion', 'vanta-video-engine', 'opentimelineio']));
+    expect(console.stages.find(stage => stage.id === 'stable-render')?.adapterIds).toEqual(expect.arrayContaining(['ffmpeg', 'queue-worker']));
+    expect(console.batchControls.join(' ')).toContain('smoke test');
+    expect(console.failurePolicy.join(' ')).toContain('单条失败只重跑单条');
+    expect(console.failurePolicy.join(' ')).toContain('不因为没有平台自动登录');
+    expect(console.customerVisibleProof).toContain('render-log.json');
+    expect(console.scaleUpgradePath.join(' ')).toContain('不接账号密码和 cookie');
+    expect(JSON.stringify(console)).not.toMatch(/apiKey|accessToken|Bearer|sk-/i);
   });
 
   it('builds a customer-readable remix workflow with no-provider fallbacks', () => {

@@ -20,6 +20,7 @@ import {
   buildCommerceOpenSourceAdapters,
   buildCommerceOpenSourceCoverage,
   buildCommerceOpenSourceInstallMatrix,
+  buildCommerceOpenSourceQueueConsole,
   buildCommerceOpenSourceRemixBlueprint,
   buildCommerceOpenSourceStackSelector,
   buildCommercePersonaPublishingConsole,
@@ -62,6 +63,7 @@ import {
   buildDemoCommerceModelImageTaskPack,
   buildDemoCommerceOpenSourceCoverage,
   buildDemoCommerceOpenSourceInstallMatrix,
+  buildDemoCommerceOpenSourceQueueConsole,
   buildDemoCommerceOpenSourceRemixBlueprint,
   buildDemoCommerceOpenSourceStackSelector,
   buildDemoCommercePersonaPublishingConsole,
@@ -159,6 +161,7 @@ function buildInputResponse(input: CommerceRemixPlanInput, body: CommerceRemixRe
   const githubRemixRadar = buildCommerceGitHubRemixRadar(input, openSourceAdapters);
   const chatCutRemixConsole = buildCommerceChatCutRemixConsole(input, plan, templates, renderReliabilityBoard);
   const executionRecipes = buildCommerceRemixExecutionRecipes(input, plan, openSourceAdapters);
+  const openSourceQueueConsole = buildCommerceOpenSourceQueueConsole(input, openSourceAdapters, executionRecipes, renderReliabilityBoard);
   const orchestrationBoard = buildCommerceRemixOrchestrationBoard(input, plan, openSourceAdapters);
   const workflowPlaybook = buildCommerceRemixWorkflowPlaybook(input, plan);
   const publishingMatrix = buildCommercePublishingMatrixPlan(input, plan.publishingPacks);
@@ -209,6 +212,7 @@ function buildInputResponse(input: CommerceRemixPlanInput, body: CommerceRemixRe
     openSourceInstallMatrix,
     openSourceRemixBlueprint,
     githubRemixRadar,
+    openSourceQueueConsole,
     chatCutRemixConsole,
     executionRecipes,
     orchestrationBoard,
@@ -262,6 +266,7 @@ export async function GET() {
     openSourceInstallMatrix: buildDemoCommerceOpenSourceInstallMatrix(),
     openSourceRemixBlueprint: buildDemoCommerceOpenSourceRemixBlueprint(),
     githubRemixRadar: buildDemoCommerceGitHubRemixRadar(),
+    openSourceQueueConsole: buildDemoCommerceOpenSourceQueueConsole(),
     chatCutRemixConsole: buildDemoCommerceChatCutRemixConsole(),
     executionRecipes: buildDemoCommerceRemixExecutionRecipes(),
     orchestrationBoard: buildDemoCommerceRemixOrchestrationBoard(),
