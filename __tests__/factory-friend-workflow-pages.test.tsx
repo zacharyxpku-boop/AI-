@@ -23,6 +23,10 @@ describe('factory friend trial workflow pages', () => {
     const html = renderToStaticMarkup(element);
 
     expect(html).toContain('Wenai 商品增长工作台');
+    expect(html).toContain('Customer Next Step');
+    expect(html).toContain('每个子页面都按同一条电商交付链路推进');
+    expect(html).toContain('客户自己发布');
+    expect(html).toContain('首版不碰：自动登录、代发、后台数据 API');
     expect(html).toContain(expected);
     expect(html).toContain('这一页最后交付什么');
     expect(html).toContain('不用外部登录也能推进');

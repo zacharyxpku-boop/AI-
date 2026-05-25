@@ -27,6 +27,39 @@ const workflowNav: Array<{ id: WorkflowStep; label: string; href: string }> = [
   { id: 'manage', label: '复盘跟进', href: '/factory/manage?variant=friend_trial' },
 ];
 
+const customerNextActions = [
+  {
+    label: '补素材',
+    title: '补齐商品和证明素材',
+    body: '主图、场景图、授权、口播和售后边界先补齐。',
+    href: '/factory/create?variant=friend_trial',
+  },
+  {
+    label: '生成',
+    title: '生成混剪和发布素材',
+    body: '开源混剪、标题矩阵、客服话术和发布包先交付。',
+    href: '/factory/video?variant=friend_trial',
+  },
+  {
+    label: '自发',
+    title: '客户自己发布',
+    body: 'Wenai 不拿账号、密码、cookie 或后台 token。',
+    href: '/factory/cast?variant=friend_trial',
+  },
+  {
+    label: '回传',
+    title: '回传证据做下一轮',
+    body: '链接、截图、CSV 或云盘目录进入复盘和重剪。',
+    href: '/factory/manage?variant=friend_trial',
+  },
+] as const;
+
+const providerBoundaryChips = [
+  '现在能跑：混剪、标题、客服、发布包',
+  '等你的 Key：图片、视频、数字人、TTS',
+  '首版不碰：自动登录、代发、后台数据 API',
+] as const;
+
 const configs: Record<WorkflowStep, WorkflowConfig> = {
   creative: {
     eyebrow: 'Step 01',
@@ -273,6 +306,33 @@ export function KuaiziWorkflowConsole({ active }: { active: WorkflowStep }) {
               <span className="rounded-md bg-emerald-50 px-2.5 py-1 text-xs font-bold text-emerald-700 ring-1 ring-emerald-100">客户能看懂</span>
             </div>
           </header>
+
+          <section className="mt-5 rounded-md border border-slate-200 bg-white p-4 shadow-sm">
+            <div className="flex flex-col gap-3 xl:flex-row xl:items-start xl:justify-between">
+              <div className="min-w-0">
+                <div className="text-xs font-black uppercase tracking-[0.18em] text-indigo-600">Customer Next Step</div>
+                <h2 className="mt-1 text-lg font-black leading-6 text-slate-950">每个子页面都按同一条电商交付链路推进</h2>
+                <p className="mt-1 text-sm leading-6 text-slate-500">客户不需要理解内部工具名，只要知道现在补什么、Wenai 交付什么、自己发布后回传什么。</p>
+              </div>
+              <div className="flex flex-wrap gap-2">
+                {providerBoundaryChips.map(chip => (
+                  <span className="rounded-md bg-slate-50 px-3 py-2 text-xs font-black leading-4 text-slate-700 ring-1 ring-slate-200" key={chip}>{chip}</span>
+                ))}
+              </div>
+            </div>
+            <div className="mt-4 grid gap-2 sm:grid-cols-2 xl:grid-cols-4">
+              {customerNextActions.map((item, index) => (
+                <Link className="min-w-0 rounded-md border border-slate-200 bg-slate-50 p-3 transition hover:border-indigo-200 hover:bg-indigo-50" href={item.href} key={item.label}>
+                  <div className="flex items-center gap-2">
+                    <span className="grid size-7 shrink-0 place-items-center rounded-md bg-slate-950 text-[11px] font-black text-white">{index + 1}</span>
+                    <span className="rounded bg-white px-2 py-1 text-[11px] font-black text-slate-600 ring-1 ring-slate-200">{item.label}</span>
+                  </div>
+                  <h3 className="mt-2 truncate text-sm font-black text-slate-950">{item.title}</h3>
+                  <p className="mt-1 line-clamp-2 text-xs font-bold leading-5 text-slate-600">{item.body}</p>
+                </Link>
+              ))}
+            </div>
+          </section>
 
           <div className="mt-5 grid gap-5 xl:grid-cols-[minmax(0,1fr)_340px]">
             <div className="min-w-0 space-y-5">
