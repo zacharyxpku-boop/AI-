@@ -85,6 +85,10 @@ describe('factory page', () => {
     expect(html).toContain('回填后系统看什么');
     expect(html).toContain('Evidence Readiness');
     expect(html).toContain('客户表现证据验收板');
+    expect(html).toContain('Customer Evidence Upload Guide');
+    expect(html).toContain('客户证据上传指南');
+    expect(html).toContain('回传四类证据');
+    expect(html).toContain('不向客户索要');
     expect(html).toContain('Post Publish Action Board');
     expect(html).toContain('发布后复盘行动板');
     expect(html).toContain('可进入下一轮');

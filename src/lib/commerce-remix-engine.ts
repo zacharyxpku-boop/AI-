@@ -175,6 +175,29 @@ export interface CommerceEvidenceReadinessBoard {
   nextRoundHandoff: string[];
 }
 
+export interface CommerceCustomerEvidenceUploadGuide {
+  headline: string;
+  promise: string;
+  uploadSteps: Array<{
+    step: string;
+    title: string;
+    customerAction: string;
+    wenaiAction: string;
+  }>;
+  acceptedEvidence: Array<{
+    label: string;
+    formats: string[];
+    destination: string;
+    proves: string;
+  }>;
+  reviewReadinessRules: string[];
+  nextRoundMapping: Array<{
+    evidence: string;
+    nextWenaiAction: string;
+  }>;
+  doNotAskCustomerFor: string[];
+}
+
 export interface CommercePostPublishActionBoard {
   headline: string;
   status: 'ready_for_next_round' | 'waiting_for_evidence';
@@ -2040,6 +2063,99 @@ export function buildCommerceEvidenceReadinessBoard(
   };
 }
 
+export function buildCommerceCustomerEvidenceUploadGuide(
+  report: CommercePerformanceUploadReport,
+  returnPlan: CommerceCloudDriveReturnPlan,
+  intakeBoard = buildCommerceCustomerReturnIntakeBoard(report, returnPlan),
+): CommerceCustomerEvidenceUploadGuide {
+  const returnFolder = returnPlan.intakeFields.find(field => field.label === '发布截图')?.example.split('/').slice(0, -1).join('/') || '04-customer-return';
+  const ready = intakeBoard.status === 'ready_for_review';
+
+  return {
+    headline: '客户证据上传指南：客户自己发布，Wenai 用证据做下一轮增长',
+    promise: ready
+      ? `已收到 ${report.rowCount} 行表现数据，可以开始复盘标题、封面、重剪和客服承接。`
+      : '不需要客户交账号、密码或 Cookie；只要补齐链接、截图、CSV 或云盘资料，就能进入复盘。',
+    uploadSteps: [
+      {
+        step: '01',
+        title: '客户自己发布',
+        customerAction: '客户在小红书、抖音、TikTok、视频号、独立站等平台自己登录并发布。',
+        wenaiAction: 'Wenai 只交付标题、封面、成片、口播和发布检查清单，不接管账号。',
+      },
+      {
+        step: '02',
+        title: '回传四类证据',
+        customerAction: '把发布链接、发布截图、表现 CSV 和补充备注放进回填入口或云盘。',
+        wenaiAction: '系统把证据映射到标题、账号人设、平台发布包和素材批次。',
+      },
+      {
+        step: '03',
+        title: '先验收再复盘',
+        customerAction: '证据不齐时只补缺项，不需要重复上传整包素材。',
+        wenaiAction: '证据齐后输出下一轮标题、混剪任务、补图任务和客服话术更新。',
+      },
+    ],
+    acceptedEvidence: [
+      {
+        label: '发布链接',
+        formats: ['URL'],
+        destination: '回填表单或 04-customer-return/link.md',
+        proves: '作品已经真实发布，可对应到平台和账号人设。',
+      },
+      {
+        label: '发布截图',
+        formats: ['PNG', 'JPG', 'WEBP'],
+        destination: `${returnFolder}/screenshots`,
+        proves: '标题、封面、发布时间或后台指标不是口头反馈。',
+      },
+      {
+        label: '表现 CSV',
+        formats: ['CSV'],
+        destination: `${returnFolder}/metrics.csv`,
+        proves: '曝光、点击、订单或收入能被归因到具体标题和素材。',
+      },
+      {
+        label: '客户备注',
+        formats: ['TXT', 'MD', '表单文本'],
+        destination: `${returnFolder}/notes.md`,
+        proves: '品牌偏好、客服问题和下一轮想放大的方向被记录下来。',
+      },
+    ],
+    reviewReadinessRules: [
+      '链接、截图、CSV 三项必填证据齐全时，进入正式复盘。',
+      '只有截图但没有 CSV 时，只能做定性判断，不能承诺哪个标题胜出。',
+      '只有 CSV 但没有链接或截图时，先要求客户补发布证明。',
+      '没有正式平台授权前，不自动登录、不抓后台、不托管客户账号。',
+    ],
+    nextRoundMapping: [
+      {
+        evidence: report.bestTitle ? `最佳标题：${report.bestTitle}` : '标题表现未知',
+        nextWenaiAction: report.bestTitle ? '复制胜出标题结构，生成下一轮标题和口播矩阵。' : '先补 CSV，再决定是否换标题或重做开场。',
+      },
+      {
+        evidence: report.totalOrders > 0 ? '已有订单信号' : '订单信号不足',
+        nextWenaiAction: report.totalOrders > 0 ? '放大同类封面、商品图和混剪节奏。' : '重做前三秒钩子、封面和商品利益点表达。',
+      },
+      {
+        evidence: intakeBoard.reviewQueue.find(item => item.includes('客服')) || '评论、私信、售后问题',
+        nextWenaiAction: '更新 FAQ、差评解释、售后转人工规则和客服短视频脚本。',
+      },
+      {
+        evidence: returnPlan.reviewSignals.find(signal => signal.includes('模特图')) || '素材缺口',
+        nextWenaiAction: '生成补模特图、细节图、对比图或数字人口播的任务清单。',
+      },
+    ],
+    doNotAskCustomerFor: [
+      '不索要平台密码。',
+      '不索要 Cookie 或浏览器登录态。',
+      '不托管客户账号。',
+      '不伪造曝光、点击、订单或评价。',
+      '不把平台 analytics API 当作首版交付前置条件。',
+    ],
+  };
+}
+
 export function buildCommercePostPublishActionBoard(
   report: CommercePerformanceUploadReport,
   returnBoard: CommerceCustomerReturnIntakeBoard,
@@ -3285,6 +3401,13 @@ export function buildDemoCommerceEvidenceReadinessBoard() {
   const report = buildDemoCommercePerformanceUploadReport();
   const returnPlan = buildCommerceCloudDriveReturnPlan(input, buildCommerceCloudDriveManifest(input));
   return buildCommerceEvidenceReadinessBoard(report, returnPlan, buildCommerceCustomerReturnIntakeBoard(report, returnPlan));
+}
+
+export function buildDemoCommerceCustomerEvidenceUploadGuide() {
+  const input = buildDemoCommerceRemixInput();
+  const report = buildDemoCommercePerformanceUploadReport();
+  const returnPlan = buildCommerceCloudDriveReturnPlan(input, buildCommerceCloudDriveManifest(input));
+  return buildCommerceCustomerEvidenceUploadGuide(report, returnPlan, buildCommerceCustomerReturnIntakeBoard(report, returnPlan));
 }
 
 export function buildDemoCommercePostPublishActionBoard() {

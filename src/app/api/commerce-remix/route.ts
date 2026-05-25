@@ -4,6 +4,7 @@ import {
   buildCommerceCloudDriveReturnPlan,
   buildCommerceCustomerReturnIntakeBoard,
   buildCommerceCustomerDeliveryMap,
+  buildCommerceCustomerEvidenceUploadGuide,
   buildCommerceEvidenceReadinessBoard,
   buildCommerceSalesConversationBoard,
   buildCommerceCustomerServicePack,
@@ -36,6 +37,7 @@ import {
   buildDemoCommerceCloudDriveReturnPlan,
   buildDemoCommerceCustomerReturnIntakeBoard,
   buildDemoCommerceCustomerDeliveryMap,
+  buildDemoCommerceCustomerEvidenceUploadGuide,
   buildDemoCommerceEvidenceReadinessBoard,
   buildDemoCommerceSalesConversationBoard,
   buildDemoCommerceCustomerServicePack,
@@ -138,6 +140,7 @@ function buildInputResponse(input: CommerceRemixPlanInput, body: CommerceRemixRe
   const selfPublishingCommandCenter = buildCommerceSelfPublishingCommandCenter(input, publishingMatrix, creatorPersonaMatrix, cloudReturnPlan);
   const customerReturnIntakeBoard = buildCommerceCustomerReturnIntakeBoard(performanceReport, cloudReturnPlan);
   const evidenceReadinessBoard = buildCommerceEvidenceReadinessBoard(performanceReport, cloudReturnPlan, customerReturnIntakeBoard);
+  const customerEvidenceUploadGuide = buildCommerceCustomerEvidenceUploadGuide(performanceReport, cloudReturnPlan, customerReturnIntakeBoard);
   const postPublishActionBoard = buildCommercePostPublishActionBoard(performanceReport, customerReturnIntakeBoard, customerSupportWorkflow, cloudReturnPlan);
 
   return {
@@ -179,6 +182,7 @@ function buildInputResponse(input: CommerceRemixPlanInput, body: CommerceRemixRe
     cloudReturnPlan,
     customerReturnIntakeBoard,
     evidenceReadinessBoard,
+    customerEvidenceUploadGuide,
     postPublishActionBoard,
   };
 }
@@ -221,6 +225,7 @@ export async function GET() {
     cloudReturnPlan: buildDemoCommerceCloudDriveReturnPlan(),
     customerReturnIntakeBoard: buildDemoCommerceCustomerReturnIntakeBoard(),
     evidenceReadinessBoard: buildDemoCommerceEvidenceReadinessBoard(),
+    customerEvidenceUploadGuide: buildDemoCommerceCustomerEvidenceUploadGuide(),
     postPublishActionBoard: buildDemoCommercePostPublishActionBoard(),
   });
 }

@@ -9,6 +9,7 @@ import {
   buildCommerceCloudDriveReturnPlan,
   buildCommerceCustomerReturnIntakeBoard,
   buildCommerceCustomerDeliveryMap,
+  buildCommerceCustomerEvidenceUploadGuide,
   buildCommerceSalesConversationBoard,
   buildCommerceCustomerServicePack,
   buildCommerceCustomerSupportWorkflow,
@@ -270,6 +271,33 @@ describe('commerce remix engine', () => {
     expect(missingEvidence.status).toBe('needs_customer_upload');
     expect(missingEvidence.blockedWhen.join(' ')).toContain('只有口头反馈');
     expect(missingEvidence.nextRoundHandoff.join(' ')).toContain('发布链接');
+  });
+
+  it('turns customer self-publishing evidence into a clear upload guide', () => {
+    const returnPlan = buildCommerceCloudDriveReturnPlan(baseInput, buildCommerceCloudDriveManifest(baseInput));
+    const report = evaluateCommercePerformanceUploads([
+      {
+        platform: 'xiaohongshu',
+        publishedUrl: 'https://example.test/post',
+        screenshotPath: '04-customer-return/post.png',
+        csvRows: [{ title: 'Hook B', impressions: 800, clicks: 90, orders: 4, revenue: 396 }],
+      },
+    ]);
+    const intakeBoard = buildCommerceCustomerReturnIntakeBoard(report, returnPlan);
+    const guide = buildCommerceCustomerEvidenceUploadGuide(report, returnPlan, intakeBoard);
+    const missingGuide = buildCommerceCustomerEvidenceUploadGuide(
+      evaluateCommercePerformanceUploads([{ platform: 'tiktok' }]),
+      returnPlan,
+    );
+
+    expect(guide.headline).toContain('客户证据上传指南');
+    expect(guide.uploadSteps.map(step => step.title)).toEqual(['客户自己发布', '回传四类证据', '先验收再复盘']);
+    expect(guide.acceptedEvidence.map(item => item.label)).toEqual(['发布链接', '发布截图', '表现 CSV', '客户备注']);
+    expect(guide.nextRoundMapping[0].nextWenaiAction).toContain('标题和口播矩阵');
+    expect(guide.doNotAskCustomerFor).toContain('不索要 Cookie 或浏览器登录态。');
+    expect(guide.reviewReadinessRules.join(' ')).toContain('不自动登录');
+    expect(missingGuide.promise).toContain('不需要客户交账号');
+    expect(JSON.stringify(guide)).not.toMatch(/apiKey|accessToken|Bearer|sk-/i);
   });
 
   it('connects customer returns to remix support and evidence actions', () => {
