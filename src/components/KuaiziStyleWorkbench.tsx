@@ -22,6 +22,7 @@ import {
   buildDemoCommerceOpenSourceStackSelector,
   buildDemoCommerceProviderActivationRunbook,
   buildDemoCommerceProviderActivationPlan,
+  buildDemoCommerceProviderEscalationBoard,
   buildDemoCommerceProviderNeedAssessment,
   buildDemoCommercePublishingMatrixPlan,
   buildDemoCommercePerformanceUploadReport,
@@ -255,6 +256,7 @@ export function KuaiziStyleWorkbench() {
   const providerActivationPlan = useMemo(() => buildDemoCommerceProviderActivationPlan(), []);
   const providerActivationRunbook = useMemo(() => buildDemoCommerceProviderActivationRunbook(), []);
   const providerNeedAssessment = useMemo(() => buildDemoCommerceProviderNeedAssessment(), []);
+  const providerEscalationBoard = useMemo(() => buildDemoCommerceProviderEscalationBoard(), []);
   const firstDeliveryChecklist = useMemo(() => buildDemoCommerceFirstDeliveryChecklist(), []);
   const openSourceAdapters = useMemo(() => buildCommerceOpenSourceAdapters(), []);
   const openSourceCoverage = useMemo(() => buildDemoCommerceOpenSourceCoverage(), []);
@@ -667,6 +669,46 @@ export function KuaiziStyleWorkbench() {
                   </div>
                   <div className="mt-4 rounded-md bg-white p-3 text-xs font-bold leading-5 text-slate-700 ring-1 ring-violet-100">
                     {providerNeedAssessment.finalRecommendation}
+                  </div>
+                </div>
+                <div className="mt-5 rounded-md border border-slate-200 bg-slate-50 p-4">
+                  <div className="flex flex-col gap-2 lg:flex-row lg:items-end lg:justify-between">
+                    <div className="min-w-0">
+                      <p className="text-xs font-black uppercase tracking-[0.18em] text-slate-600">Provider Escalation Board</p>
+                      <h4 className="mt-1 text-base font-black leading-6 text-slate-950">{providerEscalationBoard.headline}</h4>
+                      <p className="mt-2 max-w-4xl text-sm leading-6 text-slate-600">{providerEscalationBoard.plainAnswer}</p>
+                    </div>
+                    <span className="w-fit rounded bg-white px-2.5 py-1 text-xs font-black text-slate-700 ring-1 ring-slate-200">
+                      首版不强制
+                    </span>
+                  </div>
+                  <div className="mt-4 grid gap-3 lg:grid-cols-4">
+                    {providerEscalationBoard.lanes.map(lane => (
+                      <article className="min-w-0 rounded-md bg-white p-3 ring-1 ring-slate-200" key={lane.id}>
+                        <h5 className="text-sm font-black leading-5 text-slate-950">{lane.label}</h5>
+                        <p className="mt-2 line-clamp-2 text-xs font-bold leading-5 text-emerald-700">{lane.firstDeliveryPath}</p>
+                        <p className="mt-2 line-clamp-3 text-xs leading-5 text-slate-600">{lane.becomesRequiredWhen}</p>
+                        <p className="mt-3 line-clamp-2 rounded bg-slate-50 px-2 py-1.5 text-[11px] font-bold leading-4 text-slate-600">{lane.customerFallback}</p>
+                      </article>
+                    ))}
+                  </div>
+                  <div className="mt-4 grid gap-3 lg:grid-cols-2">
+                    <div className="rounded-md bg-white p-3 ring-1 ring-slate-200">
+                      <h5 className="text-sm font-black text-slate-950">现在先别买</h5>
+                      <div className="mt-3 grid gap-2 sm:grid-cols-2">
+                        {providerEscalationBoard.doNotBuyYet.map(item => (
+                          <div className="rounded bg-rose-50 px-3 py-2 text-xs font-bold leading-5 text-rose-800 ring-1 ring-rose-100" key={item}>{item}</div>
+                        ))}
+                      </div>
+                    </div>
+                    <div className="rounded-md bg-white p-3 ring-1 ring-slate-200">
+                      <h5 className="text-sm font-black text-slate-950">满足这些再配</h5>
+                      <div className="mt-3 grid gap-2 sm:grid-cols-2">
+                        {providerEscalationBoard.buyOnlyAfter.map(item => (
+                          <div className="rounded bg-emerald-50 px-3 py-2 text-xs font-bold leading-5 text-emerald-800 ring-1 ring-emerald-100" key={item}>{item}</div>
+                        ))}
+                      </div>
+                    </div>
                   </div>
                 </div>
               </section>

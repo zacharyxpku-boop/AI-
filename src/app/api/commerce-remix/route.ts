@@ -20,6 +20,7 @@ import {
   buildCommercePostPublishActionBoard,
   buildCommerceProviderActivationRunbook,
   buildCommerceProviderActivationPlan,
+  buildCommerceProviderEscalationBoard,
   buildCommerceProviderNeedAssessment,
   buildCommercePublishingMatrixPlan,
   buildCommerceRemixEnginePlan,
@@ -55,6 +56,7 @@ import {
   buildDemoCommercePostPublishActionBoard,
   buildDemoCommerceProviderActivationRunbook,
   buildDemoCommerceProviderActivationPlan,
+  buildDemoCommerceProviderEscalationBoard,
   buildDemoCommerceProviderNeedAssessment,
   buildDemoCommercePublishingMatrixPlan,
   buildDemoCommercePerformanceUploadReport,
@@ -133,6 +135,7 @@ function buildInputResponse(input: CommerceRemixPlanInput, body: CommerceRemixRe
   const providerActivationPlan = buildCommerceProviderActivationPlan();
   const providerActivationRunbook = buildCommerceProviderActivationRunbook(providerActivationPlan);
   const providerNeedAssessment = buildCommerceProviderNeedAssessment(input, plan, providerActivationPlan);
+  const providerEscalationBoard = buildCommerceProviderEscalationBoard(input, providerNeedAssessment);
   const firstDeliveryChecklist = buildCommerceFirstDeliveryChecklist(input, plan, exportPackage, customerDeliveryMap, providerActivationPlan);
   const openSourceAdapters = buildCommerceOpenSourceAdapters();
   const openSourceCoverage = buildCommerceOpenSourceCoverage(input, plan, openSourceAdapters);
@@ -178,6 +181,7 @@ function buildInputResponse(input: CommerceRemixPlanInput, body: CommerceRemixRe
     providerActivationPlan,
     providerActivationRunbook,
     providerNeedAssessment,
+    providerEscalationBoard,
     firstDeliveryChecklist,
     openSourceAdapters,
     openSourceCoverage,
@@ -224,6 +228,7 @@ export async function GET() {
     providerActivationPlan: buildDemoCommerceProviderActivationPlan(),
     providerActivationRunbook: buildDemoCommerceProviderActivationRunbook(),
     providerNeedAssessment: buildDemoCommerceProviderNeedAssessment(),
+    providerEscalationBoard: buildDemoCommerceProviderEscalationBoard(),
     firstDeliveryChecklist: buildDemoCommerceFirstDeliveryChecklist(),
     openSourceAdapters: buildCommerceOpenSourceAdapters(),
     openSourceCoverage: buildDemoCommerceOpenSourceCoverage(),

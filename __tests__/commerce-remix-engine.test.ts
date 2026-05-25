@@ -25,6 +25,7 @@ import {
   buildCommercePostPublishActionBoard,
   buildCommerceProviderActivationRunbook,
   buildCommerceProviderActivationPlan,
+  buildCommerceProviderEscalationBoard,
   buildCommerceProviderNeedAssessment,
   buildCommercePublishingMatrixPlan,
   buildCommerceRemixTemplateBank,
@@ -537,6 +538,7 @@ describe('commerce remix engine', () => {
   it('separates first-delivery work from optional provider activation', () => {
     const plan = buildCommerceProviderActivationPlan();
     const assessment = buildCommerceProviderNeedAssessment(baseInput, buildCommerceRemixEnginePlan(baseInput), plan);
+    const escalationBoard = buildCommerceProviderEscalationBoard(baseInput, assessment);
 
     expect(plan.currentMode).toContain('本地优先');
     expect(plan.lanes.map(lane => lane.id)).toEqual([
@@ -553,8 +555,15 @@ describe('commerce remix engine', () => {
     expect(assessment.waitingForYourKeys.map(item => item.keyType).join(' ')).toContain('图片');
     expect(assessment.notRequiredNow).toContain('自动代客户操作电脑或浏览器');
     expect(assessment.finalRecommendation).toContain('客户自发布');
+    expect(escalationBoard.headline).toContain('外部 provider 升级判断板');
+    expect(escalationBoard.verdict).toBe('not_required_for_first_delivery');
+    expect(escalationBoard.lanes.map(lane => lane.id)).toEqual(['generation-keys', 'cloud-render', 'platform-publish-api', 'analytics-api']);
+    expect(escalationBoard.lanes.find(lane => lane.id === 'platform-publish-api')?.firstDeliveryPath).toContain('客户自己登录平台发布');
+    expect(escalationBoard.doNotBuyYet.join(' ')).toContain('托管客户账号');
+    expect(escalationBoard.buyOnlyAfter.join(' ')).toContain('至少一轮');
     expect(JSON.stringify(plan)).not.toMatch(/apiKey|accessToken|Bearer|sk-/i);
     expect(JSON.stringify(assessment)).not.toMatch(/apiKey|accessToken|Bearer|sk-/i);
+    expect(JSON.stringify(escalationBoard)).not.toMatch(/apiKey|accessToken|Bearer|sk-/i);
   });
 
   it('turns provider keys into an activation runbook without making them first-delivery blockers', () => {

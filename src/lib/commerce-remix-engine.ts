@@ -650,6 +650,22 @@ export interface CommerceProviderNeedAssessment {
   finalRecommendation: string;
 }
 
+export interface CommerceProviderEscalationBoard {
+  headline: string;
+  verdict: 'not_required_for_first_delivery' | 'optional_enhancement' | 'required_at_scale';
+  plainAnswer: string;
+  lanes: Array<{
+    id: string;
+    label: string;
+    firstDeliveryPath: string;
+    becomesRequiredWhen: string;
+    proofBeforeBuying: string[];
+    customerFallback: string;
+  }>;
+  doNotBuyYet: string[];
+  buyOnlyAfter: string[];
+}
+
 export interface CommerceProviderActivationRunbook {
   headline: string;
   customerPromise: string;
@@ -3443,6 +3459,64 @@ export function buildCommerceProviderNeedAssessment(
   };
 }
 
+export function buildCommerceProviderEscalationBoard(
+  input: CommerceRemixPlanInput,
+  assessment = buildCommerceProviderNeedAssessment(input),
+): CommerceProviderEscalationBoard {
+  const platformText = unique(input.platforms).map(platform => PLATFORM_LABELS[platform]).join(' / ') || '目标平台';
+
+  return {
+    headline: '外部 provider 升级判断板',
+    verdict: 'not_required_for_first_delivery',
+    plainAnswer: `${platformText} 首版不需要先接平台发布、平台后台、云端渲染或账号自动化 provider；先交付开源混剪、发布包、客服素材和客户回填复盘，等真实规模和授权出现再升级。`,
+    lanes: [
+      {
+        id: 'generation-keys',
+        label: '图片/视频/数字人生成 Key',
+        firstDeliveryPath: '先导出 prompt、口播稿、字幕、时间线和本地混剪任务。',
+        becomesRequiredWhen: '客户要求真实 AI 生图、AI 镜头或数字人口播，且你已提供对应 Key、授权范围和回调方式。',
+        proofBeforeBuying: ['有明确生成任务量', '有商用授权范围', '失败能回到补素材任务', '不在页面或日志展示 Key'],
+        customerFallback: '客户提供原图、参考图、人工录音或现有素材，Wenai 继续交付发布包。',
+      },
+      {
+        id: 'cloud-render',
+        label: '云端渲染/对象存储/分布式 worker',
+        firstDeliveryPath: '先用本地队列、FFmpeg/Remotion 任务包、单条重试和云盘导出目录。',
+        becomesRequiredWhen: '单客户单批超过 100 条成片、多人同时审核，或本地机器无法稳定完成队列。',
+        proofBeforeBuying: ['连续两批产能不足', '失败率和耗时有日志', '客户确认需要长期留存', '对象存储权限可隔离'],
+        customerFallback: '拆批渲染，降低并发，先交付最重要平台的发布包。',
+      },
+      {
+        id: 'platform-publish-api',
+        label: '平台发布/OAuth/自动登录能力',
+        firstDeliveryPath: '客户自己登录平台发布，Wenai 给标题、正文、封面、成片和检查表。',
+        becomesRequiredWhen: '客户明确要求系统代发，并能提供平台正式 OAuth、开放接口或书面授权流程。',
+        proofBeforeBuying: ['平台允许自动发布', '授权不会托管密码/cookie', '失败不会误发内容', '客户愿意承担平台规则审核'],
+        customerFallback: '继续客户自发布；Wenai 只辅助复制发布包和回填证据。',
+      },
+      {
+        id: 'analytics-api',
+        label: '平台表现数据 API',
+        firstDeliveryPath: '客户上传发布链接、截图、CSV 或云盘目录，系统做下一轮复盘。',
+        becomesRequiredWhen: '客户每天有稳定发布量，手工回填成本高，且平台后台授权、口径和数据字段稳定。',
+        proofBeforeBuying: ['至少两轮真实回填证明有复盘价值', '平台字段能映射标题/账号/素材', '客户授权范围清楚', 'API 失败可回到 CSV'],
+        customerFallback: '继续上传链接、截图、CSV；没有真实证据不展示虚构表现。',
+      },
+    ],
+    doNotBuyYet: [
+      ...assessment.notRequiredNow.slice(0, 4),
+      '只为了演示而购买复杂云端渲染或平台自动化。',
+      '为了省一步客户上传证据就托管客户账号或 cookie。',
+    ],
+    buyOnlyAfter: [
+      '已经有客户真实素材、发布包和回填证据跑过至少一轮。',
+      '能证明 provider 会减少人工成本或提升交付规模，而不是只增加复杂度。',
+      '有验收标准：任务 ID、输出文件、失败原因、回退路径和权限边界。',
+      '客户知道哪些步骤仍然需要自己确认、发布或人工复核。',
+    ],
+  };
+}
+
 export function buildCommerceProviderActivationRunbook(
   providerPlan = buildCommerceProviderActivationPlan(),
 ): CommerceProviderActivationRunbook {
@@ -3849,6 +3923,12 @@ export function buildDemoCommerceProviderActivationPlan() {
 export function buildDemoCommerceProviderNeedAssessment() {
   const input = buildDemoCommerceRemixInput();
   return buildCommerceProviderNeedAssessment(input, buildCommerceRemixEnginePlan(input), buildCommerceProviderActivationPlan());
+}
+
+export function buildDemoCommerceProviderEscalationBoard() {
+  const input = buildDemoCommerceRemixInput();
+  const assessment = buildCommerceProviderNeedAssessment(input, buildCommerceRemixEnginePlan(input), buildCommerceProviderActivationPlan());
+  return buildCommerceProviderEscalationBoard(input, assessment);
 }
 
 export function buildDemoCommerceProviderActivationRunbook() {
