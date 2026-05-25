@@ -40,6 +40,10 @@ describe('factory page', () => {
     expect(html).toContain('客户自己发布，我们用证据把下一轮做准');
     expect(html).toContain('回填后系统立刻判断');
     expect(html).toContain('不向客户索要');
+    expect(html).toContain('Proof Assets &amp; Support');
+    expect(html).toContain('模特图、证明图和客服话术要接在一起');
+    expect(html).toContain('先把证明素材排成任务包');
+    expect(html).toContain('客服把内容流量接住');
     expect(html).toContain('客户能看到的边界');
     expect(html).toContain('客户不用理解');
     expect(html).toContain('首版交付清单');

@@ -588,6 +588,53 @@ export function KuaiziStyleWorkbench() {
                 </div>
               </section>
 
+              <section className="rounded-lg border border-[#f9d3c7] bg-white p-5 shadow-sm">
+                <div className="flex flex-col gap-3 lg:flex-row lg:items-end lg:justify-between">
+                  <div className="min-w-0">
+                    <p className="text-xs font-black uppercase tracking-[0.18em] text-rose-600">Proof Assets & Support</p>
+                    <h3 className="mt-1 text-lg font-black leading-6 text-slate-950">模特图、证明图和客服话术要接在一起</h3>
+                    <p className="mt-2 max-w-5xl text-sm leading-6 text-slate-500">
+                      图片 Key 没到位时先交付模特图 prompt、参考图要求和验收清单；客户咨询、评论和售后问题同步变成 FAQ、异议处理和下一轮短视频脚本。
+                    </p>
+                  </div>
+                  <div className="flex flex-wrap gap-2">
+                    <Link className="inline-flex min-h-10 items-center rounded-md bg-rose-600 px-4 py-2 text-sm font-black text-white shadow-sm" href="/factory/create?variant=friend_trial">
+                      看图片任务
+                    </Link>
+                    <Link className="inline-flex min-h-10 items-center rounded-md border border-rose-200 bg-rose-50 px-4 py-2 text-sm font-black text-rose-700" href="/factory/manage?variant=friend_trial">
+                      看客服承接
+                    </Link>
+                  </div>
+                </div>
+                <div className="mt-4 grid gap-3 lg:grid-cols-[minmax(0,1fr)_minmax(320px,0.52fr)]">
+                  <div className="rounded-md border border-orange-100 bg-orange-50 p-4">
+                    <h4 className="text-sm font-black text-slate-950">先把证明素材排成任务包</h4>
+                    <div className="mt-3 grid gap-3 md:grid-cols-3">
+                      {modelImageTaskPack.tasks.slice(0, 3).map(task => (
+                        <article className="min-w-0 rounded bg-white p-3 ring-1 ring-orange-100" key={task.title}>
+                          <h5 className="text-sm font-black leading-5 text-slate-950">{task.title}</h5>
+                          <p className="mt-2 line-clamp-2 text-xs font-bold leading-5 text-orange-700">{task.fallbackWithoutKey}</p>
+                          <p className="mt-2 line-clamp-2 rounded bg-orange-50 px-2 py-1.5 text-[11px] font-bold leading-4 text-slate-600">{task.requiredInputs.slice(0, 2).join(' / ')}</p>
+                        </article>
+                      ))}
+                    </div>
+                    <p className="mt-3 rounded bg-white px-3 py-2 text-xs font-bold leading-5 text-orange-800 ring-1 ring-orange-100">{modelImageTaskPack.providerBoundary}</p>
+                  </div>
+                  <div className="rounded-md border border-rose-100 bg-rose-50 p-4">
+                    <h4 className="text-sm font-black text-slate-950">客服把内容流量接住</h4>
+                    <div className="mt-3 grid gap-2">
+                      {customerSupportWorkflow.preSaleReplies.slice(0, 3).map(item => (
+                        <div className="rounded bg-white px-3 py-2 text-xs ring-1 ring-rose-100" key={item.scenario}>
+                          <div className="font-black text-slate-900">{item.scenario}</div>
+                          <p className="mt-1 line-clamp-2 font-bold leading-5 text-slate-600">{item.assetToSend}</p>
+                        </div>
+                      ))}
+                    </div>
+                    <p className="mt-3 rounded bg-white px-3 py-2 text-xs font-bold leading-5 text-rose-800 ring-1 ring-rose-100">{customerSupportWorkflow.humanHandoffRules[0]}</p>
+                  </div>
+                </div>
+              </section>
+
               <section className="rounded-lg border border-[#dbe6ff] bg-white p-5 shadow-sm">
                 <div className="flex flex-col gap-3 md:flex-row md:items-end md:justify-between">
                   <div className="min-w-0">
