@@ -37,6 +37,11 @@ describe('factory page', () => {
     expect(html).toContain('今天就能稳定混剪');
     expect(html).toContain('多账号标题和口播不做代登');
     expect(html).toContain('发布后用证据驱动下一轮');
+    expect(html).toContain('Platform Title Matrix');
+    expect(html).toContain('每个平台都有账号人设、标题、前三句口播和证明素材');
+    expect(html).toContain('个发布槽');
+    expect(html).toContain('证明素材：');
+    expect(html).toContain('客户动作：');
     expect(html).toContain('Today Render Queue');
     expect(html).toContain('今天队列能不能稳定出片，客户一眼看懂');
     expect(html).toContain('失败隔离');

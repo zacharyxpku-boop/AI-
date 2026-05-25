@@ -490,6 +490,44 @@ export function KuaiziStyleWorkbench() {
                 </div>
               </section>
 
+              <section className="rounded-lg border border-[#d8dcff] bg-white p-5 shadow-sm">
+                <div className="flex flex-col gap-3 lg:flex-row lg:items-end lg:justify-between">
+                  <div className="min-w-0">
+                    <p className="text-xs font-black uppercase tracking-[0.18em] text-indigo-700">Platform Title Matrix</p>
+                    <h3 className="mt-1 text-lg font-black leading-6 text-slate-950">每个平台都有账号人设、标题、前三句口播和证明素材</h3>
+                    <p className="mt-2 max-w-5xl text-sm leading-6 text-slate-500">
+                      多账号矩阵不是代登代发；Wenai 先把小红书、TikTok、视频号等发布槽拆成真实买家号、测评种草号、店铺官方号，客户复制标题和口播，自行发布后回填链接、截图或 CSV。
+                    </p>
+                  </div>
+                  <span className="w-fit rounded bg-indigo-50 px-3 py-2 text-sm font-black text-indigo-700 ring-1 ring-indigo-100">
+                    {personaPublishingConsole.rows.length} 个发布槽
+                  </span>
+                </div>
+                <div className="mt-4 grid gap-3 xl:grid-cols-4">
+                  {personaPublishingConsole.rows.slice(0, 4).map(row => (
+                    <article className="min-w-0 rounded-md border border-indigo-100 bg-indigo-50 p-4" key={row.id}>
+                      <div className="flex items-start justify-between gap-3">
+                        <div className="min-w-0">
+                          <p className="text-[11px] font-black uppercase tracking-[0.12em] text-indigo-700">{row.platformLabel}</p>
+                          <h4 className="mt-1 text-sm font-black leading-5 text-slate-950">{row.accountType}</h4>
+                        </div>
+                        <span className="shrink-0 rounded bg-white px-2 py-1 text-[11px] font-black text-indigo-700 ring-1 ring-indigo-100">{row.titleFamily}</span>
+                      </div>
+                      <p className="mt-3 line-clamp-2 text-sm font-black leading-5 text-indigo-900">{row.title}</p>
+                      <div className="mt-3 grid gap-2">
+                        {row.firstThreeVoiceoverLines.slice(0, 3).map((line, index) => (
+                          <div className="rounded bg-white px-3 py-2 text-xs font-bold leading-5 text-slate-700 ring-1 ring-indigo-100" key={`${row.id}-${line}`}>
+                            {index + 1}. {line}
+                          </div>
+                        ))}
+                      </div>
+                      <p className="mt-3 line-clamp-2 rounded bg-white px-3 py-2 text-xs font-bold leading-5 text-slate-600 ring-1 ring-indigo-100">证明素材：{row.requiredProofAsset}</p>
+                      <p className="mt-2 line-clamp-2 text-xs font-bold leading-5 text-indigo-700">客户动作：{row.customerCopyAction}</p>
+                    </article>
+                  ))}
+                </div>
+              </section>
+
               <section className="rounded-lg border border-[#dbe6ff] bg-white p-5 shadow-sm">
                 <div className="flex flex-col gap-4 lg:flex-row lg:items-start lg:justify-between">
                   <div className="min-w-0">
