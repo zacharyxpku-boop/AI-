@@ -42,6 +42,11 @@ describe('factory page', () => {
     expect(html).toContain('模特生图');
     expect(html).toContain('模特生图先做成任务包');
     expect(html).toContain('个图片任务');
+    expect(html).toContain('Ecommerce Growth Loop');
+    expect(html).toContain('电商增长闭环控制台');
+    expect(html).toContain('等 Key 时怎么交付');
+    expect(html).toContain('为什么功能多但不散');
+    expect(html).toContain('下一轮应该改图、改视频、改标题还是改客服');
     expect(html).toContain('开源混剪');
     expect(html).toContain('大规模渲染队列');
     expect(html).toContain('队列治理');

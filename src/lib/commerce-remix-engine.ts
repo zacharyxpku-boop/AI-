@@ -290,6 +290,25 @@ export interface CommerceCustomerSupportWorkflow {
   humanHandoffRules: string[];
 }
 
+export interface CommerceEcommerceGrowthLoopConsole {
+  headline: string;
+  promise: string;
+  lanes: Array<{
+    id: 'proof_image' | 'remix_video' | 'publish_pack' | 'support_reply' | 'return_review';
+    label: string;
+    customerQuestion: string;
+    wenaiDoes: string;
+    customerProvides: string[];
+    outputPack: string[];
+    proofGate: string;
+    nextLoop: string;
+  }>;
+  dailyOperatorFlow: string[];
+  keyWaitingPolicy: string[];
+  notScatteredBecause: string[];
+  customerSeesOnly: string[];
+}
+
 export interface CommerceSalesConversationBoard {
   promise: string;
   lanes: Array<{
@@ -3732,6 +3751,102 @@ export function buildCommerceCustomerSupportWorkflow(
   };
 }
 
+export function buildCommerceEcommerceGrowthLoopConsole(
+  input: CommerceRemixPlanInput,
+  modelImageTaskPack = buildCommerceModelImageTaskPack(input),
+  servicePack = buildCommerceCustomerServicePack(input),
+  supportWorkflow = buildCommerceCustomerSupportWorkflow(input, servicePack),
+  returnPlan = buildCommerceCloudDriveReturnPlan(input),
+): CommerceEcommerceGrowthLoopConsole {
+  const product = safeText(input.productName, '商品');
+  const point = safeText(input.sellingPoints[0] || '', '核心卖点');
+  const imageTasks = modelImageTaskPack.tasks.map(task => task.title);
+  const firstFaq = servicePack.faq[0]?.question || `${product}适合什么人？`;
+  const firstSupportAsset = supportWorkflow.preSaleReplies[0]?.assetToSend || '适合人群图 + 详情页 FAQ';
+
+  return {
+    headline: '电商增长闭环控制台：模特图、混剪、发布包、客服和复盘放在一条链路里',
+    promise: `客户看到的不是零散 AI 工具，而是围绕 ${product} 的商品资料、证明图、短视频、标题口播、客服话术和回填证据；图片/视频/数字人 Key 没到位时先交付 prompt、任务包、混剪包和客服包。`,
+    lanes: [
+      {
+        id: 'proof_image',
+        label: '模特图和证明素材',
+        customerQuestion: `我缺少能证明 ${point} 的图怎么办？`,
+        wenaiDoes: '生成模特手持图、场景图、细节证明图和对比解释卡的 prompt、输入要求、验收清单。',
+        customerProvides: ['商品主图', '使用场景', '目标人群', '授权边界'],
+        outputPack: imageTasks,
+        proofGate: modelImageTaskPack.reviewChecklist[0] || '商品主体和规格不能画错。',
+        nextLoop: 'Key 到位就直接执行生图；没 Key 就进入补素材任务，仍可继续混剪和客服包。',
+      },
+      {
+        id: 'remix_video',
+        label: '混剪和短视频成片',
+        customerQuestion: '素材很多，怎么稳定剪成能发布的短视频？',
+        wenaiDoes: '把长素材切片、字幕、模板时间线、渲染和上传前质检拆成可重试队列。',
+        customerProvides: ['商品视频', '口播或脚本', '证明图', '平台尺寸'],
+        outputPack: ['clip-candidates.json', 'timeline.json', 'MP4 成片', 'upload-ready-checklist.md'],
+        proofGate: '每条成片有素材来源、字幕安全区、输出路径和单条失败原因。',
+        nextLoop: '客户发布后回填链接、截图或 CSV，系统决定换封面、换前三秒还是扩量。',
+      },
+      {
+        id: 'publish_pack',
+        label: '标题口播和发布包',
+        customerQuestion: '我应该在哪个平台、用什么人设、发什么标题？',
+        wenaiDoes: '生成多账号人设矩阵、前三句口播、证明素材要求、发布说明和回填字段。',
+        customerProvides: ['目标平台', '账号人设', '成片文件', '可发时间'],
+        outputPack: ['标题矩阵', '前三句口播', '封面建议', '客户自发布清单'],
+        proofGate: '客户自己登录发布；Wenai 不拿账号、密码、cookie 或后台 token。',
+        nextLoop: '表现好的标题和人设进入下一轮扩量，表现弱的先改封面、证明素材和前三秒。',
+      },
+      {
+        id: 'support_reply',
+        label: '客服 FAQ 和售后承接',
+        customerQuestion: firstFaq,
+        wenaiDoes: '把商品卖点转成 FAQ、异议处理、售后卡片、差评挽回和人工转接规则。',
+        customerProvides: ['详情页规则', '物流政策', '售后边界', '客户问题截图'],
+        outputPack: ['FAQ 包', '异议处理话术', firstSupportAsset, '差评挽回素材'],
+        proofGate: supportWorkflow.humanHandoffRules[0] || '退款、投诉、安全和平台处罚风险必须转人工。',
+        nextLoop: '高频问题进入下一轮短视频选题、详情页补充和客服快捷回复。',
+      },
+      {
+        id: 'return_review',
+        label: '客户回填和复盘',
+        customerQuestion: '发布后怎么判断下一轮做什么？',
+        wenaiDoes: '读取客户上传的发布链接、截图、CSV、评论截图或云盘目录，生成下一轮动作。',
+        customerProvides: returnPlan.intakeFields.map(field => field.label),
+        outputPack: ['复盘摘要', '重剪任务清单', '标题迭代建议', '客服补素材任务'],
+        proofGate: '没有真实回填证据前，不虚构播放、订单、询盘或转化。',
+        nextLoop: '把表现证据写回商品增长包，驱动下一轮图、视频、标题和客服优化。',
+      },
+    ],
+    dailyOperatorFlow: [
+      '先补商品资料和证明图，再进入混剪队列。',
+      '混剪成片后生成标题、人设、前三句口播和客户自发布清单。',
+      '客户自己发布，Wenai 只收链接、截图、CSV、评论截图或云盘目录。',
+      '回填证据进入复盘，自动派生下一轮补图、重剪、标题和客服任务。',
+    ],
+    keyWaitingPolicy: [
+      '图片 Key 未到位：先交付 prompt、参考图要求和人工补图清单。',
+      '视频 Key 未到位：先走本地开源混剪、模板时间线和 FFmpeg 队列。',
+      '数字人 Key 未到位：先交付前三句口播、字幕稿和人工录音脚本。',
+      '平台数据 API 未到位：客户先上传链接、截图、CSV 或云盘目录。',
+    ],
+    notScatteredBecause: [
+      '每个功能都绑定同一个商品项目，不是独立工具入口。',
+      '每个输出都有下一步：补图、混剪、发布、客服或复盘。',
+      '每个自动化都有边界：不代登、不托管账号、不虚构表现。',
+      '每轮回填都会反哺下一轮图片、视频、标题和客服话术。',
+    ],
+    customerSeesOnly: [
+      '今天要补什么素材',
+      'Wenai 会产出什么包',
+      '客户自己在哪一步发布',
+      '发布后要回传什么证据',
+      '下一轮应该改图、改视频、改标题还是改客服',
+    ],
+  };
+}
+
 export function buildCommerceSalesConversationBoard(
   input: CommerceRemixPlanInput,
   servicePack = buildCommerceCustomerServicePack(input),
@@ -4839,6 +4954,19 @@ export function buildDemoCommerceModelImageTaskPack() {
 export function buildDemoCommerceCustomerSupportWorkflow() {
   const input = buildDemoCommerceRemixInput();
   return buildCommerceCustomerSupportWorkflow(input, buildCommerceCustomerServicePack(input));
+}
+
+export function buildDemoCommerceEcommerceGrowthLoopConsole() {
+  const input = buildDemoCommerceRemixInput();
+  const servicePack = buildCommerceCustomerServicePack(input);
+  const supportWorkflow = buildCommerceCustomerSupportWorkflow(input, servicePack);
+  return buildCommerceEcommerceGrowthLoopConsole(
+    input,
+    buildCommerceModelImageTaskPack(input),
+    servicePack,
+    supportWorkflow,
+    buildCommerceCloudDriveReturnPlan(input, buildCommerceCloudDriveManifest(input)),
+  );
 }
 
 export function buildDemoCommerceSalesConversationBoard() {

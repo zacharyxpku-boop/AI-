@@ -8,6 +8,7 @@ import {
   buildCommerceCustomerEvidenceUploadGuide,
   buildCommerceCustomerLaunchReadinessBoard,
   buildCommerceDailyOperatorCockpit,
+  buildCommerceEcommerceGrowthLoopConsole,
   buildCommerceEvidenceReadinessBoard,
   buildCommerceConversationOpsConsole,
   buildCommerceSalesConversationBoard,
@@ -52,6 +53,7 @@ import {
   buildDemoCommerceCustomerEvidenceUploadGuide,
   buildDemoCommerceCustomerLaunchReadinessBoard,
   buildDemoCommerceDailyOperatorCockpit,
+  buildDemoCommerceEcommerceGrowthLoopConsole,
   buildDemoCommerceEvidenceReadinessBoard,
   buildDemoCommerceConversationOpsConsole,
   buildDemoCommerceSalesConversationBoard,
@@ -142,6 +144,7 @@ function buildInputResponse(input: CommerceRemixPlanInput, body: CommerceRemixRe
   const servicePack = buildCommerceCustomerServicePack(input);
   const modelImageTaskPack = buildCommerceModelImageTaskPack(input);
   const customerSupportWorkflow = buildCommerceCustomerSupportWorkflow(input, servicePack);
+  const ecommerceGrowthLoopConsole = buildCommerceEcommerceGrowthLoopConsole(input, modelImageTaskPack, servicePack, customerSupportWorkflow, buildCommerceCloudDriveReturnPlan(input));
   const salesConversationBoard = buildCommerceSalesConversationBoard(input, servicePack, customerSupportWorkflow);
   const conversationOpsConsole = buildCommerceConversationOpsConsole(input, salesConversationBoard, servicePack);
   const workbenchSystemMap = buildCommerceWorkbenchSystemMap(input, plan);
@@ -195,6 +198,7 @@ function buildInputResponse(input: CommerceRemixPlanInput, body: CommerceRemixRe
     servicePack,
     modelImageTaskPack,
     customerSupportWorkflow,
+    ecommerceGrowthLoopConsole,
     salesConversationBoard,
     conversationOpsConsole,
     workbenchSystemMap,
@@ -249,6 +253,7 @@ export async function GET() {
     servicePack: buildDemoCommerceCustomerServicePack(),
     modelImageTaskPack: buildDemoCommerceModelImageTaskPack(),
     customerSupportWorkflow: buildDemoCommerceCustomerSupportWorkflow(),
+    ecommerceGrowthLoopConsole: buildDemoCommerceEcommerceGrowthLoopConsole(),
     salesConversationBoard: buildDemoCommerceSalesConversationBoard(),
     conversationOpsConsole: buildDemoCommerceConversationOpsConsole(),
     workbenchSystemMap: buildDemoCommerceWorkbenchSystemMap(),

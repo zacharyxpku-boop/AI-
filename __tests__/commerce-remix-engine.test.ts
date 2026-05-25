@@ -16,6 +16,7 @@ import {
   buildCommerceCustomerSupportWorkflow,
   buildCommerceCreatorPersonaMatrix,
   buildCommerceDailyOperatorCockpit,
+  buildCommerceEcommerceGrowthLoopConsole,
   buildCommerceEvidenceReadinessBoard,
   buildCommerceFirstDeliveryChecklist,
   buildCommerceChatCutRemixConsole,
@@ -489,6 +490,27 @@ describe('commerce remix engine', () => {
     expect(pack.tasks[0].prompt).toContain('Travel Pet Bowl');
     expect(pack.tasks[0].fallbackWithoutKey).toContain('补素材任务');
     expect(pack.reviewChecklist.join(' ')).toContain('模特图必须有生成记录或客户授权');
+  });
+
+  it('connects model images, remix, publishing, support, and return evidence into one ecommerce loop', () => {
+    const imagePack = buildCommerceModelImageTaskPack(baseInput);
+    const servicePack = buildCommerceCustomerServicePack(baseInput);
+    const supportWorkflow = buildCommerceCustomerSupportWorkflow(baseInput, servicePack);
+    const returnPlan = buildCommerceCloudDriveReturnPlan(baseInput, buildCommerceCloudDriveManifest(baseInput));
+    const console = buildCommerceEcommerceGrowthLoopConsole(baseInput, imagePack, servicePack, supportWorkflow, returnPlan);
+
+    expect(console.headline).toContain('电商增长闭环控制台');
+    expect(console.lanes.map(lane => lane.id)).toEqual(['proof_image', 'remix_video', 'publish_pack', 'support_reply', 'return_review']);
+    expect(console.lanes.find(lane => lane.id === 'proof_image')?.outputPack).toContain('手持模特证明图');
+    expect(console.lanes.find(lane => lane.id === 'remix_video')?.outputPack).toContain('upload-ready-checklist.md');
+    expect(console.lanes.find(lane => lane.id === 'publish_pack')?.proofGate).toContain('不拿账号、密码、cookie');
+    expect(console.lanes.find(lane => lane.id === 'support_reply')?.outputPack.join(' ')).toContain('FAQ');
+    expect(console.lanes.find(lane => lane.id === 'return_review')?.customerProvides).toContain('表现 CSV');
+    expect(console.dailyOperatorFlow.join(' ')).toContain('客户自己发布');
+    expect(console.keyWaitingPolicy.join(' ')).toContain('数字人 Key 未到位');
+    expect(console.notScatteredBecause.join(' ')).toContain('同一个商品项目');
+    expect(console.customerSeesOnly).toContain('下一轮应该改图、改视频、改标题还是改客服');
+    expect(JSON.stringify(console)).not.toMatch(/apiKey|accessToken|Bearer|sk-/i);
   });
 
   it('maps open-source remix capabilities into guarded ecommerce adapters', () => {

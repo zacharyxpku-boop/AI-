@@ -124,6 +124,9 @@ describe('/api/commerce-remix', () => {
     expect(body.servicePack.objectionReplies.map((item: { objection: string }) => item.objection)).toContain('担心不好用');
     expect(body.modelImageTaskPack.tasks.map((task: { id: string }) => task.id)).toContain('model-handheld-proof');
     expect(body.customerSupportWorkflow.preSaleReplies.map((item: { scenario: string }) => item.scenario)).toContain('客户觉得贵');
+    expect(body.ecommerceGrowthLoopConsole.headline).toContain('电商增长闭环控制台');
+    expect(body.ecommerceGrowthLoopConsole.lanes.map((lane: { id: string }) => lane.id)).toContain('support_reply');
+    expect(body.ecommerceGrowthLoopConsole.keyWaitingPolicy.join(' ')).toContain('数字人 Key 未到位');
     expect(body.salesConversationBoard.lanes.find((lane: { id: string }) => lane.id === 'after_sales').proofToCollect).toContain('处理结果');
     expect(body.conversationOpsConsole.triageColumns.map((column: { id: string }) => column.id)).toContain('content_loop');
     expect(body.conversationOpsConsole.noAutomationRules).toContain('不自动群发私信、评论、短信或私域消息。');
@@ -193,6 +196,7 @@ describe('/api/commerce-remix', () => {
     expect(body.customerEvidenceUploadGuide.headline).toContain('客户证据上传指南');
     expect(body.customerEvidenceUploadGuide.uploadSteps.map((step: { title: string }) => step.title)).toContain('客户自己发布');
     expect(body.customerEvidenceUploadGuide.doNotAskCustomerFor).toContain('不托管客户账号。');
+    expect(body.ecommerceGrowthLoopConsole.customerSeesOnly).toContain('下一轮应该改图、改视频、改标题还是改客服');
     expect(body.postPublishActionBoard.status).toBe('ready_for_next_round');
     expect(body.postPublishActionBoard.actionLanes.map((lane: { id: string }) => lane.id)).toContain('support');
     expect(body.postPublishActionBoard.doNotAutomate).toContain('不自动读取平台后台。');
