@@ -35,8 +35,8 @@ const CREATE_VARIANTS: Record<FactoryUiVariantId, {
     audience: '看 Wenai 是否把 brief、脚本、素材、生产交接和客户验收串成 Create 层能力。',
     headline: 'Create 不是一键生成按钮，而是可追溯的资产生产账本。',
     body: '这一层把商品 brief、benchmark、脚本、图片/视频资产、production handoff、版权状态和客户交付状态放在同一条链路里，避免只有前端按钮没有真实生产记录。',
-    firstAction: '先看资产账本是否覆盖 brief、benchmark、视觉资产和交付物，再判断是否可以接真实视频/图片 provider。',
-    stopLine: '没有 provider token、素材授权、对象存储和客户验收前，不能宣称稳定一键生成或批量混剪。',
+    firstAction: '先看资产账本是否覆盖商品需求、参考样本、视觉资产和交付物，再判断是否可以接真实视频/图片生成服务。',
+    stopLine: '没有生成服务 Key、素材授权、对象存储和客户验收前，不能宣称稳定一键生成或批量混剪。',
   },
   operator: {
     label: '运营视角',
@@ -44,13 +44,13 @@ const CREATE_VARIANTS: Record<FactoryUiVariantId, {
     headline: 'Create 的运营任务是把“素材还差什么”变成可执行队列。',
     body: '运营每天只看缺口：有没有 brief、benchmark、图片/视频资产、是否可复用、版权是否清楚、客户交付是否已批准。',
     firstAction: '先补 next actions 里最前面的缺口；资产没审批或版权未清楚时，不要推进分发计划。',
-    stopLine: '外部 provider 未接入时，只能创建生产交接包和结果回填入口，不能标记自动生成完成。',
+    stopLine: '外部生成服务未接入时，只能创建生产交接包和结果回填入口，不能标记自动生成完成。',
   },
   friend_trial: {
     label: '朋友试用视角',
     audience: '给非技术朋友看能不能从一个商品需求得到可审核的生产包。',
     headline: '朋友只需要看到：输入商品、生成生产包、等待结果、进入审核。',
-    body: '这一视角把 provider、对象存储、DLP、版权和 CRM 术语放到后台边界里，前台只展示清楚的下一步。',
+    body: '这一视角把生成服务、对象存储、DLP、版权和销售交接术语放到后台边界里，前台只展示清楚的下一步。',
     firstAction: '先创建一个商品 brief、一个参考 benchmark 和一个待生产脚本；没有真实成品 URL 时不展示“已生成”。',
     stopLine: '没有真实成品和审核入口时，只能试用 Create 流程，不能试用自动成片效果。',
   },
@@ -67,6 +67,36 @@ function createScore(snapshot: IndustrializationSnapshot | null) {
     snapshot.clientReviewAssetCount > 0,
     snapshot.approvedDeliverableCount > 0,
   ].filter(Boolean).length;
+}
+
+function readableCreateSystemText(value: string) {
+  return value
+    .replaceAll('Close gap:', '补齐生产缺口：')
+    .replaceAll('Missing production brief or script asset', '缺少商品需求或脚本资产')
+    .replaceAll('Missing image or video asset', '缺少图片或视频资产')
+    .replaceAll('Missing benchmark evidence', '缺少参考样本证据')
+    .replaceAll('Missing distribution plan', '缺少分发计划')
+    .replaceAll('Missing distribution dispatch record', '缺少分发执行记录')
+    .replaceAll('Distribution dispatch is blocked or provider-gated', '分发执行被阻断或等待生成服务接入')
+    .replaceAll('Missing persisted performance return record', '缺少已保存的表现回流记录')
+    .replaceAll('Missing performance or CRM report asset', '缺少表现复盘或销售交接报告')
+    .replaceAll('Distribution uses blocked or rights-unready asset', '分发使用了未放行或版权未就绪资产')
+    .replaceAll('Unresolved performance asset attribution', '表现数据还没有归因到资产')
+    .replaceAll('Missing next-round draft distribution plan for scale decisions', '缺少下一轮放量分发草案')
+    .replaceAll('Missing winning asset reuse in next-round distribution plan', '下一轮计划缺少胜出素材复用')
+    .replaceAll('provider-gated', '等待生成服务接入')
+    .replaceAll('provider', '生成服务')
+    .replaceAll('Provider', '生成服务')
+    .replaceAll('callback', '回调')
+    .replaceAll('brief', '商品需求')
+    .replaceAll('benchmark', '参考样本')
+    .replaceAll('script', '脚本')
+    .replaceAll('visual asset', '视觉资产')
+    .replaceAll('production handoff', '生产交接')
+    .replaceAll('handoff', '交接')
+    .replaceAll('review token', '审核链接')
+    .replaceAll('CRM', '销售交接')
+    .replaceAll('Analytics Sync', '表现回流接入');
 }
 
 export function buildCreateBrandProductionChecks(snapshot: IndustrializationSnapshot | null): CreateBrandProductionCheck[] {
@@ -98,12 +128,12 @@ export function buildCreateBrandProductionChecks(snapshot: IndustrializationSnap
         : '先沉淀可复用脚本、视觉结构和平台尺寸模板。',
     },
     {
-      stage: '生产交接与 provider 门禁',
+      stage: '生产交接与生成服务门禁',
       ready: handoffReady && deliverables > 0,
       evidence: `分发/下一轮计划 ${snapshot?.planCount || 0}/${snapshot?.nextRoundAssetPlanCount || 0} / 交付物 ${deliverables}`,
       next: deliverables > 0
-        ? '继续接 provider callback、成本上限、失败重试和结果入库。'
-        : '先把 brief、script、visual asset 转成生产 handoff；没有 provider 回调不宣称自动成片。',
+        ? '继续接生成服务回调、成本上限、失败重试和结果入库。'
+        : '先把商品需求、脚本、视觉资产转成生产交接包；没有生成服务回调不宣称自动成片。',
     },
     {
       stage: '客户审核与批准',
@@ -143,10 +173,10 @@ export function buildCreateVariantPlaybook(
     return {
       title: 'Create 运营动作剧本',
       primaryAction: gaps.length
-        ? `先处理生产缺口：${gaps[0]}。`
-        : '可以进入生产 handoff、成品回填、客户 review 和下一轮分发计划。',
+        ? `先处理生产缺口：${readableCreateSystemText(gaps[0])}。`
+        : '可以进入生产交接、成品回填、客户审核和下一轮分发计划。',
       proofToCheck: '每个素材都要能追到 asset id、类型、证据、审批、版权、复用状态和客户交付状态。',
-      handoffBoundary: 'provider、对象存储和客户验收未接入前，只能走生产交接和人工回填，不能标记自动生成完成。',
+      handoffBoundary: '生成服务、对象存储和客户验收未接入前，只能走生产交接和人工回填，不能标记自动生成完成。',
       cards: [
         `资产 ${assetCount} / 已审批 ${approvedCount} / 可复用 ${reusableCount}`,
         `版权问题 ${rightsIssues} / 交付物 ${deliverables} / 交付问题 ${deliveryIssues}`,
@@ -175,10 +205,10 @@ export function buildCreateVariantPlaybook(
   return {
     title: 'Create 商业验收剧本',
     primaryAction: score >= 5
-      ? '可以进入真实 provider 和企业云资产接入验收，重点检查回调、存储、权限和成本控制。'
+      ? '可以进入真实生成服务和企业云资产接入验收，重点检查回调、存储、权限和成本控制。'
       : '先补内部资产账本、生产交接、版权审批和客户交付闭环，再谈一键视频或智能混剪能力。',
     proofToCheck: '合作者要看到 brief、benchmark、script、visual asset、production handoff、delivery review 和权限审计在同一项目里闭环。',
-    handoffBoundary: '一键视频、智能混剪和批量生成必须等待真实 provider、素材授权、对象存储、签名 URL、DLP 和客户验收接入。',
+    handoffBoundary: '一键视频、智能混剪和批量生成必须等待真实生成服务、素材授权、对象存储、签名链接、DLP 和客户验收接入。',
     cards: [
       `Create readiness ${score}/7`,
       `资产 ${assetCount} / 交付物 ${deliverables} / 客户批准 ${approvedDeliverables}`,
@@ -271,7 +301,7 @@ export function CreateAssetConsoleClient({
       await addAsset({
         type: 'image',
         title: visualTitle,
-        evidence: '视觉资产占位已授权进入生产包；真实成品仍需 provider 或人工设计回填。',
+        evidence: '视觉资产占位已授权进入生产包；真实成品仍需生成服务或人工设计回填。',
         tags: ['visual-asset', 'needs-provider-result'],
         approvalStatus: 'review',
         rightsStatus: 'needs_review',
@@ -398,19 +428,19 @@ export function CreateAssetConsoleClient({
       {
         time: '13:02:51',
         level: 'INFO',
-        text: 'Create 只写入 brief、benchmark、script 和 visual asset，不伪装 provider 已生成成品。',
+        text: 'Create 只写入商品需求、参考样本、脚本和视觉资产，不伪装生成服务已产出成品。',
       },
     ];
     const externalGates = [
       { title: '素材授权', detail: `版权问题 ${snapshot?.rightsIssueAssetCount || 0} / 治理问题 ${snapshot?.assetGovernanceIssueCount || 0}`, blocked: (snapshot?.rightsIssueAssetCount || 0) > 0 || (snapshot?.assetGovernanceIssueCount || 0) > 0 },
       { title: '对象存储', detail: '真实文件存储、签名 URL、DLP 仍需外部配置。', blocked: true },
-      { title: '视频 Provider', detail: '真实成片仍需剪辑/生成 provider 回调。', blocked: true },
+      { title: '视频生成服务', detail: '真实成片仍需剪辑或生成服务回调。', blocked: true },
       { title: '平台账号', detail: '分发与自动发布需要 OAuth 授权。', blocked: true },
-      { title: 'Analytics Sync', detail: '表现回流管道未接通前只做内部证据。', blocked: true },
+      { title: '表现回流接入', detail: '表现回流管道未接通前只做内部证据。', blocked: true },
     ];
     const evidenceRows = [
       { module: 'Brief', source: `${projectId || 'default-project'}`, status: snapshot?.assetCount ? '内部已索引' : '待写入', audit: `${snapshot?.assetCount || 0} assets` },
-      { module: 'Script', source: 'Create Seed', status: snapshot?.reusableAssetCount ? '可复用' : '待沉淀', audit: `${snapshot?.reusableAssetCount || 0} reusable` },
+      { module: '脚本', source: '生产包补录', status: snapshot?.reusableAssetCount ? '可复用' : '待沉淀', audit: `${snapshot?.reusableAssetCount || 0} 个可复用资产` },
       { module: 'Visual', source: 'Asset ledger', status: snapshot?.rightsIssueAssetCount ? '需审计' : '可进生产包', audit: `${snapshot?.rightsIssueAssetCount || 0} rights issues` },
       { module: 'Review', source: 'Client handoff', status: snapshot?.clientReviewAssetCount ? '有入口' : '待生成', audit: `${snapshot?.clientReviewAssetCount || 0} review tokens` },
     ];
@@ -474,7 +504,7 @@ export function CreateAssetConsoleClient({
                       内部资产账本
                     </span>
                     <span className="rounded-full border border-amber-200 bg-amber-50 px-3 py-1 text-xs font-medium text-amber-700">
-                      provider-gated
+                      等待生成 Key
                     </span>
                     <span className="rounded-full border border-neutral-200 bg-neutral-50 px-3 py-1 text-xs font-medium text-neutral-700">
                       {readyChecks}/{productionChecks.length} checks
@@ -487,9 +517,9 @@ export function CreateAssetConsoleClient({
                     <div className="flex flex-wrap gap-2">
                       <a href="#create-seed" className="inline-flex items-center rounded-md bg-neutral-950 px-4 py-2 text-sm font-semibold text-white shadow-sm hover:bg-neutral-800">创建资产</a>
                       <a href="#asset-evidence" className="inline-flex items-center rounded-md border border-neutral-300 bg-white px-4 py-2 text-sm font-medium text-neutral-700 shadow-sm hover:bg-neutral-50">查看证据</a>
-                      <a href="#create-readiness" className="inline-flex items-center rounded-md border border-neutral-300 bg-white px-4 py-2 text-sm font-medium text-neutral-700 shadow-sm hover:bg-neutral-50">Readiness</a>
+                      <a href="#create-readiness" className="inline-flex items-center rounded-md border border-neutral-300 bg-white px-4 py-2 text-sm font-medium text-neutral-700 shadow-sm hover:bg-neutral-50">准备检查</a>
                     </div>
-                    <div className="text-xs font-medium text-neutral-500">No fake provider · No fake OAuth · Ledger first</div>
+                    <div className="text-xs font-medium text-neutral-500">不伪装生成 · 不代管登录 · 先留证据</div>
                   </div>
                   <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-4">
                     {[
@@ -510,13 +540,13 @@ export function CreateAssetConsoleClient({
                     <form id="create-seed" onSubmit={seedCreatePackage} className="rounded-lg border border-neutral-200 bg-white p-5 shadow-sm">
                       <div className="flex items-start justify-between gap-4">
                         <div>
-                          <p className="text-xs font-semibold uppercase text-neutral-500">Create Seed</p>
+                          <p className="text-xs font-semibold uppercase text-neutral-500">补生产包</p>
                           <h2 className="mt-2 text-lg font-semibold text-neutral-950">补一个可追溯生产包</h2>
                           <p className="mt-2 max-h-12 overflow-hidden text-sm leading-6 text-neutral-600">
-                            一次写入 brief、benchmark、script 和 visual asset；视觉资产保持待审核，避免把 provider-gated 结果伪装成成品。
+                            一次写入商品需求、参考样本、脚本和视觉资产；视觉资产保持待审核，避免把等待生成 Key 的结果伪装成成品。
                           </p>
                         </div>
-                        <span className="shrink-0 rounded-md border border-amber-200 bg-amber-50 px-3 py-1 text-xs font-medium text-amber-700">provider-gated</span>
+                        <span className="shrink-0 rounded-md border border-amber-200 bg-amber-50 px-3 py-1 text-xs font-medium text-amber-700">等待生成 Key</span>
                       </div>
                       <div className="mt-5 grid gap-3 sm:grid-cols-2">
                         {[
@@ -551,17 +581,17 @@ export function CreateAssetConsoleClient({
                     <section className="rounded-lg border border-neutral-200 bg-white p-5 shadow-sm">
                       <div className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
                         <div>
-                          <p className="text-xs font-semibold uppercase text-neutral-500">Operation Queue</p>
+                          <p className="text-xs font-semibold uppercase text-neutral-500">下一步动作</p>
                           <h2 className="mt-2 text-lg font-semibold text-neutral-950">Create 缺口与操作</h2>
                         </div>
-                        <div className="text-xs text-neutral-500">{nextActions.length || 2} actions</div>
+                        <div className="text-xs text-neutral-500">{nextActions.length || 2} 个动作</div>
                       </div>
                       <div className="mt-4 grid gap-3 md:grid-cols-2">
                         {(nextActions.length ? nextActions : [
                           selectedVariant.firstAction,
                           selectedVariant.stopLine,
                         ]).map(item => (
-                          <div key={item} className="rounded-lg border border-neutral-200 bg-neutral-50 p-4 text-sm leading-6 text-neutral-700">{item}</div>
+                          <div key={item} className="rounded-lg border border-neutral-200 bg-neutral-50 p-4 text-sm leading-6 text-neutral-700">{readableCreateSystemText(item)}</div>
                         ))}
                       </div>
                     </section>
@@ -616,8 +646,8 @@ export function CreateAssetConsoleClient({
                       <section className="rounded-[1.75rem] border border-neutral-200 bg-[#0f172a] p-5 text-slate-300 shadow-sm">
                         <div className="flex items-center justify-between gap-4 border-b border-slate-700/60 pb-4">
                           <div>
-                            <p className="text-xs uppercase text-slate-400">Terminal // Create Logs</p>
-                            <h3 className="mt-2 text-lg font-semibold text-white">SYSTEM LOGS</h3>
+                            <p className="text-xs uppercase text-slate-400">生产记录</p>
+                            <h3 className="mt-2 text-lg font-semibold text-white">素材生产日志</h3>
                           </div>
                           <span className="text-xs font-medium text-emerald-400">Live</span>
                         </div>
@@ -639,7 +669,7 @@ export function CreateAssetConsoleClient({
                       <section className="rounded-lg border border-neutral-200 bg-white p-5 shadow-sm">
                         <div className="flex items-center justify-between gap-4">
                           <div>
-                            <p className="text-xs uppercase text-neutral-500">External Gates</p>
+                            <p className="text-xs uppercase text-neutral-500">外部接入门禁</p>
                             <h3 className="mt-2 text-lg font-semibold text-neutral-950">关键外部门禁</h3>
                           </div>
                           <div className="text-xs font-medium text-neutral-500">{externalGates.filter(gate => gate.blocked).length}/5 blocked</div>
@@ -665,10 +695,10 @@ export function CreateAssetConsoleClient({
                     <div id="asset-evidence" className="overflow-hidden rounded-lg border border-neutral-200 bg-white shadow-sm">
                       <div className="flex items-center justify-between border-b border-neutral-100 px-5 py-4">
                         <div>
-                          <p className="text-xs font-semibold uppercase text-neutral-500">Evidence Layer</p>
+                          <p className="text-xs font-semibold uppercase text-neutral-500">资产证据层</p>
                           <h2 className="mt-1 text-sm font-semibold text-neutral-950">近期资产证据层</h2>
                         </div>
-                        <span className="text-xs font-medium text-neutral-500">{snapshot?.assetCount || 0} assets</span>
+                        <span className="text-xs font-medium text-neutral-500">{snapshot?.assetCount || 0} 个资产</span>
                       </div>
                       <div className="overflow-x-auto">
                         <table className="w-full text-left text-sm">
@@ -701,10 +731,10 @@ export function CreateAssetConsoleClient({
                     <div id="create-readiness" className="overflow-hidden rounded-lg border border-neutral-200 bg-white shadow-sm">
                       <div className="flex items-center justify-between border-b border-neutral-100 px-5 py-4">
                         <div>
-                          <p className="text-xs font-semibold uppercase text-neutral-500">Readiness Table</p>
+                          <p className="text-xs font-semibold uppercase text-neutral-500">准备检查表</p>
                           <h2 className="mt-1 text-sm font-semibold text-neutral-950">模块准备度</h2>
                         </div>
-                        <span className="text-xs font-medium text-neutral-500">{readyChecks}/{productionChecks.length} ready</span>
+                        <span className="text-xs font-medium text-neutral-500">{readyChecks}/{productionChecks.length} 项就绪</span>
                       </div>
                       <div className="overflow-x-auto">
                         <table className="w-full text-left text-sm">
@@ -744,7 +774,7 @@ export function CreateAssetConsoleClient({
                         <p className="text-xs uppercase tracking-[0.22em] text-neutral-500">Creatopy / Pencil 参考层</p>
                         <h2 className="mt-2 text-xl font-semibold text-neutral-950">品牌安全批量生产验收板</h2>
                         <p className="mt-2 max-w-3xl text-sm leading-6 text-neutral-600">
-                          这里把品牌资产、素材权属、模板复用、版本矩阵、provider 门禁、客户审核和发布前停止线放到同一块板上；缺一项就不宣称一键视频或批量混剪。
+                          这里把品牌资产、素材权属、模板复用、版本矩阵、生成服务门禁、客户审核和发布前停止线放到同一块板上；缺一项就不宣称一键视频或批量混剪。
                         </p>
                       </div>
                       <div className="text-sm font-semibold text-neutral-700">{readyChecks}/{productionChecks.length} 就绪</div>
@@ -778,7 +808,7 @@ export function CreateAssetConsoleClient({
         <section className="rounded-[8px] border border-amber-200/15 bg-[#1a150d] p-5 shadow-2xl shadow-black/30">
           <div className="flex flex-col gap-4 lg:flex-row lg:items-end lg:justify-between">
             <div className="max-w-3xl">
-              <p className="text-xs uppercase tracking-[0.22em] text-amber-200">Create Asset Variant</p>
+              <p className="text-xs uppercase tracking-[0.22em] text-amber-200">素材生产视角</p>
               <h1 className="mt-3 text-3xl font-semibold tracking-normal text-white sm:text-4xl">资产生产控制台</h1>
               <p className="mt-3 text-sm leading-6 text-amber-50/75">{selectedVariant.headline}</p>
               <p className="mt-2 text-sm leading-6 text-white/55">{selectedVariant.body}</p>
@@ -790,7 +820,7 @@ export function CreateAssetConsoleClient({
           accent="amber"
           basePath="/factory/create"
           evidenceCards={playbook.cards}
-          eyebrow="Create Action Playbook"
+          eyebrow="素材生产动作剧本"
           firstScreen={selectedVariant.body}
           nextAction={selectedVariant.firstAction}
           primaryAction={playbook.primaryAction}
@@ -808,7 +838,7 @@ export function CreateAssetConsoleClient({
               <p className="text-xs uppercase tracking-[0.22em] text-amber-200">Creatopy / Pencil 参考层</p>
               <h2 className="mt-2 text-xl font-semibold">品牌安全批量生产验收板</h2>
               <p className="mt-2 text-sm leading-6 text-white/55">
-                这里把品牌资产、素材权属、模板复用、版本矩阵、provider 门禁、客户审核和发布前停止线放到同一块板上；缺一项就不宣称一键视频或批量混剪。
+                这里把品牌资产、素材权属、模板复用、版本矩阵、生成服务门禁、客户审核和发布前停止线放到同一块板上；缺一项就不宣称一键视频或批量混剪。
               </p>
             </div>
             <div className="text-sm font-semibold text-amber-100">
@@ -833,9 +863,9 @@ export function CreateAssetConsoleClient({
 
         <section className="grid gap-4">
           <form onSubmit={seedCreatePackage} className="rounded-[8px] border border-white/10 bg-white/[0.04] p-5">
-            <p className="text-xs uppercase tracking-[0.22em] text-amber-200">Create Seed</p>
+            <p className="text-xs uppercase tracking-[0.22em] text-amber-200">补生产包</p>
             <h2 className="mt-2 text-xl font-semibold">补一个可追溯生产包</h2>
-            <p className="mt-2 text-sm leading-6 text-white/55">一次写入 brief、benchmark、script 和 visual asset；视觉资产保持待审核，避免把 provider-gated 结果伪装成成品。</p>
+            <p className="mt-2 text-sm leading-6 text-white/55">一次写入商品需求、参考样本、脚本和视觉资产；视觉资产保持待审核，避免把等待生成 Key 的结果伪装成成品。</p>
             <div className="mt-4 grid gap-3">
               <label className="text-sm text-white/70">
                 项目
@@ -873,17 +903,17 @@ export function CreateAssetConsoleClient({
 
         <section className="grid gap-4 lg:grid-cols-3">
           <div className="rounded-[8px] border border-white/10 bg-white/[0.04] p-5">
-            <p className="text-xs uppercase tracking-[0.22em] text-white/45">Assets</p>
+            <p className="text-xs uppercase tracking-[0.22em] text-white/45">资产包</p>
             <div className="mt-3 text-3xl font-semibold">{snapshot?.assetCount || 0}</div>
             <p className="mt-2 text-sm text-white/60">已审批 {snapshot?.approvedAssetCount || 0} · 可复用 {snapshot?.reusableAssetCount || 0}</p>
           </div>
           <div className="rounded-[8px] border border-white/10 bg-white/[0.04] p-5">
-            <p className="text-xs uppercase tracking-[0.22em] text-white/45">Governance</p>
+            <p className="text-xs uppercase tracking-[0.22em] text-white/45">版权治理</p>
             <div className="mt-3 text-3xl font-semibold">{snapshot?.rightsIssueAssetCount || 0}</div>
             <p className="mt-2 text-sm text-white/60">版权问题 · 治理问题 {snapshot?.assetGovernanceIssueCount || 0}</p>
           </div>
           <div className="rounded-[8px] border border-white/10 bg-white/[0.04] p-5">
-            <p className="text-xs uppercase tracking-[0.22em] text-white/45">Delivery</p>
+            <p className="text-xs uppercase tracking-[0.22em] text-white/45">交付物</p>
             <div className="mt-3 text-3xl font-semibold">{snapshot?.deliverableAssetCount || 0}</div>
             <p className="mt-2 text-sm text-white/60">客户审核 {snapshot?.clientReviewAssetCount || 0} · 已批准 {snapshot?.approvedDeliverableCount || 0}</p>
           </div>
@@ -893,8 +923,8 @@ export function CreateAssetConsoleClient({
           <div className="rounded-[8px] border border-white/10 bg-white/[0.04] p-5">
             <h2 className="text-lg font-semibold">Create 缺口</h2>
             <div className="mt-3 space-y-2">
-              {(gaps.length ? gaps : ['内部 Create 账本当前没有阻断项，下一步是接真实 provider、对象存储和客户验收。']).map(item => (
-                <div key={item} className="rounded-[6px] border border-white/10 bg-black/20 p-3 text-sm text-white/70">{item}</div>
+              {(gaps.length ? gaps : ['内部 Create 账本当前没有阻断项，下一步是接真实生成服务、对象存储和客户验收。']).map(item => (
+                <div key={item} className="rounded-[6px] border border-white/10 bg-black/20 p-3 text-sm text-white/70">{readableCreateSystemText(item)}</div>
               ))}
             </div>
           </div>
@@ -905,7 +935,7 @@ export function CreateAssetConsoleClient({
                 selectedVariant.firstAction,
                 selectedVariant.stopLine,
               ]).map(item => (
-                <div key={item} className="rounded-[6px] border border-white/10 bg-black/20 p-3 text-sm text-white/70">{item}</div>
+                <div key={item} className="rounded-[6px] border border-white/10 bg-black/20 p-3 text-sm text-white/70">{readableCreateSystemText(item)}</div>
               ))}
             </div>
           </div>

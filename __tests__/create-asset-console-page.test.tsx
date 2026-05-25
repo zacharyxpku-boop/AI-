@@ -51,13 +51,13 @@ describe('create asset console page', () => {
     const html = renderToStaticMarkup(page);
 
     expect(html).toContain('资产生产控制台');
-    expect(html).toContain('Create Asset Variant');
-    expect(html).toContain('Create Action Playbook');
+    expect(html).toContain('素材生产视角');
+    expect(html).toContain('素材生产动作剧本');
     expect(html).toContain('Create 运营动作剧本');
     expect(html).toContain('Creatopy / Pencil 参考层');
     expect(html).toContain('品牌安全批量生产验收板');
-    expect(html).toContain('Create Seed');
-    expect(html).toContain('brief、benchmark、script 和 visual asset');
+    expect(html).toContain('补生产包');
+    expect(html).toContain('商品需求、参考样本、脚本和视觉资产');
     expect(html).toContain('/factory/create?projectId=launch-create&amp;variant=partner');
     expect(html).toContain('/factory/create?projectId=launch-create&amp;variant=friend_trial');
   });
@@ -84,7 +84,7 @@ describe('create asset console page', () => {
 
     expect(partnerHtml).toContain('合作者视角');
     expect(partnerHtml).toContain('Create 商业验收剧本');
-    expect(partnerHtml).toContain('真实 provider 和企业云资产接入验收');
+    expect(partnerHtml).toContain('真实生成服务和企业云资产接入验收');
     expect(partnerHtml).toContain('一键视频、智能混剪和批量生成');
 
     expect(friendHtml).toContain('Wenai 商品增长工作台');
@@ -113,13 +113,13 @@ describe('create asset console page', () => {
 
     expect(buildCreateVariantPlaybook(blocked, 'operator')).toEqual(expect.objectContaining({
       title: 'Create 运营动作剧本',
-      primaryAction: expect.stringContaining('Missing production brief or script asset'),
+      primaryAction: expect.stringContaining('缺少商品需求或脚本资产'),
       handoffBoundary: expect.stringContaining('不能标记自动生成完成'),
     }));
 
     expect(buildCreateVariantPlaybook(ready, 'partner')).toEqual(expect.objectContaining({
       title: 'Create 商业验收剧本',
-      primaryAction: expect.stringContaining('真实 provider'),
+      primaryAction: expect.stringContaining('真实生成服务'),
       cards: expect.arrayContaining([
         expect.stringContaining('Create readiness 7/7'),
       ]),
@@ -150,7 +150,7 @@ describe('create asset console page', () => {
     expect(buildCreateBrandProductionChecks(ready)).toEqual(expect.arrayContaining([
       expect.objectContaining({ stage: '品牌资产与素材权属', ready: true }),
       expect.objectContaining({ stage: '模板与版本矩阵', ready: true }),
-      expect.objectContaining({ stage: '生产交接与 provider 门禁', ready: true }),
+      expect.objectContaining({ stage: '生产交接与生成服务门禁', ready: true }),
       expect.objectContaining({ stage: '客户审核与批准', ready: true }),
       expect.objectContaining({ stage: '治理与发布前停止线', ready: true }),
     ]));
