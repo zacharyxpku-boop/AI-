@@ -17,6 +17,7 @@ import {
   buildDemoCommerceModelImageTaskPack,
   buildCommerceOpenSourceAdapters,
   buildDemoCommerceOpenSourceCoverage,
+  buildDemoCommerceOpenSourceInstallMatrix,
   buildDemoCommerceOpenSourceStackSelector,
   buildDemoCommerceProviderActivationRunbook,
   buildDemoCommerceProviderActivationPlan,
@@ -255,6 +256,7 @@ export function KuaiziStyleWorkbench() {
   const openSourceAdapters = useMemo(() => buildCommerceOpenSourceAdapters(), []);
   const openSourceCoverage = useMemo(() => buildDemoCommerceOpenSourceCoverage(), []);
   const openSourceStackSelector = useMemo(() => buildDemoCommerceOpenSourceStackSelector(), []);
+  const openSourceInstallMatrix = useMemo(() => buildDemoCommerceOpenSourceInstallMatrix(), []);
   const executionRecipes = useMemo(() => buildDemoCommerceRemixExecutionRecipes(), []);
   const orchestrationBoard = useMemo(() => buildDemoCommerceRemixOrchestrationBoard(), []);
   const workflowPlaybook = useMemo(() => buildDemoCommerceRemixWorkflowPlaybook(), []);
@@ -833,14 +835,60 @@ export function KuaiziStyleWorkbench() {
                         </article>
                       ))}
                     </div>
-                    <div className="mt-4 grid gap-2 lg:grid-cols-2">
-                      {openSourceStackSelector.scaleUpRules.map(rule => (
-                        <div className="rounded-md bg-white px-3 py-2 text-xs font-bold leading-5 text-slate-700 ring-1 ring-emerald-100" key={rule}>{rule}</div>
-                      ))}
+                  <div className="mt-4 grid gap-2 lg:grid-cols-2">
+                    {openSourceStackSelector.scaleUpRules.map(rule => (
+                      <div className="rounded-md bg-white px-3 py-2 text-xs font-bold leading-5 text-slate-700 ring-1 ring-emerald-100" key={rule}>{rule}</div>
+                    ))}
+                  </div>
+                </div>
+                <div className="mt-5 rounded-md border border-lime-100 bg-lime-50 p-4">
+                  <div className="flex flex-col gap-3 lg:flex-row lg:items-end lg:justify-between">
+                    <div className="min-w-0">
+                      <p className="text-xs font-black uppercase tracking-[0.18em] text-lime-700">Install & Smoke Test Matrix</p>
+                      <h4 className="mt-1 text-base font-black leading-6 text-slate-950">{openSourceInstallMatrix.headline}</h4>
+                      <p className="mt-2 max-w-4xl text-sm leading-6 text-slate-600">{openSourceInstallMatrix.promise}</p>
+                    </div>
+                    <span className="w-fit rounded bg-white px-2.5 py-1 text-xs font-black text-lime-700 ring-1 ring-lime-100">{openSourceInstallMatrix.minimumLocalStack.length} 个最小本地栈</span>
+                  </div>
+                  <div className="mt-4 grid gap-3 xl:grid-cols-3">
+                    {openSourceInstallMatrix.lanes.map(lane => (
+                      <article className="min-w-0 rounded-md bg-white p-3 ring-1 ring-lime-100" key={lane.id}>
+                        <div className="flex items-start justify-between gap-3">
+                          <h5 className="min-w-0 text-sm font-black leading-5 text-slate-950">{lane.customerLabel}</h5>
+                          <span className="shrink-0 rounded bg-lime-50 px-2 py-1 text-[11px] font-black text-lime-700">{lane.adapterIds.length} tools</span>
+                        </div>
+                        <p className="mt-2 line-clamp-2 text-xs font-bold leading-5 text-lime-700">{lane.installCheck}</p>
+                        <p className="mt-2 line-clamp-2 text-xs leading-5 text-slate-600">{lane.smokeTest}</p>
+                        <p className="mt-2 truncate rounded bg-slate-50 px-2 py-1.5 text-[11px] font-bold text-slate-600">{lane.outputProof}</p>
+                        <div className="mt-3 flex flex-wrap gap-1.5">
+                          {lane.adapterIds.slice(0, 4).map(id => (
+                            <span className="rounded bg-lime-50 px-2 py-1 text-[11px] font-black text-lime-700" key={id}>{id}</span>
+                          ))}
+                        </div>
+                      </article>
+                    ))}
+                  </div>
+                  <div className="mt-4 grid gap-3 lg:grid-cols-[minmax(0,1fr)_minmax(280px,0.55fr)]">
+                    <div className="rounded-md bg-white p-3 ring-1 ring-lime-100">
+                      <h5 className="text-sm font-black text-slate-950">进入客户交付前必须满足</h5>
+                      <div className="mt-3 grid gap-2 sm:grid-cols-2">
+                        {openSourceInstallMatrix.readyDefinition.map(item => (
+                          <div className="rounded bg-lime-50 px-3 py-2 text-xs font-bold leading-5 text-slate-700 ring-1 ring-lime-100" key={item}>{item}</div>
+                        ))}
+                      </div>
+                    </div>
+                    <div className="rounded-md bg-white p-3 ring-1 ring-lime-100">
+                      <h5 className="text-sm font-black text-slate-950">仍然不是 provider 依赖</h5>
+                      <div className="mt-3 grid gap-2">
+                        {openSourceInstallMatrix.providerBoundary.map(item => (
+                          <div className="rounded bg-rose-50 px-3 py-2 text-xs font-bold leading-5 text-rose-800 ring-1 ring-rose-100" key={item}>{item}</div>
+                        ))}
+                      </div>
                     </div>
                   </div>
-                  <div className="mt-5 rounded-md border border-indigo-100 bg-indigo-50 p-4">
-                    <div className="flex flex-col gap-2 md:flex-row md:items-end md:justify-between">
+                </div>
+                <div className="mt-5 rounded-md border border-indigo-100 bg-indigo-50 p-4">
+                  <div className="flex flex-col gap-2 md:flex-row md:items-end md:justify-between">
                       <div>
                         <p className="text-xs font-black uppercase tracking-[0.18em] text-indigo-600">开源能力适配器</p>
                         <h4 className="mt-1 text-base font-black text-slate-950">不是堆开源项目，而是把成熟能力封成电商任务</h4>

@@ -124,6 +124,9 @@ describe('/api/commerce-remix', () => {
     expect(body.openSourceCoverage.customerPromise).toContain('自己发布');
     expect(body.openSourceStackSelector.decisions.find((decision: { id: string }) => decision.id === 'long-material-slicing').defaultAdapterIds).toContain('pyscenedetect');
     expect(body.openSourceStackSelector.doNotUseFor.join(' ')).toContain('cookie');
+    expect(body.openSourceInstallMatrix.headline).toContain('开源混剪安装和冒烟验收矩阵');
+    expect(body.openSourceInstallMatrix.lanes.find((lane: { id: string }) => lane.id === 'render-queue-smoke').smokeTest).toContain('故意失败一次');
+    expect(body.openSourceInstallMatrix.providerBoundary).toContain('不把平台自动登录当作开源混剪能力。');
     expect(body.executionRecipes.find((recipe: { adapterId: string }) => recipe.adapterId === 'ffmpeg').passCriteria.join(' ')).toContain('MP4 可播放');
     expect(body.executionRecipes.find((recipe: { adapterId: string }) => recipe.adapterId === 'mediainfo').passCriteria.join(' ')).toContain('编码');
     expect(body.orchestrationBoard.routes.find((route: { id: string }) => route.id === 'template-compose').primaryAdapterIds).toContain('editly');

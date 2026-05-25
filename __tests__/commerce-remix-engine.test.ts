@@ -19,6 +19,7 @@ import {
   buildCommerceModelImageTaskPack,
   buildCommerceOpenSourceAdapters,
   buildCommerceOpenSourceCoverage,
+  buildCommerceOpenSourceInstallMatrix,
   buildCommerceOpenSourceStackSelector,
   buildCommercePostPublishActionBoard,
   buildCommerceProviderActivationRunbook,
@@ -654,6 +655,35 @@ describe('commerce remix engine', () => {
     expect(selector.scaleUpRules.join(' ')).toContain('GStreamer');
     expect(selector.doNotUseFor).toContain('不保存客户平台账号、密码、cookie 或后台 token。');
     expect(JSON.stringify(selector)).not.toMatch(/apiKey|accessToken|Bearer|sk-/i);
+  });
+
+  it('defines install and smoke-test gates before open-source tools enter delivery', () => {
+    const plan = buildCommerceRemixEnginePlan(baseInput);
+    const matrix = buildCommerceOpenSourceInstallMatrix(baseInput, plan);
+
+    expect(matrix.headline).toContain('开源混剪安装和冒烟验收矩阵');
+    expect(matrix.minimumLocalStack).toEqual(expect.arrayContaining([
+      'mediainfo',
+      'pyscenedetect',
+      'auto-editor',
+      'remotion',
+      'ffmpeg',
+      'queue-worker',
+    ]));
+    expect(matrix.lanes.map(lane => lane.id)).toEqual([
+      'asset-normalize-smoke',
+      'clip-mining-smoke',
+      'caption-smoke',
+      'template-compose-smoke',
+      'render-queue-smoke',
+      'qa-return-smoke',
+    ]);
+    expect(matrix.lanes.find(lane => lane.id === 'render-queue-smoke')?.smokeTest).toContain('故意失败一次');
+    expect(matrix.lanes.find(lane => lane.id === 'clip-mining-smoke')?.adapterIds).toEqual(expect.arrayContaining(['lossless-cut', 'pyscenedetect', 'auto-editor']));
+    expect(matrix.readyDefinition.join(' ')).toContain('客户看到的是发布包');
+    expect(matrix.scaleLaterStack).toEqual(expect.arrayContaining(['gstreamer', 'gpac-packager']));
+    expect(matrix.providerBoundary).toContain('不把未通过 smoke test 的工具展示为可交付能力。');
+    expect(JSON.stringify(matrix)).not.toMatch(/apiKey|accessToken|Bearer|sk-/i);
   });
 
   it('builds a customer-readable remix workflow with no-provider fallbacks', () => {

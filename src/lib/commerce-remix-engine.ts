@@ -410,6 +410,24 @@ export interface CommerceOpenSourceStackSelector {
   doNotUseFor: string[];
 }
 
+export interface CommerceOpenSourceInstallMatrix {
+  headline: string;
+  promise: string;
+  minimumLocalStack: string[];
+  lanes: Array<{
+    id: string;
+    customerLabel: string;
+    adapterIds: string[];
+    installCheck: string;
+    smokeTest: string;
+    outputProof: string;
+    fallback: string;
+  }>;
+  readyDefinition: string[];
+  scaleLaterStack: string[];
+  providerBoundary: string[];
+}
+
 export interface CommerceRemixWorkflowPlaybook {
   stages: Array<{
     id: string;
@@ -1206,6 +1224,103 @@ export function buildCommerceOpenSourceStackSelector(
       '不保存客户平台账号、密码、cookie 或后台 token。',
       '不代替客户自动登录、自动发布或绕过平台发布流程。',
       '不把开源项目名堆给客户，客户只看到素材、成片、发布包和复盘任务。',
+    ],
+  };
+}
+
+export function buildCommerceOpenSourceInstallMatrix(
+  input: CommerceRemixPlanInput,
+  plan = buildCommerceRemixEnginePlan(input),
+  adapters = buildCommerceOpenSourceAdapters(),
+): CommerceOpenSourceInstallMatrix {
+  const adapterIds = new Set(adapters.map(adapter => adapter.id));
+  const availableIds = (ids: string[]) => ids.filter(id => adapterIds.has(id));
+  const packageRoot = `exports/commerce-remix-${slugify(input.productName)}`;
+  const firstQueueId = plan.queue[0]?.id || `${slugify(input.productName)}-demo-render`;
+
+  return {
+    headline: '开源混剪安装和冒烟验收矩阵',
+    promise: '每个开源工具只在通过本地检查、样例任务和输出证据后进入客户交付链路；没通过就走降级路径，不让客户看到半成品。',
+    minimumLocalStack: availableIds([
+      'mediainfo',
+      'imagemagick-libheif',
+      'lossless-cut',
+      'pyscenedetect',
+      'auto-editor',
+      'remotion',
+      'opentimelineio',
+      'editly',
+      'ffmpeg',
+      'queue-worker',
+    ]),
+    lanes: [
+      {
+        id: 'asset-normalize-smoke',
+        customerLabel: '素材先变成可剪格式',
+        adapterIds: availableIds(['mediainfo', 'imagemagick-libheif', 'ffmpeg']),
+        installCheck: '读取一张商品图和一段视频的格式、尺寸、时长、帧率和音轨。',
+        smokeTest: '把 HEIF/WEBP/PNG 标准化成封面图，把一段视频转成平台可上传 MP4。',
+        outputProof: `${packageRoot}/upload-ready-checklist.md`,
+        fallback: '格式识别失败时，先生成客户补素材清单，不进入批量渲染。',
+      },
+      {
+        id: 'clip-mining-smoke',
+        customerLabel: '长素材自动切成可用片段',
+        adapterIds: availableIds(['lossless-cut', 'pyscenedetect', 'auto-editor']),
+        installCheck: '确认能读取长视频、识别场景切点、保留原始时间戳。',
+        smokeTest: '从 60 秒测试素材导出 3 个候选片段，并标注静音、场景变化和人工复核点。',
+        outputProof: `${packageRoot}/clip-candidates.json`,
+        fallback: '自动切点不稳定时，退回人工标记片段，不影响模板和发布包生成。',
+      },
+      {
+        id: 'caption-smoke',
+        customerLabel: '口播和字幕可复核',
+        adapterIds: availableIds(['whisper', 'subtitle-edit', 'auto-editor']),
+        installCheck: '确认能生成 SRT/ASS 字幕底稿，并保留原音频引用。',
+        smokeTest: '用 15 秒口播生成字幕，检查商品名、价格、售后承诺和敏感词。',
+        outputProof: `${packageRoot}/subtitles.srt`,
+        fallback: '语音识别不可用时，使用脚本文案生成字幕底稿并标记人工校对。',
+      },
+      {
+        id: 'template-compose-smoke',
+        customerLabel: '脚本变成电商视频结构',
+        adapterIds: availableIds(['remotion', 'opentimelineio', 'editly', 'moviepy']),
+        installCheck: '确认时间线 JSON、模板参数、素材引用和发布包标题能互相对应。',
+        smokeTest: `用 ${plan.publishingPacks.length} 个平台发布包生成一条模板草稿任务。`,
+        outputProof: `${packageRoot}/timeline.json`,
+        fallback: '模板渲染不可用时，保留时间线、字幕、封面和 FFmpeg 命令清单。',
+      },
+      {
+        id: 'render-queue-smoke',
+        customerLabel: '批量渲染失败不拖垮整批',
+        adapterIds: availableIds(['queue-worker', 'ffmpeg', 'mediainfo']),
+        installCheck: '确认队列能限制并发、记录 attempt、区分缺素材和可重试失败。',
+        smokeTest: `让 ${firstQueueId} 故意失败一次，确认只重试单条任务并保留失败原因。`,
+        outputProof: `${packageRoot}/render-report.json`,
+        fallback: '队列不可用时，导出单条渲染命令和人工执行顺序，不阻塞发布包。',
+      },
+      {
+        id: 'qa-return-smoke',
+        customerLabel: '成片和客户回传能进入下一轮',
+        adapterIds: availableIds(['mediainfo', 'opencv-mediapipe', 'subtitle-edit']),
+        installCheck: '检查 MP4 是否可播放、字幕不遮挡商品、客户回传 CSV 是否有标题列。',
+        smokeTest: '抽检桌面和移动预览，确认无横向溢出、无空视频、无缺失标题。',
+        outputProof: `${packageRoot}/05-next-round/review.md`,
+        fallback: '质检不通过时，只交付问题清单和补素材任务，不标记为可发布。',
+      },
+    ],
+    readyDefinition: [
+      '最小本地栈能完成素材标准化、片段切分、模板编排、队列渲染和媒体质检。',
+      '每条渲染任务都有输入、输出、attempt、失败原因和下一步动作。',
+      '客户看到的是发布包、成片、标题矩阵、客服话术和回填清单，不需要理解 GitHub 工具名。',
+      '没有图片/视频/数字人 Key 时，仍可导出 prompt、时间线、混剪任务和发布包。',
+    ],
+    scaleLaterStack: availableIds(['gstreamer', 'gpac-packager', 'libopenshot', 'mcp-video']),
+    providerBoundary: [
+      '不把平台自动登录当作开源混剪能力。',
+      '不保存客户平台账号、密码、cookie 或后台 token。',
+      '不自动下载来源不明素材。',
+      '不把未通过 smoke test 的工具展示为可交付能力。',
     ],
   };
 }
@@ -3497,6 +3612,13 @@ export function buildDemoCommerceOpenSourceStackSelector() {
   const plan = buildCommerceRemixEnginePlan(input);
   const adapters = buildCommerceOpenSourceAdapters();
   return buildCommerceOpenSourceStackSelector(input, plan, adapters);
+}
+
+export function buildDemoCommerceOpenSourceInstallMatrix() {
+  const input = buildDemoCommerceRemixInput();
+  const plan = buildCommerceRemixEnginePlan(input);
+  const adapters = buildCommerceOpenSourceAdapters();
+  return buildCommerceOpenSourceInstallMatrix(input, plan, adapters);
 }
 
 export function buildDemoCommerceRemixOrchestrationBoard() {
