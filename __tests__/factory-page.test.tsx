@@ -36,6 +36,10 @@ describe('factory page', () => {
     expect(html).toContain('今天队列能不能稳定出片，客户一眼看懂');
     expect(html).toContain('失败隔离');
     expect(html).toContain('什么时候再升级');
+    expect(html).toContain('Self Publish Evidence Inbox');
+    expect(html).toContain('客户自己发布，我们用证据把下一轮做准');
+    expect(html).toContain('回填后系统立刻判断');
+    expect(html).toContain('不向客户索要');
     expect(html).toContain('客户能看到的边界');
     expect(html).toContain('客户不用理解');
     expect(html).toContain('首版交付清单');

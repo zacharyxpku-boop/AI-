@@ -540,6 +540,54 @@ export function KuaiziStyleWorkbench() {
                 </div>
               </section>
 
+              <section className="rounded-lg border border-[#fde68a] bg-white p-5 shadow-sm">
+                <div className="flex flex-col gap-3 lg:flex-row lg:items-end lg:justify-between">
+                  <div className="min-w-0">
+                    <p className="text-xs font-black uppercase tracking-[0.18em] text-amber-700">Self Publish Evidence Inbox</p>
+                    <h3 className="mt-1 text-lg font-black leading-6 text-slate-950">客户自己发布，我们用证据把下一轮做准</h3>
+                    <p className="mt-2 max-w-5xl text-sm leading-6 text-slate-500">
+                      首版不接管账号、不自动登录、不读后台。客户只要把发布链接、截图、CSV 或云盘目录交回来，Wenai 就能判断下一轮该改标题、改封面、重剪视频还是补客服话术。
+                    </p>
+                  </div>
+                  <Link className="inline-flex min-h-11 w-fit shrink-0 items-center rounded-md bg-amber-600 px-4 py-2 text-sm font-black text-white shadow-sm" href="/factory/manage?variant=friend_trial">
+                    查看回填复盘
+                  </Link>
+                </div>
+                <div className="mt-4 grid gap-3 md:grid-cols-4">
+                  {customerEvidenceUploadGuide.acceptedEvidence.map(item => (
+                    <article className="min-w-0 rounded-md border border-amber-100 bg-amber-50 p-4" key={item.label}>
+                      <div className="flex items-start justify-between gap-3">
+                        <h4 className="text-sm font-black leading-5 text-slate-950">{item.label}</h4>
+                        <span className="shrink-0 rounded bg-white px-2 py-1 text-[11px] font-black text-amber-700 ring-1 ring-amber-100">{item.formats[0]}</span>
+                      </div>
+                      <p className="mt-2 text-xs font-bold leading-5 text-amber-800">{item.proves}</p>
+                      <p className="mt-3 line-clamp-2 rounded bg-white px-2 py-1.5 text-[11px] font-bold leading-4 text-slate-600 ring-1 ring-amber-100">{item.destination}</p>
+                    </article>
+                  ))}
+                </div>
+                <div className="mt-4 grid gap-3 lg:grid-cols-[minmax(0,1fr)_minmax(280px,0.54fr)]">
+                  <div className="rounded-md border border-emerald-100 bg-emerald-50 p-4">
+                    <h4 className="text-sm font-black text-slate-950">回填后系统立刻判断</h4>
+                    <div className="mt-3 grid gap-2 sm:grid-cols-2">
+                      {customerEvidenceUploadGuide.nextRoundMapping.map(item => (
+                        <div className="rounded bg-white px-3 py-2 text-xs ring-1 ring-emerald-100" key={item.evidence}>
+                          <div className="line-clamp-1 font-black text-slate-900">{item.evidence}</div>
+                          <p className="mt-1 line-clamp-2 font-bold leading-5 text-slate-600">{item.nextWenaiAction}</p>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                  <div className="rounded-md border border-rose-100 bg-rose-50 p-4">
+                    <h4 className="text-sm font-black text-slate-950">不向客户索要</h4>
+                    <div className="mt-3 flex flex-wrap gap-2">
+                      {customerEvidenceUploadGuide.doNotAskCustomerFor.map(item => (
+                        <span className="rounded bg-white px-2.5 py-1 text-xs font-black leading-5 text-rose-700 ring-1 ring-rose-100" key={item}>{item}</span>
+                      ))}
+                    </div>
+                  </div>
+                </div>
+              </section>
+
               <section className="rounded-lg border border-[#dbe6ff] bg-white p-5 shadow-sm">
                 <div className="flex flex-col gap-3 md:flex-row md:items-end md:justify-between">
                   <div className="min-w-0">
