@@ -41,6 +41,11 @@ describe('factory page', () => {
     expect(html).toContain('今天队列能不能稳定出片，客户一眼看懂');
     expect(html).toContain('失败隔离');
     expect(html).toContain('什么时候再升级');
+    expect(html).toContain('Scale Runbook');
+    expect(html).toContain('大规模渲染不靠一把梭，按三层队列逐步升级');
+    expect(html).toContain('客户只看四种状态');
+    expect(html).toContain('运营按步骤跑批次');
+    expect(html).toContain('扩容路径');
     expect(html).toContain('Self Publish Evidence Inbox');
     expect(html).toContain('客户自己发布，我们用证据把下一轮做准');
     expect(html).toContain('回填后系统立刻判断');
