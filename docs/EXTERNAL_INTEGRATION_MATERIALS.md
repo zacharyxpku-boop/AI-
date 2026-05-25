@@ -1,10 +1,10 @@
 # Wenai External Integration Materials
 
-This document is the partner-facing intake list for moving Wenai from an internal full-chain skeleton to real Kuaizi-level platform execution. Do not paste secrets into GitHub, chat, reports, browser localStorage, screenshots, or client-side config. Secrets must only enter server-side environment variables or the deployment provider secret store.
+This document is the partner-facing intake list for moving Wenai from a local-first customer trial to deeper Kuaizi-level platform automation. Do not paste secrets into GitHub, chat, reports, browser localStorage, screenshots, or client-side config. Secrets must only enter server-side environment variables or the deployment provider secret store.
 
 ## Current Boundary
 
-Wenai can already demonstrate the internal Compose / Create / Cut / Cast / Manage loop: creative intelligence, assets, video workflow, distribution ledger, CRM handoff, client review, RBAC/audit, and performance feedback. It cannot claim true platform-scale execution until the external packs below are configured and verified.
+Wenai can already demonstrate and sell the first-delivery Compose / Create / Cut / Cast / Manage loop without new platform providers: customer materials enter, Wenai outputs model-image tasks, local/open-source remix plans, stable render batches, title/persona matrices, customer self-publish packs, service/support material, and evidence-return reviews. External packs below are optional upgrades for automated generation, automatic publishing, automatic analytics, enterprise storage, or audited scale claims.
 
 The 91M+ creative output and 42M+ video distribution numbers are competitor benchmarks. They must not be displayed as Wenai-owned metrics until an audited Wenai scale ledger reconciles production output, platform publish records, dedupe rules, and date ranges.
 
@@ -14,7 +14,8 @@ Use this as the handoff path before sharing anything with Wenai. Do not send pas
 
 | Lane | Where to get it | Steps | Acceptance proof |
 | --- | --- | --- | --- |
-| Video provider | Provider console or provider integration contact | Open sandbox project; configure server token in deployment secrets; register callback URL; set quota, cost cap, and retry policy | Test task id, signed callback, and playable finished-video URL |
+| Customer self-publish return | Customer platform account and shared folder | Publish manually from Wenai pack; upload links, screenshots, comments, CSV, and notes into the return folder | Next-round review can identify title, cover, remix, proof-image, or service/support actions |
+| Generation provider | Provider console or provider integration contact | Open sandbox project; configure server token in deployment secrets; register callback or polling URL; set quota, cost cap, and retry policy | Test task id, signed callback or poll result, and usable generated image/video/avatar/voice asset |
 | Platform OAuth | TikTok/Douyin, Xiaohongshu, Kuaishou, Meta, Google, Amazon, or Shopify developer console | Create developer app; add redirect URI; grant sandbox/test account; record store, page, handle, or account id | Account reaches `oauth_ready`; Wenai can read identity, health, publish limit, and available slots |
 | Ad account | Ads Manager or business manager console | Create controlled advertiser; grant least privilege; set hard budget cap; bind conversion event and stop rules | Test campaign can be read or created with spend, impression, click, and conversion return |
 | Analytics sync | Platform analytics API, ads reporting API, or scheduled export | Define metrics; set attribution window; map `asset_ref` or UTM; choose sync cadence and timezone | Synced rows attach to dispatch, campaign, SKU, and brand learning without fake returns |
@@ -23,27 +24,46 @@ Use this as the handoff path before sharing anything with Wenai. Do not send pas
 
 ## P0 Materials
 
-### 1. Video Generation / Editing Provider Pack
+### 1. Customer Self-Publish Return Pack
 
-Purpose: unlock real Cut execution for AI video analysis, smart remixing, one-click video, provider callbacks, and finished-video review.
+Purpose: keep first delivery unblocked. Wenai creates the publishing pack; the customer publishes and returns evidence so Wenai can produce the next round.
+
+Provide:
+- target platforms and account personas
+- publish-ready video/image files or file links
+- titles, captions, tags, covers, first-line hooks, and service/support notes
+- shared return folder or upload form
+- published URLs, screenshots, comments, CSV export, and customer notes after posting
+
+Acceptance:
+- one customer can publish from the pack without Wenai account access
+- returned evidence can drive a next-round title, cover, remix, proof-image, or service/support action
+- no account password, cookie, or backend token is requested
+
+### 2. Generation Provider Pack
+
+Purpose: unlock automated image generation, video generation, avatar, or TTS once the owner provides the chosen server-side keys. This improves generation speed but is not required for local/open-source remix, publishing packs, customer self-publish, or evidence return.
 
 Provide:
 - provider name and sandbox account
-- submit endpoint and callback endpoint requirements
+- generation scope: image, video, avatar, TTS, or mixed
+- submit endpoint and callback or polling requirements
 - server-side provider token through the deployment secret store
-- webhook signing secret
+- webhook signing secret if callbacks are used
 - sample task id or sandbox job
 - cost limit and failure/retry policy
 - licensed sample assets and usage rights
 
 Acceptance:
-- one provider-ready video workflow is submitted
-- signed callback is verified
-- result URL is ingested as a governed asset
-- customer review link is generated
+- one provider-ready generation workflow is submitted
+- signed callback or polling result is verified
+- result URL or file is ingested as a governed asset
+- failed generation falls back to prompt/task pack or customer-provided material
 - no provider token appears in browser output, reports, tests, or Git history
 
-### 2. Platform OAuth / Account Pool Pack
+## P1 Materials
+
+### 3. Platform OAuth / Account Pool Pack
 
 Purpose: unlock real Cast execution for multi-platform account binding, PubPal/matrix distribution, publish slots, and account health.
 
@@ -61,7 +81,7 @@ Acceptance:
 - tokens stay server-side only
 - account health, publish limit, and available slots are visible before dispatch
 
-### 3. Ad Account / Campaign Pack
+### 4. Ad Account / Campaign Pack
 
 Purpose: unlock real advertising execution instead of only campaign ledger planning.
 
@@ -80,9 +100,9 @@ Acceptance:
 - spend, clicks, orders, revenue, and asset_ref return to Wenai
 - no automatic optimization is claimed before budget and rollback controls exist
 
-## P1 Materials
+## P2 Materials
 
-### 4. Analytics Sync / Performance Return Pack
+### 5. Analytics Sync / Performance Return Pack
 
 Purpose: replace manual CSV returns with scheduled platform data sync.
 
@@ -99,7 +119,7 @@ Acceptance:
 - every measured dispatch links back to asset, platform, campaign, and SKU
 - failed syncs are visible and do not create fake performance returns
 
-### 5. Enterprise Asset Cloud / Permission Pack
+### 6. Enterprise Asset Cloud / Permission Pack
 
 Purpose: upgrade internal RBAC/audit modeling into real enterprise cloud asset enforcement.
 
@@ -118,7 +138,7 @@ Acceptance:
 - DLP, watermark, retention, and access audit evidence exists per governed asset
 - customers, operators, and distribution roles receive different permission results
 
-### 6. Audited Scale Ledger Pack
+### 7. Audited Scale Ledger Pack
 
 Purpose: decide when Wenai may display its own scale numbers instead of only competitor benchmarks.
 
@@ -138,9 +158,9 @@ Acceptance:
 
 ## Stop Lines
 
-- No platform OAuth: keep distribution as manual/provider-gated dispatch.
+- No generation key or callback: do not claim automated AI-generated shots, avatars, voices, or provider-finished videos; local/open-source remix packages and stable render queues are still claimable.
+- No platform OAuth: keep distribution as customer self-publish with Wenai-generated packs and evidence return.
 - No ad account authorization: do not claim automatic ad delivery or optimization.
-- No video provider callback: do not claim one-click finished video or batch smart remixing.
-- No analytics sync: do not claim automatic performance learning beyond manual import.
+- No analytics sync: do not claim automatic performance learning beyond customer-uploaded links, screenshots, CSV, or cloud-drive folders.
 - No object storage and signed URLs: do not claim enterprise cloud asset enforcement.
 - No audited scale ledger: do not display Wenai-owned 91M+ / 42M+ scale claims.

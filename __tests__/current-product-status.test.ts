@@ -11,7 +11,7 @@ describe('current product status report', () => {
     expect(doc).toContain('docs/EXTERNAL_INTEGRATION_MATERIALS.md');
     expect(doc).toContain('91M+ creative output');
     expect(doc).toContain('42M+ video distribution');
-    expect(doc).toContain('No provider callback');
+    expect(doc).toContain('No generation key or callback');
     expect(doc).toContain('No platform OAuth');
     expect(doc).toContain('No ad account authorization');
     expect(doc).toContain('最终产品形态');
@@ -47,7 +47,8 @@ describe('current product status report', () => {
     expect(doc).toContain('Ad Delivery Guardrails');
     expect(doc).toContain('品牌学习不能只是报告');
     expect(doc).toContain('内部还能继续解决');
-    expect(doc).toContain('必须外部提供');
+    expect(doc).toContain('外部提供判断');
+    expect(doc).toContain('首版不强制新增外部 provider');
     expect(doc).toContain('不建议公开售卖为筷子科技等价平台');
   });
 });

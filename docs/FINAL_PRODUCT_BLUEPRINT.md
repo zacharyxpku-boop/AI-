@@ -6,13 +6,13 @@ This is the current north-star product shape for Wenai. It keeps Kuaizi as the c
 
 Wenai should become an ecommerce AI content industrialization operating system, not a loose generator bundle.
 
-| Layer | Final capability | Internal work Wenai can keep advancing | External gate before commercial claim |
+| Layer | Final capability | First-delivery path without new provider | External gate before stronger commercial claim |
 | --- | --- | --- | --- |
-| Compose | Whole-web inspiration management, competitor account tracking, trend/rank capture, hot video teardown, Hook Bank, brand learning, and audited action queue | Deepen creative monitoring, source sync, hook/pacing structures, brand-learning rules, and next-production constraints | Authorized source feeds, account observation, legal video inputs, and multimodal parser provider |
-| Create | SKU/offer/brand input to scripts, asset briefs, production tasks, provider request, result ingestion, and client-reviewable deliverables | Keep binding product source, script, assets, provider request, result URL, review token, and CRM handoff into one task record | Real image/video provider, object storage, licensed assets, and signed callback |
-| Cut | AI video analysis, structured teardown, smart remix, batch variants, finished-video review, and performance learning | Keep adding template ladders, cut plans, asset segment fields, QA gates, review receipts, and performance return links | Multimodal video parser, editing/render provider, transcoding storage, and retry queue |
-| Cast | Multi-platform distribution, PubPal-style matrix scheduling, ad campaign ledger, budget gates, publish proof, and analytics sync | Keep strengthening account matrix, dispatch handoff, UTM/asset_ref, manual publish receipt, campaign ledger, and stop rules | Platform OAuth, auto-publish permission, ad account authorization, conversion events, and reporting APIs |
-| Manage | Enterprise asset security, RBAC/audit, client review, CRM handoff, DLP/watermark, retention, and audited scale claims | Keep fail-closed permissions, access audit, review portal, CRM packet, brand-learning feedback, and scale-claim guards | Object storage/signed URL, team cloud, CRM/payment/contract system, and audited scale ledger |
+| Compose | Whole-web inspiration management, competitor account tracking, trend/rank capture, hot video teardown, Hook Bank, brand learning, and audited action queue | Customer provides links, screenshots, files, or CSV; Wenai turns them into hook, pacing, proof, and next-production constraints | Authorized source feeds, account observation, legal video inputs, and multimodal parser provider |
+| Create | SKU/offer/brand input to scripts, model-image tasks, asset briefs, result ingestion, and client-reviewable deliverables | Export prompts, task packs, proof-image requirements, scene boards, and customer-ready asset shelves; image/video/avatar/TTS keys only improve generation speed | Real image/video/avatar/TTS provider, licensed assets, signed callback, and result ingestion |
+| Cut | AI video analysis, structured teardown, smart remix, batch variants, finished-video review, and performance learning | Use open-source/local remix stacks, FFmpeg/Remotion timelines, stable queues, single-item retry, and customer upload evidence; do not wait for platform providers | Multimodal parser, cloud render workers, transcoding storage, and callback provider only after scale proof |
+| Cast | Multi-platform distribution, PubPal-style matrix scheduling, ad campaign ledger, budget gates, publish proof, and analytics sync | Generate platform titles, persona variants, cover notes, captions, customer self-publish checklists, and return evidence folders | Platform OAuth, auto-publish permission, ad account authorization, conversion events, and reporting APIs |
+| Manage | Enterprise asset security, RBAC/audit, client review, CRM handoff, DLP/watermark, retention, and audited scale claims | Use export packages, customer upload links/screenshots/CSV/cloud-drive folders, manual review, and fail-closed permissions | Object storage/signed URL, team cloud, CRM/payment/contract system, and audited scale ledger |
 
 ## Reference Platforms Beyond Kuaizi
 
@@ -30,28 +30,32 @@ Wenai should become an ecommerce AI content industrialization operating system, 
 
 ## Current Commercial Boundary
 
-Current status: Wenai has a verified internal operating skeleton with real ledgers, pages, APIs, readiness guards, review flow, video workflow, and tests. It is suitable for partner review and controlled POC explanation.
+Current status: Wenai has a verified local-first ecommerce workbench with product intake, model-image tasks, open-source remix planning, render queues, title/persona matrices, customer self-publish packs, service/support material, customer upload evidence, readiness guards, pages, APIs, and tests. It is suitable for partner review and controlled customer trials.
 
-Not yet true platform-level commercial execution: real video provider callbacks, platform OAuth, auto-publish receipts, ad account authorization, analytics sync, enterprise object storage, and audited scale counters are still external gates.
+Not yet true platform-level automation: AI generation keys, platform OAuth, auto-publish receipts, ad account authorization, analytics sync, enterprise object storage, and audited scale counters are still optional external gates. They should not block first delivery.
 
 ## External Material Packs Required
 
-P0:
-- Video generation/editing provider pack: provider endpoint, server token in secret store, webhook signing secret, sandbox quota, callback allowlist, cost cap, licensed sample assets.
+First delivery:
+- No new external provider required beyond customer materials and any generation keys the owner chooses to provide.
+- Customer self-publish pack: platform, persona, title, caption, cover, file links, publish checklist, and return evidence folder.
+- Manual performance return pack: published URLs, screenshots, CSV export, customer notes, comments, and service/support issues.
+
+P1 after the first proof loop:
+- Generation provider pack: server-side generation key, model scope, result callback or polling, quota, cost cap, licensed sample assets, and failure policy.
+- Cloud-drive/object-storage pack: isolated customer folder or bucket, access rules, signed link policy, watermark/DLP rule, and retention rule.
+
+P2 after scale or formal authorization:
 - Platform OAuth/account pool pack: developer apps, redirect URI, sandbox grants, account/store/page ids, publish permissions, rate limits.
 - Ad account/campaign pack: advertiser id, ad account id, create/read permission, test budget cap, conversion events, stop rules.
-
-P1:
 - Analytics sync/performance return pack: account ids, metric mapping, attribution window, UTM or asset_ref mapping, sync cadence, sample report.
-- Enterprise asset cloud/permission pack: bucket/project, service account, signed URL policy, team roles, DLP/watermark, retention policy.
 - Audited scale ledger pack: creative output ledger, video distribution ledger, platform evidence URLs, date range, dedupe rule, auditor or customer note.
 
 ## Stop Lines
 
-- No provider callback: do not claim one-click finished video, batch smart remixing, or commercial video factory execution.
-- No platform OAuth: keep distribution as manual/provider-gated dispatch.
+- No generation key or callback: do not claim automated AI-generated shots, avatars, voices, or provider-finished videos; local/open-source remix packages and stable render queues are still claimable.
+- No platform OAuth: keep distribution as customer self-publish with Wenai-generated packs and evidence return.
 - No ad account authorization: do not claim automatic ad delivery or optimization.
-- No analytics sync: do not claim automatic creative learning beyond manual import.
+- No analytics sync: do not claim automatic creative learning beyond customer-uploaded links, screenshots, CSV, or cloud-drive folders.
 - No object storage and signed URLs: do not claim enterprise cloud asset enforcement.
 - No audited scale ledger: keep `91M+ creative output` and `42M+ video distribution` as competitor benchmarks only.
-

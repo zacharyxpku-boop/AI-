@@ -649,7 +649,7 @@ function commercialCutReadiness(queue: VideoProductionQueue | null) {
   const providerFailures = (queue?.failedProviderExecutionCount || 0) + (queue?.retryableProviderExecutionCount || 0);
   const gates = [
     {
-      label: '真实视频 provider 回调',
+      label: 'AI 生成镜头 provider 回调',
       ok: providerCompleted,
       detail: providerCompleted
         ? `已有 ${queue?.completedProviderExecutionCount || 0} 条完成回调。`
@@ -678,7 +678,7 @@ function commercialCutReadiness(queue: VideoProductionQueue | null) {
   ];
   const passed = gates.filter(gate => gate.ok).length;
   return {
-    verdict: passed === gates.length ? '可进入商用 Cut 验收' : '仍是 provider-gated POC',
+    verdict: passed === gates.length ? '可进入商用 Cut 验收' : '本地混剪可交付，AI 生成待接入',
     score: `${passed}/${gates.length}`,
     gates,
     risk: providerFailures > 0
@@ -686,7 +686,7 @@ function commercialCutReadiness(queue: VideoProductionQueue | null) {
       : '暂无 provider 失败记录；主要风险仍是外部授权与真实回流证据。',
     stopLine: passed === gates.length
       ? '可以进入小规模商用验收，但仍需按平台 OAuth、广告账户和资产权限继续扩展。'
-      : '没有 provider 完成回调、成片、客户批准和表现回流前，不能宣称筷子级稳定视频工厂。',
+      : '没有生成回调、成片、客户批准和表现回流前，不能宣称筷子级全自动视频工厂；本地/开源混剪仍可交付客户自发布包。',
   };
 }
 
@@ -790,7 +790,7 @@ export function buildCutOperatingChecks(queue: VideoProductionQueue | null): Cut
       evidence: hasTask
         ? `已能从 brief 创建生产 handoff、分发计划和 dispatch，provider ready ${queue?.providerReadyCount || 0}/${queue?.itemCount || 0}。`
         : '还没有从 brief 自动生成视频工作流。',
-      internalMove: '保留一键编排能力，但 UI 必须继续标注 provider-gated，避免把编排误说成自动成片。',
+      internalMove: '保留一键编排能力，但 UI 必须标注 AI 生成待接入，避免把编排误说成自动生成镜头。',
       externalGate: '视频生成 provider token、webhook secret、成本上限、失败重试和回调验签。',
     },
     {
@@ -895,7 +895,7 @@ const VIDEO_FACTORY_UI_VARIANTS: Record<FactoryUiVariantId, {
     body: '这一屏展示 Wenai 如何把 AI 视频分析、智能混剪、一键视频、客户审核、分发回流串成闭环；Hookly / Omneky 这类广告平台提供 UGC 变体和表现优化参考，筷子科技提供编拍剪投管的全链路参照。',
     firstAction: '先看能力矩阵和外部门禁，再判断是否具备商用交付条件。',
     proof: '证明点：队列、handoff、review token、dispatch、performance return 都是同一项目账本。',
-    stopLine: '未接真实视频 provider、平台 OAuth、广告账户和 analytics sync 前，不宣称自动规模化。',
+    stopLine: '未接 AI 生成 provider、平台 OAuth、广告账户和 analytics sync 前，不宣称自动规模化；本地混剪和客户自发布包可以先交付。',
     reference: '参考：筷子科技的编拍剪投管；Hookly/Hookshot 类平台的 hook/UGC 变体；Omneky 的广告创意表现回流。',
   },
   operator: {
@@ -966,7 +966,7 @@ export function buildVideoFactoryVariantPlaybook(queue: VideoProductionQueue | n
     title: '合作者验收路径',
     primaryAction: '先看 Commercial Cut Readiness 和 Scale Claim Guard，再判断是否已经具备商用交付边界。',
     proofToCheck: '证明 Wenai 是 Compose/Create/Cut/Cast/Manage 的闭环，不是单个生成按钮：队列、handoff、review、dispatch、performance return 必须同项目可追踪。',
-    handoffBoundary: '未接真实视频 provider、平台 OAuth、广告账户、analytics sync 和审计规模账本前，不展示 91M+/42M+ 为 Wenai 自有能力。',
+    handoffBoundary: '未接 AI 生成 provider、平台 OAuth、广告账户、analytics sync 和审计规模账本前，不展示 91M+/42M+ 为 Wenai 自有能力。',
     cards: [
       `Cut readiness ${cut.score} / ${cut.verdict}`,
       `任务 ${itemCount} / 成片 ${resultCount} / 表现回流 ${measuredCount}`,
@@ -1268,7 +1268,7 @@ export function VideoProductionQueueClient({
             <p className="text-xs uppercase tracking-[0.22em] text-neutral-500">Commercial Cut Readiness</p>
             <h2 className="mt-2 text-xl font-semibold text-neutral-950">商用 Cut 放行门禁</h2>
             <p className="mt-2 max-w-3xl text-sm leading-6 text-neutral-600">
-              这层只判断视频工厂是否已经能进入真实商用验收：provider 完成回调、成片资产、客户审核、客户批准、发布或表现回流必须全部有证据。
+              这层只判断视频工厂是否已经能进入真实商用验收：AI 生成 provider 回调、成片资产、客户审核、客户批准、发布或表现回流必须全部有证据。本地混剪和客户自发布包不因此停摆。
             </p>
           </div>
           <div className="flex w-fit flex-col items-start gap-2 rounded-2xl border border-neutral-200 bg-neutral-50 px-3 py-2 text-xs">
@@ -1307,7 +1307,7 @@ export function VideoProductionQueueClient({
         <div className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
           <div>
             <p className="text-xs uppercase tracking-[0.22em] text-neutral-500">Provider Sandbox Contract</p>
-            <h2 className="mt-2 text-xl font-semibold text-neutral-950">视频 provider 沙盒接入合约</h2>
+            <h2 className="mt-2 text-xl font-semibold text-neutral-950">AI 生成 provider 沙盒接入合约</h2>
             <p className="mt-2 max-w-3xl text-sm leading-6 text-neutral-600">
               这层不配置真实密钥，也不伪装自动成片。它把接入视频 provider 前必须验证的提交、回调、失败恢复、成片入库和客户验收拆成沙盒门禁，等外部材料齐后直接对照验收。
             </p>
@@ -1495,7 +1495,7 @@ export function VideoProductionQueueClient({
               </p>
             </div>
             <span className="rounded-full border border-amber-200 bg-amber-50 px-3 py-1 text-xs font-medium text-amber-700">
-              provider-gated
+              AI 生成待接入
             </span>
           </div>
           <div className="mt-5 grid gap-3">
@@ -1805,7 +1805,7 @@ export function VideoProductionQueueClient({
               <p className="text-xs uppercase tracking-[0.22em] text-violet-200">Commercial Cut Readiness</p>
               <h2 className="mt-2 text-xl font-semibold">商用 Cut 放行门禁</h2>
               <p className="mt-2 max-w-3xl text-sm leading-6 text-white/60">
-                这层只判断视频工厂是否已经能进入真实商用验收：provider 完成回调、成片资产、客户审核、客户批准、发布或表现回流必须全部有证据。
+                这层只判断视频工厂是否已经能进入真实商用验收：AI 生成 provider 回调、成片资产、客户审核、客户批准、发布或表现回流必须全部有证据。本地混剪和客户自发布包不因此停摆。
               </p>
             </div>
             <div className="flex w-fit flex-col items-start gap-2 border border-white/10 bg-black/25 px-3 py-2 text-xs">
@@ -1844,7 +1844,7 @@ export function VideoProductionQueueClient({
           <div className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
             <div>
               <p className="text-xs uppercase tracking-[0.22em] text-cyan-200">Provider Sandbox Contract</p>
-              <h2 className="mt-2 text-xl font-semibold">视频 provider 沙盒接入合约</h2>
+              <h2 className="mt-2 text-xl font-semibold">AI 生成 provider 沙盒接入合约</h2>
               <p className="mt-2 max-w-3xl text-sm leading-6 text-white/60">
                 这层不配置真实密钥，也不伪装自动成片。它把接入视频 provider 前必须验证的提交、回调、失败恢复、成片入库和客户验收拆成沙盒门禁，等外部材料齐后直接对照验收。
               </p>

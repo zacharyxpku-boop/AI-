@@ -25,7 +25,7 @@ describe('video production queue page', () => {
     expect(html).toContain('Friend Trial Readiness');
     expect(html).toContain('Commercial Cut Readiness');
     expect(html).toContain('Provider Sandbox Contract');
-    expect(html).toContain('视频 provider 沙盒接入合约');
+    expect(html).toContain('AI 生成 provider 沙盒接入合约');
     expect(html).toContain('提交适配器门禁');
     expect(html).toContain('回调验签门禁');
     expect(html).toContain('失败恢复门禁');
@@ -39,10 +39,10 @@ describe('video production queue page', () => {
     expect(html).toContain('VidMob');
     expect(html).toContain('AI 视频解析');
     expect(html).toContain('Provider 执行闭环');
-    expect(html).toContain('仍是 provider-gated POC');
+    expect(html).toContain('本地混剪可交付，AI 生成待接入');
     expect(html).toContain('score 0/5');
-    expect(html).toContain('真实视频 provider 回调');
-    expect(html).toContain('没有 provider 完成回调、成片、客户批准和表现回流前，不能宣称筷子级稳定视频工厂');
+    expect(html).toContain('AI 生成镜头 provider 回调');
+    expect(html).toContain('没有生成回调、成片、客户批准和表现回流前，不能宣称筷子级全自动视频工厂');
     expect(html).toContain('朋友试用放行判断');
     expect(html).toContain('非技术用户能不能从视频任务进入客户审核');
     expect(html).toContain('运营视角');
@@ -78,11 +78,11 @@ describe('video production queue page', () => {
 
     expect(partnerHtml).toContain('合作者视角');
     expect(partnerHtml).toContain('合作者验收路径');
-    expect(partnerHtml).toContain('未接真实视频 provider、平台 OAuth、广告账户、analytics sync 和审计规模账本前，不展示 91M+/42M+ 为 Wenai 自有能力');
+    expect(partnerHtml).toContain('未接 AI 生成 provider、平台 OAuth、广告账户、analytics sync 和审计规模账本前，不展示 91M+/42M+ 为 Wenai 自有能力');
     expect(partnerHtml).toContain('Cut 不是单个生成按钮，而是一条可审计的视频工业化生产线');
     expect(partnerHtml).toContain('Hookly / Omneky');
     expect(partnerHtml).toContain('筷子科技的编拍剪投管');
-    expect(partnerHtml).toContain('未接真实视频 provider、平台 OAuth、广告账户和 analytics sync 前，不宣称自动规模化');
+    expect(partnerHtml).toContain('未接 AI 生成 provider、平台 OAuth、广告账户和 analytics sync 前，不宣称自动规模化');
 
     expect(friendHtml).toContain('Wenai 商品增长工作台');
     expect(friendHtml).toContain('一组卖点生成多条内容');
@@ -181,7 +181,7 @@ describe('video production queue page', () => {
       expect.objectContaining({
         label: '一键视频编排',
         status: 'blocked',
-        internalMove: expect.stringContaining('provider-gated'),
+        internalMove: expect.stringContaining('AI 生成待接入'),
       }),
       expect.objectContaining({
         label: '分发表现回流',
