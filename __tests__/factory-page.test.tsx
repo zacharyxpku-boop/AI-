@@ -58,6 +58,9 @@ describe('factory page', () => {
     expect(html).toContain('客户看到的是一条商品增长流水线');
     expect(html).toContain('没有外部 provider 时的替代路径');
     expect(html).toContain('外部 provider 需求评估');
+    expect(html).toContain('Activation Runbook');
+    expect(html).toContain('Key 到位后的接入运行手册');
+    expect(html).toContain('不在页面、日志或导出包展示 Key 值');
     expect(html).toContain('首版可交付');
     expect(html).toContain('客户自发布');
     expect(html).toContain('客户回填字段');

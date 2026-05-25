@@ -13,6 +13,7 @@ import {
   buildCommerceOpenSourceAdapters,
   buildCommerceOpenSourceCoverage,
   buildCommercePostPublishActionBoard,
+  buildCommerceProviderActivationRunbook,
   buildCommerceProviderActivationPlan,
   buildCommerceProviderNeedAssessment,
   buildCommercePublishingMatrixPlan,
@@ -37,6 +38,7 @@ import {
   buildDemoCommerceModelImageTaskPack,
   buildDemoCommerceOpenSourceCoverage,
   buildDemoCommercePostPublishActionBoard,
+  buildDemoCommerceProviderActivationRunbook,
   buildDemoCommerceProviderActivationPlan,
   buildDemoCommerceProviderNeedAssessment,
   buildDemoCommercePublishingMatrixPlan,
@@ -105,6 +107,7 @@ function buildInputResponse(input: CommerceRemixPlanInput, body: CommerceRemixRe
   const salesConversationBoard = buildCommerceSalesConversationBoard(input, servicePack, customerSupportWorkflow);
   const customerDeliveryMap = buildCommerceCustomerDeliveryMap(input);
   const providerActivationPlan = buildCommerceProviderActivationPlan();
+  const providerActivationRunbook = buildCommerceProviderActivationRunbook(providerActivationPlan);
   const providerNeedAssessment = buildCommerceProviderNeedAssessment(input, plan, providerActivationPlan);
   const firstDeliveryChecklist = buildCommerceFirstDeliveryChecklist(input, plan, exportPackage, customerDeliveryMap, providerActivationPlan);
   const openSourceAdapters = buildCommerceOpenSourceAdapters();
@@ -139,6 +142,7 @@ function buildInputResponse(input: CommerceRemixPlanInput, body: CommerceRemixRe
     salesConversationBoard,
     customerDeliveryMap,
     providerActivationPlan,
+    providerActivationRunbook,
     providerNeedAssessment,
     firstDeliveryChecklist,
     openSourceAdapters,
@@ -174,6 +178,7 @@ export async function GET() {
     salesConversationBoard: buildDemoCommerceSalesConversationBoard(),
     customerDeliveryMap: buildDemoCommerceCustomerDeliveryMap(),
     providerActivationPlan: buildDemoCommerceProviderActivationPlan(),
+    providerActivationRunbook: buildDemoCommerceProviderActivationRunbook(),
     providerNeedAssessment: buildDemoCommerceProviderNeedAssessment(),
     firstDeliveryChecklist: buildDemoCommerceFirstDeliveryChecklist(),
     openSourceAdapters: buildCommerceOpenSourceAdapters(),

@@ -459,6 +459,24 @@ export interface CommerceProviderNeedAssessment {
   finalRecommendation: string;
 }
 
+export interface CommerceProviderActivationRunbook {
+  headline: string;
+  customerPromise: string;
+  keyHandlingRules: string[];
+  steps: Array<{
+    id: string;
+    laneId: string;
+    label: string;
+    customerInput: string[];
+    wenaiAction: string[];
+    writesBackTo: string[];
+    acceptanceEvidence: string[];
+    fallbackIfFailed: string;
+  }>;
+  fallbackPolicy: string[];
+  doneDefinition: string[];
+}
+
 export interface CommerceFirstDeliveryChecklist {
   promise: string;
   customerInputs: string[];
@@ -2442,6 +2460,81 @@ export function buildCommerceProviderNeedAssessment(
   };
 }
 
+export function buildCommerceProviderActivationRunbook(
+  providerPlan = buildCommerceProviderActivationPlan(),
+): CommerceProviderActivationRunbook {
+  const runbookByLane: Record<string, Omit<CommerceProviderActivationRunbook['steps'][number], 'laneId' | 'label'>> = {
+    'image-key': {
+      id: 'activate-image-generation',
+      customerInput: ['图片生成 Key 类型', '商用授权范围', '默认画幅', '失败回调或查询方式'],
+      wenaiAction: ['把模特图、场景图、细节图 prompt 接入任务队列', '生成结果写回素材货架', '把可用图片挂到对应混剪任务'],
+      writesBackTo: ['素材货架', '模特生图任务包', '发布包封面建议', '渲染队列 missing asset'],
+      acceptanceEvidence: ['每张图有任务 ID 或生成记录', '商品主体不变形不串款', '失败任务能回到人工补图清单'],
+      fallbackIfFailed: '保留 prompt、参考图要求和人工拍摄清单，继续使用客户原图交付。',
+    },
+    'video-key': {
+      id: 'activate-video-generation',
+      customerInput: ['视频生成 Key 类型', '任务提交接口', '结果查询或回调', '单条失败码和重试规则'],
+      wenaiAction: ['把需要 AI 镜头的分镜转成 provider 任务', '结果写回 render queue', '失败时只重试单条镜头'],
+      writesBackTo: ['时间线片段', '渲染队列', '成片验收清单', '失败重试记录'],
+      acceptanceEvidence: ['每个 AI 镜头有 provider task id', '返回视频能被本地混剪读取', '单条失败不阻塞整批发布包'],
+      fallbackIfFailed: '继续用本地素材、字幕、口播和 FFmpeg/Remotion 混剪出可发布版本。',
+    },
+    'avatar-tts-key': {
+      id: 'activate-avatar-tts',
+      customerInput: ['数字人或 TTS Key 类型', '可用人设或音色', '语言范围', '下载或回调方式'],
+      wenaiAction: ['把口播稿转成音频或数字人任务', '校验字幕和口播一致', '把音频/视频挂回多账号人设'],
+      writesBackTo: ['口播素材', '字幕轨', '多账号人设矩阵', '发布包说明'],
+      acceptanceEvidence: ['口播内容和字幕一致', '音色或人设可复用', '失败时仍能导出人工录音脚本'],
+      fallbackIfFailed: '导出口播稿、字幕和录音说明，让客户或运营人工录音。',
+    },
+    'cloud-drive': {
+      id: 'activate-cloud-drive',
+      customerInput: ['云盘或对象存储配置', '目录命名规则', '访问权限', '签名链接策略'],
+      wenaiAction: ['把发布包和回填材料写入客户目录', '按批次生成交付目录', '读取客户上传的截图/CSV/链接'],
+      writesBackTo: ['客户交付目录', '回填收件箱', '复盘数据源', '下一轮任务清单'],
+      acceptanceEvidence: ['客户只能访问自己的目录', '回填文件可被复盘读取', '链接过期和权限可控'],
+      fallbackIfFailed: '继续用本地导出包、客户上传链接和 CSV 回填，不影响首版发布包。',
+    },
+    'analytics-api': {
+      id: 'activate-analytics-api',
+      customerInput: ['平台授权方式', '指标口径', '时间窗口', '账号和作品映射'],
+      wenaiAction: ['把平台数据转成统一表现证据', '与客户回填截图互相校验', '驱动下一轮标题/封面/重剪建议'],
+      writesBackTo: ['表现回填板', '复盘行动板', '下一轮混剪任务', '客服素材机会'],
+      acceptanceEvidence: ['指标和客户后台一致', '缺授权时不读取', '缺数据时不虚构表现'],
+      fallbackIfFailed: '客户继续上传链接、截图、CSV 或云盘目录，系统先基于真实证据复盘。',
+    },
+  };
+
+  const steps = providerPlan.lanes.map(lane => ({
+    ...runbookByLane[lane.id],
+    laneId: lane.id,
+    label: lane.name,
+  }));
+
+  return {
+    headline: 'Key 到位后的接入运行手册',
+    customerPromise: '图片、视频、数字人和数据接口只增强自动化层；首版混剪、发布包、客服素材和复盘入口不等待这些 Key。',
+    keyHandlingRules: [
+      '只记录 Key 类型、用途、验收状态和失败原因，不在页面、日志或导出包展示 Key 值。',
+      '每个 provider 先用一条小任务验收，通过后再进入批量队列。',
+      'provider 失败只影响对应素材或镜头，不影响客户自发布包和本地混剪交付。',
+    ],
+    steps,
+    fallbackPolicy: [
+      '图片失败：回到 prompt 包、参考图和人工拍摄清单。',
+      '视频失败：回到本地素材混剪、字幕和 FFmpeg/Remotion 渲染。',
+      '数字人失败：回到口播稿、字幕和人工录音说明。',
+      '云盘或数据失败：回到客户上传链接、截图、CSV 和本地导出目录。',
+    ],
+    doneDefinition: [
+      '每个已接 provider 都有任务 ID、输入、输出、验收证据和失败回退记录。',
+      '生成结果能写回素材货架、渲染队列、发布包或复盘行动板。',
+      '没有授权的账号、后台数据和客户私信不被读取或自动操作。',
+    ],
+  };
+}
+
 export function buildCommerceFirstDeliveryChecklist(
   input: CommerceRemixPlanInput,
   plan = buildCommerceRemixEnginePlan(input),
@@ -2696,6 +2789,10 @@ export function buildDemoCommerceProviderActivationPlan() {
 export function buildDemoCommerceProviderNeedAssessment() {
   const input = buildDemoCommerceRemixInput();
   return buildCommerceProviderNeedAssessment(input, buildCommerceRemixEnginePlan(input), buildCommerceProviderActivationPlan());
+}
+
+export function buildDemoCommerceProviderActivationRunbook() {
+  return buildCommerceProviderActivationRunbook(buildCommerceProviderActivationPlan());
 }
 
 export function buildDemoCommerceFirstDeliveryChecklist() {

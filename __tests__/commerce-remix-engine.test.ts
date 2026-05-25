@@ -18,6 +18,7 @@ import {
   buildCommerceOpenSourceAdapters,
   buildCommerceOpenSourceCoverage,
   buildCommercePostPublishActionBoard,
+  buildCommerceProviderActivationRunbook,
   buildCommerceProviderActivationPlan,
   buildCommerceProviderNeedAssessment,
   buildCommercePublishingMatrixPlan,
@@ -484,6 +485,26 @@ describe('commerce remix engine', () => {
     expect(assessment.finalRecommendation).toContain('客户自发布');
     expect(JSON.stringify(plan)).not.toMatch(/apiKey|accessToken|Bearer|sk-/i);
     expect(JSON.stringify(assessment)).not.toMatch(/apiKey|accessToken|Bearer|sk-/i);
+  });
+
+  it('turns provider keys into an activation runbook without making them first-delivery blockers', () => {
+    const plan = buildCommerceProviderActivationPlan();
+    const runbook = buildCommerceProviderActivationRunbook(plan);
+
+    expect(runbook.headline).toContain('Key 到位后的接入运行手册');
+    expect(runbook.customerPromise).toContain('不等待这些 Key');
+    expect(runbook.steps.map(step => step.laneId)).toEqual([
+      'image-key',
+      'video-key',
+      'avatar-tts-key',
+      'cloud-drive',
+      'analytics-api',
+    ]);
+    expect(runbook.steps.find(step => step.laneId === 'video-key')?.writesBackTo).toContain('渲染队列');
+    expect(runbook.steps.find(step => step.laneId === 'analytics-api')?.fallbackIfFailed).toContain('客户继续上传链接、截图、CSV');
+    expect(runbook.keyHandlingRules.join(' ')).toContain('不在页面、日志或导出包展示 Key 值');
+    expect(runbook.doneDefinition.join(' ')).toContain('没有授权的账号');
+    expect(JSON.stringify(runbook)).not.toMatch(/apiKey|accessToken|Bearer|sk-/i);
   });
 
   it('summarizes first delivery without waiting for image video or avatar keys', () => {

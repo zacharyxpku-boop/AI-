@@ -101,6 +101,9 @@ describe('/api/commerce-remix', () => {
     expect(body.providerNeedAssessment.verdict).toBe('first_delivery_ready');
     expect(body.providerNeedAssessment.notRequiredNow).toContain('自动代客户操作电脑或浏览器');
     expect(body.providerActivationPlan.notNeededForFirstDelivery).toContain('平台自动登录');
+    expect(body.providerActivationRunbook.headline).toContain('Key 到位后的接入运行手册');
+    expect(body.providerActivationRunbook.steps.find((step: { laneId: string; writesBackTo: string[] }) => step.laneId === 'image-key').writesBackTo).toContain('素材货架');
+    expect(body.providerActivationRunbook.keyHandlingRules.join(' ')).toContain('不在页面、日志或导出包展示 Key 值');
     expect(body.firstDeliveryChecklist.promise).toContain('不等图片/视频/数字人 Key');
     expect(body.firstDeliveryChecklist.noWaitItems).toContain('平台自动登录');
     expect(body.openSourceAdapters.find((adapter: { id: string }) => adapter.id === 'queue-worker').readiness).toBe('ready_now');

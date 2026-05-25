@@ -15,6 +15,7 @@ import {
   buildDemoCommerceModelImageTaskPack,
   buildCommerceOpenSourceAdapters,
   buildDemoCommerceOpenSourceCoverage,
+  buildDemoCommerceProviderActivationRunbook,
   buildDemoCommerceProviderActivationPlan,
   buildDemoCommerceProviderNeedAssessment,
   buildDemoCommercePublishingMatrixPlan,
@@ -240,6 +241,7 @@ export function KuaiziStyleWorkbench() {
   const customerSupportWorkflow = useMemo(() => buildDemoCommerceCustomerSupportWorkflow(), []);
   const salesConversationBoard = useMemo(() => buildDemoCommerceSalesConversationBoard(), []);
   const providerActivationPlan = useMemo(() => buildDemoCommerceProviderActivationPlan(), []);
+  const providerActivationRunbook = useMemo(() => buildDemoCommerceProviderActivationRunbook(), []);
   const providerNeedAssessment = useMemo(() => buildDemoCommerceProviderNeedAssessment(), []);
   const firstDeliveryChecklist = useMemo(() => buildDemoCommerceFirstDeliveryChecklist(), []);
   const openSourceAdapters = useMemo(() => buildCommerceOpenSourceAdapters(), []);
@@ -491,6 +493,47 @@ export function KuaiziStyleWorkbench() {
                       <p className="mt-3 rounded bg-white p-2 text-xs font-bold leading-5 text-violet-700 ring-1 ring-violet-100">{lane.fallbackUntilActivated}</p>
                     </article>
                   ))}
+                </div>
+
+                <div className="mt-5 rounded-md border border-indigo-100 bg-indigo-50 p-4">
+                  <div className="flex flex-col gap-2 lg:flex-row lg:items-end lg:justify-between">
+                    <div className="min-w-0">
+                      <p className="text-xs font-black uppercase tracking-[0.18em] text-indigo-700">Activation Runbook</p>
+                      <h4 className="mt-1 text-base font-black leading-6 text-slate-950">{providerActivationRunbook.headline}</h4>
+                      <p className="mt-2 max-w-4xl text-sm leading-6 text-slate-600">{providerActivationRunbook.customerPromise}</p>
+                    </div>
+                    <span className="w-fit rounded bg-white px-2.5 py-1 text-xs font-black text-indigo-700 ring-1 ring-indigo-100">
+                      {providerActivationRunbook.steps.length} 个接入步骤
+                    </span>
+                  </div>
+                  <div className="mt-4 grid gap-3 lg:grid-cols-3">
+                    {providerActivationRunbook.steps.slice(0, 3).map(step => (
+                      <article className="min-w-0 rounded-md bg-white p-3 ring-1 ring-indigo-100" key={step.id}>
+                        <h5 className="text-sm font-black leading-5 text-slate-950">{step.label}</h5>
+                        <p className="mt-2 text-xs font-bold leading-5 text-indigo-700">客户给：{step.customerInput.slice(0, 3).join(' / ')}</p>
+                        <p className="mt-2 line-clamp-3 text-xs leading-5 text-slate-600">Wenai 做：{step.wenaiAction.join('；')}</p>
+                        <p className="mt-3 rounded bg-indigo-50 p-2 text-xs font-bold leading-5 text-slate-700">{step.fallbackIfFailed}</p>
+                      </article>
+                    ))}
+                  </div>
+                  <div className="mt-3 grid gap-3 lg:grid-cols-2">
+                    <div className="rounded-md bg-white p-3 ring-1 ring-indigo-100">
+                      <h5 className="text-sm font-black text-slate-950">验收证据</h5>
+                      <div className="mt-2 grid gap-2 sm:grid-cols-2">
+                        {providerActivationRunbook.doneDefinition.map(item => (
+                          <div className="rounded bg-indigo-50 px-3 py-2 text-xs font-bold leading-5 text-slate-700" key={item}>{item}</div>
+                        ))}
+                      </div>
+                    </div>
+                    <div className="rounded-md bg-white p-3 ring-1 ring-indigo-100">
+                      <h5 className="text-sm font-black text-slate-950">Key 处理规则</h5>
+                      <div className="mt-2 grid gap-2">
+                        {providerActivationRunbook.keyHandlingRules.map(rule => (
+                          <div className="rounded bg-indigo-50 px-3 py-2 text-xs font-bold leading-5 text-slate-700" key={rule}>{rule}</div>
+                        ))}
+                      </div>
+                    </div>
+                  </div>
                 </div>
 
                 <div className="mt-4 grid gap-3 lg:grid-cols-2">
