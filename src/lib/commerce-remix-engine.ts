@@ -574,6 +574,24 @@ export interface CommerceOpenSourceQueueConsole {
   scaleUpgradePath: string[];
 }
 
+export interface CommerceOpenSourceLastMileBoard {
+  headline: string;
+  promise: string;
+  canShipWithoutKeys: string[];
+  lanes: Array<{
+    id: string;
+    label: string;
+    adapters: string[];
+    nowDoable: string;
+    customerGets: string;
+    smokeProof: string;
+    lastMileOwner: 'wenai' | 'customer' | 'shared';
+  }>;
+  customerFinalStep: string[];
+  upgradeOnlyWhen: string[];
+  notSolvingWithOpenSource: string[];
+}
+
 export interface CommerceRemixWorkflowPlaybook {
   stages: Array<{
     id: string;
@@ -1962,6 +1980,94 @@ export function buildCommerceOpenSourceQueueConsole(
       '当单批超过 30 条时增加 queue worker 和对象存储。',
       '当连续客户都需要长素材切片时，把 LosslessCut/PySceneDetect/Auto-Editor 固化成预处理 worker。',
       '当客户要求平台表现自动读取时，再评估平台 API 或云盘自动导入，不接账号密码和 cookie。',
+    ],
+  };
+}
+
+export function buildCommerceOpenSourceLastMileBoard(
+  input: CommerceRemixPlanInput,
+  adapters = buildCommerceOpenSourceAdapters(),
+  queueConsole = buildCommerceOpenSourceQueueConsole(input, adapters),
+  providerAssessment = buildCommerceProviderNeedAssessment(input),
+  renderBoard = buildCommerceRenderReliabilityBoard(buildCommerceRemixEnginePlan(input).queue),
+): CommerceOpenSourceLastMileBoard {
+  const adapterIds = new Set(adapters.map(adapter => adapter.id));
+  const availableIds = (ids: string[]) => ids.filter(id => adapterIds.has(id));
+  const product = safeText(input.productName, '商品');
+  const platformText = unique(input.platforms).map(platform => PLATFORM_LABELS[platform]).join(' / ') || '目标平台';
+  const stageById = new Map(queueConsole.stages.map(stage => [stage.id, stage]));
+
+  return {
+    headline: '开源混剪最后一公里判断板',
+    promise: `${product} 首版能靠开源/本地链路做到“素材清洗、长素材切片、字幕口播、模板编排、稳定渲染、发布包、客户回填”；${platformText} 发布仍由客户自己完成，图片/视频/数字人 Key 到位后只增强生成层。`,
+    canShipWithoutKeys: [
+      '客户上传商品图、长视频、口播、评论截图或云盘目录后，可生成混剪任务包。',
+      '每条成片任务都有素材来源、时间线、字幕、输出路径、失败原因和重试策略。',
+      '多账号矩阵先输出标题、首句、口播节奏、封面提示和发布检查表。',
+      '客户发布后回传链接、截图、CSV 或云盘目录，系统再给下一轮重剪和客服话术。',
+    ],
+    lanes: [
+      {
+        id: 'source-to-clips',
+        label: '素材到可用片段',
+        adapters: availableIds(['lossless-cut', 'pyscenedetect', 'auto-editor', 'mediainfo', 'ffmpeg']),
+        nowDoable: stageById.get('source-slicing')?.customerOutput || '输出可复核片段池和素材缺口表。',
+        customerGets: 'clip-candidates.json、原始时间戳、素材授权状态和补素材清单。',
+        smokeProof: '至少 1 条长素材能切出候选片段；低置信度片段只进入人工复核。',
+        lastMileOwner: 'wenai',
+      },
+      {
+        id: 'captions-to-hooks',
+        label: '字幕口播到标题钩子',
+        adapters: availableIds(['whisper', 'subtitle-edit', 'auto-subtitles', 'short-video-maker']),
+        nowDoable: stageById.get('caption-script')?.customerOutput || '输出前三句口播、字幕底稿和标题候选。',
+        customerGets: '每个平台的标题、前三句口播、字幕文件和敏感承诺复核项。',
+        smokeProof: '字幕文件能对应时间线片段，标题能映射到商品证据。',
+        lastMileOwner: 'shared',
+      },
+      {
+        id: 'template-to-mp4',
+        label: '模板时间线到 MP4',
+        adapters: availableIds(['remotion', 'opentimelineio', 'editly', 'vidosy', 'ffmpeg', 'moviepy']),
+        nowDoable: renderBoard.customerPromise,
+        customerGets: 'timeline.json、composition manifest、MP4、封面和 render-log.json。',
+        smokeProof: '一条 smoke test 先通过，整批再按并发进入队列；失败只重跑单条。',
+        lastMileOwner: 'wenai',
+      },
+      {
+        id: 'mp4-to-publish-pack',
+        label: '成片到发布包',
+        adapters: availableIds(['mediainfo', 'opencv-mediapipe', 'mcp-video']),
+        nowDoable: stageById.get('qa-handoff')?.customerOutput || '输出上传前检查表、媒体参数报告和平台发布包。',
+        customerGets: '成片、标题、正文、标签、封面建议、发布时段和回填字段。',
+        smokeProof: 'MP4 可播放、音量/编码/字幕安全区通过，发布包不含账号密码或 cookie。',
+        lastMileOwner: 'shared',
+      },
+      {
+        id: 'publish-to-next-round',
+        label: '客户发布到下一轮复盘',
+        adapters: availableIds(['mediainfo', 'subtitle-edit', 'ffmpeg']),
+        nowDoable: '客户自己发布后，把链接、截图、CSV 或云盘目录回填，Wenai 生成下一轮重剪、标题和客服动作。',
+        customerGets: '05-next-round 任务清单、标题复盘、素材缺口和客服/售后补充话术。',
+        smokeProof: '没有真实回填时不展示虚构表现；有 CSV/截图时能进入复盘板。',
+        lastMileOwner: 'customer',
+      },
+    ],
+    customerFinalStep: [
+      '客户自己登录小红书、TikTok、Shopify、Meta 或视频号发布。',
+      '客户不交账号、密码、cookie、后台 token 或私信权限。',
+      '发布后把链接、截图、CSV 或云盘目录回填给 Wenai。',
+      'Wenai 根据真实回填决定下一轮改标题、改图、重剪视频还是补客服话术。',
+    ],
+    upgradeOnlyWhen: [
+      ...providerAssessment.escalationTriggers,
+      '本地 smoke test 连续通过后，才把对应开源能力写成可交付能力。',
+    ],
+    notSolvingWithOpenSource: [
+      '不开源绕过平台登录、验证码、风控或发布审核。',
+      '不托管客户账号、密码、cookie、token 或私信权限。',
+      '不自动读取平台后台表现；先用客户上传的链接、截图、CSV 和云盘证据。',
+      '不把图片/视频/数字人 Key 未接入时的 prompt 包包装成真实自动生成结果。',
     ],
   };
 }
@@ -5012,6 +5118,27 @@ export function buildDemoCommerceOpenSourceQueueConsole() {
     adapters,
     buildCommerceRemixExecutionRecipes(input, plan, adapters),
     buildCommerceRenderReliabilityBoard(plan.queue, batchPlan, renderCapacity),
+  );
+}
+
+export function buildDemoCommerceOpenSourceLastMileBoard() {
+  const input = buildDemoCommerceRemixInput();
+  const plan = buildCommerceRemixEnginePlan(input);
+  const adapters = buildCommerceOpenSourceAdapters();
+  const batchPlan = buildCommerceRenderBatchPlan(plan.queue, { maxConcurrency: 3, retryBudget: 2 });
+  const renderCapacity = buildCommerceRenderCapacityPlan(plan.queue, batchPlan);
+  const renderBoard = buildCommerceRenderReliabilityBoard(plan.queue, batchPlan, renderCapacity);
+  return buildCommerceOpenSourceLastMileBoard(
+    input,
+    adapters,
+    buildCommerceOpenSourceQueueConsole(
+      input,
+      adapters,
+      buildCommerceRemixExecutionRecipes(input, plan, adapters),
+      renderBoard,
+    ),
+    buildCommerceProviderNeedAssessment(input, plan, buildCommerceProviderActivationPlan()),
+    renderBoard,
   );
 }
 

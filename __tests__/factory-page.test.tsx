@@ -91,6 +91,10 @@ describe('factory page', () => {
     expect(html).toContain('video-wizard');
     expect(html).toContain('Open Source Queue Console');
     expect(html).toContain('开源混剪队列控制台');
+    expect(html).toContain('Open Source Last Mile');
+    expect(html).toContain('开源混剪最后一公里判断板');
+    expect(html).toContain('客户最后一步');
+    expect(html).toContain('开源不解决');
     expect(html).toContain('稳定渲染和单条重试');
     expect(html).toContain('客户可见证据');
     expect(html).toContain('Open Source Stack Selector');

@@ -27,6 +27,7 @@ import {
   buildCommerceOpenSourceAdapters,
   buildCommerceOpenSourceCoverage,
   buildCommerceOpenSourceInstallMatrix,
+  buildCommerceOpenSourceLastMileBoard,
   buildCommerceOpenSourceQueueConsole,
   buildCommerceOpenSourceRemixBlueprint,
   buildCommerceOpenSourceStackSelector,
@@ -862,6 +863,25 @@ describe('commerce remix engine', () => {
     expect(console.customerVisibleProof).toContain('render-log.json');
     expect(console.scaleUpgradePath.join(' ')).toContain('不接账号密码和 cookie');
     expect(JSON.stringify(console)).not.toMatch(/apiKey|accessToken|Bearer|sk-/i);
+  });
+
+  it('states the open-source remix last mile before buying external providers', () => {
+    const plan = buildCommerceRemixEnginePlan(baseInput);
+    const adapters = buildCommerceOpenSourceAdapters();
+    const recipes = buildCommerceRemixExecutionRecipes(baseInput, plan, adapters);
+    const renderBoard = buildCommerceRenderReliabilityBoard(plan.queue, buildCommerceRenderBatchPlan(plan.queue, { maxConcurrency: 2, retryBudget: 2 }));
+    const queueConsole = buildCommerceOpenSourceQueueConsole(baseInput, adapters, recipes, renderBoard);
+    const board = buildCommerceOpenSourceLastMileBoard(baseInput, adapters, queueConsole, buildCommerceProviderNeedAssessment(baseInput, plan), renderBoard);
+
+    expect(board.headline).toContain('开源混剪最后一公里判断板');
+    expect(board.lanes.map(lane => lane.id)).toEqual(['source-to-clips', 'captions-to-hooks', 'template-to-mp4', 'mp4-to-publish-pack', 'publish-to-next-round']);
+    expect(board.lanes.find(lane => lane.id === 'template-to-mp4')?.adapters).toEqual(expect.arrayContaining(['remotion', 'opentimelineio', 'ffmpeg']));
+    expect(board.lanes.find(lane => lane.id === 'publish-to-next-round')?.lastMileOwner).toBe('customer');
+    expect(board.canShipWithoutKeys.join(' ')).toContain('多账号矩阵');
+    expect(board.customerFinalStep.join(' ')).toContain('客户自己登录');
+    expect(board.upgradeOnlyWhen.join(' ')).toContain('平台 analytics API');
+    expect(board.notSolvingWithOpenSource.join(' ')).toContain('账号、密码、cookie');
+    expect(JSON.stringify(board)).not.toMatch(/apiKey|accessToken|Bearer|sk-/i);
   });
 
   it('builds a customer-readable remix workflow with no-provider fallbacks', () => {

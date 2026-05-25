@@ -65,6 +65,8 @@ describe('/api/commerce-remix', () => {
     expect(body.openSourceQueueConsole.headline).toContain('开源混剪队列控制台');
     expect(body.openSourceQueueConsole.stages.map((stage: { id: string }) => stage.id)).toContain('stable-render');
     expect(body.openSourceQueueConsole.failurePolicy.join(' ')).toContain('单条失败只重跑单条');
+    expect(body.openSourceLastMileBoard.headline).toContain('开源混剪最后一公里判断板');
+    expect(body.openSourceLastMileBoard.customerFinalStep.join(' ')).toContain('客户自己登录');
     expect(body.chatCutRemixConsole.headline).toContain('chat Cut 式精简混剪控制台');
     expect(body.chatCutRemixConsole.cutFlow.map((step: { id: string }) => step.id)).toContain('queue');
     expect(body.workflowPlaybook.stages.map((stage: { id: string }) => stage.id)).toContain('publishing-pack');
@@ -168,6 +170,8 @@ describe('/api/commerce-remix', () => {
     expect(body.githubRemixRadar.notProviderDependency.join(' ')).toContain('不纳入首版交付');
     expect(body.openSourceQueueConsole.customerVisibleProof).toContain('upload-ready-checklist.md');
     expect(body.openSourceQueueConsole.scaleUpgradePath.join(' ')).toContain('不接账号密码和 cookie');
+    expect(body.openSourceLastMileBoard.lanes.find((lane: { id: string }) => lane.id === 'template-to-mp4').smokeProof).toContain('失败只重跑单条');
+    expect(body.openSourceLastMileBoard.notSolvingWithOpenSource.join(' ')).toContain('不托管客户账号');
     expect(body.chatCutRemixConsole.defaultRecipes.map((recipe: { id: string }) => recipe.id)).toContain('support-objection');
     expect(body.chatCutRemixConsole.reliabilityRules.join(' ')).toContain('单条任务');
     expect(body.executionRecipes.find((recipe: { adapterId: string }) => recipe.adapterId === 'ffmpeg').passCriteria.join(' ')).toContain('MP4 可播放');
