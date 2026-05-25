@@ -52,6 +52,9 @@ describe('factory page', () => {
     expect(html).toContain('Super IP Title Board');
     expect(html).toContain('超级 IP 标题和口播作战板');
     expect(html).toContain('套标题打法');
+    expect(html).toContain('Title Quality Gate');
+    expect(html).toContain('标题和口播发布前验收门');
+    expect(html).toContain('满足这些才给客户发');
     expect(html).toContain('开源提词器思路');
     expect(html).toContain('回填：');
     expect(html).toContain('个账号人设');

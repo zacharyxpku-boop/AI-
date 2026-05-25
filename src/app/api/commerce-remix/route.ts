@@ -34,6 +34,7 @@ import {
   buildCommerceRenderReliabilityBoard,
   buildCommerceSelfPublishingCommandCenter,
   buildCommerceSuperIpTitleBoard,
+  buildCommerceTitleQualityGate,
   buildCommerceWorkbenchSystemMap,
   buildDemoCommerceCloudDriveManifest,
   buildDemoCommerceCloudDriveReturnPlan,
@@ -71,6 +72,7 @@ import {
   buildDemoCommerceRenderReliabilityBoard,
   buildDemoCommerceSelfPublishingCommandCenter,
   buildDemoCommerceSuperIpTitleBoard,
+  buildDemoCommerceTitleQualityGate,
   buildDemoCommerceWorkbenchSystemMap,
   evaluateCommercePerformanceUploads,
   evaluateCommerceRemixQuality,
@@ -142,6 +144,7 @@ function buildInputResponse(input: CommerceRemixPlanInput, body: CommerceRemixRe
   const publishingMatrix = buildCommercePublishingMatrixPlan(input, plan.publishingPacks);
   const creatorPersonaMatrix = buildCommerceCreatorPersonaMatrix(input, publishingMatrix);
   const superIpTitleBoard = buildCommerceSuperIpTitleBoard(input, creatorPersonaMatrix);
+  const titleQualityGate = buildCommerceTitleQualityGate(input, superIpTitleBoard, publishingMatrix);
   const cloudReturnPlan = buildCommerceCloudDriveReturnPlan(input, cloudDrive);
   const selfPublishingCommandCenter = buildCommerceSelfPublishingCommandCenter(input, publishingMatrix, creatorPersonaMatrix, cloudReturnPlan);
   const customerReturnIntakeBoard = buildCommerceCustomerReturnIntakeBoard(performanceReport, cloudReturnPlan);
@@ -186,6 +189,7 @@ function buildInputResponse(input: CommerceRemixPlanInput, body: CommerceRemixRe
     publishingMatrix,
     creatorPersonaMatrix,
     superIpTitleBoard,
+    titleQualityGate,
     selfPublishingCommandCenter,
     cloudReturnPlan,
     customerReturnIntakeBoard,
@@ -231,6 +235,7 @@ export async function GET() {
     publishingMatrix: buildDemoCommercePublishingMatrixPlan(),
     creatorPersonaMatrix: buildDemoCommerceCreatorPersonaMatrix(),
     superIpTitleBoard: buildDemoCommerceSuperIpTitleBoard(),
+    titleQualityGate: buildDemoCommerceTitleQualityGate(),
     selfPublishingCommandCenter: buildDemoCommerceSelfPublishingCommandCenter(),
     cloudReturnPlan: buildDemoCommerceCloudDriveReturnPlan(),
     customerReturnIntakeBoard: buildDemoCommerceCustomerReturnIntakeBoard(),

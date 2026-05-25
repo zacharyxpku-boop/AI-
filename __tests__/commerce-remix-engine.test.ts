@@ -35,6 +35,7 @@ import {
   buildCommerceRenderOperationsRunbook,
   buildCommerceSelfPublishingCommandCenter,
   buildCommerceSuperIpTitleBoard,
+  buildCommerceTitleQualityGate,
   buildCommerceWorkbenchSystemMap,
   buildDemoCommerceRemixEnginePlan,
   buildFfmpegCommandManifest,
@@ -728,6 +729,7 @@ describe('commerce remix engine', () => {
     const matrix = buildCommercePublishingMatrixPlan(baseInput);
     const personas = buildCommerceCreatorPersonaMatrix(baseInput, matrix);
     const titleBoard = buildCommerceSuperIpTitleBoard(baseInput, personas);
+    const qualityGate = buildCommerceTitleQualityGate(baseInput, titleBoard, matrix);
 
     expect(matrix).toHaveLength(3);
     expect(matrix[0].accountAngles.map(angle => angle.accountType)).toEqual(['真实买家号', '测评种草号', '店铺官方号']);
@@ -747,6 +749,13 @@ describe('commerce remix engine', () => {
     expect(titleBoard.titleFamilies[1].evidenceRequired).toContain('对比图');
     expect(titleBoard.operatingRules.join(' ')).toContain('客户自己登录平台发布');
     expect(titleBoard.returnLoop.join(' ')).toContain('高频问题转成下一条口播开场');
+    expect(qualityGate.headline).toContain('标题和口播发布前验收门');
+    expect(qualityGate.gateStatus).toBe('needs_copy_review');
+    expect(qualityGate.checks.map(check => check.label)).toContain('不越过发布边界');
+    expect(qualityGate.platformGuides.map(guide => guide.platform)).toEqual(['tiktok', 'xiaohongshu', 'shopify']);
+    expect(qualityGate.publishOnlyWhen.join(' ')).toContain('回填字段');
+    expect(qualityGate.returnSignals.join(' ')).toContain('证据不足');
+    expect(JSON.stringify(qualityGate)).not.toMatch(/apiKey|accessToken|Bearer|sk-/i);
   });
 
   it('turns persona matrices into a customer self-publishing command center', () => {

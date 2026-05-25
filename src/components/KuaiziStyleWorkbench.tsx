@@ -40,6 +40,7 @@ import {
   buildDemoCommerceRenderReliabilityBoard,
   buildDemoCommerceSelfPublishingCommandCenter,
   buildDemoCommerceSuperIpTitleBoard,
+  buildDemoCommerceTitleQualityGate,
   buildDemoCommerceWorkbenchSystemMap,
 } from '@/lib/commerce-remix-engine';
 
@@ -265,6 +266,7 @@ export function KuaiziStyleWorkbench() {
   const publishingMatrix = useMemo(() => buildDemoCommercePublishingMatrixPlan(), []);
   const creatorPersonaMatrix = useMemo(() => buildDemoCommerceCreatorPersonaMatrix(), []);
   const superIpTitleBoard = useMemo(() => buildDemoCommerceSuperIpTitleBoard(), []);
+  const titleQualityGate = useMemo(() => buildDemoCommerceTitleQualityGate(), []);
   const selfPublishingCommandCenter = useMemo(() => buildDemoCommerceSelfPublishingCommandCenter(), []);
   const renderCapacity = useMemo(() => buildDemoCommerceRenderCapacityPlan(), []);
   const renderReliabilityBoard = useMemo(() => buildDemoCommerceRenderReliabilityBoard(), []);
@@ -1660,6 +1662,54 @@ export function KuaiziStyleWorkbench() {
                       {superIpTitleBoard.operatingRules.map(rule => (
                         <div className="rounded-md bg-slate-50 px-3 py-2 text-xs font-bold leading-5 text-slate-700 ring-1 ring-slate-100" key={rule}>{rule}</div>
                       ))}
+                    </div>
+                  </div>
+                  <div className="mt-4 rounded-md border border-amber-100 bg-amber-50 p-4">
+                    <div className="flex flex-col gap-2 lg:flex-row lg:items-end lg:justify-between">
+                      <div className="min-w-0">
+                        <p className="text-xs font-black uppercase tracking-[0.18em] text-amber-700">Title Quality Gate</p>
+                        <h5 className="mt-1 text-base font-black leading-6 text-slate-950">{titleQualityGate.headline}</h5>
+                        <p className="mt-2 max-w-4xl text-sm leading-6 text-slate-600">{titleQualityGate.promise}</p>
+                      </div>
+                      <span className={`w-fit rounded bg-white px-2.5 py-1 text-xs font-black ring-1 ${titleQualityGate.gateStatus === 'ready_to_publish_pack' ? 'text-emerald-700 ring-emerald-100' : 'text-amber-700 ring-amber-100'}`}>
+                        {titleQualityGate.gateStatus === 'ready_to_publish_pack' ? '可进发布包' : '需改标题'}
+                      </span>
+                    </div>
+                    <div className="mt-4 grid gap-3 lg:grid-cols-4">
+                      {titleQualityGate.checks.map(check => (
+                        <article className="min-w-0 rounded-md bg-white p-3 ring-1 ring-amber-100" key={check.label}>
+                          <h6 className="text-sm font-black leading-5 text-slate-950">{check.label}</h6>
+                          <p className="mt-2 line-clamp-3 text-xs font-bold leading-5 text-amber-800">{check.passRule}</p>
+                          <p className="mt-3 line-clamp-2 rounded bg-slate-50 px-2 py-1.5 text-[11px] font-bold leading-4 text-slate-600">{check.failAction}</p>
+                        </article>
+                      ))}
+                    </div>
+                    <div className="mt-4 grid gap-3 xl:grid-cols-5">
+                      {titleQualityGate.platformGuides.map(guide => (
+                        <article className="min-w-0 rounded-md bg-white p-3 ring-1 ring-amber-100" key={guide.platform}>
+                          <h6 className="text-sm font-black text-slate-950">{guide.platformLabel}</h6>
+                          <p className="mt-2 line-clamp-3 text-xs font-bold leading-5 text-slate-700">{guide.firstLineRule}</p>
+                          <p className="mt-3 line-clamp-2 text-[11px] font-bold leading-4 text-amber-700">证据：{guide.proofNeeded.join(' / ')}</p>
+                        </article>
+                      ))}
+                    </div>
+                    <div className="mt-4 grid gap-3 lg:grid-cols-2">
+                      <div className="rounded-md bg-white p-3 ring-1 ring-amber-100">
+                        <h6 className="text-sm font-black text-slate-950">满足这些才给客户发</h6>
+                        <div className="mt-3 grid gap-2">
+                          {titleQualityGate.publishOnlyWhen.map(item => (
+                            <div className="rounded bg-amber-50 px-3 py-2 text-xs font-bold leading-5 text-slate-700" key={item}>{item}</div>
+                          ))}
+                        </div>
+                      </div>
+                      <div className="rounded-md bg-white p-3 ring-1 ring-amber-100">
+                        <h6 className="text-sm font-black text-slate-950">回填后怎么判断下一轮</h6>
+                        <div className="mt-3 grid gap-2">
+                          {titleQualityGate.returnSignals.map(item => (
+                            <div className="rounded bg-slate-50 px-3 py-2 text-xs font-bold leading-5 text-slate-700 ring-1 ring-slate-100" key={item}>{item}</div>
+                          ))}
+                        </div>
+                      </div>
                     </div>
                   </div>
                   <div className="mt-4 grid gap-3 xl:grid-cols-5">

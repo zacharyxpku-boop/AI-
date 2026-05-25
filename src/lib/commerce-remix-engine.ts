@@ -506,6 +506,26 @@ export interface CommerceSuperIpTitleBoard {
   returnLoop: string[];
 }
 
+export interface CommerceTitleQualityGate {
+  headline: string;
+  promise: string;
+  gateStatus: 'ready_to_publish_pack' | 'needs_copy_review';
+  checks: Array<{
+    label: string;
+    passRule: string;
+    failAction: string;
+  }>;
+  platformGuides: Array<{
+    platform: RemixPlatform;
+    platformLabel: string;
+    firstLineRule: string;
+    proofNeeded: string[];
+    avoid: string[];
+  }>;
+  publishOnlyWhen: string[];
+  returnSignals: string[];
+}
+
 export interface CommerceSelfPublishingSlot {
   id: string;
   platform: RemixPlatform;
@@ -1724,6 +1744,79 @@ export function buildCommerceSuperIpTitleBoard(
       '回填评论截图后，把高频问题转成下一条口播开场。',
       '回填 CSV 后，用点击、收藏、咨询、订单判断下一轮重剪方向。',
       '表现弱的账号人设不删除，先换封面、前三秒和证据素材再测一次。',
+    ],
+  };
+}
+
+export function buildCommerceTitleQualityGate(
+  input: CommerceRemixPlanInput,
+  titleBoard = buildCommerceSuperIpTitleBoard(input),
+  publishingMatrix = buildCommercePublishingMatrixPlan(input),
+): CommerceTitleQualityGate {
+  const platforms = unique(publishingMatrix.map(plan => plan.platform));
+  const allTitles = publishingMatrix.flatMap(plan => plan.accountAngles.map(angle => angle.title));
+  const repeatedTitleCount = allTitles.length - unique(allTitles).length;
+
+  return {
+    headline: '标题和口播发布前验收门',
+    promise: '多账号矩阵不是把标题堆满，而是每个平台、每个人设都要有证据、边界和回填字段；不合格标题先改，不交给客户发布。',
+    gateStatus: repeatedTitleCount === 0 ? 'ready_to_publish_pack' : 'needs_copy_review',
+    checks: [
+      {
+        label: '同商品不重复标题',
+        passRule: `首轮 ${allTitles.length} 个标题不能互相复制，要覆盖痛点、测评和官方承接。`,
+        failAction: '重复标题进入改写池，先换开头、证据素材和账号人格。',
+      },
+      {
+        label: '标题能对应画面证据',
+        passRule: titleBoard.titleFamilies.map(family => `${family.label} 需要 ${family.evidenceRequired[0]}`).join('；'),
+        failAction: '缺证据时不发布，转成模特图、细节图、对比图或 FAQ 卡片任务。',
+      },
+      {
+        label: '口播前三句能照读',
+        passRule: '每条口播先讲场景或判断问题，再讲商品证据，最后讲适合/不适合谁。',
+        failAction: '如果前三句像内部术语或参数堆叠，改成客户场景语言。',
+      },
+      {
+        label: '不越过发布边界',
+        passRule: '发布包只给标题、正文、素材、发布时间和回填字段，不索要账号、密码、cookie。',
+        failAction: '任何需要自动登录或后台 token 的标题动作都改成客户自发布步骤。',
+      },
+    ],
+    platformGuides: platforms.map(platform => ({
+      platform,
+      platformLabel: PLATFORM_LABELS[platform],
+      firstLineRule: platform === 'tiktok'
+        ? '前三秒必须是痛点、反问或强画面，不用店铺自夸开头。'
+        : platform === 'xiaohongshu'
+          ? '标题先像买家笔记，正文再补参数、限制和适合人群。'
+          : platform === 'shopify'
+            ? '标题承接搜索和商品页，首屏说清卖点、规格和购买理由。'
+            : platform === 'wechat_video'
+              ? '口播第一句先讲人群和场景，再导向评论或私域咨询。'
+              : '广告标题先讲结果和证据，正文再承接落地页或询盘。',
+      proofNeeded: platform === 'shopify'
+        ? ['商品页截图', '详情页模块', 'FAQ']
+        : platform === 'meta'
+          ? ['封面图', '落地页链接', '素材尺寸']
+          : ['发布截图', '封面截图', '评论或互动截图'],
+      avoid: [
+        '绝对化功效',
+        '虚构销量或订单',
+        '未经授权账号身份',
+      ],
+    })),
+    publishOnlyWhen: [
+      '标题、首句、封面提示和证据素材能一一对应。',
+      '客户知道自己在哪个平台、哪个账号人设、什么时间发布。',
+      '回填字段已经准备好：发布链接、截图、标题截图、表现 CSV 或云盘目录。',
+      '客服 FAQ 和售后边界已经同步到发布包。',
+    ],
+    returnSignals: [
+      '标题点击强但订单弱：保留标题，补商品证明图和客服异议解释。',
+      '收藏评论强但点击弱：保留口播结构，重做封面和前三秒。',
+      '咨询多但转化弱：补价格、规格、售后和 FAQ 素材。',
+      '证据不足：不判断胜负，先让客户补链接、截图或 CSV。',
     ],
   };
 }
@@ -3695,6 +3788,12 @@ export function buildDemoCommerceCreatorPersonaMatrix() {
 export function buildDemoCommerceSuperIpTitleBoard() {
   const input = buildDemoCommerceRemixInput();
   return buildCommerceSuperIpTitleBoard(input, buildCommerceCreatorPersonaMatrix(input));
+}
+
+export function buildDemoCommerceTitleQualityGate() {
+  const input = buildDemoCommerceRemixInput();
+  const publishingMatrix = buildCommercePublishingMatrixPlan(input);
+  return buildCommerceTitleQualityGate(input, buildCommerceSuperIpTitleBoard(input, buildCommerceCreatorPersonaMatrix(input, publishingMatrix)), publishingMatrix);
 }
 
 export function buildDemoCommerceSelfPublishingCommandCenter() {
