@@ -1441,7 +1441,7 @@ export function KuaiziStyleWorkbench() {
                 <div className="rounded-lg border border-[#e2e8f5] bg-white p-5 shadow-sm">
                   <div className="flex flex-col gap-2 md:flex-row md:items-end md:justify-between">
                     <div>
-                      <p className="text-xs font-black uppercase tracking-[0.18em] text-indigo-500">Open Remix Engine</p>
+                      <p className="text-xs font-black uppercase tracking-[0.18em] text-indigo-500">稳定混剪引擎</p>
                       <p className="mt-2 max-w-3xl text-sm leading-6 text-slate-500">混剪底盘覆盖时间线交换、无损切片、场景检测、字幕校对、图片格式标准化、FFmpeg 合成和批量队列；客户看到的是稳定交付包，不需要理解这些开源项目。</p>
                       <h3 className="mt-1 text-lg font-black text-slate-950">混剪不等外部平台，先做成稳定的本地渲染系统</h3>
                     </div>
@@ -1450,7 +1450,7 @@ export function KuaiziStyleWorkbench() {
                   <div className="mt-5 rounded-md border border-indigo-100 bg-indigo-50 p-4">
                     <div className="flex flex-col gap-2 lg:flex-row lg:items-end lg:justify-between">
                       <div className="min-w-0">
-                        <p className="text-xs font-black uppercase tracking-[0.18em] text-indigo-700">Customer Remix Path</p>
+                        <p className="text-xs font-black uppercase tracking-[0.18em] text-indigo-700">客户混剪路径</p>
                         <h4 className="mt-1 text-base font-black leading-6 text-slate-950">客户只看 5 步：素材、片段、模板、渲染、回填</h4>
                         <p className="mt-2 max-w-4xl text-sm leading-6 text-slate-600">{openSourceCoverage.customerPromise}</p>
                       </div>
@@ -1486,7 +1486,7 @@ export function KuaiziStyleWorkbench() {
                   <div className="mt-5 rounded-md border border-emerald-100 bg-emerald-50 p-4">
                     <div className="flex flex-col gap-3 lg:flex-row lg:items-end lg:justify-between">
                       <div className="min-w-0">
-                        <p className="text-xs font-black uppercase tracking-[0.18em] text-emerald-700">Open Source Last Mile</p>
+                        <p className="text-xs font-black uppercase tracking-[0.18em] text-emerald-700">交付最后一公里</p>
                         <h4 className="mt-1 text-base font-black leading-6 text-slate-950">{openSourceLastMileBoard.headline}</h4>
                         <p className="mt-2 max-w-4xl text-sm leading-6 text-slate-600">{openSourceLastMileBoard.promise}</p>
                       </div>
@@ -1539,7 +1539,7 @@ export function KuaiziStyleWorkbench() {
                   <div className="mt-5 rounded-md border border-violet-100 bg-violet-50 p-4">
                     <div className="flex flex-col gap-3 lg:flex-row lg:items-end lg:justify-between">
                       <div className="min-w-0">
-                        <p className="text-xs font-black uppercase tracking-[0.18em] text-violet-700">GitHub Adoption Queue</p>
+                        <p className="text-xs font-black uppercase tracking-[0.18em] text-violet-700">开源能力接入队列</p>
                         <h4 className="mt-1 text-base font-black leading-6 text-slate-950">GitHub 开源能力接入队列</h4>
                         <p className="mt-2 max-w-4xl text-sm leading-6 text-slate-600">
                           不把一堆仓库名丢给客户；Wenai 先把可本地跑的混剪、字幕、时间线和队列能力接成发布包，再把大规模渲染和云端 worker 放到规模化阶段。
@@ -1575,7 +1575,7 @@ export function KuaiziStyleWorkbench() {
                   <div className="rounded-md border border-sky-100 bg-sky-50 p-4">
                     <div className="flex flex-col gap-3 lg:flex-row lg:items-end lg:justify-between">
                       <div className="min-w-0">
-                        <p className="text-xs font-black uppercase tracking-[0.18em] text-sky-700">Open Source Coverage</p>
+                        <p className="text-xs font-black uppercase tracking-[0.18em] text-sky-700">开源混剪能力地图</p>
                         <h4 className="mt-1 text-base font-black leading-6 text-slate-950">{openSourceCoverage.headline}</h4>
                         <p className="mt-2 max-w-4xl text-sm leading-6 text-slate-600">{openSourceCoverage.summary}</p>
                       </div>
@@ -1658,7 +1658,7 @@ export function KuaiziStyleWorkbench() {
                   <div className="rounded-md border border-fuchsia-100 bg-fuchsia-50 p-4">
                     <div className="flex flex-col gap-3 lg:flex-row lg:items-end lg:justify-between">
                       <div className="min-w-0">
-                        <p className="text-xs font-black uppercase tracking-[0.18em] text-fuchsia-700">GitHub Remix Radar</p>
+                        <p className="text-xs font-black uppercase tracking-[0.18em] text-fuchsia-700">开源混剪能力雷达</p>
                         <h4 className="mt-1 text-base font-black leading-6 text-slate-950">{githubRemixRadar.headline}</h4>
                         <p className="mt-2 max-w-4xl text-sm leading-6 text-slate-600">{githubRemixRadar.promise}</p>
                       </div>
@@ -1712,7 +1712,7 @@ export function KuaiziStyleWorkbench() {
                   <div className="rounded-md border border-teal-100 bg-teal-50 p-4">
                     <div className="flex flex-col gap-3 lg:flex-row lg:items-end lg:justify-between">
                       <div className="min-w-0">
-                        <p className="text-xs font-black uppercase tracking-[0.18em] text-teal-700">Open Source Queue Console</p>
+                        <p className="text-xs font-black uppercase tracking-[0.18em] text-teal-700">混剪队列控制台</p>
                         <h4 className="mt-1 text-base font-black leading-6 text-slate-950">{openSourceQueueConsole.headline}</h4>
                         <p className="mt-2 max-w-4xl text-sm leading-6 text-slate-600">{openSourceQueueConsole.promise}</p>
                       </div>
@@ -1802,7 +1802,7 @@ export function KuaiziStyleWorkbench() {
                 <div className="rounded-md border border-lime-100 bg-lime-50 p-4">
                   <div className="flex flex-col gap-3 lg:flex-row lg:items-end lg:justify-between">
                     <div className="min-w-0">
-                      <p className="text-xs font-black uppercase tracking-[0.18em] text-lime-700">Install & Smoke Test Matrix</p>
+                      <p className="text-xs font-black uppercase tracking-[0.18em] text-lime-700">安装和冒烟验收</p>
                       <h4 className="mt-1 text-base font-black leading-6 text-slate-950">{openSourceInstallMatrix.headline}</h4>
                       <p className="mt-2 max-w-4xl text-sm leading-6 text-slate-600">{openSourceInstallMatrix.promise}</p>
                     </div>

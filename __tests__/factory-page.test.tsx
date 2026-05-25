@@ -105,9 +105,9 @@ describe('factory page', () => {
     expect(html).toContain('开源提词器思路');
     expect(html).toContain('回填：');
     expect(html).toContain('个账号人设');
-    expect(html).toContain('Open Source Coverage');
     expect(html).toContain('开源混剪能力地图');
-    expect(html).toContain('Customer Remix Path');
+    expect(html).toContain('开源混剪能力地图');
+    expect(html).toContain('客户混剪路径');
     expect(html).toContain('客户只看 5 步：素材、片段、模板、渲染、回填');
     expect(html).toContain('给素材 -&gt; 出多平台成片包 -&gt; 自己发布 -&gt; 回填复盘');
     expect(html).toContain('Auto-Editor');
@@ -117,9 +117,9 @@ describe('factory page', () => {
     expect(html).toContain('一个商品项目统一多种开源能力');
     expect(html).toContain('程序化模板 + 稳定队列批量出片');
     expect(html).toContain('进入交付的规则');
-    expect(html).toContain('GitHub Remix Radar');
+    expect(html).toContain('开源混剪能力雷达');
     expect(html).toContain('GitHub 开源混剪能力雷达');
-    expect(html).toContain('GitHub Adoption Queue');
+    expect(html).toContain('开源能力接入队列');
     expect(html).toContain('GitHub 开源能力接入队列');
     expect(html).toContain('类开源范式');
     expect(html).toContain('大规模渲染和云端 worker');
@@ -131,9 +131,9 @@ describe('factory page', () => {
     expect(html).toContain('opencut-ai');
     expect(html).toContain('clipsai');
     expect(html).toContain('supoclip');
-    expect(html).toContain('Open Source Queue Console');
+    expect(html).toContain('混剪队列控制台');
     expect(html).toContain('开源混剪队列控制台');
-    expect(html).toContain('Open Source Last Mile');
+    expect(html).toContain('交付最后一公里');
     expect(html).toContain('开源混剪最后一公里判断板');
     expect(html).toContain('客户最后一步');
     expect(html).toContain('开源不解决');
@@ -143,7 +143,7 @@ describe('factory page', () => {
     expect(html).toContain('开源混剪栈选择器');
     expect(html).toContain('long-material-slicing');
     expect(html).toContain('stable-render');
-    expect(html).toContain('Install &amp; Smoke Test Matrix');
+    expect(html).toContain('安装和冒烟验收');
     expect(html).toContain('开源混剪安装和冒烟验收矩阵');
     expect(html).toContain('进入客户交付前必须满足');
     expect(html).toContain('开源能力适配器');
