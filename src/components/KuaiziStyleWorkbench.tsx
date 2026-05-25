@@ -682,6 +682,46 @@ export function KuaiziStyleWorkbench() {
                     </div>
                   </div>
                 </div>
+                <div className="mt-4 rounded-md border border-cyan-100 bg-cyan-50 p-4">
+                  <div className="flex flex-col gap-3 lg:flex-row lg:items-end lg:justify-between">
+                    <div className="min-w-0">
+                      <p className="text-xs font-black uppercase tracking-[0.18em] text-cyan-700">渲染健康护栏</p>
+                      <h4 className="mt-1 text-base font-black leading-6 text-slate-950">先样片、小批次、抽检、回填，再决定是否上多 worker</h4>
+                      <p className="mt-2 max-w-4xl text-sm leading-6 text-slate-600">
+                        客户不需要理解云渲染和对象存储；只要看到每次放量都有目标、证据和停止线，批量出片才不会越跑越乱。
+                      </p>
+                    </div>
+                    <span className="w-fit rounded bg-white px-2.5 py-1 text-xs font-black text-cyan-700 ring-1 ring-cyan-100">
+                      {renderCapacity.healthChecklist.length} 个健康检查
+                    </span>
+                  </div>
+                  <div className="mt-4 grid gap-3 xl:grid-cols-4">
+                    {renderCapacity.healthChecklist.map(item => (
+                      <article className="min-w-0 rounded-md bg-white p-3 ring-1 ring-cyan-100" key={item.label}>
+                        <h5 className="text-sm font-black leading-5 text-slate-950">{item.label}</h5>
+                        <p className="mt-2 text-xs font-bold leading-5 text-cyan-800">{item.target}</p>
+                        <p className="mt-3 line-clamp-2 rounded bg-cyan-50 px-2 py-1.5 text-[11px] font-bold leading-4 text-slate-700">证据：{item.evidence}</p>
+                        <p className="mt-2 line-clamp-3 text-[11px] font-bold leading-4 text-rose-700">停止线：{item.stopLine}</p>
+                      </article>
+                    ))}
+                  </div>
+                  <div className="mt-4 rounded-md bg-white p-3 ring-1 ring-cyan-100">
+                    <h5 className="text-sm font-black text-slate-950">客户可见放量阶梯</h5>
+                    <div className="mt-3 grid gap-3 lg:grid-cols-4">
+                      {renderCapacity.customerScaleLadder.map(item => (
+                        <article className="min-w-0 rounded-md bg-slate-50 p-3 ring-1 ring-slate-200" key={item.stage}>
+                          <div className="flex items-start justify-between gap-2">
+                            <h6 className="text-sm font-black leading-5 text-slate-950">{item.stage}</h6>
+                            <span className="shrink-0 rounded bg-white px-2 py-1 text-[11px] font-black text-cyan-700 ring-1 ring-cyan-100">{item.volume}</span>
+                          </div>
+                          <p className="mt-2 text-xs font-bold leading-5 text-slate-700">{item.mode}</p>
+                          <p className="mt-2 line-clamp-2 text-[11px] font-bold leading-4 text-cyan-700">{item.customerPromise}</p>
+                          <p className="mt-2 line-clamp-2 text-[11px] leading-4 text-slate-500">升级条件：{item.upgradeOnlyWhen}</p>
+                        </article>
+                      ))}
+                    </div>
+                  </div>
+                </div>
               </section>
 
               <section className="rounded-lg border border-[#fde68a] bg-white p-5 shadow-sm">

@@ -1064,5 +1064,9 @@ describe('commerce remix engine', () => {
     expect(capacity.storageHandoff.join(' ')).toContain('04-customer-return');
     expect(capacity.scaleTriggers.join(' ')).toContain('多 worker');
     expect(capacity.scalePath.join(' ')).toContain('多 worker');
+    expect(capacity.healthChecklist.map(item => item.label)).toEqual(['先跑样片', '小批次放量', '发布前抽检', '回填再扩容']);
+    expect(capacity.healthChecklist.find(item => item.label === '回填再扩容')?.stopLine).toContain('没有真实发布证据');
+    expect(capacity.customerScaleLadder.map(item => item.stage)).toEqual(['首批试跑', '小批量交付', '稳定放量', '规模化升级']);
+    expect(capacity.customerScaleLadder.find(item => item.stage === '规模化升级')?.mode).toContain('多 worker');
   });
 });

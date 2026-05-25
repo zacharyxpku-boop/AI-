@@ -51,6 +51,12 @@ describe('factory page', () => {
     expect(html).toContain('客户只看四种状态');
     expect(html).toContain('运营按步骤跑批次');
     expect(html).toContain('扩容路径');
+    expect(html).toContain('渲染健康护栏');
+    expect(html).toContain('先样片、小批次、抽检、回填，再决定是否上多 worker');
+    expect(html).toContain('客户可见放量阶梯');
+    expect(html).toContain('首批试跑');
+    expect(html).toContain('规模化升级');
+    expect(html).toContain('没有真实发布证据时，不购买云渲染或多 worker');
     expect(html).toContain('自发布证据收件箱');
     expect(html).toContain('客户自己发布，我们用证据把下一轮做准');
     expect(html).toContain('回填后系统立刻判断');

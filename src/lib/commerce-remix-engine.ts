@@ -756,6 +756,19 @@ export interface CommerceRenderCapacityPlan {
   recommendedConcurrency: number;
   estimatedOutputsPerHour: number;
   queuePolicy: string[];
+  healthChecklist: Array<{
+    label: string;
+    target: string;
+    evidence: string;
+    stopLine: string;
+  }>;
+  customerScaleLadder: Array<{
+    stage: string;
+    volume: string;
+    mode: string;
+    customerPromise: string;
+    upgradeOnlyWhen: string;
+  }>;
   failureIsolation: string[];
   monitoringSignals: string[];
   humanReviewGates: string[];
@@ -3377,6 +3390,62 @@ export function buildCommerceRenderCapacityPlan(
       `每批最多 ${batchPlan.maxConcurrency} 条并发，避免单机或小云主机被渲染打满`,
       '每条视频保留 platform、尺寸、模板、字幕、输出路径和重试次数',
       '渲染完成后只进入客户自发布交付包，不自动登录任何平台账号',
+    ],
+    healthChecklist: [
+      {
+        label: '先跑样片',
+        target: '每个主平台先跑 1 条 15-30 秒样片',
+        evidence: 'sample-render.mp4、media-probe-report.json、字幕安全区截图',
+        stopLine: '样片黑屏、错尺寸、字幕遮挡或商品主体错误时，不进入批量渲染。',
+      },
+      {
+        label: '小批次放量',
+        target: `每批最多 ${batchPlan.maxConcurrency} 条并发，先完成一批再开下一批`,
+        evidence: 'render-log.json 记录 started/exported/failed/blocked',
+        stopLine: '同批失败超过 15% 时先降并发并查素材，不继续追加任务。',
+      },
+      {
+        label: '发布前抽检',
+        target: '每个平台至少抽检 1 条，重点看字幕、商品主体、封面和售后承诺',
+        evidence: 'upload-ready-checklist.md、人工抽检记录、发布包字段完整性',
+        stopLine: '抽检不通过时，只返工问题条，不把整批标记为可发布。',
+      },
+      {
+        label: '回填再扩容',
+        target: '客户发布后回传链接、截图、CSV 或云盘目录，再判断是否加大批量',
+        evidence: '04-customer-return、下一轮标题/封面/重剪建议',
+        stopLine: '没有真实发布证据时，不购买云渲染或多 worker，也不虚构表现。',
+      },
+    ],
+    customerScaleLadder: [
+      {
+        stage: '首批试跑',
+        volume: '1-10 条',
+        mode: '本地 FFmpeg/Remotion 任务包 + 人工抽检',
+        customerPromise: '先证明一个商品能稳定出可发布视频、标题和回填表。',
+        upgradeOnlyWhen: '样片合格，客户确认发布包能直接复制使用。',
+      },
+      {
+        stage: '小批量交付',
+        volume: '10-30 条',
+        mode: '本地队列 + 单条重试 + 云盘目录交付',
+        customerPromise: '按平台和账号人设拆批，失败只影响单条任务。',
+        upgradeOnlyWhen: '连续两批输出稳定，失败率低于 15%。',
+      },
+      {
+        stage: '稳定放量',
+        volume: '30-100 条',
+        mode: '队列 worker + 分批抽检 + 发布包批量导出',
+        customerPromise: '运营看到批次、状态、失败原因和下一步，不需要看底层命令。',
+        upgradeOnlyWhen: '单机排队超过 2 小时或多人审核开始成为瓶颈。',
+      },
+      {
+        stage: '规模化升级',
+        volume: '100 条以上',
+        mode: '多 worker / 对象存储 / 签名下载链接 / 客户空间权限',
+        customerPromise: '只在真实规模出现后升级，不让客户为首版复杂度买单。',
+        upgradeOnlyWhen: '连续多批有真实回填，且客户需要长期留存和多人协作。',
+      },
     ],
     failureIsolation: [
       '缺素材任务不进入批次',
