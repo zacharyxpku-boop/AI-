@@ -22,6 +22,7 @@ import {
   buildCommerceOpenSourceInstallMatrix,
   buildCommerceOpenSourceRemixBlueprint,
   buildCommerceOpenSourceStackSelector,
+  buildCommercePersonaPublishingConsole,
   buildCommercePostPublishActionBoard,
   buildCommerceProviderActivationRunbook,
   buildCommerceProviderActivationPlan,
@@ -63,6 +64,7 @@ import {
   buildDemoCommerceOpenSourceInstallMatrix,
   buildDemoCommerceOpenSourceRemixBlueprint,
   buildDemoCommerceOpenSourceStackSelector,
+  buildDemoCommercePersonaPublishingConsole,
   buildDemoCommercePostPublishActionBoard,
   buildDemoCommerceProviderActivationRunbook,
   buildDemoCommerceProviderActivationPlan,
@@ -165,6 +167,7 @@ function buildInputResponse(input: CommerceRemixPlanInput, body: CommerceRemixRe
   const titleQualityGate = buildCommerceTitleQualityGate(input, superIpTitleBoard, publishingMatrix);
   const cloudReturnPlan = buildCommerceCloudDriveReturnPlan(input, cloudDrive);
   const selfPublishingCommandCenter = buildCommerceSelfPublishingCommandCenter(input, publishingMatrix, creatorPersonaMatrix, cloudReturnPlan);
+  const personaPublishingConsole = buildCommercePersonaPublishingConsole(input, publishingMatrix, creatorPersonaMatrix, superIpTitleBoard, selfPublishingCommandCenter);
   const customerReturnIntakeBoard = buildCommerceCustomerReturnIntakeBoard(performanceReport, cloudReturnPlan);
   const evidenceReadinessBoard = buildCommerceEvidenceReadinessBoard(performanceReport, cloudReturnPlan, customerReturnIntakeBoard);
   const customerEvidenceUploadGuide = buildCommerceCustomerEvidenceUploadGuide(performanceReport, cloudReturnPlan, customerReturnIntakeBoard);
@@ -215,6 +218,7 @@ function buildInputResponse(input: CommerceRemixPlanInput, body: CommerceRemixRe
     superIpTitleBoard,
     titleQualityGate,
     selfPublishingCommandCenter,
+    personaPublishingConsole,
     cloudReturnPlan,
     customerReturnIntakeBoard,
     evidenceReadinessBoard,
@@ -267,6 +271,7 @@ export async function GET() {
     superIpTitleBoard: buildDemoCommerceSuperIpTitleBoard(),
     titleQualityGate: buildDemoCommerceTitleQualityGate(),
     selfPublishingCommandCenter: buildDemoCommerceSelfPublishingCommandCenter(),
+    personaPublishingConsole: buildDemoCommercePersonaPublishingConsole(),
     cloudReturnPlan: buildDemoCommerceCloudDriveReturnPlan(),
     customerReturnIntakeBoard: buildDemoCommerceCustomerReturnIntakeBoard(),
     evidenceReadinessBoard: buildDemoCommerceEvidenceReadinessBoard(),

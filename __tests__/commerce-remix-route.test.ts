@@ -71,6 +71,9 @@ describe('/api/commerce-remix', () => {
     expect(body.openSourceStackSelector.defaultStack).toContain('lossless-cut');
     expect(body.publishingMatrix[0].accountAngles.length).toBeGreaterThanOrEqual(3);
     expect(body.creatorPersonaMatrix[0].personas[0].titleFormulas.length).toBeGreaterThanOrEqual(3);
+    expect(body.personaPublishingConsole.headline).toContain('多账号人设发布矩阵');
+    expect(body.personaPublishingConsole.rows[0].customerCopyAction).toContain('客户自己登录');
+    expect(body.personaPublishingConsole.evidenceFields).toContain('表现 CSV');
     expect(body.renderCapacity.queuePolicy.join(' ')).toContain('不自动登录');
     expect(body.renderCapacity.monitoringSignals.join(' ')).toContain('failed/blocked');
     expect(body.renderCapacity.storageHandoff.join(' ')).toContain('02-render-outputs');
@@ -172,6 +175,10 @@ describe('/api/commerce-remix', () => {
     expect(body.selfPublishingCommandCenter.slots[0].copyAction).toContain('客户自己登录');
     expect(body.selfPublishingCommandCenter.noLoginRules).toContain('不绕过平台发布流程。');
     expect(body.selfPublishingCommandCenter.evidenceInbox.map((item: { label: string }) => item.label)).toContain('表现 CSV');
+    expect(body.personaPublishingConsole.rows).toHaveLength(6);
+    expect(body.personaPublishingConsole.rows.map((row: { accountType: string }) => row.accountType)).toContain('真实买家号');
+    expect(body.personaPublishingConsole.rows[0].firstThreeVoiceoverLines.length).toBeGreaterThanOrEqual(3);
+    expect(body.personaPublishingConsole.boundaryRules.join(' ')).toContain('不索要客户账号');
     expect(body.cloudReturnPlan.nextRoundOutputs).toContain('重剪任务清单');
     expect(body.customerReturnIntakeBoard.status).toBe('ready_for_review');
     expect(body.customerReturnIntakeBoard.evidenceCards.every((card: { state: string }) => card.state === 'received')).toBe(true);

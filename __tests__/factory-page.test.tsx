@@ -115,6 +115,10 @@ describe('factory page', () => {
     expect(html).toContain('首版可交付');
     expect(html).toContain('客户自发布');
     expect(html).toContain('客户回填字段');
+    expect(html).toContain('Persona Publishing Console');
+    expect(html).toContain('多账号人设发布矩阵');
+    expect(html).toContain('前三句口播');
+    expect(html).toContain('客户自己登录');
     expect(html).toContain('回填后系统看什么');
     expect(html).toContain('Evidence Readiness');
     expect(html).toContain('客户表现证据验收板');

@@ -637,6 +637,28 @@ export interface CommerceSelfPublishingCommandCenter {
   nextRoundDecisions: string[];
 }
 
+export interface CommercePersonaPublishingConsole {
+  headline: string;
+  promise: string;
+  rows: Array<{
+    id: string;
+    platform: RemixPlatform;
+    platformLabel: string;
+    accountType: string;
+    titleFamily: string;
+    title: string;
+    firstThreeVoiceoverLines: string[];
+    requiredProofAsset: string;
+    manualPublishDestination: string;
+    customerCopyAction: string;
+    evidenceToUpload: string[];
+    remixAfterReturn: string;
+  }>;
+  customerHandoffChecklist: string[];
+  boundaryRules: string[];
+  evidenceFields: string[];
+}
+
 export interface CommerceRenderCapacityPlan {
   laneCount: number;
   recommendedConcurrency: number;
@@ -2276,6 +2298,61 @@ export function buildCommerceSelfPublishingCommandCenter(
       '哪个封面或开头需要重剪。',
       '哪些评论和客服问题要变成下一条内容。',
     ],
+  };
+}
+
+export function buildCommercePersonaPublishingConsole(
+  input: CommerceRemixPlanInput,
+  publishingMatrix = buildCommercePublishingMatrixPlan(input),
+  creatorPersonaMatrix = buildCommerceCreatorPersonaMatrix(input, publishingMatrix),
+  titleBoard = buildCommerceSuperIpTitleBoard(input, creatorPersonaMatrix),
+  selfPublishingCommandCenter = buildCommerceSelfPublishingCommandCenter(input, publishingMatrix, creatorPersonaMatrix),
+): CommercePersonaPublishingConsole {
+  const personaByKey = new Map(
+    creatorPersonaMatrix.flatMap(plan => plan.personas.map(persona => [`${plan.platform}:${persona.accountType}`, persona])),
+  );
+  const titleFamilyByIndex = titleBoard.titleFamilies;
+  const rows = selfPublishingCommandCenter.slots.map((slot, index) => {
+    const persona = personaByKey.get(`${slot.platform}:${slot.accountType}`);
+    const titleFamily = titleFamilyByIndex[index % Math.max(titleFamilyByIndex.length, 1)];
+    const firstThreeVoiceoverLines = (persona?.openingLines || [slot.firstLine])
+      .slice(0, 3)
+      .map(line => line.replace(/\s+/g, ' ').trim())
+      .filter(Boolean);
+
+    return {
+      id: `${slot.id}-persona-publish`,
+      platform: slot.platform,
+      platformLabel: slot.platformLabel,
+      accountType: slot.accountType,
+      titleFamily: titleFamily?.label || '平台原生标题',
+      title: slot.title,
+      firstThreeVoiceoverLines,
+      requiredProofAsset: slot.assetToUpload,
+      manualPublishDestination: `${slot.platformLabel} 后台或 App 发布页，客户自己登录后粘贴发布。`,
+      customerCopyAction: `复制标题、前三句口播、正文标签和成片文件名；客户自己登录 ${slot.platformLabel} 发布。`,
+      evidenceToUpload: unique([...slot.evidenceRequired, '表现 CSV', '评论截图', '云盘目录']).slice(0, 6),
+      remixAfterReturn: slot.nextReviewMove,
+    };
+  });
+
+  return {
+    headline: '多账号人设发布矩阵：标题、前三句口播、证据和自发布动作放在一张表',
+    promise: '客户看到的不是 SKU/CRM 术语，而是每个平台该用哪个人设、复制哪条标题、前三句怎么说、要补什么证明、发完回传什么证据。',
+    rows,
+    customerHandoffChecklist: [
+      '每一行都对应一个可发布版本：平台、人设、标题、前三句口播、证明素材和回填字段齐全。',
+      '客户只需要下载成片和封面，复制文案，自己登录平台发布。',
+      '发布后把发布链接、表现 CSV、评论截图或云盘目录传回 Wenai。',
+      '系统根据回填证据决定下一轮是换标题、换封面、换前三秒，还是扩量同一人设。',
+    ],
+    boundaryRules: [
+      '不索要客户账号、密码、cookie、验证码或后台 token。',
+      '不承诺绕过平台登录，也不替客户自动发布。',
+      '没有客户回填证据前，不虚构播放、订单、询盘或转化。',
+      '平台数据 API 后续可配，但首版交付不依赖它。',
+    ],
+    evidenceFields: unique(rows.flatMap(row => row.evidenceToUpload)),
   };
 }
 
@@ -4580,6 +4657,20 @@ export function buildDemoCommerceSelfPublishingCommandCenter() {
   const publishingMatrix = buildCommercePublishingMatrixPlan(input);
   const personaMatrix = buildCommerceCreatorPersonaMatrix(input, publishingMatrix);
   return buildCommerceSelfPublishingCommandCenter(input, publishingMatrix, personaMatrix, buildCommerceCloudDriveReturnPlan(input));
+}
+
+export function buildDemoCommercePersonaPublishingConsole() {
+  const input = buildDemoCommerceRemixInput();
+  const publishingMatrix = buildCommercePublishingMatrixPlan(input);
+  const personaMatrix = buildCommerceCreatorPersonaMatrix(input, publishingMatrix);
+  const titleBoard = buildCommerceSuperIpTitleBoard(input, personaMatrix);
+  return buildCommercePersonaPublishingConsole(
+    input,
+    publishingMatrix,
+    personaMatrix,
+    titleBoard,
+    buildCommerceSelfPublishingCommandCenter(input, publishingMatrix, personaMatrix, buildCommerceCloudDriveReturnPlan(input)),
+  );
 }
 
 export function buildDemoCommerceRemixQualityGate() {

@@ -25,6 +25,7 @@ import {
   buildDemoCommerceOpenSourceInstallMatrix,
   buildDemoCommerceOpenSourceRemixBlueprint,
   buildDemoCommerceOpenSourceStackSelector,
+  buildDemoCommercePersonaPublishingConsole,
   buildDemoCommerceProviderActivationRunbook,
   buildDemoCommerceProviderActivationPlan,
   buildDemoCommerceProviderEscalationBoard,
@@ -280,6 +281,7 @@ export function KuaiziStyleWorkbench() {
   const superIpTitleBoard = useMemo(() => buildDemoCommerceSuperIpTitleBoard(), []);
   const titleQualityGate = useMemo(() => buildDemoCommerceTitleQualityGate(), []);
   const selfPublishingCommandCenter = useMemo(() => buildDemoCommerceSelfPublishingCommandCenter(), []);
+  const personaPublishingConsole = useMemo(() => buildDemoCommercePersonaPublishingConsole(), []);
   const renderCapacity = useMemo(() => buildDemoCommerceRenderCapacityPlan(), []);
   const renderReliabilityBoard = useMemo(() => buildDemoCommerceRenderReliabilityBoard(), []);
   const renderOperationsRunbook = useMemo(() => buildDemoCommerceRenderOperationsRunbook(), []);
@@ -1874,6 +1876,66 @@ export function KuaiziStyleWorkbench() {
                       </div>
                     </article>
                   ))}
+                </div>
+                <div className="mt-5 rounded-md border border-cyan-100 bg-cyan-50 p-4">
+                  <div className="flex flex-col gap-3 lg:flex-row lg:items-end lg:justify-between">
+                    <div className="min-w-0">
+                      <p className="text-xs font-black uppercase tracking-[0.18em] text-cyan-700">Persona Publishing Console</p>
+                      <h4 className="mt-1 text-base font-black leading-6 text-slate-950">{personaPublishingConsole.headline}</h4>
+                      <p className="mt-2 max-w-4xl text-sm leading-6 text-slate-600">{personaPublishingConsole.promise}</p>
+                    </div>
+                    <span className="w-fit rounded bg-white px-2.5 py-1 text-xs font-black text-cyan-700 ring-1 ring-cyan-100">
+                      {personaPublishingConsole.rows.length} 条可发布组合
+                    </span>
+                  </div>
+                  <div className="mt-4 grid gap-3 xl:grid-cols-3">
+                    {personaPublishingConsole.rows.slice(0, 6).map(row => (
+                      <article className="min-w-0 rounded-md bg-white p-3 ring-1 ring-cyan-100" key={row.id}>
+                        <div className="flex flex-wrap items-center gap-2">
+                          <span className="rounded bg-cyan-50 px-2 py-1 text-[11px] font-black text-cyan-700">{row.platformLabel}</span>
+                          <span className="rounded bg-slate-100 px-2 py-1 text-[11px] font-black text-slate-700">{row.accountType}</span>
+                        </div>
+                        <p className="mt-3 text-xs font-black leading-5 text-cyan-700">{row.titleFamily}</p>
+                        <h5 className="mt-1 line-clamp-2 text-sm font-black leading-5 text-slate-950">{row.title}</h5>
+                        <div className="mt-3 grid gap-1.5">
+                          {row.firstThreeVoiceoverLines.map((line, index) => (
+                            <p className="rounded bg-slate-50 px-2 py-1.5 text-xs font-bold leading-5 text-slate-700" key={`${row.id}-line-${index}`}>
+                              {index + 1}. {line}
+                            </p>
+                          ))}
+                        </div>
+                        <p className="mt-3 rounded bg-amber-50 px-2 py-1.5 text-[11px] font-bold leading-4 text-amber-800">证明素材：{row.requiredProofAsset}</p>
+                        <p className="mt-2 rounded bg-emerald-50 px-2 py-1.5 text-[11px] font-bold leading-4 text-emerald-700">{row.customerCopyAction}</p>
+                        <p className="mt-2 line-clamp-2 text-[11px] font-bold leading-4 text-slate-500">回传：{row.evidenceToUpload.slice(0, 4).join(' / ')}</p>
+                      </article>
+                    ))}
+                  </div>
+                  <div className="mt-4 grid gap-3 lg:grid-cols-3">
+                    <div className="rounded-md bg-white p-3 ring-1 ring-cyan-100">
+                      <h5 className="text-sm font-black text-slate-950">客户交付清单</h5>
+                      <div className="mt-3 grid gap-2">
+                        {personaPublishingConsole.customerHandoffChecklist.map(item => (
+                          <div className="rounded bg-cyan-50 px-3 py-2 text-xs font-bold leading-5 text-slate-700" key={item}>{item}</div>
+                        ))}
+                      </div>
+                    </div>
+                    <div className="rounded-md bg-white p-3 ring-1 ring-cyan-100">
+                      <h5 className="text-sm font-black text-slate-950">回传字段</h5>
+                      <div className="mt-3 flex flex-wrap gap-2">
+                        {personaPublishingConsole.evidenceFields.map(field => (
+                          <span className="rounded bg-slate-50 px-2.5 py-1 text-xs font-black text-slate-700 ring-1 ring-slate-100" key={field}>{field}</span>
+                        ))}
+                      </div>
+                    </div>
+                    <div className="rounded-md bg-white p-3 ring-1 ring-cyan-100">
+                      <h5 className="text-sm font-black text-slate-950">边界规则</h5>
+                      <div className="mt-3 grid gap-2">
+                        {personaPublishingConsole.boundaryRules.map(rule => (
+                          <div className="rounded bg-rose-50 px-3 py-2 text-xs font-bold leading-5 text-rose-800" key={rule}>{rule}</div>
+                        ))}
+                      </div>
+                    </div>
+                  </div>
                 </div>
                 <div className="mt-5 rounded-md border border-emerald-100 bg-emerald-50 p-4">
                   <div className="flex flex-col gap-3 lg:flex-row lg:items-end lg:justify-between">

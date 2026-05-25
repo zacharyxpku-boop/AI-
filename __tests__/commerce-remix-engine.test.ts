@@ -32,6 +32,7 @@ import {
   buildCommerceProviderActivationPlan,
   buildCommerceProviderEscalationBoard,
   buildCommerceProviderNeedAssessment,
+  buildCommercePersonaPublishingConsole,
   buildCommercePublishingMatrixPlan,
   buildCommerceRemixTemplateBank,
   buildCommerceRemixExecutionRecipes,
@@ -914,6 +915,29 @@ describe('commerce remix engine', () => {
     expect(commandCenter.noLoginRules).toContain('不绕过平台发布流程。');
     expect(commandCenter.nextRoundDecisions).toContain('哪个账号人设值得继续发布。');
     expect(JSON.stringify(commandCenter)).not.toMatch(/apiKey|accessToken|Bearer|sk-/i);
+  });
+
+  it('creates a customer-readable persona publishing console with self-publish boundaries', () => {
+    const matrix = buildCommercePublishingMatrixPlan(baseInput);
+    const personas = buildCommerceCreatorPersonaMatrix(baseInput, matrix);
+    const titleBoard = buildCommerceSuperIpTitleBoard(baseInput, personas);
+    const commandCenter = buildCommerceSelfPublishingCommandCenter(baseInput, matrix, personas);
+    const console = buildCommercePersonaPublishingConsole(baseInput, matrix, personas, titleBoard, commandCenter);
+
+    expect(console.headline).toContain('多账号人设发布矩阵');
+    expect(console.rows).toHaveLength(9);
+    expect(console.rows.map(row => row.accountType)).toContain('真实买家号');
+    expect(console.rows.map(row => row.accountType)).toContain('测评种草号');
+    expect(console.rows.map(row => row.accountType)).toContain('店铺官方号');
+    expect(console.rows[0].firstThreeVoiceoverLines.length).toBeGreaterThanOrEqual(3);
+    expect(console.rows[0].customerCopyAction).toContain('客户自己登录');
+    expect(console.rows[0].manualPublishDestination).toContain('客户自己登录');
+    expect(console.evidenceFields).toContain('发布链接');
+    expect(console.evidenceFields).toContain('表现 CSV');
+    expect(console.evidenceFields).toContain('评论截图');
+    expect(console.boundaryRules.join(' ')).toContain('不索要客户账号');
+    expect(console.customerHandoffChecklist.join(' ')).toContain('换前三秒');
+    expect(JSON.stringify(console)).not.toMatch(/apiKey|accessToken|Bearer|sk-/i);
   });
 
   it('summarizes render capacity without pretending platform automation', () => {
