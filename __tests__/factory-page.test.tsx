@@ -55,6 +55,9 @@ describe('factory page', () => {
     expect(html).toContain('开源混剪编排板');
     expect(html).toContain('客户看到的是 5 步稳定流水线');
     expect(html).toContain('平台自动登录不是首版 blocker');
+    expect(html).toContain('Reliability Board');
+    expect(html).toContain('稳定渲染看板');
+    expect(html).toContain('客户看到的状态');
     expect(html).toContain('客户看到的是一条商品增长流水线');
     expect(html).toContain('没有外部 provider 时的替代路径');
     expect(html).toContain('外部 provider 需求评估');

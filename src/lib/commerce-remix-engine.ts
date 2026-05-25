@@ -411,6 +411,26 @@ export interface CommerceRenderCapacityPlan {
   scalePath: string[];
 }
 
+export interface CommerceRenderReliabilityBoard {
+  status: 'ready' | 'needs_material' | 'scale_review';
+  customerPromise: string;
+  lanes: Array<{
+    id: string;
+    label: string;
+    count: number;
+    customerMeaning: string;
+    operatorAction: string;
+  }>;
+  batchControls: string[];
+  customerVisibleStatuses: string[];
+  operatorRules: string[];
+  scaleDecision: {
+    currentMode: string;
+    whenToScale: string[];
+    notNeededYet: string[];
+  };
+}
+
 export interface CommerceCloudDriveReturnPlan {
   intakeFields: Array<{ label: string; required: boolean; acceptedFormats: string[]; example: string }>;
   folderRules: string[];
@@ -1859,6 +1879,78 @@ export function buildCommerceRenderCapacityPlan(
   };
 }
 
+export function buildCommerceRenderReliabilityBoard(
+  queue: CommerceRemixQueueItem[],
+  batchPlan = buildCommerceRenderBatchPlan(queue),
+  capacity = buildCommerceRenderCapacityPlan(queue, batchPlan),
+): CommerceRenderReliabilityBoard {
+  const countByStatus = (status: CommerceRemixQueueItem['status']) => queue.filter(item => item.status === status).length;
+  const blockedCount = countByStatus('needs_material') + countByStatus('blocked');
+  const shouldScale = queue.length >= 30 || batchPlan.batches.length >= 10;
+
+  return {
+    status: shouldScale ? 'scale_review' : blockedCount > 0 ? 'needs_material' : 'ready',
+    customerPromise: '每条视频都先变成可追踪任务：素材齐了才渲染，失败只重跑单条，合格成片进入客户自发布包。',
+    lanes: [
+      {
+        id: 'material-gate',
+        label: '素材门禁',
+        count: countByStatus('needs_material'),
+        customerMeaning: '还缺商品图、模特图、授权或音频，先补齐再进渲染。',
+        operatorAction: '把缺口写回素材清单和客户回填字段。',
+      },
+      {
+        id: 'ready-queue',
+        label: '可渲染队列',
+        count: countByStatus('ready'),
+        customerMeaning: '这些任务已有素材、模板、尺寸和输出路径，可以进入本地混剪。',
+        operatorAction: `按每批 ${batchPlan.maxConcurrency} 条并发执行，保留 attempt 和输出日志。`,
+      },
+      {
+        id: 'retry-lane',
+        label: '单条重试',
+        count: countByStatus('failed_retryable'),
+        customerMeaning: '失败不会拖垮整批，只把该条退回重跑。',
+        operatorAction: `每条最多 ${batchPlan.batches[0]?.retryBudget || 2} 次重试，超过后转人工复核。`,
+      },
+      {
+        id: 'exported-pack',
+        label: '可交付成片',
+        count: countByStatus('exported'),
+        customerMeaning: '成片、封面、字幕和发布文案进入客户自发布包。',
+        operatorAction: '写入 02-render-outputs 和 03-publishing-packs，等待客户发布后回填表现。',
+      },
+    ],
+    batchControls: [
+      `当前 ${queue.length} 条任务拆成 ${batchPlan.batches.length} 个批次`,
+      `建议并发 ${capacity.recommendedConcurrency}，预估每小时 ${capacity.estimatedOutputsPerHour} 条输出`,
+      '缺素材、blocked 和人工复核任务不占用渲染并发',
+      '所有命令以参数数组和 manifest 保存，不拼接 shell 字符串',
+    ],
+    customerVisibleStatuses: [
+      '待补素材：客户只需要补图、补授权或补链接',
+      '可渲染：Wenai 正在按任务包生成成片',
+      '需复核：只说明要检查素材/字幕/音频，不把底层报错甩给客户',
+      '可发布：客户自己登录平台发布并回填链接、截图或 CSV',
+    ],
+    operatorRules: [
+      '首批每个平台至少抽检 1 条成片。',
+      '连续失败先降并发，再检查素材编码、字幕长度、音频响度和封面安全区。',
+      '已导出的 MP4 不因其他任务失败而回滚。',
+      '不自动登录客户平台，不代发，不读取后台表现。',
+    ],
+    scaleDecision: {
+      currentMode: shouldScale ? '建议进入多 worker 评估' : '当前用本地批次和失败隔离即可交付',
+      whenToScale: capacity.scaleTriggers,
+      notNeededYet: [
+        '首版不需要客户平台自动发布权限',
+        '首版不需要平台后台自动读数',
+        '首版不需要把所有客户素材托管到企业云盘',
+      ],
+    },
+  };
+}
+
 export function executeCommerceRenderBatches(queue: CommerceRemixQueueItem[], plan = buildCommerceRenderBatchPlan(queue), options: { failQueueItemIds?: string[] } = {}): CommerceRenderBatchExecution {
   const failIds = new Set(options.failQueueItemIds || []);
   const byId = new Map(queue.map(item => [item.id, item]));
@@ -2709,6 +2801,19 @@ export function buildDemoCommerceRenderCapacityPlan() {
   const plan = buildCommerceRemixEnginePlan(readyInput);
   const batchPlan = buildCommerceRenderBatchPlan(plan.queue, { maxConcurrency: 3, retryBudget: 2 });
   return buildCommerceRenderCapacityPlan(plan.queue, batchPlan);
+}
+
+export function buildDemoCommerceRenderReliabilityBoard() {
+  const demoInput = buildDemoCommerceRemixInput();
+  const readyInput = {
+    ...demoInput,
+    assets: demoInput.assets.map(asset => asset.id === 'model-handheld'
+      ? { ...asset, missing: false, uri: 'assets/model-handheld.png', rightsReady: true }
+      : asset),
+  };
+  const plan = buildCommerceRemixEnginePlan(readyInput);
+  const batchPlan = buildCommerceRenderBatchPlan(plan.queue, { maxConcurrency: 3, retryBudget: 2 });
+  return buildCommerceRenderReliabilityBoard(plan.queue, batchPlan, buildCommerceRenderCapacityPlan(plan.queue, batchPlan));
 }
 
 export function buildDemoCommerceRemixTemplateBank() {

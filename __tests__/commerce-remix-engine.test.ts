@@ -26,6 +26,7 @@ import {
   buildCommerceRemixExecutionRecipes,
   buildCommerceRemixOrchestrationBoard,
   buildCommerceRemixWorkflowPlaybook,
+  buildCommerceRenderReliabilityBoard,
   buildCommerceSelfPublishingCommandCenter,
   buildDemoCommerceRemixEnginePlan,
   buildFfmpegCommandManifest,
@@ -340,6 +341,22 @@ describe('commerce remix engine', () => {
     expect(execution.exportedCount).toBe(4);
     expect(execution.retryableCount).toBe(1);
     expect(execution.traces.join(' ')).toContain(`${readyPlan.queue[2].id}:failed_retryable`);
+  });
+
+  it('summarizes render queue reliability as customer-visible lanes and scale decisions', () => {
+    const plan = buildCommerceRemixEnginePlan(baseInput);
+    const batchPlan = buildCommerceRenderBatchPlan(plan.queue, { maxConcurrency: 2, retryBudget: 2 });
+    const board = buildCommerceRenderReliabilityBoard(plan.queue, batchPlan);
+
+    expect(board.status).toBe('needs_material');
+    expect(board.customerPromise).toContain('失败只重跑单条');
+    expect(board.lanes.map(lane => lane.id)).toEqual(['material-gate', 'ready-queue', 'retry-lane', 'exported-pack']);
+    expect(board.lanes.find(lane => lane.id === 'material-gate')?.count).toBe(3);
+    expect(board.batchControls.join(' ')).toContain('缺素材、blocked 和人工复核任务不占用渲染并发');
+    expect(board.customerVisibleStatuses.join(' ')).toContain('客户自己登录平台发布');
+    expect(board.operatorRules.join(' ')).toContain('不自动登录客户平台');
+    expect(board.scaleDecision.currentMode).toContain('本地批次');
+    expect(board.scaleDecision.notNeededYet).toContain('首版不需要客户平台自动发布权限');
   });
 
   it('builds a compact ecommerce remix template bank with safe captions and quality checks', () => {

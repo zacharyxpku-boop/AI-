@@ -31,6 +31,7 @@ import {
   buildDemoCommerceRemixTemplateBank,
   buildDemoCommerceRenderCapacityPlan,
   buildDemoCommerceRenderBatchPlan,
+  buildDemoCommerceRenderReliabilityBoard,
   buildDemoCommerceSelfPublishingCommandCenter,
 } from '@/lib/commerce-remix-engine';
 
@@ -253,6 +254,7 @@ export function KuaiziStyleWorkbench() {
   const creatorPersonaMatrix = useMemo(() => buildDemoCommerceCreatorPersonaMatrix(), []);
   const selfPublishingCommandCenter = useMemo(() => buildDemoCommerceSelfPublishingCommandCenter(), []);
   const renderCapacity = useMemo(() => buildDemoCommerceRenderCapacityPlan(), []);
+  const renderReliabilityBoard = useMemo(() => buildDemoCommerceRenderReliabilityBoard(), []);
   const cloudReturnPlan = useMemo(() => buildDemoCommerceCloudDriveReturnPlan(), []);
   const customerReturnIntakeBoard = useMemo(() => buildDemoCommerceCustomerReturnIntakeBoard(), []);
   const postPublishActionBoard = useMemo(() => buildDemoCommercePostPublishActionBoard(), []);
@@ -851,6 +853,29 @@ export function KuaiziStyleWorkbench() {
                   <p className="mt-3 text-sm leading-6 text-slate-600">
                     每条视频都有素材清单、模板、尺寸、字幕、封面和输出路径。失败时只回到缺口，不让客户看到复杂报错。
                   </p>
+                  <div className="mt-4 rounded-md border border-blue-100 bg-white p-3 ring-1 ring-blue-50">
+                    <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
+                      <div>
+                        <div className="text-xs font-black uppercase tracking-[0.16em] text-blue-600">Reliability Board</div>
+                        <p className="mt-1 text-sm font-black leading-5 text-slate-950">稳定渲染看板</p>
+                      </div>
+                      <span className="w-fit rounded bg-blue-50 px-2.5 py-1 text-xs font-black text-blue-700">
+                        {renderReliabilityBoard.status === 'ready' ? '可批量渲染' : renderReliabilityBoard.status === 'scale_review' ? '评估扩容' : '先补素材'}
+                      </span>
+                    </div>
+                    <p className="mt-3 text-xs leading-5 text-slate-600">{renderReliabilityBoard.customerPromise}</p>
+                    <div className="mt-3 grid gap-2 sm:grid-cols-2">
+                      {renderReliabilityBoard.lanes.map(lane => (
+                        <div className="rounded bg-blue-50 px-3 py-2" key={lane.id}>
+                          <div className="flex items-center justify-between gap-2">
+                            <span className="min-w-0 text-xs font-black leading-5 text-slate-800">{lane.label}</span>
+                            <span className="shrink-0 rounded bg-white px-2 py-1 text-[11px] font-black text-blue-700">{lane.count}</span>
+                          </div>
+                          <p className="mt-1 line-clamp-2 text-[11px] font-bold leading-4 text-slate-600">{lane.customerMeaning}</p>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
                   <div className="mt-4 grid grid-cols-3 gap-2">
                     <div className="rounded-md bg-white p-3 ring-1 ring-blue-100">
                       <div className="text-lg font-black text-slate-950">{dryRun.exportedCount}</div>
@@ -884,8 +909,19 @@ export function KuaiziStyleWorkbench() {
                   <div className="mt-4 rounded-md border border-blue-100 bg-white p-3">
                     <div className="text-xs font-black tracking-[0.16em] text-blue-600">队列治理</div>
                     <div className="mt-3 grid gap-2">
-                      {renderCapacity.monitoringSignals.slice(0, 3).map(item => (
+                      {renderReliabilityBoard.batchControls.slice(0, 2).map(item => (
                         <div className="rounded bg-blue-50 px-3 py-2 text-xs font-bold leading-5 text-slate-700" key={item}>{item}</div>
+                      ))}
+                      {renderReliabilityBoard.operatorRules.slice(0, 2).map(item => (
+                        <div className="rounded bg-blue-50 px-3 py-2 text-xs font-bold leading-5 text-slate-700" key={item}>{item}</div>
+                      ))}
+                    </div>
+                  </div>
+                  <div className="mt-3 rounded-md border border-slate-200 bg-white p-3">
+                    <div className="text-xs font-black tracking-[0.16em] text-slate-600">客户看到的状态</div>
+                    <div className="mt-3 grid gap-2">
+                      {renderReliabilityBoard.customerVisibleStatuses.slice(0, 4).map(item => (
+                        <div className="rounded bg-slate-50 px-3 py-2 text-xs font-bold leading-5 text-slate-700" key={item}>{item}</div>
                       ))}
                     </div>
                   </div>
@@ -893,6 +929,10 @@ export function KuaiziStyleWorkbench() {
                     {renderCapacity.humanReviewGates.slice(0, 3).map(item => (
                       <div className="rounded-md bg-amber-50 px-3 py-2 text-xs font-bold leading-5 text-amber-800 ring-1 ring-amber-100" key={item}>{item}</div>
                     ))}
+                  </div>
+                  <div className="mt-3 rounded-md border border-emerald-100 bg-emerald-50 p-3">
+                    <div className="text-xs font-black text-emerald-700">扩容判断</div>
+                    <p className="mt-2 text-xs font-bold leading-5 text-slate-700">{renderReliabilityBoard.scaleDecision.currentMode}</p>
                   </div>
                   <div className="mt-3 rounded-md border border-cyan-100 bg-cyan-50 p-3">
                     <div className="text-xs font-black text-cyan-700">云盘交付结构</div>

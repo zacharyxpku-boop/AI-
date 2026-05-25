@@ -90,6 +90,9 @@ describe('/api/commerce-remix', () => {
     expect(body.providerBoundary).toContain('不自动登录客户账号');
     expect(body.qualityGate.passed).toBe(true);
     expect(body.batchPlan.batches).toHaveLength(2);
+    expect(body.renderReliabilityBoard.customerPromise).toContain('失败只重跑单条');
+    expect(body.renderReliabilityBoard.lanes.map((lane: { id: string }) => lane.id)).toContain('material-gate');
+    expect(body.renderReliabilityBoard.operatorRules.join(' ')).toContain('不自动登录客户平台');
     expect(body.performanceReport.bestTitle).toBe('Hook A');
     expect(body.cloudDrive.folders.map((folder: { path: string }) => folder.path).join(' ')).toContain('04-customer-return');
     expect(body.servicePack.objectionReplies.map((item: { objection: string }) => item.objection)).toContain('担心不好用');
