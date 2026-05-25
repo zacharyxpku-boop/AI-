@@ -30,6 +30,7 @@ import {
   buildCommerceRenderReliabilityBoard,
   buildCommerceSelfPublishingCommandCenter,
   buildCommerceSuperIpTitleBoard,
+  buildCommerceWorkbenchSystemMap,
   buildDemoCommerceCloudDriveManifest,
   buildDemoCommerceCloudDriveReturnPlan,
   buildDemoCommerceCustomerReturnIntakeBoard,
@@ -62,6 +63,7 @@ import {
   buildDemoCommerceRenderReliabilityBoard,
   buildDemoCommerceSelfPublishingCommandCenter,
   buildDemoCommerceSuperIpTitleBoard,
+  buildDemoCommerceWorkbenchSystemMap,
   evaluateCommercePerformanceUploads,
   evaluateCommerceRemixQuality,
   executeCommerceRenderBatches,
@@ -114,6 +116,7 @@ function buildInputResponse(input: CommerceRemixPlanInput, body: CommerceRemixRe
   const modelImageTaskPack = buildCommerceModelImageTaskPack(input);
   const customerSupportWorkflow = buildCommerceCustomerSupportWorkflow(input, servicePack);
   const salesConversationBoard = buildCommerceSalesConversationBoard(input, servicePack, customerSupportWorkflow);
+  const workbenchSystemMap = buildCommerceWorkbenchSystemMap(input, plan);
   const customerDeliveryMap = buildCommerceCustomerDeliveryMap(input);
   const providerActivationPlan = buildCommerceProviderActivationPlan();
   const providerActivationRunbook = buildCommerceProviderActivationRunbook(providerActivationPlan);
@@ -153,6 +156,7 @@ function buildInputResponse(input: CommerceRemixPlanInput, body: CommerceRemixRe
     modelImageTaskPack,
     customerSupportWorkflow,
     salesConversationBoard,
+    workbenchSystemMap,
     customerDeliveryMap,
     providerActivationPlan,
     providerActivationRunbook,
@@ -193,6 +197,7 @@ export async function GET() {
     modelImageTaskPack: buildDemoCommerceModelImageTaskPack(),
     customerSupportWorkflow: buildDemoCommerceCustomerSupportWorkflow(),
     salesConversationBoard: buildDemoCommerceSalesConversationBoard(),
+    workbenchSystemMap: buildDemoCommerceWorkbenchSystemMap(),
     customerDeliveryMap: buildDemoCommerceCustomerDeliveryMap(),
     providerActivationPlan: buildDemoCommerceProviderActivationPlan(),
     providerActivationRunbook: buildDemoCommerceProviderActivationRunbook(),

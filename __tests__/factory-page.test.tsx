@@ -19,6 +19,10 @@ describe('factory page', () => {
     expect(html).toContain('从一个商品，生成一整套可发布内容');
     expect(html).toContain('电商增长闭环');
     expect(html).toContain('功能很多，但客户只看到一条商品增长流水线');
+    expect(html).toContain('商品资料进来');
+    expect(html).toContain('模特生图和商品证明图');
+    expect(html).toContain('客户自己发布');
+    expect(html).toContain('表现 CSV');
     expect(html).toContain('发布不代登');
     expect(html).toContain('数据回下一轮');
     expect(html).toContain('首版交付清单');

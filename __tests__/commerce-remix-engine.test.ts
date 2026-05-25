@@ -31,6 +31,7 @@ import {
   buildCommerceRenderReliabilityBoard,
   buildCommerceSelfPublishingCommandCenter,
   buildCommerceSuperIpTitleBoard,
+  buildCommerceWorkbenchSystemMap,
   buildDemoCommerceRemixEnginePlan,
   buildFfmpegCommandManifest,
   buildCommerceRemixExportPackage,
@@ -622,6 +623,7 @@ describe('commerce remix engine', () => {
     const plan = buildCommerceRemixEnginePlan(baseInput);
     const playbook = buildCommerceRemixWorkflowPlaybook(baseInput, plan);
     const deliveryMap = buildCommerceCustomerDeliveryMap(baseInput);
+    const systemMap = buildCommerceWorkbenchSystemMap(baseInput, plan);
 
     expect(playbook.stages.map(stage => stage.id)).toEqual([
       'brief',
@@ -636,6 +638,14 @@ describe('commerce remix engine', () => {
     expect(deliveryMap.phases.map(phase => phase.id)).toEqual(['brief', 'image', 'remix', 'publish', 'support', 'return']);
     expect(deliveryMap.oneLinePromise).toContain('客户只按步骤补资料');
     expect(deliveryMap.handoffRules.join(' ')).toContain('客户自行完成');
+    expect(systemMap.headline).toContain('功能很多');
+    expect(systemMap.primaryRoute).toEqual(['商品资料进来', '素材和模特图补齐', '混剪成批量短视频', '导出多平台发布包', '客户自己发布', '回填证据做下一轮']);
+    expect(systemMap.lanes.map(lane => lane.id)).toEqual(['brief', 'model_image', 'remix', 'publish_pack', 'support', 'review']);
+    expect(systemMap.lanes.find(lane => lane.id === 'model_image')?.status).toBe('key_enhanced');
+    expect(systemMap.lanes.find(lane => lane.id === 'publish_pack')?.customerAction).toContain('不代登');
+    expect(systemMap.lanes.find(lane => lane.id === 'review')?.proofToCollect).toContain('表现 CSV');
+    expect(systemMap.notInScope.join(' ')).toContain('cookie');
+    expect(JSON.stringify(systemMap)).not.toMatch(/apiKey|accessToken|Bearer|sk-/i);
   });
 
   it('plans platform title matrices for customer self-publishing', () => {

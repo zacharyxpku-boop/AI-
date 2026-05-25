@@ -48,6 +48,8 @@ describe('/api/commerce-remix', () => {
     expect(body.servicePack.faq.length).toBeGreaterThan(0);
     expect(body.salesConversationBoard.lanes.map((lane: { id: string }) => lane.id)).toContain('repurchase');
     expect(body.salesConversationBoard.noAutomationBoundaries).toContain('不自动登录客户平台账号');
+    expect(body.workbenchSystemMap.lanes.map((lane: { id: string }) => lane.id)).toContain('model_image');
+    expect(body.workbenchSystemMap.primaryRoute).toContain('客户自己发布');
     expect(body.openSourceAdapters.map((adapter: { id: string }) => adapter.id)).toContain('ffmpeg');
     expect(body.openSourceAdapters.map((adapter: { id: string }) => adapter.id)).toContain('mcp-video');
     expect(body.workflowPlaybook.stages.map((stage: { id: string }) => stage.id)).toContain('publishing-pack');
@@ -101,6 +103,8 @@ describe('/api/commerce-remix', () => {
     expect(body.modelImageTaskPack.tasks.map((task: { id: string }) => task.id)).toContain('model-handheld-proof');
     expect(body.customerSupportWorkflow.preSaleReplies.map((item: { scenario: string }) => item.scenario)).toContain('客户觉得贵');
     expect(body.salesConversationBoard.lanes.find((lane: { id: string }) => lane.id === 'after_sales').proofToCollect).toContain('处理结果');
+    expect(body.workbenchSystemMap.lanes.find((lane: { id: string }) => lane.id === 'support').wenaiOutput).toContain('FAQ');
+    expect(body.workbenchSystemMap.notInScope.join(' ')).toContain('cookie');
     expect(body.customerDeliveryMap.phases.map((phase: { id: string }) => phase.id)).toContain('publish');
     expect(body.providerActivationPlan.lanes.map((lane: { id: string }) => lane.id)).toContain('image-key');
     expect(body.providerNeedAssessment.verdict).toBe('first_delivery_ready');

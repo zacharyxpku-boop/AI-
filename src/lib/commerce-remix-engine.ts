@@ -283,6 +283,26 @@ export interface CommerceSalesConversationBoard {
   handoffSummary: string[];
 }
 
+export interface CommerceWorkbenchSystemLane {
+  id: 'brief' | 'model_image' | 'remix' | 'publish_pack' | 'support' | 'review';
+  title: string;
+  customerQuestion: string;
+  wenaiOutput: string[];
+  customerAction: string;
+  proofToCollect: string[];
+  routeHref: string;
+  status: 'ready_now' | 'key_enhanced' | 'customer_upload';
+}
+
+export interface CommerceWorkbenchSystemMap {
+  headline: string;
+  promise: string;
+  primaryRoute: string[];
+  lanes: CommerceWorkbenchSystemLane[];
+  dailyOperatingRules: string[];
+  notInScope: string[];
+}
+
 export interface CommerceOpenSourceAdapter {
   id: string;
   name: string;
@@ -2711,6 +2731,106 @@ export function buildCommerceCustomerDeliveryMap(input: CommerceRemixPlanInput):
   };
 }
 
+export function buildCommerceWorkbenchSystemMap(
+  input: CommerceRemixPlanInput,
+  plan = buildCommerceRemixEnginePlan(input),
+): CommerceWorkbenchSystemMap {
+  const product = safeText(input.productName, '商品');
+  const platformLabels = unique(input.platforms).map(platform => PLATFORM_LABELS[platform]);
+  const platformText = platformLabels.length > 0 ? platformLabels.join(' / ') : '目标平台';
+  const outputCount = plan.publishingPacks.reduce((sum, pack) => sum + pack.accountVariants.length, 0);
+  const readyRenderCount = plan.queue.filter(item => item.status === 'ready').length;
+
+  return {
+    headline: '功能很多，但客户只看到一条商品增长流水线',
+    promise: `围绕 ${product}，Wenai 把商品资料、模特生图、开源混剪、发布包、客服承接和表现复盘排成同一张工作台；${platformText} 的 ${outputCount} 个发布角度可以先交付，图片/视频/数字人 Key 到位后只增强生产层。`,
+    primaryRoute: [
+      '商品资料进来',
+      '素材和模特图补齐',
+      '混剪成批量短视频',
+      '导出多平台发布包',
+      '客户自己发布',
+      '回填证据做下一轮',
+    ],
+    lanes: [
+      {
+        id: 'brief',
+        title: '商品资料和卖点脚本',
+        customerQuestion: '客户先告诉我们卖什么、卖给谁、不能说什么。',
+        wenaiOutput: ['商品 brief', '卖点脚本', '风险词提醒', '素材缺口清单'],
+        customerAction: '补商品链接、主图、卖点、参考账号和禁用词。',
+        proofToCollect: ['商品链接', '主图或详情页', '授权边界'],
+        routeHref: '/factory/creative?variant=friend_trial',
+        status: 'ready_now',
+      },
+      {
+        id: 'model_image',
+        title: '模特生图和商品证明图',
+        customerQuestion: '电商人需要主图、手持图、场景图、细节图和对比解释卡。',
+        wenaiOutput: ['图片 prompt 包', '补拍清单', '人工验收项', '生成记录占位'],
+        customerAction: 'Key 到位后直接生成；没 Key 时先补参考图或确认拍摄清单。',
+        proofToCollect: ['参考图', '模特风格', '使用场景', '生成记录'],
+        routeHref: '/factory/create?variant=friend_trial',
+        status: 'key_enhanced',
+      },
+      {
+        id: 'remix',
+        title: '开源混剪和稳定渲染',
+        customerQuestion: '长素材、口播、直播切片要变成可发布短视频。',
+        wenaiOutput: ['候选片段', '字幕底稿', '时间线模板', `${readyRenderCount} 条可渲染任务`],
+        customerAction: '只确认素材授权和低置信片段，不需要理解开源工具。',
+        proofToCollect: ['原始时间戳', '字幕复核', '成片抽检'],
+        routeHref: '/factory/video?variant=friend_trial',
+        status: 'ready_now',
+      },
+      {
+        id: 'publish_pack',
+        title: '多账号标题和发布包',
+        customerQuestion: '每个平台、每个人设要不同标题、正文、封面和发布时间。',
+        wenaiOutput: ['标题矩阵', '口播开头', '封面提示', '发布检查表'],
+        customerAction: '客户自己登录平台发布，Wenai 不代登、不保管账号。',
+        proofToCollect: ['发布链接', '封面截图', '发布时间'],
+        routeHref: '/factory/cast?variant=friend_trial',
+        status: 'ready_now',
+      },
+      {
+        id: 'support',
+        title: '客服素材和售后承接',
+        customerQuestion: '内容发出去以后，咨询、异议、差评和售后要接得住。',
+        wenaiOutput: ['FAQ', '异议回复', '售后卡片', '人工转接规则'],
+        customerAction: '客服使用素材回复，退款、投诉、平台处罚转人工。',
+        proofToCollect: ['客户问题截图', '已发素材', '处理结果'],
+        routeHref: '/factory/manage?variant=friend_trial',
+        status: 'ready_now',
+      },
+      {
+        id: 'review',
+        title: '表现回填和下一轮优化',
+        customerQuestion: '平台数据先不强求自动读取，客户把证据交回来就能复盘。',
+        wenaiOutput: ['下一轮标题', '封面改法', '重剪任务', '素材缺口'],
+        customerAction: '上传链接、截图、CSV 或云盘目录。',
+        proofToCollect: ['表现 CSV', '评论截图', '订单或转化截图'],
+        routeHref: '/factory/manage?variant=friend_trial',
+        status: 'customer_upload',
+      },
+    ],
+    dailyOperatingRules: [
+      '发布不代登，账号、密码、cookie 和后台 token 都不进入 Wenai。',
+      '数据回下一轮，链接、截图、CSV 或云盘目录都能变成下一轮优化任务。',
+      '先让客户看懂今天要补什么、能拿到什么，不把工具名放在第一层。',
+      '图片、视频、数字人 Key 只增强生成效率，不阻塞首版发布包。',
+      '混剪和渲染先走本地/开源队列，单条失败只回到单条任务。',
+      '发布、账号登录、cookie 和后台数据读取先由客户自己完成。',
+    ],
+    notInScope: [
+      '不自动登录客户平台账号。',
+      '不保存客户密码、cookie 或后台 token。',
+      '不伪造播放量、订单、转化或客户反馈。',
+      '不把复杂剪辑器 UI 直接搬给客户。',
+    ],
+  };
+}
+
 export function buildCommerceProviderActivationPlan(): CommerceProviderActivationPlan {
   return {
     currentMode: '本地优先：混剪、发布包、云盘回填、客服素材和复盘建议不依赖外部 provider。',
@@ -3184,6 +3304,11 @@ export function buildDemoCommerceSalesConversationBoard() {
   const input = buildDemoCommerceRemixInput();
   const servicePack = buildCommerceCustomerServicePack(input);
   return buildCommerceSalesConversationBoard(input, servicePack, buildCommerceCustomerSupportWorkflow(input, servicePack));
+}
+
+export function buildDemoCommerceWorkbenchSystemMap() {
+  const input = buildDemoCommerceRemixInput();
+  return buildCommerceWorkbenchSystemMap(input, buildCommerceRemixEnginePlan(input));
 }
 
 export function buildDemoCommerceCustomerDeliveryMap() {

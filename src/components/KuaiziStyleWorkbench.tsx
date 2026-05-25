@@ -36,6 +36,7 @@ import {
   buildDemoCommerceRenderReliabilityBoard,
   buildDemoCommerceSelfPublishingCommandCenter,
   buildDemoCommerceSuperIpTitleBoard,
+  buildDemoCommerceWorkbenchSystemMap,
 } from '@/lib/commerce-remix-engine';
 
 type FlowId = 'brief' | 'asset' | 'image' | 'video' | 'publish' | 'review';
@@ -244,6 +245,7 @@ export function KuaiziStyleWorkbench() {
   const modelImageTaskPack = useMemo(() => buildDemoCommerceModelImageTaskPack(), []);
   const customerSupportWorkflow = useMemo(() => buildDemoCommerceCustomerSupportWorkflow(), []);
   const salesConversationBoard = useMemo(() => buildDemoCommerceSalesConversationBoard(), []);
+  const workbenchSystemMap = useMemo(() => buildDemoCommerceWorkbenchSystemMap(), []);
   const providerActivationPlan = useMemo(() => buildDemoCommerceProviderActivationPlan(), []);
   const providerActivationRunbook = useMemo(() => buildDemoCommerceProviderActivationRunbook(), []);
   const providerNeedAssessment = useMemo(() => buildDemoCommerceProviderNeedAssessment(), []);
@@ -436,20 +438,41 @@ export function KuaiziStyleWorkbench() {
                       Wenai 把商品资料、图片任务、开源混剪、发布包、客服话术和表现回填串成同一套交付链路；图片、视频、数字人 Key 到位后增强，不影响首版先交付。
                     </p>
                   </div>
-                  <span className="w-fit rounded-md bg-indigo-50 px-3 py-2 text-sm font-black text-indigo-700">{operatingSystemRows.length} 条流水线</span>
+                  <span className="w-fit rounded-md bg-indigo-50 px-3 py-2 text-sm font-black text-indigo-700">{workbenchSystemMap.lanes.length} 条工作流 / {operatingSystemRows.length} 个旧版节点已收拢</span>
                 </div>
-                <div className="mt-5 grid gap-3 md:grid-cols-2 xl:grid-cols-3">
-                  {operatingSystemRows.map((row, index) => (
-                    <article className="min-w-0 rounded-md border border-indigo-100 bg-indigo-50 p-4" key={row[0]}>
+                <div className="mt-4 flex flex-wrap gap-2">
+                  {workbenchSystemMap.primaryRoute.map((item, index) => (
+                    <div className="flex items-center gap-2 rounded-md border border-indigo-100 bg-indigo-50 px-3 py-2 text-xs font-black text-indigo-800" key={item}>
+                      <span className="grid size-5 place-items-center rounded bg-white text-[10px] ring-1 ring-indigo-100">{index + 1}</span>
+                      <span>{item}</span>
+                    </div>
+                  ))}
+                </div>
+                <div className="mt-5 grid gap-3 lg:grid-cols-2">
+                  {workbenchSystemMap.lanes.map((lane, index) => (
+                    <Link className="min-w-0 rounded-md border border-indigo-100 bg-indigo-50 p-4 transition hover:bg-white" href={lane.routeHref} key={lane.id}>
                       <div className="flex items-start gap-3">
                         <span className="grid size-7 shrink-0 place-items-center rounded-md bg-white text-xs font-black text-indigo-700 ring-1 ring-indigo-100">{index + 1}</span>
                         <div className="min-w-0">
-                          <h4 className="text-sm font-black leading-5 text-slate-950">{row[0]}</h4>
-                          <p className="mt-1 text-xs font-bold leading-5 text-indigo-700">{row[1]}</p>
+                          <h4 className="text-sm font-black leading-5 text-slate-950">{lane.title}</h4>
+                          <p className="mt-1 text-xs font-bold leading-5 text-indigo-700">{lane.customerQuestion}</p>
                         </div>
                       </div>
-                      <p className="mt-3 rounded bg-white p-2 text-xs font-bold leading-5 text-slate-700 ring-1 ring-indigo-100">{row[2]}</p>
-                    </article>
+                      <div className="mt-3 grid gap-2 sm:grid-cols-2">
+                        <p className="rounded bg-white p-2 text-xs font-bold leading-5 text-slate-700 ring-1 ring-indigo-100">输出：{lane.wenaiOutput.slice(0, 3).join(' / ')}</p>
+                        <p className="rounded bg-white p-2 text-xs font-bold leading-5 text-slate-700 ring-1 ring-indigo-100">客户：{lane.customerAction}</p>
+                      </div>
+                      <div className="mt-3 flex flex-wrap gap-1.5">
+                        {lane.proofToCollect.slice(0, 3).map(item => (
+                          <span className="rounded bg-white px-2 py-1 text-[11px] font-black text-indigo-700 ring-1 ring-indigo-100" key={item}>{item}</span>
+                        ))}
+                      </div>
+                    </Link>
+                  ))}
+                </div>
+                <div className="mt-4 grid gap-2 md:grid-cols-4">
+                  {workbenchSystemMap.dailyOperatingRules.map(rule => (
+                    <div className="rounded-md border border-slate-200 bg-slate-50 px-3 py-2 text-xs font-bold leading-5 text-slate-600" key={rule}>{rule}</div>
                   ))}
                 </div>
               </section>
