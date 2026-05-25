@@ -546,7 +546,7 @@ export function KuaiziStyleWorkbench() {
                   {customerNextStepCommandCenter.providerReadinessCards.map(card => (
                     <div className="min-w-0 rounded-md border border-slate-200 bg-slate-50 p-4" key={card.id}>
                       <div className="flex flex-wrap items-center gap-2">
-                        <p className="text-[11px] font-black uppercase tracking-[0.12em] text-slate-500">Provider Readiness</p>
+                        <p className="text-[11px] font-black uppercase tracking-[0.12em] text-slate-500">接入状态</p>
                         <span className="rounded bg-white px-2 py-1 text-[11px] font-black text-slate-800 ring-1 ring-slate-200">{card.status}</span>
                       </div>
                       <h4 className="mt-2 text-sm font-black leading-5 text-slate-950">{card.label}</h4>
@@ -1059,7 +1059,7 @@ export function KuaiziStyleWorkbench() {
                 <div className="mt-5 rounded-md border border-indigo-100 bg-indigo-50 p-4">
                   <div className="flex flex-col gap-2 lg:flex-row lg:items-end lg:justify-between">
                     <div className="min-w-0">
-                      <p className="text-xs font-black uppercase tracking-[0.18em] text-indigo-700">Activation Runbook</p>
+                      <p className="text-xs font-black uppercase tracking-[0.18em] text-indigo-700">Key 接入步骤</p>
                       <h4 className="mt-1 text-base font-black leading-6 text-slate-950">{providerActivationRunbook.headline}</h4>
                       <p className="mt-2 max-w-4xl text-sm leading-6 text-slate-600">{providerActivationRunbook.customerPromise}</p>
                     </div>
@@ -1118,8 +1118,8 @@ export function KuaiziStyleWorkbench() {
                 <div className="mt-5 rounded-md border border-violet-100 bg-violet-50 p-4">
                   <div className="flex flex-col gap-2 lg:flex-row lg:items-end lg:justify-between">
                     <div>
-                      <p className="text-xs font-black uppercase tracking-[0.18em] text-violet-700">Provider Need Assessment</p>
-                      <h4 className="mt-1 text-base font-black text-slate-950">外部 provider 需求评估：首版可交付，Key 到位后增强</h4>
+                      <p className="text-xs font-black uppercase tracking-[0.18em] text-violet-700">外部接入判断</p>
+                      <h4 className="mt-1 text-base font-black text-slate-950">首版可交付，图片/视频/数字人 Key 到位后增强</h4>
                       <p className="mt-2 max-w-4xl text-sm leading-6 text-slate-600">{providerNeedAssessment.customerSummary}</p>
                     </div>
                     <span className="w-fit rounded bg-white px-2.5 py-1 text-xs font-black text-violet-700 ring-1 ring-violet-100">
@@ -1150,7 +1150,7 @@ export function KuaiziStyleWorkbench() {
                 <div className="mt-5 rounded-md border border-slate-200 bg-slate-50 p-4">
                   <div className="flex flex-col gap-2 lg:flex-row lg:items-end lg:justify-between">
                     <div className="min-w-0">
-                      <p className="text-xs font-black uppercase tracking-[0.18em] text-slate-600">Provider Escalation Board</p>
+                      <p className="text-xs font-black uppercase tracking-[0.18em] text-slate-600">什么时候再升级</p>
                       <h4 className="mt-1 text-base font-black leading-6 text-slate-950">{providerEscalationBoard.headline}</h4>
                       <p className="mt-2 max-w-4xl text-sm leading-6 text-slate-600">{providerEscalationBoard.plainAnswer}</p>
                     </div>
@@ -1312,7 +1312,7 @@ export function KuaiziStyleWorkbench() {
                     </div>
                   </div>
                   <div className="rounded-md border border-amber-100 bg-amber-50 p-4">
-                    <h4 className="text-sm font-black text-slate-950">没有外部 provider 时的替代路径</h4>
+                    <h4 className="text-sm font-black text-slate-950">没有外部接入时的替代路径</h4>
                     <div className="mt-3 grid gap-2">
                       {workflowPlaybook.noProviderFallbacks.map(item => (
                         <div className="rounded bg-white px-3 py-2 text-xs font-bold leading-5 text-slate-700 ring-1 ring-amber-100" key={item}>{item}</div>
@@ -1700,7 +1700,7 @@ export function KuaiziStyleWorkbench() {
                         </div>
                       </div>
                       <div className="rounded-md bg-white p-3 ring-1 ring-fuchsia-100">
-                        <h5 className="text-sm font-black text-slate-950">仍然不等外部 provider</h5>
+                        <h5 className="text-sm font-black text-slate-950">仍然不等外部接入</h5>
                         <div className="mt-3 grid gap-2">
                           {githubRemixRadar.notProviderDependency.map(item => (
                             <div className="rounded bg-white px-3 py-2 text-xs font-bold leading-5 text-fuchsia-800 ring-1 ring-fuchsia-100" key={item}>{item}</div>
