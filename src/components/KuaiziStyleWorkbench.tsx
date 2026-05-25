@@ -385,24 +385,39 @@ export function KuaiziStyleWorkbench() {
                           <span className="rounded-full bg-white px-3 py-1.5 text-xs font-black text-slate-700 shadow-sm ring-1 ring-slate-200" key={item}>{item}</span>
                         ))}
                       </div>
+                      <div className="mt-5 grid gap-2 sm:grid-cols-2">
+                        {customerNextStepCommandCenter.commandCards.map(card => (
+                          <Link className="min-w-0 rounded-md border border-white/80 bg-white/88 p-3 text-left shadow-sm transition hover:bg-white" href={card.href} key={card.id}>
+                            <div className="flex items-center gap-2">
+                              <span className="grid size-6 shrink-0 place-items-center rounded bg-[#14213d] text-[11px] font-black text-white">
+                                {card.label.slice(0, 1)}
+                              </span>
+                              <h3 className="min-w-0 truncate text-xs font-black text-slate-950">{card.label.replace(/^\d+\.\s*/, '')}</h3>
+                            </div>
+                            <p className="mt-2 line-clamp-2 text-[11px] font-bold leading-4 text-slate-600">{card.customerDoes}</p>
+                          </Link>
+                        ))}
+                      </div>
                     </div>
                     <div className="mx-auto w-full max-w-[520px]">
                       <MiniIllustration step={selectedStep} large />
                     </div>
                   </div>
 
-                  <div className="mx-auto mt-9 grid max-w-6xl gap-4 sm:grid-cols-2 lg:grid-cols-3 2xl:grid-cols-6">
+                  <div className="mx-auto mt-6 grid max-w-6xl grid-cols-3 gap-2 sm:grid-cols-3 lg:gap-3 2xl:grid-cols-6">
                     {flowSteps.map(step => (
                       <button
-                        className={`group relative min-h-[228px] rounded-lg border bg-white p-3 text-left shadow-sm transition hover:-translate-y-0.5 hover:shadow-md ${selectedStep.id === step.id ? 'border-[#6b5cff] ring-2 ring-[#6b5cff]/15' : 'border-slate-200'}`}
+                        className={`group relative min-h-[96px] rounded-lg border bg-white p-2 text-left shadow-sm transition hover:-translate-y-0.5 hover:shadow-md sm:min-h-[128px] sm:p-3 lg:min-h-[184px] ${selectedStep.id === step.id ? 'border-[#6b5cff] ring-2 ring-[#6b5cff]/15' : 'border-slate-200'}`}
                         key={step.id}
                         onClick={() => setSelectedId(step.id)}
                         type="button"
                       >
-                        <MiniIllustration step={step} />
-                        <div className="mt-3 break-words text-sm font-black leading-5 text-slate-900">{step.label}</div>
-                        <p className="mt-1 line-clamp-3 text-xs leading-5 text-slate-500">{step.body}</p>
-                        <p className="mt-2 text-xs font-black text-indigo-600">{step.output}</p>
+                        <div className="hidden lg:block">
+                          <MiniIllustration step={step} />
+                        </div>
+                        <div className="break-words text-xs font-black leading-4 text-slate-900 sm:text-sm sm:leading-5 lg:mt-3">{step.label}</div>
+                        <p className="mt-1 hidden text-xs leading-5 text-slate-500 sm:line-clamp-2 sm:block lg:line-clamp-3">{step.body}</p>
+                        <p className="mt-2 hidden text-xs font-black text-indigo-600 sm:line-clamp-1 sm:block lg:line-clamp-2">{step.output}</p>
                       </button>
                     ))}
                   </div>
