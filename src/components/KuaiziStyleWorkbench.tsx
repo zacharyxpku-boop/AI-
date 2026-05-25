@@ -709,6 +709,49 @@ export function KuaiziStyleWorkbench() {
                     </article>
                   ))}
                 </div>
+                <div className="mt-4 rounded-md border border-amber-100 bg-slate-50 p-4">
+                  <div className="flex flex-col gap-3 lg:flex-row lg:items-end lg:justify-between">
+                    <div className="min-w-0">
+                      <p className="text-xs font-black uppercase tracking-[0.18em] text-amber-700">Return Upload Path</p>
+                      <h4 className="mt-1 text-base font-black leading-6 text-slate-950">客户回传只走一个云盘目录，缺 API 也能复盘</h4>
+                      <p className="mt-2 max-w-4xl text-sm leading-6 text-slate-600">
+                        默认把发布证据放进 {cloudDrive.rootDir}/04-customer-return；后续有企业云盘、对象存储或 analytics API 时，只替换同步层，不改变客户回传习惯。
+                      </p>
+                    </div>
+                    <span className="w-fit rounded bg-white px-2.5 py-1 text-xs font-black text-amber-700 ring-1 ring-amber-100">
+                      {cloudReturnPlan.intakeFields.length} 类证据
+                    </span>
+                  </div>
+                  <div className="mt-4 grid gap-3 lg:grid-cols-[minmax(0,0.8fr)_minmax(0,1fr)_minmax(260px,0.75fr)]">
+                    <div className="rounded-md bg-white p-3 ring-1 ring-slate-200">
+                      <h5 className="text-sm font-black text-slate-950">客户上传步骤</h5>
+                      <div className="mt-3 grid gap-2">
+                        {customerEvidenceUploadGuide.uploadSteps.map((step, index) => (
+                          <div className="rounded bg-amber-50 px-3 py-2 text-xs ring-1 ring-amber-100" key={step.title}>
+                            <div className="font-black leading-5 text-amber-900">{index + 1}. {step.title}</div>
+                            <p className="mt-1 line-clamp-2 font-bold leading-5 text-slate-600">{step.customerAction}</p>
+                          </div>
+                        ))}
+                      </div>
+                    </div>
+                    <div className="rounded-md bg-white p-3 ring-1 ring-slate-200">
+                      <h5 className="text-sm font-black text-slate-950">云盘目录规则</h5>
+                      <div className="mt-3 grid gap-2 sm:grid-cols-2">
+                        {cloudReturnPlan.folderRules.map(item => (
+                          <div className="rounded bg-white px-3 py-2 text-xs font-bold leading-5 text-slate-700 ring-1 ring-slate-200" key={item}>{item}</div>
+                        ))}
+                      </div>
+                    </div>
+                    <div className="rounded-md bg-white p-3 ring-1 ring-slate-200">
+                      <h5 className="text-sm font-black text-slate-950">上传后产出</h5>
+                      <div className="mt-3 grid gap-2">
+                        {cloudReturnPlan.nextRoundOutputs.slice(0, 5).map(item => (
+                          <div className="rounded bg-emerald-50 px-3 py-2 text-xs font-bold leading-5 text-emerald-900" key={item}>{item}</div>
+                        ))}
+                      </div>
+                    </div>
+                  </div>
+                </div>
                 <div className="mt-4 grid gap-3 lg:grid-cols-[minmax(0,1fr)_minmax(280px,0.54fr)]">
                   <div className="rounded-md border border-emerald-100 bg-emerald-50 p-4">
                     <h4 className="text-sm font-black text-slate-950">回填后系统立刻判断</h4>

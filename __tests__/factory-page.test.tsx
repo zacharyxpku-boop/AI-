@@ -54,6 +54,11 @@ describe('factory page', () => {
     expect(html).toContain('Self Publish Evidence Inbox');
     expect(html).toContain('客户自己发布，我们用证据把下一轮做准');
     expect(html).toContain('回填后系统立刻判断');
+    expect(html).toContain('Return Upload Path');
+    expect(html).toContain('客户回传只走一个云盘目录，缺 API 也能复盘');
+    expect(html).toContain('客户上传步骤');
+    expect(html).toContain('云盘目录规则');
+    expect(html).toContain('上传后产出');
     expect(html).toContain('不向客户索要');
     expect(html).toContain('Proof Assets &amp; Support');
     expect(html).toContain('模特图、证明图和客服话术要接在一起');
