@@ -13,6 +13,7 @@ import {
   buildCommerceCustomerServicePack,
   buildCommerceCustomerSupportWorkflow,
   buildCommerceCreatorPersonaMatrix,
+  buildCommerceEvidenceReadinessBoard,
   buildCommerceFirstDeliveryChecklist,
   buildCommerceModelImageTaskPack,
   buildCommerceOpenSourceAdapters,
@@ -249,14 +250,23 @@ describe('commerce remix engine', () => {
     const missingReport = evaluateCommercePerformanceUploads([{ platform: 'tiktok' }]);
     const readyBoard = buildCommerceCustomerReturnIntakeBoard(readyReport, returnPlan);
     const missingBoard = buildCommerceCustomerReturnIntakeBoard(missingReport, returnPlan);
+    const readyEvidence = buildCommerceEvidenceReadinessBoard(readyReport, returnPlan, readyBoard);
+    const missingEvidence = buildCommerceEvidenceReadinessBoard(missingReport, returnPlan, missingBoard);
 
     expect(readyBoard.status).toBe('ready_for_review');
     expect(readyBoard.evidenceCards.every(card => card.state === 'received')).toBe(true);
     expect(readyBoard.reviewQueue.join(' ')).toContain('Hook B');
     expect(readyBoard.nextOwnerActions.length).toBeGreaterThanOrEqual(4);
+    expect(readyEvidence.status).toBe('ready_for_review');
+    expect(readyEvidence.headline).toContain('客户表现证据验收板');
+    expect(readyEvidence.requiredEvidenceChecks.every(check => check.state === 'ready')).toBe(true);
+    expect(readyEvidence.uploadRoutes).toContain('把文件放到 04-customer-return 云盘目录');
     expect(missingBoard.status).toBe('needs_evidence');
     expect(missingBoard.evidenceCards.filter(card => card.state === 'missing')).toHaveLength(3);
     expect(missingBoard.nextOwnerActions).toHaveLength(3);
+    expect(missingEvidence.status).toBe('needs_customer_upload');
+    expect(missingEvidence.blockedWhen.join(' ')).toContain('只有口头反馈');
+    expect(missingEvidence.nextRoundHandoff.join(' ')).toContain('发布链接');
   });
 
   it('connects customer returns to remix support and evidence actions', () => {

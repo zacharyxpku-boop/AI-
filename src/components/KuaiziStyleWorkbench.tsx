@@ -7,6 +7,7 @@ import {
   buildDemoCommerceCloudDriveReturnPlan,
   buildDemoCommerceCustomerReturnIntakeBoard,
   buildDemoCommerceCustomerDeliveryMap,
+  buildDemoCommerceEvidenceReadinessBoard,
   buildDemoCommerceSalesConversationBoard,
   buildDemoCommerceCustomerServicePack,
   buildDemoCommerceCustomerSupportWorkflow,
@@ -259,6 +260,7 @@ export function KuaiziStyleWorkbench() {
   const renderReliabilityBoard = useMemo(() => buildDemoCommerceRenderReliabilityBoard(), []);
   const cloudReturnPlan = useMemo(() => buildDemoCommerceCloudDriveReturnPlan(), []);
   const customerReturnIntakeBoard = useMemo(() => buildDemoCommerceCustomerReturnIntakeBoard(), []);
+  const evidenceReadinessBoard = useMemo(() => buildDemoCommerceEvidenceReadinessBoard(), []);
   const postPublishActionBoard = useMemo(() => buildDemoCommercePostPublishActionBoard(), []);
   const queueSummary = useMemo(() => {
     const statuses = ['needs_material', 'ready', 'rendering', 'exported'] as const;
@@ -1067,6 +1069,31 @@ export function KuaiziStyleWorkbench() {
                     {performanceReport.nextRoundAdvice.slice(0, 3).map(item => (
                       <div className="rounded-md bg-white px-3 py-2 text-xs font-bold leading-5 text-slate-700 ring-1 ring-amber-100" key={item}>{item}</div>
                     ))}
+                  </div>
+                  <div className="mt-4 rounded-md border border-orange-100 bg-white p-3 ring-1 ring-orange-50">
+                    <div className="flex items-center justify-between gap-3">
+                      <div>
+                        <div className="text-xs font-black uppercase tracking-[0.16em] text-orange-700">Evidence Readiness</div>
+                        <h4 className="mt-1 text-sm font-black text-slate-950">{evidenceReadinessBoard.headline}</h4>
+                      </div>
+                      <span className={`shrink-0 rounded px-2 py-1 text-[11px] font-black ${evidenceReadinessBoard.status === 'ready_for_review' ? 'bg-emerald-50 text-emerald-700' : 'bg-rose-50 text-rose-700'}`}>
+                        {evidenceReadinessBoard.status === 'ready_for_review' ? '证据已齐' : '待客户上传'}
+                      </span>
+                    </div>
+                    <p className="mt-3 text-xs leading-5 text-slate-600">{evidenceReadinessBoard.customerInstruction}</p>
+                    <div className="mt-3 grid gap-2">
+                      {evidenceReadinessBoard.requiredEvidenceChecks.map(check => (
+                        <div className="rounded bg-orange-50 px-3 py-2 text-xs ring-1 ring-orange-100" key={check.label}>
+                          <div className="flex items-center justify-between gap-2">
+                            <span className="font-black text-slate-800">{check.label}</span>
+                            <span className={`shrink-0 rounded px-2 py-0.5 font-black ${check.state === 'ready' ? 'bg-emerald-50 text-emerald-700' : 'bg-rose-50 text-rose-700'}`}>
+                              {check.state === 'ready' ? '可复盘' : '缺证据'}
+                            </span>
+                          </div>
+                          <p className="mt-1 line-clamp-2 leading-5 text-slate-600">{check.whyItMatters}</p>
+                        </div>
+                      ))}
+                    </div>
                   </div>
                   <div className="mt-4 rounded-md border border-amber-100 bg-white p-3">
                     <div className="flex items-center justify-between gap-3">

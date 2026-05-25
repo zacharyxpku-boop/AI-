@@ -130,6 +130,9 @@ describe('/api/commerce-remix', () => {
     expect(body.cloudReturnPlan.nextRoundOutputs).toContain('重剪任务清单');
     expect(body.customerReturnIntakeBoard.status).toBe('ready_for_review');
     expect(body.customerReturnIntakeBoard.evidenceCards.every((card: { state: string }) => card.state === 'received')).toBe(true);
+    expect(body.evidenceReadinessBoard.headline).toContain('客户表现证据验收板');
+    expect(body.evidenceReadinessBoard.requiredEvidenceChecks.every((check: { state: string }) => check.state === 'ready')).toBe(true);
+    expect(body.evidenceReadinessBoard.uploadRoutes).toContain('把文件放到 04-customer-return 云盘目录');
     expect(body.postPublishActionBoard.status).toBe('ready_for_next_round');
     expect(body.postPublishActionBoard.actionLanes.map((lane: { id: string }) => lane.id)).toContain('support');
     expect(body.postPublishActionBoard.doNotAutomate).toContain('不自动读取平台后台。');

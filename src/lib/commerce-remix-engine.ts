@@ -159,6 +159,22 @@ export interface CommerceCustomerReturnIntakeBoard {
   nextOwnerActions: string[];
 }
 
+export interface CommerceEvidenceReadinessBoard {
+  headline: string;
+  status: 'ready_for_review' | 'needs_customer_upload';
+  customerInstruction: string;
+  requiredEvidenceChecks: Array<{
+    label: string;
+    state: 'ready' | 'missing';
+    whyItMatters: string;
+    nextAction: string;
+  }>;
+  uploadRoutes: string[];
+  readyToReviewWhen: string[];
+  blockedWhen: string[];
+  nextRoundHandoff: string[];
+}
+
 export interface CommercePostPublishActionBoard {
   headline: string;
   status: 'ready_for_next_round' | 'waiting_for_evidence';
@@ -1808,6 +1824,60 @@ export function buildCommerceCustomerReturnIntakeBoard(
   };
 }
 
+export function buildCommerceEvidenceReadinessBoard(
+  report: CommercePerformanceUploadReport,
+  returnPlan: CommerceCloudDriveReturnPlan,
+  intakeBoard = buildCommerceCustomerReturnIntakeBoard(report, returnPlan),
+): CommerceEvidenceReadinessBoard {
+  const checks = intakeBoard.evidenceCards
+    .filter(card => card.required)
+    .map(card => {
+      const label = card.label;
+      const state = card.state === 'received' ? 'ready' as const : 'missing' as const;
+      return {
+        label,
+        state,
+        whyItMatters: label === '发布平台链接'
+          ? '确认作品真实发布，后续才能把表现归因到具体标题和账号人设。'
+          : label === '发布截图'
+            ? '确认发布时间、封面、标题和后台指标，不靠口头描述判断效果。'
+            : '用曝光、点击、互动、订单或收入判断下一轮放大、换标题还是重剪。',
+        nextAction: state === 'ready'
+          ? `${label}已齐，可以进入复盘。`
+          : `请客户补交${label}，再进入标题和素材表现判断。`,
+      };
+    });
+  const ready = checks.every(check => check.state === 'ready');
+
+  return {
+    headline: '客户表现证据验收板',
+    status: ready ? 'ready_for_review' : 'needs_customer_upload',
+    customerInstruction: '客户不用给平台账号，也不用开后台权限；只要把发布链接、截图、表现 CSV 或云盘目录上传，Wenai 就能做下一轮复盘。',
+    requiredEvidenceChecks: checks,
+    uploadRoutes: [
+      '直接粘贴发布链接 URL',
+      '上传发布截图或后台表现截图',
+      '上传表现 CSV：title, impressions, clicks, orders, revenue',
+      '把文件放到 04-customer-return 云盘目录',
+    ],
+    readyToReviewWhen: [
+      '能看到作品链接和发布时间',
+      '截图能证明标题、封面或后台指标',
+      'CSV 至少包含标题列和一个表现指标',
+      '客户备注说明哪些内容想继续放大或停止',
+    ],
+    blockedWhen: [
+      '只有口头反馈，没有链接、截图或 CSV',
+      '截图看不到标题、发布时间或指标来源',
+      'CSV 没有标题列，无法对应到账号人设和发布包',
+      '客户要求系统自动登录平台读取后台，但未提供正式授权路径',
+    ],
+    nextRoundHandoff: ready
+      ? returnPlan.nextRoundOutputs
+      : report.missingEvidence.map(item => `先补齐${item.replace('缺', '')}`),
+  };
+}
+
 export function buildCommercePostPublishActionBoard(
   report: CommercePerformanceUploadReport,
   returnBoard: CommerceCustomerReturnIntakeBoard,
@@ -2858,6 +2928,13 @@ export function buildDemoCommerceCustomerReturnIntakeBoard() {
     buildDemoCommercePerformanceUploadReport(),
     buildCommerceCloudDriveReturnPlan(input, buildCommerceCloudDriveManifest(input)),
   );
+}
+
+export function buildDemoCommerceEvidenceReadinessBoard() {
+  const input = buildDemoCommerceRemixInput();
+  const report = buildDemoCommercePerformanceUploadReport();
+  const returnPlan = buildCommerceCloudDriveReturnPlan(input, buildCommerceCloudDriveManifest(input));
+  return buildCommerceEvidenceReadinessBoard(report, returnPlan, buildCommerceCustomerReturnIntakeBoard(report, returnPlan));
 }
 
 export function buildDemoCommercePostPublishActionBoard() {

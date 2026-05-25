@@ -4,6 +4,7 @@ import {
   buildCommerceCloudDriveReturnPlan,
   buildCommerceCustomerReturnIntakeBoard,
   buildCommerceCustomerDeliveryMap,
+  buildCommerceEvidenceReadinessBoard,
   buildCommerceSalesConversationBoard,
   buildCommerceCustomerServicePack,
   buildCommerceCustomerSupportWorkflow,
@@ -32,6 +33,7 @@ import {
   buildDemoCommerceCloudDriveReturnPlan,
   buildDemoCommerceCustomerReturnIntakeBoard,
   buildDemoCommerceCustomerDeliveryMap,
+  buildDemoCommerceEvidenceReadinessBoard,
   buildDemoCommerceSalesConversationBoard,
   buildDemoCommerceCustomerServicePack,
   buildDemoCommerceCustomerSupportWorkflow,
@@ -126,6 +128,7 @@ function buildInputResponse(input: CommerceRemixPlanInput, body: CommerceRemixRe
   const cloudReturnPlan = buildCommerceCloudDriveReturnPlan(input, cloudDrive);
   const selfPublishingCommandCenter = buildCommerceSelfPublishingCommandCenter(input, publishingMatrix, creatorPersonaMatrix, cloudReturnPlan);
   const customerReturnIntakeBoard = buildCommerceCustomerReturnIntakeBoard(performanceReport, cloudReturnPlan);
+  const evidenceReadinessBoard = buildCommerceEvidenceReadinessBoard(performanceReport, cloudReturnPlan, customerReturnIntakeBoard);
   const postPublishActionBoard = buildCommercePostPublishActionBoard(performanceReport, customerReturnIntakeBoard, customerSupportWorkflow, cloudReturnPlan);
 
   return {
@@ -163,6 +166,7 @@ function buildInputResponse(input: CommerceRemixPlanInput, body: CommerceRemixRe
     selfPublishingCommandCenter,
     cloudReturnPlan,
     customerReturnIntakeBoard,
+    evidenceReadinessBoard,
     postPublishActionBoard,
   };
 }
@@ -201,6 +205,7 @@ export async function GET() {
     selfPublishingCommandCenter: buildDemoCommerceSelfPublishingCommandCenter(),
     cloudReturnPlan: buildDemoCommerceCloudDriveReturnPlan(),
     customerReturnIntakeBoard: buildDemoCommerceCustomerReturnIntakeBoard(),
+    evidenceReadinessBoard: buildDemoCommerceEvidenceReadinessBoard(),
     postPublishActionBoard: buildDemoCommercePostPublishActionBoard(),
   });
 }

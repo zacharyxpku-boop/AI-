@@ -71,6 +71,8 @@ describe('factory page', () => {
     expect(html).toContain('客户自发布');
     expect(html).toContain('客户回填字段');
     expect(html).toContain('回填后系统看什么');
+    expect(html).toContain('Evidence Readiness');
+    expect(html).toContain('客户表现证据验收板');
     expect(html).toContain('Post Publish Action Board');
     expect(html).toContain('发布后复盘行动板');
     expect(html).toContain('可进入下一轮');
