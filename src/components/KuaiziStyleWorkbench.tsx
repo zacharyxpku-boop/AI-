@@ -123,8 +123,8 @@ const flowSteps: FlowStep[] = [
     label: '发布与分发',
     short: '分发',
     href: '/factory/cast?variant=friend_trial',
-    title: '生成平台发布包，让客户直接发或授权执行',
-    body: '先把标题、正文、封面、素材、发布时间和回填字段准备好；需要代操作时只走客户授权范围内的辅助流程。',
+    title: '生成平台发布包，让客户自己登录平台发布',
+    body: '先把标题、正文、封面、素材、发布时间和回填字段准备好；Wenai 不代管账号，只交付可复制、可检查、可回填的发布包。',
     output: '输出：发布包 + 回填表',
     accent: 'from-sky-500 via-cyan-500 to-lime-400',
   },
@@ -355,11 +355,11 @@ export function KuaiziStyleWorkbench() {
               <div className="min-w-0">
                 <div className="flex flex-wrap items-center gap-2">
                   <h1 className="text-lg font-black tracking-tight md:text-xl">Wenai 商品增长工作台</h1>
-                  <span className="rounded-md bg-blue-50 px-2 py-1 text-xs font-bold text-blue-700 ring-1 ring-blue-100">API Key 可接入</span>
+                  <span className="rounded-md bg-blue-50 px-2 py-1 text-xs font-bold text-blue-700 ring-1 ring-blue-100">生成服务可增强</span>
                   <span className="rounded-md bg-emerald-50 px-2 py-1 text-xs font-bold text-emerald-700 ring-1 ring-emerald-100">可先交付发布包</span>
                 </div>
                 <p className="mt-1 line-clamp-2 max-w-3xl text-sm leading-6 text-slate-500">
-                  客户按“商品资料 - 卖点脚本 - 图片/视频/数字人 - 发布包 - 表现复盘”的顺序操作；能自动生成的直接接 API，最后发布可由客户自己完成，也可在授权后辅助执行。
+                  客户按“商品资料 - 卖点脚本 - 图片/视频/数字人 - 发布包 - 表现复盘”的顺序操作；生成服务 Key 到位后增强图片、视频和数字人，首版仍由客户自己登录平台发布。
                 </p>
               </div>
               <div className="flex flex-wrap items-center gap-2">
@@ -377,7 +377,7 @@ export function KuaiziStyleWorkbench() {
                 <div className="relative bg-[radial-gradient(circle_at_18%_0%,#ddf7ff_0,transparent_24%),radial-gradient(circle_at_70%_0%,#ffe3f3_0,transparent_30%),linear-gradient(135deg,#fbfdff_0%,#f5f8ff_48%,#ffffff_100%)] px-5 py-9">
                   <div className="mx-auto grid max-w-6xl gap-8 lg:grid-cols-[minmax(0,0.95fr)_minmax(360px,0.72fr)] lg:items-center">
                     <div className="min-w-0 text-center lg:text-left">
-                      <p className="text-xs font-black uppercase tracking-[0.18em] text-indigo-600">Product Content Factory</p>
+                      <p className="text-xs font-black uppercase tracking-[0.18em] text-indigo-600">商品内容工厂</p>
                       <h2 className="mt-3 text-3xl font-black leading-tight tracking-tight text-[#15213f] md:text-5xl">从一个商品，生成一整套可发布内容</h2>
                       <p className="mt-4 max-w-2xl text-sm leading-7 text-slate-600 lg:text-base">
                         不让客户看一堆抽象模块。客户只要按步骤填商品资料、选卖点、生成图片和视频、导出发布包，再把发布结果回填，平台就能给出下一轮建议。
@@ -429,7 +429,7 @@ export function KuaiziStyleWorkbench() {
               <section className="rounded-lg border border-[#cfe8ff] bg-white p-5 shadow-sm">
                 <div className="flex flex-col gap-3 lg:flex-row lg:items-end lg:justify-between">
                   <div className="min-w-0">
-                    <p className="text-xs font-black uppercase tracking-[0.18em] text-cyan-700">Remix To Publish Control</p>
+                    <p className="text-xs font-black uppercase tracking-[0.18em] text-cyan-700">混剪到发布控制台</p>
                     <h3 className="mt-1 text-lg font-black leading-6 text-slate-950">开源混剪、口播标题、客户自发布，先合成一条稳定流水线</h3>
                     <p className="mt-2 max-w-5xl text-sm leading-6 text-slate-500">
                       图片、视频、数字人和 TTS 等 Key 到位后增强生成层；首版先把 GitHub 开源混剪范式、账号人设标题、发布包和云盘回传证据接成可交付闭环，客户不用理解仓库名，也不用交出账号密码。
@@ -493,7 +493,7 @@ export function KuaiziStyleWorkbench() {
               <section className="rounded-lg border border-[#d8dcff] bg-white p-5 shadow-sm">
                 <div className="flex flex-col gap-3 lg:flex-row lg:items-end lg:justify-between">
                   <div className="min-w-0">
-                    <p className="text-xs font-black uppercase tracking-[0.18em] text-indigo-700">Platform Title Matrix</p>
+                    <p className="text-xs font-black uppercase tracking-[0.18em] text-indigo-700">多账号标题矩阵</p>
                     <h3 className="mt-1 text-lg font-black leading-6 text-slate-950">每个平台都有账号人设、标题、前三句口播和证明素材</h3>
                     <p className="mt-2 max-w-5xl text-sm leading-6 text-slate-500">
                       多账号矩阵不是代登代发；Wenai 先把小红书、TikTok、视频号等发布槽拆成真实买家号、测评种草号、店铺官方号，客户复制标题和口播，自行发布后回填链接、截图或 CSV。
@@ -531,7 +531,7 @@ export function KuaiziStyleWorkbench() {
               <section className="rounded-lg border border-[#dbe6ff] bg-white p-5 shadow-sm">
                 <div className="flex flex-col gap-4 lg:flex-row lg:items-start lg:justify-between">
                   <div className="min-w-0">
-                    <p className="text-xs font-black uppercase tracking-[0.18em] text-blue-600">Customer Next Step</p>
+                    <p className="text-xs font-black uppercase tracking-[0.18em] text-blue-600">客户下一步</p>
                     <h3 className="mt-1 text-lg font-black leading-6 text-slate-950">{customerNextStepCommandCenter.headline}</h3>
                     <p className="mt-2 max-w-5xl text-sm leading-6 text-slate-500">{customerNextStepCommandCenter.promise}</p>
                   </div>
@@ -590,7 +590,7 @@ export function KuaiziStyleWorkbench() {
               <section className="rounded-lg border border-[#d9e8ff] bg-white p-5 shadow-sm">
                 <div className="flex flex-col gap-3 lg:flex-row lg:items-end lg:justify-between">
                   <div className="min-w-0">
-                    <p className="text-xs font-black uppercase tracking-[0.18em] text-sky-600">Today Render Queue</p>
+                    <p className="text-xs font-black uppercase tracking-[0.18em] text-sky-600">今日渲染队列</p>
                     <h3 className="mt-1 text-lg font-black leading-6 text-slate-950">今天队列能不能稳定出片，客户一眼看懂</h3>
                     <p className="mt-2 max-w-5xl text-sm leading-6 text-slate-500">
                       混剪不只是一键生成视频；Wenai 把每条成片拆成素材预检、模板时间线、批量渲染、单条重试和发布包回填，失败不会拖垮整批。
@@ -643,7 +643,7 @@ export function KuaiziStyleWorkbench() {
                 <div className="mt-4 rounded-md border border-sky-100 bg-slate-50 p-4">
                   <div className="flex flex-col gap-3 lg:flex-row lg:items-end lg:justify-between">
                     <div className="min-w-0">
-                      <p className="text-xs font-black uppercase tracking-[0.18em] text-sky-700">Scale Runbook</p>
+                      <p className="text-xs font-black uppercase tracking-[0.18em] text-sky-700">扩容运行手册</p>
                       <h4 className="mt-1 text-base font-black leading-6 text-slate-950">大规模渲染不靠一把梭，按三层队列逐步升级</h4>
                       <p className="mt-2 max-w-4xl text-sm leading-6 text-slate-600">{renderOperationsRunbook.operatingMode}</p>
                     </div>
@@ -687,7 +687,7 @@ export function KuaiziStyleWorkbench() {
               <section className="rounded-lg border border-[#fde68a] bg-white p-5 shadow-sm">
                 <div className="flex flex-col gap-3 lg:flex-row lg:items-end lg:justify-between">
                   <div className="min-w-0">
-                    <p className="text-xs font-black uppercase tracking-[0.18em] text-amber-700">Self Publish Evidence Inbox</p>
+                    <p className="text-xs font-black uppercase tracking-[0.18em] text-amber-700">自发布证据收件箱</p>
                     <h3 className="mt-1 text-lg font-black leading-6 text-slate-950">客户自己发布，我们用证据把下一轮做准</h3>
                     <p className="mt-2 max-w-5xl text-sm leading-6 text-slate-500">
                       首版不接管账号、不自动登录、不读后台。客户只要把发布链接、截图、CSV 或云盘目录交回来，Wenai 就能判断下一轮该改标题、改封面、重剪视频还是补客服话术。
@@ -712,7 +712,7 @@ export function KuaiziStyleWorkbench() {
                 <div className="mt-4 rounded-md border border-amber-100 bg-slate-50 p-4">
                   <div className="flex flex-col gap-3 lg:flex-row lg:items-end lg:justify-between">
                     <div className="min-w-0">
-                      <p className="text-xs font-black uppercase tracking-[0.18em] text-amber-700">Return Upload Path</p>
+                      <p className="text-xs font-black uppercase tracking-[0.18em] text-amber-700">回传上传路径</p>
                       <h4 className="mt-1 text-base font-black leading-6 text-slate-950">客户回传只走一个云盘目录，缺 API 也能复盘</h4>
                       <p className="mt-2 max-w-4xl text-sm leading-6 text-slate-600">
                         默认把发布证据放进 {cloudDrive.rootDir}/04-customer-return；后续有企业云盘、对象存储或表现数据 API 时，只替换同步层，不改变客户回传习惯。
@@ -778,7 +778,7 @@ export function KuaiziStyleWorkbench() {
               <section className="rounded-lg border border-[#f9d3c7] bg-white p-5 shadow-sm">
                 <div className="flex flex-col gap-3 lg:flex-row lg:items-end lg:justify-between">
                   <div className="min-w-0">
-                    <p className="text-xs font-black uppercase tracking-[0.18em] text-rose-600">Proof Assets & Support</p>
+                    <p className="text-xs font-black uppercase tracking-[0.18em] text-rose-600">证明素材和客服承接</p>
                     <h3 className="mt-1 text-lg font-black leading-6 text-slate-950">模特图、证明图和客服话术要接在一起</h3>
                     <p className="mt-2 max-w-5xl text-sm leading-6 text-slate-500">
                       图片 Key 没到位时先交付模特图 prompt、参考图要求和验收清单；客户咨询、评论和售后问题同步变成 FAQ、异议处理和下一轮短视频脚本。
@@ -966,7 +966,7 @@ export function KuaiziStyleWorkbench() {
                 <div className="mt-5 rounded-md border border-emerald-100 bg-emerald-50 p-4">
                   <div className="flex flex-col gap-3 lg:flex-row lg:items-end lg:justify-between">
                     <div className="min-w-0">
-                      <p className="text-xs font-black uppercase tracking-[0.18em] text-emerald-700">Daily Operator Cockpit</p>
+                      <p className="text-xs font-black uppercase tracking-[0.18em] text-emerald-700">每日运营驾驶舱</p>
                       <h4 className="mt-1 text-base font-black leading-6 text-slate-950">{dailyOperatorCockpit.headline}</h4>
                       <p className="mt-2 max-w-4xl text-sm leading-6 text-slate-600">{dailyOperatorCockpit.promise}</p>
                     </div>
@@ -1192,7 +1192,7 @@ export function KuaiziStyleWorkbench() {
               <section className="rounded-lg border border-[#e2e8f5] bg-white p-5 shadow-sm">
                 <div className="flex flex-col gap-3 md:flex-row md:items-end md:justify-between">
                   <div>
-                    <p className="text-xs font-black uppercase tracking-[0.18em] text-orange-600">Model Image Tasks</p>
+                    <p className="text-xs font-black uppercase tracking-[0.18em] text-orange-600">模特生图任务</p>
                     <h3 className="mt-1 text-lg font-black text-slate-950">模特生图先做成任务包，Key 到位后直接执行</h3>
                     <p className="mt-1 text-sm leading-6 text-slate-500">{modelImageTaskPack.providerBoundary}</p>
                   </div>
@@ -1217,7 +1217,7 @@ export function KuaiziStyleWorkbench() {
               <section className="rounded-lg border border-[#e2e8f5] bg-white p-5 shadow-sm">
                 <div className="flex flex-col gap-3 md:flex-row md:items-end md:justify-between">
                   <div className="min-w-0">
-                    <p className="text-xs font-black uppercase tracking-[0.18em] text-indigo-600">Ecommerce Growth Loop</p>
+                    <p className="text-xs font-black uppercase tracking-[0.18em] text-indigo-600">电商增长闭环</p>
                     <h3 className="mt-1 text-lg font-black leading-6 text-slate-950">{ecommerceGrowthLoopConsole.headline}</h3>
                     <p className="mt-2 max-w-5xl text-sm leading-6 text-slate-500">{ecommerceGrowthLoopConsole.promise}</p>
                   </div>
@@ -1280,7 +1280,7 @@ export function KuaiziStyleWorkbench() {
               <section className="rounded-lg border border-[#e2e8f5] bg-white p-5 shadow-sm">
                 <div className="flex flex-col gap-3 md:flex-row md:items-end md:justify-between">
                   <div>
-                    <p className="text-xs font-black uppercase tracking-[0.18em] text-cyan-600">Customer Workflow</p>
+                    <p className="text-xs font-black uppercase tracking-[0.18em] text-cyan-600">客户工作流</p>
                     <h3 className="mt-1 text-lg font-black text-slate-950">客户看到的是一条商品增长流水线，不是零散 AI 工具</h3>
                     <p className="mt-1 text-sm leading-6 text-slate-500">从商品资料到发布回填，每一步都写清客户要做什么、系统产出什么、什么时候不能继续。</p>
                   </div>
@@ -1425,7 +1425,7 @@ export function KuaiziStyleWorkbench() {
                 <aside className="rounded-lg border border-[#e2e8f5] bg-white p-5 shadow-sm">
                   <div className="flex items-start justify-between gap-3">
                     <div className="min-w-0">
-                      <div className="text-xs font-bold uppercase tracking-wide text-slate-400">Today</div>
+                      <div className="text-xs font-bold uppercase tracking-wide text-slate-400">今天</div>
                       <h3 className="mt-1 text-xl font-black leading-snug text-slate-950">今天先完成一个商品的首轮内容包</h3>
                     </div>
                     <span className="rounded-full bg-slate-100 px-2.5 py-1 text-xs font-black text-slate-600">1/6</span>
@@ -1624,7 +1624,7 @@ export function KuaiziStyleWorkbench() {
                   <div className="rounded-md border border-violet-100 bg-violet-50 p-4">
                     <div className="flex flex-col gap-3 lg:flex-row lg:items-end lg:justify-between">
                       <div className="min-w-0">
-                        <p className="text-xs font-black uppercase tracking-[0.18em] text-violet-700">GitHub Remix Blueprint</p>
+                        <p className="text-xs font-black uppercase tracking-[0.18em] text-violet-700">GitHub 开源混剪蓝图</p>
                         <h4 className="mt-1 text-base font-black leading-6 text-slate-950">{openSourceRemixBlueprint.headline}</h4>
                         <p className="mt-2 max-w-4xl text-sm leading-6 text-slate-600">{openSourceRemixBlueprint.promise}</p>
                       </div>
@@ -1781,7 +1781,7 @@ export function KuaiziStyleWorkbench() {
                   <div className="rounded-md border border-emerald-100 bg-emerald-50 p-4">
                     <div className="flex flex-col gap-3 lg:flex-row lg:items-end lg:justify-between">
                       <div className="min-w-0">
-                        <p className="text-xs font-black uppercase tracking-[0.18em] text-emerald-700">Open Source Stack Selector</p>
+                        <p className="text-xs font-black uppercase tracking-[0.18em] text-emerald-700">开源混剪栈选择器</p>
                         <h4 className="mt-1 text-base font-black leading-6 text-slate-950">{openSourceStackSelector.headline}</h4>
                         <p className="mt-2 max-w-4xl text-sm leading-6 text-slate-600">{openSourceStackSelector.customerPromise}</p>
                       </div>
@@ -1930,7 +1930,7 @@ export function KuaiziStyleWorkbench() {
                 </div>
 
                 <aside className="rounded-lg border border-[#d8e4ff] bg-[#f4f8ff] p-5 text-slate-950 shadow-sm">
-                  <p className="text-xs font-black uppercase tracking-[0.18em] text-blue-600">Render Queue</p>
+                  <p className="text-xs font-black uppercase tracking-[0.18em] text-blue-600">渲染队列</p>
                   <h3 className="mt-2 text-xl font-black leading-snug">大规模渲染队列先按“任务包”解决</h3>
                   <p className="mt-3 text-sm leading-6 text-slate-600">
                     每条视频都有素材清单、模板、尺寸、字幕、封面和输出路径。失败时只回到缺口，不让客户看到复杂报错。
@@ -1938,7 +1938,7 @@ export function KuaiziStyleWorkbench() {
                   <div className="mt-4 rounded-md border border-blue-100 bg-white p-3 ring-1 ring-blue-50">
                     <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
                       <div>
-                        <div className="text-xs font-black uppercase tracking-[0.16em] text-blue-600">Reliability Board</div>
+                        <div className="text-xs font-black uppercase tracking-[0.16em] text-blue-600">稳定渲染看板</div>
                         <p className="mt-1 text-sm font-black leading-5 text-slate-950">稳定渲染看板</p>
                       </div>
                       <span className="w-fit rounded bg-blue-50 px-2.5 py-1 text-xs font-black text-blue-700">
@@ -1961,7 +1961,7 @@ export function KuaiziStyleWorkbench() {
                   <div className="mt-4 rounded-md border border-indigo-100 bg-white p-3 ring-1 ring-indigo-50">
                     <div className="flex flex-col gap-2 sm:flex-row sm:items-start sm:justify-between">
                       <div className="min-w-0">
-                        <div className="text-xs font-black uppercase tracking-[0.16em] text-indigo-600">Render Operations Runbook</div>
+                        <div className="text-xs font-black uppercase tracking-[0.16em] text-indigo-600">稳定渲染运行手册</div>
                         <p className="mt-1 text-sm font-black leading-5 text-slate-950">{renderOperationsRunbook.headline}</p>
                         <p className="mt-2 text-xs leading-5 text-slate-600">{renderOperationsRunbook.operatingMode}</p>
                       </div>
@@ -2076,7 +2076,7 @@ export function KuaiziStyleWorkbench() {
                 <div className="rounded-lg border border-[#e2e8f5] bg-white p-5 shadow-sm">
                   <div className="flex flex-col gap-2 md:flex-row md:items-end md:justify-between">
                     <div>
-                      <p className="text-xs font-black uppercase tracking-[0.18em] text-fuchsia-600">Template Bank</p>
+                      <p className="text-xs font-black uppercase tracking-[0.18em] text-fuchsia-600">混剪模板库</p>
                       <h3 className="mt-1 text-lg font-black text-slate-950">混剪模板少而准：种草、模特证明、客服异议三条主线</h3>
                       <p className="mt-1 text-sm leading-6 text-slate-500">参考开源剪辑器的时间线和转场方式，但收敛成电商人能直接选择的模板，不把客户丢进复杂编辑器。</p>
                     </div>
@@ -2099,7 +2099,7 @@ export function KuaiziStyleWorkbench() {
                 </div>
 
                 <aside className="rounded-lg border border-fuchsia-200 bg-fuchsia-50 p-5 shadow-sm">
-                  <p className="text-xs font-black uppercase tracking-[0.18em] text-fuchsia-700">Quality Gate</p>
+                  <p className="text-xs font-black uppercase tracking-[0.18em] text-fuchsia-700">发布质量门</p>
                   <h3 className="mt-2 text-xl font-black leading-snug text-slate-950">导出前先检查，不把不可用成片交给客户</h3>
                   <div className="mt-4 space-y-2">
                     {qualityGate.checks.map(check => (
@@ -2120,7 +2120,7 @@ export function KuaiziStyleWorkbench() {
                 <div className="rounded-lg border border-[#e2e8f5] bg-white p-5 shadow-sm">
                   <div className="flex flex-col gap-2 md:flex-row md:items-end md:justify-between">
                     <div>
-                      <p className="text-xs font-black uppercase tracking-[0.18em] text-amber-600">Customer Return Loop</p>
+                      <p className="text-xs font-black uppercase tracking-[0.18em] text-amber-600">客户回填闭环</p>
                       <h3 className="mt-1 text-lg font-black text-slate-950">客户自己发布后，用云盘和表现表回到下一轮</h3>
                       <p className="mt-1 text-sm leading-6 text-slate-500">不要求平台自动登录，也不把表现读取当成首版阻塞。客户上传链接、截图、CSV，系统就能判断继续放大、换标题，还是重剪素材。</p>
                     </div>
@@ -2162,7 +2162,7 @@ export function KuaiziStyleWorkbench() {
                 </div>
 
                 <aside className="rounded-lg border border-amber-200 bg-amber-50 p-5 shadow-sm">
-                  <p className="text-xs font-black uppercase tracking-[0.18em] text-amber-700">Performance Upload</p>
+                  <p className="text-xs font-black uppercase tracking-[0.18em] text-amber-700">表现上传</p>
                   <h3 className="mt-2 text-xl font-black leading-snug text-slate-950">表现数据先让客户上传，我们负责复盘和下一轮动作</h3>
                   <div className="mt-4 grid grid-cols-3 gap-2">
                     <div className="rounded-md bg-white p-3 ring-1 ring-amber-100">
@@ -2243,7 +2243,7 @@ export function KuaiziStyleWorkbench() {
               <section className="rounded-lg border border-[#fde68a] bg-[#fff8e6] p-5 shadow-sm">
                 <div className="grid gap-5 xl:grid-cols-[minmax(0,0.78fr)_minmax(320px,0.52fr)]">
                   <div className="min-w-0">
-                    <p className="text-xs font-black uppercase tracking-[0.18em] text-amber-700">Customer Evidence Upload Guide</p>
+                    <p className="text-xs font-black uppercase tracking-[0.18em] text-amber-700">客户证据上传指南</p>
                     <h3 className="mt-1 text-lg font-black leading-6 text-slate-950">{customerEvidenceUploadGuide.headline}</h3>
                     <p className="mt-2 max-w-4xl text-sm leading-6 text-slate-700">{customerEvidenceUploadGuide.promise}</p>
                     <div className="mt-4 grid gap-3 md:grid-cols-3">
@@ -2304,7 +2304,7 @@ export function KuaiziStyleWorkbench() {
               <section className="rounded-lg border border-[#dbeafe] bg-white p-5 shadow-sm">
                 <div className="flex flex-col gap-3 lg:flex-row lg:items-end lg:justify-between">
                   <div className="min-w-0">
-                    <p className="text-xs font-black uppercase tracking-[0.18em] text-blue-600">Post Publish Action Board</p>
+                    <p className="text-xs font-black uppercase tracking-[0.18em] text-blue-600">发布后行动板</p>
                     <h3 className="mt-1 text-lg font-black leading-6 text-slate-950">{postPublishActionBoard.headline}</h3>
                     <p className="mt-2 max-w-4xl text-sm leading-6 text-slate-600">{postPublishActionBoard.evidenceSummary}</p>
                   </div>
@@ -2350,7 +2350,7 @@ export function KuaiziStyleWorkbench() {
               <section className="rounded-lg border border-[#e2e8f5] bg-white p-5 shadow-sm">
                 <div className="flex flex-col gap-3 md:flex-row md:items-end md:justify-between">
                   <div>
-                    <p className="text-xs font-black uppercase tracking-[0.18em] text-rose-600">Customer Service Pack</p>
+                    <p className="text-xs font-black uppercase tracking-[0.18em] text-rose-600">客服素材包</p>
                     <h3 className="mt-1 text-lg font-black text-slate-950">客服、售后和差评解释也进入商品增长包</h3>
                     <p className="mt-1 text-sm leading-6 text-slate-500">电商人不只要视频，还要能回答客户问题。平台根据商品卖点生成 FAQ、异议处理和售后卡片，避免内容和客服话术断开。</p>
                   </div>
@@ -2459,7 +2459,7 @@ export function KuaiziStyleWorkbench() {
                   <div className="mt-5 rounded-md border border-pink-100 bg-white p-4">
                     <div className="flex flex-col gap-3 lg:flex-row lg:items-end lg:justify-between">
                       <div className="min-w-0">
-                        <p className="text-xs font-black uppercase tracking-[0.18em] text-pink-700">chat Cut Workflow Console</p>
+                        <p className="text-xs font-black uppercase tracking-[0.18em] text-pink-700">chat Cut 式电商对话工单台</p>
                         <h5 className="mt-1 text-base font-black leading-6 text-slate-950">{conversationOpsConsole.headline}</h5>
                         <p className="mt-2 max-w-4xl text-sm leading-6 text-slate-600">{conversationOpsConsole.promise}</p>
                       </div>
@@ -2513,7 +2513,7 @@ export function KuaiziStyleWorkbench() {
               <section className="rounded-lg border border-[#e2e8f5] bg-white p-5 shadow-sm">
                 <div className="flex flex-col gap-3 md:flex-row md:items-end md:justify-between">
                   <div>
-                    <p className="text-xs font-black uppercase tracking-[0.18em] text-emerald-600">Ecommerce Operating System</p>
+                    <p className="text-xs font-black uppercase tracking-[0.18em] text-emerald-600">电商运营系统</p>
                     <h3 className="mt-1 text-lg font-black text-slate-950">功能很多，但按电商人每天的工作组织</h3>
                     <p className="mt-1 text-sm leading-6 text-slate-500">不是堆 AI 工具，而是把上新、模特图、内容、发布、客服、复盘放进同一个商品增长闭环。</p>
                   </div>
@@ -2531,7 +2531,7 @@ export function KuaiziStyleWorkbench() {
               <section className="rounded-lg border border-[#e2e8f5] bg-white p-5 shadow-sm">
                 <div className="flex flex-col gap-3 md:flex-row md:items-end md:justify-between">
                   <div>
-                    <p className="text-xs font-black uppercase tracking-[0.18em] text-sky-600">Publishing Matrix</p>
+                    <p className="text-xs font-black uppercase tracking-[0.18em] text-sky-600">发布矩阵</p>
                     <h3 className="mt-1 text-lg font-black text-slate-950">多账号矩阵先不做自动登录，先把每个平台发布包做准</h3>
                     <p className="mt-1 text-sm leading-6 text-slate-500">客户自己发布，平台表现先上传截图、链接或 CSV；后续再接云盘和数据回流。</p>
                   </div>
@@ -2568,7 +2568,7 @@ export function KuaiziStyleWorkbench() {
                 <div className="rounded-md border border-cyan-100 bg-cyan-50 p-4">
                   <div className="flex flex-col gap-3 lg:flex-row lg:items-end lg:justify-between">
                     <div className="min-w-0">
-                      <p className="text-xs font-black uppercase tracking-[0.18em] text-cyan-700">Persona Publishing Console</p>
+                      <p className="text-xs font-black uppercase tracking-[0.18em] text-cyan-700">人设发布操作台</p>
                       <h4 className="mt-1 text-base font-black leading-6 text-slate-950">{personaPublishingConsole.headline}</h4>
                       <p className="mt-2 max-w-4xl text-sm leading-6 text-slate-600">{personaPublishingConsole.promise}</p>
                     </div>
@@ -2628,7 +2628,7 @@ export function KuaiziStyleWorkbench() {
                 <div className="rounded-md border border-emerald-100 bg-emerald-50 p-4">
                   <div className="flex flex-col gap-3 lg:flex-row lg:items-end lg:justify-between">
                     <div className="min-w-0">
-                      <p className="text-xs font-black uppercase tracking-[0.18em] text-emerald-700">Self Publishing Command Center</p>
+                      <p className="text-xs font-black uppercase tracking-[0.18em] text-emerald-700">客户自发布操作台</p>
                       <h4 className="mt-1 text-base font-black leading-6 text-slate-950">{selfPublishingCommandCenter.headline}</h4>
                       <p className="mt-2 max-w-4xl text-sm leading-6 text-slate-600">{selfPublishingCommandCenter.promise}</p>
                     </div>
@@ -2684,7 +2684,7 @@ export function KuaiziStyleWorkbench() {
                 <div className="rounded-md border border-sky-100 bg-sky-50 p-4">
                   <div className="flex flex-col gap-2 md:flex-row md:items-end md:justify-between">
                     <div>
-                      <p className="text-xs font-black uppercase tracking-[0.18em] text-sky-700">Creator Persona Matrix</p>
+                      <p className="text-xs font-black uppercase tracking-[0.18em] text-sky-700">账号人设矩阵</p>
                       <h4 className="mt-1 text-base font-black text-slate-950">超级 IP 和口播标题矩阵：先生成可复制脚本，客户自己发</h4>
                     </div>
                     <span className="rounded bg-white px-2.5 py-1 text-xs font-black text-sky-700 ring-1 ring-sky-100">
@@ -2694,7 +2694,7 @@ export function KuaiziStyleWorkbench() {
                   <div className="mt-4 rounded-md border border-blue-100 bg-white p-4 ring-1 ring-sky-100">
                     <div className="flex flex-col gap-2 lg:flex-row lg:items-end lg:justify-between">
                       <div className="min-w-0">
-                        <p className="text-xs font-black uppercase tracking-[0.18em] text-blue-700">Super IP Title Board</p>
+                        <p className="text-xs font-black uppercase tracking-[0.18em] text-blue-700">超级 IP 标题板</p>
                         <h5 className="mt-1 text-base font-black leading-6 text-slate-950">{superIpTitleBoard.headline}</h5>
                         <p className="mt-2 max-w-4xl text-sm leading-6 text-slate-600">{superIpTitleBoard.promise}</p>
                       </div>
@@ -2722,7 +2722,7 @@ export function KuaiziStyleWorkbench() {
                   <div className="mt-4 rounded-md border border-amber-100 bg-amber-50 p-4">
                     <div className="flex flex-col gap-2 lg:flex-row lg:items-end lg:justify-between">
                       <div className="min-w-0">
-                        <p className="text-xs font-black uppercase tracking-[0.18em] text-amber-700">Title Quality Gate</p>
+                        <p className="text-xs font-black uppercase tracking-[0.18em] text-amber-700">标题质量门</p>
                         <h5 className="mt-1 text-base font-black leading-6 text-slate-950">{titleQualityGate.headline}</h5>
                         <p className="mt-2 max-w-4xl text-sm leading-6 text-slate-600">{titleQualityGate.promise}</p>
                       </div>
