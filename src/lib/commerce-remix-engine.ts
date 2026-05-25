@@ -461,6 +461,29 @@ export interface CommerceOpenSourceRemixBlueprint {
   scaleDecision: string[];
 }
 
+export interface CommerceGitHubRemixRadar {
+  headline: string;
+  promise: string;
+  repoFamilies: Array<{
+    id: string;
+    label: string;
+    repoIds: string[];
+    customerJob: string;
+    adoptNow: string;
+    keepBehindGate: string;
+    customerOutput: string;
+  }>;
+  adoptionQueue: Array<{
+    stage: 'now' | 'next' | 'scale_later';
+    label: string;
+    repoIds: string[];
+    reason: string;
+    evidenceRequired: string;
+  }>;
+  customerReadyDefinition: string[];
+  notProviderDependency: string[];
+}
+
 export interface CommerceRemixWorkflowPlaybook {
   stages: Array<{
     id: string;
@@ -874,6 +897,36 @@ export function buildCommerceOpenSourceAdapters(): CommerceOpenSourceAdapter[] {
       customerValue: '把短视频生产做成可复用项目，而不是一次性手工剪辑。',
       readiness: 'later',
       guardrail: '只借鉴自托管结构和渲染服务边界；发布仍由客户自己完成。',
+    },
+    {
+      id: 'moneyprinterturbo',
+      name: 'MoneyPrinterTurbo production pattern',
+      repositoryUrl: 'https://github.com/harry0703/MoneyPrinterTurbo',
+      useFor: '参考脚本、素材、字幕、配音和短视频批量生成的任务拆解方式',
+      integrationMode: 'task_manifest',
+      customerValue: '把“一句话生成视频”的复杂链路拆成客户可审核的商品脚本、素材和成片包。',
+      readiness: 'later',
+      guardrail: '只借鉴任务编排和交付结构；不自动抓取素材，不直接复制未审核的脚本或配音。',
+    },
+    {
+      id: 'short-video-maker',
+      name: 'short-video-maker MCP pattern',
+      repositoryUrl: 'https://github.com/gyoridavid/short-video-maker',
+      useFor: '参考 MCP/REST 短视频生成、TTS、字幕和 Remotion 渲染的工具化接口',
+      integrationMode: 'task_manifest',
+      customerValue: '后续可以把 Wenai 混剪步骤包装成可调度工具，但客户仍只看到发布包和验收状态。',
+      readiness: 'later',
+      guardrail: '外部素材源、TTS 或云端渲染需要单独授权；首版不把它当作必需 provider。',
+    },
+    {
+      id: 'video-wizard',
+      name: 'VideoWizard viral clip workflow pattern',
+      repositoryUrl: 'https://github.com/yunlong10/VideoWizard',
+      useFor: '参考长视频亮点识别、字幕、切片和社媒短视频再包装的工作流',
+      integrationMode: 'task_manifest',
+      customerValue: '客户给直播回放或测评长素材时，先找高价值片段，再进入电商模板重剪。',
+      readiness: 'later',
+      guardrail: '只处理客户授权素材；热度判断必须回到商品证据和人工抽检，不能虚构爆款承诺。',
     },
     {
       id: 'revideo',
@@ -1556,6 +1609,107 @@ export function buildCommerceOpenSourceRemixBlueprint(
       '首版用本地 worker、任务包和云盘回填即可交付。',
       '单客户连续多批超过 100 条且本地队列排队明显时，再接多 worker、对象存储和监控。',
       '平台 API、自动读取表现和自动发布只在客户授权、字段稳定、失败可回退到 CSV 后再接。',
+    ],
+  };
+}
+
+export function buildCommerceGitHubRemixRadar(
+  input: CommerceRemixPlanInput,
+  adapters = buildCommerceOpenSourceAdapters(),
+): CommerceGitHubRemixRadar {
+  const adapterIds = new Set(adapters.map(adapter => adapter.id));
+  const existing = (ids: string[]) => ids.filter(id => adapterIds.has(id));
+  const readyNow = adapters.filter(adapter => adapter.readiness === 'ready_now').map(adapter => adapter.id);
+  const next = adapters
+    .filter(adapter => adapter.readiness === 'later' && ['vanta-video-engine', 'openmontage-agent', 'moneyprinterturbo', 'short-video-maker', 'video-wizard', 'revideo', 'twick-sdk'].includes(adapter.id))
+    .map(adapter => adapter.id);
+  const scaleLater = adapters
+    .filter(adapter => ['gstreamer', 'gpac-packager', 'libopenshot', 'openshorts-platform'].includes(adapter.id))
+    .map(adapter => adapter.id);
+
+  return {
+    headline: 'GitHub 开源混剪能力雷达',
+    promise: `不是把所有 GitHub 仓库都塞进客户界面，而是把 ${safeText(input.productName, '商品')} 需要的切片、字幕、模板、渲染、质检和发布包能力分层接入；每个仓库只有通过烟测、授权和输出验收后才进入交付。`,
+    repoFamilies: [
+      {
+        id: 'clip-mining',
+        label: '长素材切片和高价值片段',
+        repoIds: existing(['lossless-cut', 'pyscenedetect', 'auto-editor', 'video-wizard']),
+        customerJob: '客户给直播回放、测评长视频或口播长素材，不知道哪段能用。',
+        adoptNow: '先用无损切片、场景检测和去停顿生成 clip-candidates.json，再让运营抽检。',
+        keepBehindGate: '自动判断爆款片段、自动下载平台素材、自动处理来源不明素材。',
+        customerOutput: '可用片段、需要补拍片段、不能用片段和下一轮重剪建议。',
+      },
+      {
+        id: 'script-caption-voice',
+        label: '脚本、字幕和口播统一',
+        repoIds: existing(['whisper', 'subtitle-edit', 'auto-subtitles', 'short-video-maker']),
+        customerJob: '客户要口播、数字人、字幕和标题一致，但 Key 还没到位。',
+        adoptNow: '先导出口播稿、SRT、标题矩阵和人工录音说明；Key 到位后替换执行层。',
+        keepBehindGate: '声音克隆、未确认人设、未经复核的自动转写。',
+        customerOutput: '每个平台能直接读的前三句、字幕底稿、标题和客服承接话术。',
+      },
+      {
+        id: 'template-render',
+        label: '程序化模板和稳定渲染',
+        repoIds: existing(['remotion', 'vidosy', 'editly', 'moviepy', 'ffmpeg', 'revideo', 'twick-sdk']),
+        customerJob: '同一商品要批量生成不同平台、尺寸、账号人设的短视频。',
+        adoptNow: '把商品时间线转成 JSON 配方、FFmpeg 参数数组和可重试队列。',
+        keepBehindGate: '把复杂剪辑器 UI 直接交给客户、让单条失败拖垮整批。',
+        customerOutput: '待补素材、可渲染、已导出、需重试四类状态和可下载发布包。',
+      },
+      {
+        id: 'pipeline-system',
+        label: '端到端生产流水线',
+        repoIds: existing(['vanta-video-engine', 'openmontage-agent', 'moneyprinterturbo', 'short-video-maker', 'openshorts-platform', 'mcp-video']),
+        customerJob: '客户希望看到一套系统，而不是散落的图片、视频、字幕和客服工具。',
+        adoptNow: '只吸收流水线分层：brief、素材、混剪、发布包、回填、复盘。',
+        keepBehindGate: '未验证大仓库、需要额外模型或外部素材源的自动化。',
+        customerOutput: '一个商品项目内的成片、封面、标题、客服话术、回填入口和复盘建议。',
+      },
+      {
+        id: 'qa-scale',
+        label: '媒体质检和规模化队列',
+        repoIds: existing(['mediainfo', 'queue-worker', 'gpac-packager', 'gstreamer', 'opencv-mediapipe']),
+        customerJob: '批量渲染时要稳定，不希望导出黑屏、错尺寸、字幕遮挡或整批失败。',
+        adoptNow: '本地队列、单条失败隔离、MediaInfo 参数、字幕安全区和人工抽检先跑通。',
+        keepBehindGate: '云端多 worker、对象存储、监控告警和平台 API 同步。',
+        customerOutput: '每条成片都有状态、失败原因、重试动作和可播放验收证据。',
+      },
+    ],
+    adoptionQueue: [
+      {
+        stage: 'now',
+        label: '首版现在就接成工作流',
+        repoIds: readyNow,
+        reason: '这些能力能用本地任务包、参数数组、导出文件和人工抽检先跑通，不等图片/视频/数字人 Key。',
+        evidenceRequired: '每个工具至少有安装检查、15 秒样片、输出文件、失败原因和不含账号凭据的导出包。',
+      },
+      {
+        stage: 'next',
+        label: '下一轮做适配器验证',
+        repoIds: next,
+        reason: '这些仓库更像端到端范式或新编辑器，先抽象成 Wenai 配方，不直接暴露给客户。',
+        evidenceRequired: '能把同一商品 brief 转成 Wenai timeline、字幕、发布包和队列状态，且不引入未授权素材。',
+      },
+      {
+        stage: 'scale_later',
+        label: '规模化后再升级工程底座',
+        repoIds: scaleLater,
+        reason: '只有当单客户连续多批、并发和存储压力真实出现时，才需要更重的媒体管线和封装能力。',
+        evidenceRequired: '本地队列已证明瓶颈，客户回填真实，且对象存储、监控和多 worker 有明确成本收益。',
+      },
+    ],
+    customerReadyDefinition: [
+      '客户不需要看 GitHub 仓库名，也能知道今天补什么、系统产什么、下一步怎么发布。',
+      '每条混剪结果都有素材来源、字幕、尺寸、输出路径、失败原因和重试路径。',
+      '所有开源能力只处理客户上传或授权素材，不自动下载来源不明内容。',
+      '客户自己发布并回填链接、截图、CSV 或云盘目录，系统再做下一轮重剪和客服优化。',
+    ],
+    notProviderDependency: [
+      '开源混剪、字幕、模板、队列和质检不是外部 provider 阻塞项。',
+      '图片、视频、数字人 Key 只增强生成层；没有 Key 仍能导出 prompt、时间线、发布包和回填清单。',
+      '自动登录、cookie 托管、平台后台读取和自动发布不纳入首版交付。',
     ],
   };
 }
@@ -4121,6 +4275,10 @@ export function buildDemoCommerceOpenSourceRemixBlueprint() {
   const plan = buildCommerceRemixEnginePlan(input);
   const adapters = buildCommerceOpenSourceAdapters();
   return buildCommerceOpenSourceRemixBlueprint(input, plan, adapters);
+}
+
+export function buildDemoCommerceGitHubRemixRadar() {
+  return buildCommerceGitHubRemixRadar(buildDemoCommerceRemixInput(), buildCommerceOpenSourceAdapters());
 }
 
 export function buildDemoCommerceRemixOrchestrationBoard() {

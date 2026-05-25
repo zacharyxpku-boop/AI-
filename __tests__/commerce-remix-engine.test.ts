@@ -18,6 +18,7 @@ import {
   buildCommerceDailyOperatorCockpit,
   buildCommerceEvidenceReadinessBoard,
   buildCommerceFirstDeliveryChecklist,
+  buildCommerceGitHubRemixRadar,
   buildCommerceModelImageTaskPack,
   buildCommerceOpenSourceAdapters,
   buildCommerceOpenSourceCoverage,
@@ -485,6 +486,9 @@ describe('commerce remix engine', () => {
       'vanta-video-engine',
       'openmontage-agent',
       'openshorts-platform',
+      'moneyprinterturbo',
+      'short-video-maker',
+      'video-wizard',
       'revideo',
       'twick-sdk',
       'vidosy',
@@ -515,6 +519,9 @@ describe('commerce remix engine', () => {
     expect(adapters.find(adapter => adapter.id === 'vanta-video-engine')?.repositoryUrl).toBe('https://github.com/itsjwill/vanta');
     expect(adapters.find(adapter => adapter.id === 'openmontage-agent')?.repositoryUrl).toBe('https://github.com/calesthio/OpenMontage');
     expect(adapters.find(adapter => adapter.id === 'openshorts-platform')?.repositoryUrl).toBe('https://github.com/mutonby/openshorts');
+    expect(adapters.find(adapter => adapter.id === 'moneyprinterturbo')?.repositoryUrl).toBe('https://github.com/harry0703/MoneyPrinterTurbo');
+    expect(adapters.find(adapter => adapter.id === 'short-video-maker')?.repositoryUrl).toBe('https://github.com/gyoridavid/short-video-maker');
+    expect(adapters.find(adapter => adapter.id === 'video-wizard')?.repositoryUrl).toBe('https://github.com/yunlong10/VideoWizard');
     expect(adapters.find(adapter => adapter.id === 'revideo')?.repositoryUrl).toBe('https://github.com/redotvideo/revideo');
     expect(adapters.find(adapter => adapter.id === 'twick-sdk')?.repositoryUrl).toBe('https://github.com/ncounterspecialist/twick');
     expect(adapters.find(adapter => adapter.id === 'vidosy')?.repositoryUrl).toBe('https://github.com/aaurelions/vidosy');
@@ -770,6 +777,32 @@ describe('commerce remix engine', () => {
     expect(blueprint.deliveryRules.join(' ')).toContain('不保存账号、密码、cookie');
     expect(blueprint.scaleDecision.join(' ')).toContain('超过 100 条');
     expect(JSON.stringify(blueprint)).not.toMatch(/apiKey|accessToken|Bearer|sk-/i);
+  });
+
+  it('prioritizes GitHub remix repositories as customer-safe workflow layers', () => {
+    const adapters = buildCommerceOpenSourceAdapters();
+    const radar = buildCommerceGitHubRemixRadar(baseInput, adapters);
+
+    expect(adapters.map(adapter => adapter.id)).toEqual(expect.arrayContaining([
+      'moneyprinterturbo',
+      'short-video-maker',
+      'video-wizard',
+    ]));
+    expect(radar.headline).toContain('GitHub 开源混剪能力雷达');
+    expect(radar.repoFamilies.map(family => family.id)).toEqual([
+      'clip-mining',
+      'script-caption-voice',
+      'template-render',
+      'pipeline-system',
+      'qa-scale',
+    ]);
+    expect(radar.repoFamilies.find(family => family.id === 'clip-mining')?.repoIds).toEqual(expect.arrayContaining(['pyscenedetect', 'auto-editor', 'video-wizard']));
+    expect(radar.repoFamilies.find(family => family.id === 'pipeline-system')?.repoIds).toEqual(expect.arrayContaining(['moneyprinterturbo', 'short-video-maker']));
+    expect(radar.adoptionQueue.map(queue => queue.stage)).toEqual(['now', 'next', 'scale_later']);
+    expect(radar.adoptionQueue.find(queue => queue.stage === 'now')?.reason).toContain('不等图片/视频/数字人 Key');
+    expect(radar.customerReadyDefinition.join(' ')).toContain('客户自己发布');
+    expect(radar.notProviderDependency.join(' ')).toContain('自动登录');
+    expect(JSON.stringify(radar)).not.toMatch(/apiKey|accessToken|Bearer|sk-/i);
   });
 
   it('builds a customer-readable remix workflow with no-provider fallbacks', () => {

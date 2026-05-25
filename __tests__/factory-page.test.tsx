@@ -71,6 +71,13 @@ describe('factory page', () => {
     expect(html).toContain('一个商品项目统一多种开源能力');
     expect(html).toContain('程序化模板 + 稳定队列批量出片');
     expect(html).toContain('进入交付的规则');
+    expect(html).toContain('GitHub Remix Radar');
+    expect(html).toContain('GitHub 开源混剪能力雷达');
+    expect(html).toContain('客户可见的上线标准');
+    expect(html).toContain('仍然不等外部 provider');
+    expect(html).toContain('moneyprinterturbo');
+    expect(html).toContain('short-video-maker');
+    expect(html).toContain('video-wizard');
     expect(html).toContain('Open Source Stack Selector');
     expect(html).toContain('开源混剪栈选择器');
     expect(html).toContain('long-material-slicing');

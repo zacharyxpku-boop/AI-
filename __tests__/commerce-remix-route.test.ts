@@ -55,8 +55,11 @@ describe('/api/commerce-remix', () => {
     expect(body.openSourceAdapters.map((adapter: { id: string }) => adapter.id)).toContain('ffmpeg');
     expect(body.openSourceAdapters.map((adapter: { id: string }) => adapter.id)).toContain('mcp-video');
     expect(body.openSourceAdapters.map((adapter: { id: string }) => adapter.id)).toContain('vanta-video-engine');
+    expect(body.openSourceAdapters.map((adapter: { id: string }) => adapter.id)).toContain('moneyprinterturbo');
     expect(body.openSourceRemixBlueprint.headline).toContain('GitHub 开源混剪蓝图');
     expect(body.openSourceRemixBlueprint.githubPatternGroups.map((group: { id: string }) => group.id)).toContain('programmatic-render');
+    expect(body.githubRemixRadar.headline).toContain('GitHub 开源混剪能力雷达');
+    expect(body.githubRemixRadar.repoFamilies.map((family: { id: string }) => family.id)).toContain('pipeline-system');
     expect(body.workflowPlaybook.stages.map((stage: { id: string }) => stage.id)).toContain('publishing-pack');
     expect(body.executionRecipes.map((recipe: { id: string }) => recipe.id)).toContain('recipe-local-render');
     expect(body.orchestrationBoard.routes.map((route: { id: string }) => route.id)).toContain('render-export');
@@ -142,6 +145,8 @@ describe('/api/commerce-remix', () => {
     expect(body.openSourceRemixBlueprint.githubPatternGroups.find((group: { id: string }) => group.id === 'self-publish-return').whatNotCopy).toContain('自动登录');
     expect(body.openSourceRemixBlueprint.deliveryRules.join(' ')).toContain('不保存账号、密码、cookie');
     expect(body.openSourceRemixBlueprint.scaleDecision.join(' ')).toContain('多 worker');
+    expect(body.githubRemixRadar.adoptionQueue.find((queue: { stage: string }) => queue.stage === 'now').reason).toContain('不等图片/视频/数字人 Key');
+    expect(body.githubRemixRadar.notProviderDependency.join(' ')).toContain('不纳入首版交付');
     expect(body.executionRecipes.find((recipe: { adapterId: string }) => recipe.adapterId === 'ffmpeg').passCriteria.join(' ')).toContain('MP4 可播放');
     expect(body.executionRecipes.find((recipe: { adapterId: string }) => recipe.adapterId === 'mediainfo').passCriteria.join(' ')).toContain('编码');
     expect(body.orchestrationBoard.routes.find((route: { id: string }) => route.id === 'template-compose').primaryAdapterIds).toContain('editly');

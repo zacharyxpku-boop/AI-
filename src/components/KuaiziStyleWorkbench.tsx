@@ -16,6 +16,7 @@ import {
   buildDemoCommerceCustomerSupportWorkflow,
   buildDemoCommerceCreatorPersonaMatrix,
   buildDemoCommerceFirstDeliveryChecklist,
+  buildDemoCommerceGitHubRemixRadar,
   buildDemoCommerceModelImageTaskPack,
   buildCommerceOpenSourceAdapters,
   buildDemoCommerceOpenSourceCoverage,
@@ -266,6 +267,7 @@ export function KuaiziStyleWorkbench() {
   const openSourceStackSelector = useMemo(() => buildDemoCommerceOpenSourceStackSelector(), []);
   const openSourceInstallMatrix = useMemo(() => buildDemoCommerceOpenSourceInstallMatrix(), []);
   const openSourceRemixBlueprint = useMemo(() => buildDemoCommerceOpenSourceRemixBlueprint(), []);
+  const githubRemixRadar = useMemo(() => buildDemoCommerceGitHubRemixRadar(), []);
   const executionRecipes = useMemo(() => buildDemoCommerceRemixExecutionRecipes(), []);
   const orchestrationBoard = useMemo(() => buildDemoCommerceRemixOrchestrationBoard(), []);
   const workflowPlaybook = useMemo(() => buildDemoCommerceRemixWorkflowPlaybook(), []);
@@ -991,6 +993,60 @@ export function KuaiziStyleWorkbench() {
                       </div>
                     </div>
                   </div>
+                  <div className="mt-5 rounded-md border border-fuchsia-100 bg-fuchsia-50 p-4">
+                    <div className="flex flex-col gap-3 lg:flex-row lg:items-end lg:justify-between">
+                      <div className="min-w-0">
+                        <p className="text-xs font-black uppercase tracking-[0.18em] text-fuchsia-700">GitHub Remix Radar</p>
+                        <h4 className="mt-1 text-base font-black leading-6 text-slate-950">{githubRemixRadar.headline}</h4>
+                        <p className="mt-2 max-w-4xl text-sm leading-6 text-slate-600">{githubRemixRadar.promise}</p>
+                      </div>
+                      <span className="w-fit rounded bg-white px-2.5 py-1 text-xs font-black text-fuchsia-700 ring-1 ring-fuchsia-100">{githubRemixRadar.repoFamilies.length} 层能力</span>
+                    </div>
+                    <div className="mt-4 grid gap-3 xl:grid-cols-5">
+                      {githubRemixRadar.repoFamilies.map(family => (
+                        <article className="min-w-0 rounded-md bg-white p-3 ring-1 ring-fuchsia-100" key={family.id}>
+                          <div className="text-[11px] font-black uppercase tracking-[0.12em] text-fuchsia-700">{family.id}</div>
+                          <h5 className="mt-1 text-sm font-black leading-5 text-slate-950">{family.label}</h5>
+                          <p className="mt-2 line-clamp-2 text-xs font-bold leading-5 text-fuchsia-700">{family.customerJob}</p>
+                          <p className="mt-2 line-clamp-3 text-xs leading-5 text-slate-600">{family.adoptNow}</p>
+                          <div className="mt-3 flex flex-wrap gap-1.5">
+                            {family.repoIds.slice(0, 4).map(id => (
+                              <span className="rounded bg-fuchsia-50 px-2 py-1 text-[11px] font-black text-fuchsia-700" key={id}>{id}</span>
+                            ))}
+                          </div>
+                          <p className="mt-3 line-clamp-2 rounded bg-slate-50 px-2 py-1.5 text-[11px] font-bold leading-4 text-slate-600">{family.customerOutput}</p>
+                        </article>
+                      ))}
+                    </div>
+                    <div className="mt-4 grid gap-3 lg:grid-cols-3">
+                      {githubRemixRadar.adoptionQueue.map(queue => (
+                        <article className="min-w-0 rounded-md bg-white p-3 ring-1 ring-fuchsia-100" key={queue.stage}>
+                          <div className="text-[11px] font-black uppercase tracking-[0.12em] text-fuchsia-700">{queue.stage}</div>
+                          <h5 className="mt-1 text-sm font-black leading-5 text-slate-950">{queue.label}</h5>
+                          <p className="mt-2 text-xs leading-5 text-slate-600">{queue.reason}</p>
+                          <p className="mt-3 rounded bg-fuchsia-50 px-2 py-1.5 text-[11px] font-bold leading-4 text-fuchsia-800">{queue.evidenceRequired}</p>
+                        </article>
+                      ))}
+                    </div>
+                    <div className="mt-4 grid gap-3 lg:grid-cols-[minmax(0,1fr)_minmax(280px,0.55fr)]">
+                      <div className="rounded-md bg-white p-3 ring-1 ring-fuchsia-100">
+                        <h5 className="text-sm font-black text-slate-950">客户可见的上线标准</h5>
+                        <div className="mt-3 grid gap-2 sm:grid-cols-2">
+                          {githubRemixRadar.customerReadyDefinition.map(item => (
+                            <div className="rounded bg-fuchsia-50 px-3 py-2 text-xs font-bold leading-5 text-slate-700 ring-1 ring-fuchsia-100" key={item}>{item}</div>
+                          ))}
+                        </div>
+                      </div>
+                      <div className="rounded-md bg-white p-3 ring-1 ring-fuchsia-100">
+                        <h5 className="text-sm font-black text-slate-950">仍然不等外部 provider</h5>
+                        <div className="mt-3 grid gap-2">
+                          {githubRemixRadar.notProviderDependency.map(item => (
+                            <div className="rounded bg-white px-3 py-2 text-xs font-bold leading-5 text-fuchsia-800 ring-1 ring-fuchsia-100" key={item}>{item}</div>
+                          ))}
+                        </div>
+                      </div>
+                    </div>
+                  </div>
                   <div className="mt-5 rounded-md border border-emerald-100 bg-emerald-50 p-4">
                     <div className="flex flex-col gap-3 lg:flex-row lg:items-end lg:justify-between">
                       <div className="min-w-0">
@@ -1040,7 +1096,7 @@ export function KuaiziStyleWorkbench() {
                         </div>
                         <p className="mt-2 line-clamp-2 text-xs font-bold leading-5 text-lime-700">{lane.installCheck}</p>
                         <p className="mt-2 line-clamp-2 text-xs leading-5 text-slate-600">{lane.smokeTest}</p>
-                        <p className="mt-2 truncate rounded bg-slate-50 px-2 py-1.5 text-[11px] font-bold text-slate-600">{lane.outputProof}</p>
+                        <p className="mt-2 rounded bg-slate-50 px-2 py-1.5 text-[11px] font-bold leading-4 text-slate-600 [overflow-wrap:anywhere]">{lane.outputProof}</p>
                         <div className="mt-3 flex flex-wrap gap-1.5">
                           {lane.adapterIds.slice(0, 4).map(id => (
                             <span className="rounded bg-lime-50 px-2 py-1 text-[11px] font-black text-lime-700" key={id}>{id}</span>
@@ -1329,9 +1385,9 @@ export function KuaiziStyleWorkbench() {
                     {cloudDrive.folders.map((folder, index) => (
                       <article className="min-w-0 rounded-md border border-slate-200 bg-slate-50 p-3" key={folder.path}>
                         <div className="text-[11px] font-black text-amber-600">{String(index + 1).padStart(2, '0')}</div>
-                        <h4 className="mt-1 text-sm font-black leading-5 text-slate-950">{folder.path.split('/').pop()}</h4>
+                        <h4 className="mt-1 text-sm font-black leading-5 text-slate-950 [overflow-wrap:anywhere]">{folder.path.split('/').pop()}</h4>
                         <p className="mt-2 text-xs font-bold text-slate-500">负责人：{folder.owner}</p>
-                        <p className="mt-2 line-clamp-3 text-xs leading-5 text-slate-600">{folder.requiredFiles.join(' / ')}</p>
+                        <p className="mt-2 line-clamp-3 text-xs leading-5 text-slate-600 [overflow-wrap:anywhere]">{folder.requiredFiles.join(' / ')}</p>
                       </article>
                     ))}
                   </div>
@@ -1345,7 +1401,7 @@ export function KuaiziStyleWorkbench() {
                               <span className="font-black text-slate-800">{field.label}</span>
                               <span className="rounded bg-amber-50 px-2 py-0.5 font-black text-amber-700">{field.required ? '必填' : '选填'}</span>
                             </div>
-                            <p className="mt-1 leading-5 text-slate-500">{field.acceptedFormats.join(' / ')} · {field.example}</p>
+                            <p className="mt-1 leading-5 text-slate-500 [overflow-wrap:anywhere]">{field.acceptedFormats.join(' / ')} · {field.example}</p>
                           </div>
                         ))}
                       </div>
@@ -1464,7 +1520,7 @@ export function KuaiziStyleWorkbench() {
                           <div className="flex items-start justify-between gap-3">
                             <div className="min-w-0">
                               <h4 className="text-sm font-black leading-5 text-slate-950">{item.label}</h4>
-                              <p className="mt-1 truncate text-xs font-bold text-amber-700">{item.destination}</p>
+                              <p className="mt-1 text-xs font-bold leading-5 text-amber-700 [overflow-wrap:anywhere]">{item.destination}</p>
                             </div>
                             <span className="shrink-0 rounded bg-amber-50 px-2 py-1 text-[11px] font-black text-amber-700">{item.formats.join('/')}</span>
                           </div>
