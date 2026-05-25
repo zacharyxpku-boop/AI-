@@ -346,7 +346,7 @@ function FriendTrialProductionConsole({
               <section className="rounded-[1.75rem] border border-neutral-200 bg-white p-5 shadow-sm">
                 <div className="flex items-center justify-between gap-4">
                   <div>
-                    <p className="text-xs uppercase text-neutral-500">Queue evidence</p>
+                    <p className="text-xs uppercase text-neutral-500">队列证据</p>
                     <h3 className="mt-2 text-xl font-semibold text-neutral-950">视频任务与交接证据</h3>
                   </div>
                   <div className="rounded-full border border-neutral-200 bg-neutral-50 px-3 py-1 text-xs font-medium text-neutral-700">
@@ -448,7 +448,7 @@ function FriendTrialProductionConsole({
             <section className="rounded-lg border border-neutral-200 bg-white p-5 shadow-sm">
               <div className="flex items-center justify-between gap-4">
                 <div>
-                  <p className="text-xs uppercase text-neutral-500">Readiness matrix</p>
+                  <p className="text-xs uppercase text-neutral-500">放行检查</p>
                   <h3 className="mt-2 text-lg font-semibold text-neutral-950">模块准备度评估</h3>
                 </div>
                 <div className="text-xs font-medium text-neutral-500">
@@ -794,7 +794,7 @@ export function buildCutOperatingChecks(queue: VideoProductionQueue | null): Cut
       externalGate: '视频生成 provider token、webhook secret、成本上限、失败重试和回调验签。',
     },
     {
-      label: 'Provider 执行闭环',
+      label: 'AI 生成执行闭环',
       status: providerReady && providerCompleted && !hasProviderRecovery ? 'ready' : 'blocked',
       evidence: providerCompleted
         ? `完成回调 ${queue?.completedProviderExecutionCount || 0} 条 / 失败或待重试 ${(queue?.failedProviderExecutionCount || 0) + (queue?.retryableProviderExecutionCount || 0)} 条`
@@ -833,7 +833,7 @@ const MIXCUT_OPERATION_BOARD = [
     gate: '需要视频 provider、产品素材 URL、生成授权和回调配置后，才能自动产出成片',
   },
   {
-    title: 'Offer Test Matrix 分发',
+    title: '卖点测试分发',
     input: '折扣、套装、赠品、信任背书、平台活动和目标受众',
     action: '写入分发计划、dispatch、广告假设、停止条件和表现回流字段',
     gate: '没有平台 OAuth、广告账户和 analytics sync 前，只能做计划与手工回灌',
@@ -964,7 +964,7 @@ export function buildVideoFactoryVariantPlaybook(queue: VideoProductionQueue | n
 
   return {
     title: '合作者验收路径',
-    primaryAction: '先看 Commercial Cut Readiness 和 Scale Claim Guard，再判断是否已经具备商用交付边界。',
+    primaryAction: '先看商用成片验收和规模口径保护，再判断是否已经具备商用交付边界。',
     proofToCheck: '证明 Wenai 是 Compose/Create/Cut/Cast/Manage 的闭环，不是单个生成按钮：队列、handoff、review、dispatch、performance return 必须同项目可追踪。',
     handoffBoundary: '未接 AI 生成 provider、平台 OAuth、广告账户、analytics sync 和审计规模账本前，不展示 91M+/42M+ 为 Wenai 自有能力。',
     cards: [
@@ -1225,7 +1225,7 @@ export function VideoProductionQueueClient({
       <section className="rounded-[2rem] border border-neutral-200 bg-white p-5 shadow-sm">
         <div className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
           <div>
-            <p className="text-xs uppercase tracking-[0.22em] text-neutral-500">Friend Trial Readiness</p>
+            <p className="text-xs uppercase tracking-[0.22em] text-neutral-500">试用放行判断</p>
             <h2 className="mt-2 text-xl font-semibold text-neutral-950">朋友试用放行判断</h2>
             <p className="mt-2 max-w-3xl text-sm leading-6 text-neutral-600">
               这张卡不看“页面是否好看”，只看非技术用户能不能从视频任务进入客户审核并完成反馈或批准。
@@ -1265,7 +1265,7 @@ export function VideoProductionQueueClient({
       <section className="rounded-[2rem] border border-neutral-200 bg-white p-5 shadow-sm">
         <div className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
           <div>
-            <p className="text-xs uppercase tracking-[0.22em] text-neutral-500">Commercial Cut Readiness</p>
+            <p className="text-xs uppercase tracking-[0.22em] text-neutral-500">商用成片验收</p>
             <h2 className="mt-2 text-xl font-semibold text-neutral-950">商用 Cut 放行门禁</h2>
             <p className="mt-2 max-w-3xl text-sm leading-6 text-neutral-600">
               这层只判断视频工厂是否已经能进入真实商用验收：AI 生成 provider 回调、成片资产、客户审核、客户批准、发布或表现回流必须全部有证据。本地混剪和客户自发布包不因此停摆。
@@ -1306,7 +1306,7 @@ export function VideoProductionQueueClient({
       <section className="rounded-[2rem] border border-neutral-200 bg-white p-5 shadow-sm">
         <div className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
           <div>
-            <p className="text-xs uppercase tracking-[0.22em] text-neutral-500">Provider Sandbox Contract</p>
+            <p className="text-xs uppercase tracking-[0.22em] text-neutral-500">AI 生成接入验收</p>
             <h2 className="mt-2 text-xl font-semibold text-neutral-950">AI 生成 provider 沙盒接入合约</h2>
             <p className="mt-2 max-w-3xl text-sm leading-6 text-neutral-600">
               这层不配置真实密钥，也不伪装自动成片。它把接入视频 provider 前必须验证的提交、回调、失败恢复、成片入库和客户验收拆成沙盒门禁，等外部材料齐后直接对照验收。
@@ -1554,7 +1554,7 @@ export function VideoProductionQueueClient({
       <div className="self-start rounded-lg border border-neutral-200 bg-neutral-50 p-5">
         <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
           <div>
-            <p className="text-xs font-semibold uppercase text-neutral-500">Queue operations</p>
+            <p className="text-xs font-semibold uppercase text-neutral-500">队列操作</p>
             <h2 className="mt-2 text-lg font-semibold text-neutral-950">队列状态</h2>
           </div>
           <div className="text-xs text-neutral-500">
@@ -1762,7 +1762,7 @@ export function VideoProductionQueueClient({
         <section className="border border-cyan-300/20 bg-cyan-950/20 p-5">
           <div className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
             <div>
-              <p className="text-xs uppercase tracking-[0.22em] text-cyan-200">Friend Trial Readiness</p>
+              <p className="text-xs uppercase tracking-[0.22em] text-cyan-200">试用放行判断</p>
               <h2 className="mt-2 text-xl font-semibold">朋友试用放行判断</h2>
               <p className="mt-2 max-w-3xl text-sm leading-6 text-white/60">
                 这张卡不看“页面是否好看”，只看非技术用户能不能从视频任务进入客户审核并完成反馈或批准。
@@ -1802,7 +1802,7 @@ export function VideoProductionQueueClient({
         <section className="border border-violet-300/20 bg-violet-950/20 p-5">
           <div className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
             <div>
-              <p className="text-xs uppercase tracking-[0.22em] text-violet-200">Commercial Cut Readiness</p>
+              <p className="text-xs uppercase tracking-[0.22em] text-violet-200">商用成片验收</p>
               <h2 className="mt-2 text-xl font-semibold">商用 Cut 放行门禁</h2>
               <p className="mt-2 max-w-3xl text-sm leading-6 text-white/60">
                 这层只判断视频工厂是否已经能进入真实商用验收：AI 生成 provider 回调、成片资产、客户审核、客户批准、发布或表现回流必须全部有证据。本地混剪和客户自发布包不因此停摆。
@@ -1843,7 +1843,7 @@ export function VideoProductionQueueClient({
         <section className="border border-cyan-300/20 bg-cyan-950/20 p-5">
           <div className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
             <div>
-              <p className="text-xs uppercase tracking-[0.22em] text-cyan-200">Provider Sandbox Contract</p>
+              <p className="text-xs uppercase tracking-[0.22em] text-cyan-200">AI 生成接入验收</p>
               <h2 className="mt-2 text-xl font-semibold">AI 生成 provider 沙盒接入合约</h2>
               <p className="mt-2 max-w-3xl text-sm leading-6 text-white/60">
                 这层不配置真实密钥，也不伪装自动成片。它把接入视频 provider 前必须验证的提交、回调、失败恢复、成片入库和客户验收拆成沙盒门禁，等外部材料齐后直接对照验收。

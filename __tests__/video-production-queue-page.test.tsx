@@ -22,9 +22,9 @@ describe('video production queue page', () => {
     expect(html).toContain('Video Factory Variant');
     expect(html).toContain('Variant Action Playbook');
     expect(html).toContain('运营执行路径');
-    expect(html).toContain('Friend Trial Readiness');
-    expect(html).toContain('Commercial Cut Readiness');
-    expect(html).toContain('Provider Sandbox Contract');
+    expect(html).toContain('试用放行判断');
+    expect(html).toContain('商用成片验收');
+    expect(html).toContain('AI 生成接入验收');
     expect(html).toContain('AI 生成 provider 沙盒接入合约');
     expect(html).toContain('提交适配器门禁');
     expect(html).toContain('回调验签门禁');
@@ -38,7 +38,7 @@ describe('video production queue page', () => {
     expect(html).toContain('Creatify');
     expect(html).toContain('VidMob');
     expect(html).toContain('AI 视频解析');
-    expect(html).toContain('Provider 执行闭环');
+    expect(html).toContain('AI 生成执行闭环');
     expect(html).toContain('本地混剪可交付，AI 生成待接入');
     expect(html).toContain('score 0/5');
     expect(html).toContain('AI 生成镜头 provider 回调');
@@ -53,7 +53,7 @@ describe('video production queue page', () => {
     expect(html).toContain('从 Hook 结构库到智能混剪包');
     expect(html).toContain('Hook Bank 入场');
     expect(html).toContain('UGC Script Spine 成片');
-    expect(html).toContain('Offer Test Matrix 分发');
+    expect(html).toContain('卖点测试分发');
     expect(html).toContain('Cut Production Line');
     expect(html).toContain('AI 视频分析');
     expect(html).toContain('一键视频');
