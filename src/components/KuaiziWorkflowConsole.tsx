@@ -209,8 +209,8 @@ const configs: Record<WorkflowStep, WorkflowConfig> = {
   },
   manage: {
     eyebrow: 'Step 05',
-    title: '把表现数据、客服反馈和售后问题变成下一轮增长动作',
-    subtitle: '平台数据直连先不作为阻塞。客户可上传链接、截图、CSV 或云盘资料，系统判断哪条内容有效、下一轮拍什么、客服话术怎么补。',
+    title: '把链接、截图、CSV、云盘和客服问题变成下一轮动作',
+    subtitle: '平台数据直连先不作为阻塞。客户上传发布链接、后台截图、CSV、云盘资料和客服反馈，系统判断哪条放大、哪条重剪、哪类 FAQ 要补。',
     primaryLabel: '回到工作台',
     primaryHref: '/factory?variant=friend_trial',
     toolName: '表现复盘与客户跟进',
@@ -219,14 +219,14 @@ const configs: Record<WorkflowStep, WorkflowConfig> = {
     accent: 'from-slate-700 via-blue-600 to-cyan-500',
     outcome: '复盘页要回答电商人每天最实际的问题：哪条继续放大、哪条换角度、客服和售后该怎么说。',
     cards: [
-      { label: '可复盘内容', value: '4 条', detail: '来自链接、截图、客户反馈或 CSV。' },
-      { label: '下一轮建议', value: '3 项', detail: '继续放大、换角度、补素材。' },
+      { label: '回填入口', value: '4 类', detail: '链接、截图、CSV、云盘目录。' },
+      { label: '下一轮动作', value: '4 种', detail: '放大、重剪、补客服、暂停。' },
       { label: '客服素材', value: '可生成', detail: 'FAQ、差评解释、物流/尺码/材质话术和售后卡片。' },
     ],
     systemPillars: [
-      { title: '云盘回填复盘', body: '客户把发布链接、截图、CSV、云盘目录或备注上传回来。', proof: '没有平台 API 也能判断下一轮方向。' },
+      { title: '回填收件箱', body: '客户把发布链接、后台截图、CSV、云盘目录或备注上传回来。', proof: '没有平台 API 也能判断下一轮方向。' },
       { title: '客服和售后承接', body: '把评论区问题、差评原因、物流/尺码/材质问题变成客服话术。', proof: '内容带来的咨询能被接住。' },
-      { title: '后续可接数据 API', body: '等客户授权、字段稳定、失败可回退 CSV 后，再接 analytics 或平台 API。', proof: '不先为 provider 付费或卡首版交付。' },
+      { title: '下一轮增长动作', body: '按证据判断继续放大、换角度重剪、补 FAQ，还是暂停。', proof: '不先为外部数据接口付费或卡首版交付。' },
     ],
     tasks: [
       { title: '回填首批发布链接', owner: '客户', status: '待回填' },
@@ -234,9 +234,9 @@ const configs: Record<WorkflowStep, WorkflowConfig> = {
       { title: '发送下一轮内容建议', owner: '销售', status: '今天' },
     ],
     deliverables: [
-      { title: '表现上传', body: '链接、截图、CSV、云盘文件都能作为第一阶段数据入口。', status: '可用' },
+      { title: '表现回填', body: '链接、截图、CSV、云盘文件都能作为第一阶段数据入口。', status: '可用' },
       { title: '复盘建议', body: '从点击、收藏、评论、转化和客户反馈里生成下一轮内容角度。', status: '可生成' },
-      { title: '客服与售后', body: '把常见问题、异议、差评原因整理成客服话术和售后卡片。', status: '新增' },
+      { title: '客服与售后', body: '把常见问题、异议、差评原因整理成客服话术和售后卡片。', status: '可生成' },
     ],
   },
 };

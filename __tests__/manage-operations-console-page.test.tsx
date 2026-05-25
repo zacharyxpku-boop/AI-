@@ -155,6 +155,11 @@ describe('manage operations console page', () => {
     expect(friendHtml).toContain('只展示已确认结果');
     expect(friendHtml).toContain('发布证明');
     expect(friendHtml).toContain('效果优化表');
+    expect(friendHtml).toContain('表现回填收件箱');
+    expect(friendHtml).toContain('链接 / 截图 / CSV / 云盘');
+    expect(friendHtml).toContain('客服与售后诊断');
+    expect(friendHtml).toContain('下一轮增长动作');
+    expect(friendHtml).toContain('补客服话术');
     expect(friendHtml).toContain('今天要确认的事');
     expect(friendHtml).toContain('销售跟进面板');
     expect(friendHtml).toContain('查看可跟进清单');
@@ -169,9 +174,9 @@ describe('manage operations console page', () => {
 
     expect(html).toContain('Wenai 商品增长工作台');
     expect(html).toContain('客户能看到的系统能力');
-    expect(html).toContain('云盘回填复盘');
+    expect(html).toContain('回填收件箱');
     expect(html).toContain('客服和售后承接');
-    expect(html).toContain('后续可接数据 API');
+    expect(html).toContain('下一轮增长动作');
     expect(html).toContain('没有平台 API 也能判断下一轮方向');
     expect(html).toContain('/factory?variant=friend_trial');
   });

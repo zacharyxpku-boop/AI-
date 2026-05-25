@@ -63,6 +63,43 @@ const MANAGE_VARIANTS: Record<FactoryUiVariantId, {
   },
 };
 
+const PERFORMANCE_RETURN_INBOX = [
+  {
+    title: '发布链接',
+    body: '小红书笔记、短视频、商品页、广告活动链接统一贴回工作台。',
+    proof: '先确认内容真实发出，再谈优化。',
+  },
+  {
+    title: '截图证据',
+    body: '曝光、点击、订单、评论、私信、售后截图都可以作为第一阶段证据。',
+    proof: '没有平台直连时，也能做复盘判断。',
+  },
+  {
+    title: 'CSV / 表格',
+    body: '客户导出曝光、点击、成交、销售额、花费，上传后进入下一轮判断。',
+    proof: '字段不稳定时先手工导入，不把平台 API 当首版阻塞。',
+  },
+  {
+    title: '云盘目录',
+    body: '成片、封面、评论截图、达人反馈和复盘备注放在同一目录。',
+    proof: '团队能按目录补证据，不靠聊天记录找材料。',
+  },
+];
+
+const SUPPORT_REVIEW_PACK = [
+  '高频咨询：尺码、材质、容量、物流、退换和适用场景。',
+  '评论区异议：价格、耐用度、真实感、竞品差异和使用门槛。',
+  '售后风险：破损、色差、延迟、不会用、预期不一致。',
+  '下一轮内容：补证明图、重剪视频、换标题、加 FAQ 或暂停投放。',
+];
+
+const NEXT_ROUND_DECISION_PACK = [
+  { title: '继续放大', body: '有证据、有咨询、有成交苗头的内容进入下一轮发布包。' },
+  { title: '换角度重剪', body: '播放可以但咨询弱，优先换开头、卖点顺序和封面。' },
+  { title: '补客服话术', body: '评论区问得多但成交弱，先补 FAQ、售后边界和异议处理。' },
+  { title: '暂停或降级', body: '无证据、无互动、无成交线索的内容不继续消耗排期。' },
+];
+
 function manageScore(
   industrial: IndustrializationSnapshot | null,
   permission: AssetPermissionSnapshot | null,
@@ -158,7 +195,7 @@ export function buildManageOperatingChecks(
       ready: dlpReady && watermarkReady && (permission?.retentionPolicyCount || 0) > 0,
       evidence: `安全策略 ${securityCount} / DLP 通过 ${permission?.dlpPassedPolicyCount || 0} / 水印 ${permission?.watermarkAppliedCount || 0}`,
       next: dlpReady && watermarkReady
-        ? '继续接真实对象存储、签名 URL、DLP provider 和水印服务。'
+        ? '继续接真实对象存储、签名链接、内容安全检查和水印服务。'
         : '先补 DLP、水印和留存规则；没有安全策略不开放外部下载或分享。',
     },
     {
@@ -175,7 +212,7 @@ export function buildManageOperatingChecks(
       evidence: `表现回流 ${performanceCount} 条 / scale 决策 ${scaleDecisionCount} 条`,
       next: performanceCount > 0
         ? '把结果反哺品牌学习、下一轮生产计划和销售续约动作。'
-        : '补表现回流接入或手工表现导入；没有回流不能宣称自动优化。',
+        : '补链接、截图、CSV 或云盘资料；没有回流不能宣称自动优化。',
     },
     {
       stage: '销售下一步队列',
@@ -642,6 +679,57 @@ export function ManageOperationsConsoleClient({
                     </article>
                   ))}
                 </div>
+
+                <section className="grid gap-4 xl:grid-cols-[1.1fr_0.9fr]">
+                  <div className="rounded-xl border border-indigo-100 bg-white p-5 shadow-sm">
+                    <div className="flex flex-col gap-2 sm:flex-row sm:items-end sm:justify-between">
+                      <div>
+                        <p className="text-xs font-black uppercase tracking-[0.18em] text-indigo-600">Return inbox</p>
+                        <h2 className="mt-1 text-lg font-black text-slate-950">表现回填收件箱</h2>
+                      </div>
+                      <span className="w-fit rounded-md bg-indigo-50 px-2.5 py-1 text-xs font-black text-indigo-700 ring-1 ring-indigo-100">链接 / 截图 / CSV / 云盘</span>
+                    </div>
+                    <div className="mt-4 grid gap-3 md:grid-cols-2">
+                      {PERFORMANCE_RETURN_INBOX.map(item => (
+                        <article className="rounded-lg border border-indigo-100 bg-indigo-50 p-3" key={item.title}>
+                          <h3 className="text-sm font-black text-slate-950">{item.title}</h3>
+                          <p className="mt-2 text-xs font-bold leading-5 text-slate-600">{item.body}</p>
+                          <p className="mt-2 rounded bg-white px-2 py-1.5 text-[11px] font-bold leading-4 text-indigo-700">{item.proof}</p>
+                        </article>
+                      ))}
+                    </div>
+                  </div>
+
+                  <div className="rounded-xl border border-emerald-100 bg-emerald-50 p-5 shadow-sm">
+                    <p className="text-xs font-black uppercase tracking-[0.18em] text-emerald-700">Support review</p>
+                    <h2 className="mt-1 text-lg font-black text-slate-950">客服与售后诊断</h2>
+                    <div className="mt-4 grid gap-2">
+                      {SUPPORT_REVIEW_PACK.map(item => (
+                        <div className="rounded-md bg-white px-3 py-2 text-sm font-bold leading-6 text-emerald-800 ring-1 ring-emerald-100" key={item}>
+                          {item}
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                </section>
+
+                <section className="rounded-xl border border-slate-200 bg-white p-5 shadow-sm">
+                  <div className="flex flex-col gap-2 sm:flex-row sm:items-end sm:justify-between">
+                    <div>
+                      <p className="text-xs font-black uppercase tracking-[0.18em] text-slate-400">Next round decisions</p>
+                      <h2 className="mt-1 text-lg font-black text-slate-950">下一轮增长动作</h2>
+                    </div>
+                    <span className="w-fit rounded-md bg-slate-100 px-2.5 py-1 text-xs font-black text-slate-600">不靠猜，按证据推进</span>
+                  </div>
+                  <div className="mt-4 grid gap-3 md:grid-cols-2 xl:grid-cols-4">
+                    {NEXT_ROUND_DECISION_PACK.map(item => (
+                      <article className="rounded-lg border border-slate-100 bg-slate-50 p-3" key={item.title}>
+                        <h3 className="text-sm font-black text-slate-950">{item.title}</h3>
+                        <p className="mt-2 text-xs font-bold leading-5 text-slate-600">{item.body}</p>
+                      </article>
+                    ))}
+                  </div>
+                </section>
 
                 <div className="grid grid-cols-1 gap-6 xl:grid-cols-12">
                   <div className="flex flex-col space-y-6 xl:col-span-8">

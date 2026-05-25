@@ -35,8 +35,8 @@ describe('kuaizi workflow console', () => {
     },
     {
       active: 'manage' as const,
-      title: '把表现数据、客服反馈和售后问题变成下一轮增长动作',
-      pillar: '云盘回填复盘',
+      title: '把链接、截图、CSV、云盘和客服问题变成下一轮动作',
+      pillar: '回填收件箱',
       proof: '没有平台 API 也能判断下一轮方向。',
       next: '/factory?variant=friend_trial',
     },
