@@ -62,6 +62,8 @@ describe('/api/commerce-remix', () => {
     expect(body.openSourceRemixBlueprint.githubPatternGroups.map((group: { id: string }) => group.id)).toContain('programmatic-render');
     expect(body.githubRemixRadar.headline).toContain('GitHub 开源混剪能力雷达');
     expect(body.githubRemixRadar.repoFamilies.map((family: { id: string }) => family.id)).toContain('pipeline-system');
+    expect(body.chatCutRemixConsole.headline).toContain('chat Cut 式精简混剪控制台');
+    expect(body.chatCutRemixConsole.cutFlow.map((step: { id: string }) => step.id)).toContain('queue');
     expect(body.workflowPlaybook.stages.map((stage: { id: string }) => stage.id)).toContain('publishing-pack');
     expect(body.executionRecipes.map((recipe: { id: string }) => recipe.id)).toContain('recipe-local-render');
     expect(body.orchestrationBoard.routes.map((route: { id: string }) => route.id)).toContain('render-export');
@@ -151,6 +153,8 @@ describe('/api/commerce-remix', () => {
     expect(body.openSourceRemixBlueprint.scaleDecision.join(' ')).toContain('多 worker');
     expect(body.githubRemixRadar.adoptionQueue.find((queue: { stage: string }) => queue.stage === 'now').reason).toContain('不等图片/视频/数字人 Key');
     expect(body.githubRemixRadar.notProviderDependency.join(' ')).toContain('不纳入首版交付');
+    expect(body.chatCutRemixConsole.defaultRecipes.map((recipe: { id: string }) => recipe.id)).toContain('support-objection');
+    expect(body.chatCutRemixConsole.reliabilityRules.join(' ')).toContain('单条任务');
     expect(body.executionRecipes.find((recipe: { adapterId: string }) => recipe.adapterId === 'ffmpeg').passCriteria.join(' ')).toContain('MP4 可播放');
     expect(body.executionRecipes.find((recipe: { adapterId: string }) => recipe.adapterId === 'mediainfo').passCriteria.join(' ')).toContain('编码');
     expect(body.orchestrationBoard.routes.find((route: { id: string }) => route.id === 'template-compose').primaryAdapterIds).toContain('editly');

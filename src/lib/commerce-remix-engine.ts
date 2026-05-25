@@ -520,6 +520,30 @@ export interface CommerceRemixWorkflowPlaybook {
   noProviderFallbacks: string[];
 }
 
+export interface CommerceChatCutRemixConsole {
+  headline: string;
+  promise: string;
+  operatingMode: string;
+  cutFlow: Array<{
+    id: 'source' | 'cut' | 'script' | 'compose' | 'qa' | 'queue';
+    label: string;
+    customerInput: string;
+    systemAction: string;
+    output: string;
+    passGate: string;
+  }>;
+  defaultRecipes: Array<{
+    id: string;
+    label: string;
+    bestFor: string;
+    structure: string[];
+    openSourceStack: string[];
+    customerOutput: string;
+  }>;
+  reliabilityRules: string[];
+  customerOnlySees: string[];
+}
+
 export interface CommercePublishingMatrixPlan {
   platform: RemixPlatform;
   accountAngles: Array<{
@@ -3220,6 +3244,116 @@ export function buildCommerceRemixWorkflowPlaybook(
   };
 }
 
+export function buildCommerceChatCutRemixConsole(
+  input: CommerceRemixPlanInput,
+  plan = buildCommerceRemixEnginePlan(input),
+  templates = buildCommerceRemixTemplateBank(input),
+  renderBoard = buildCommerceRenderReliabilityBoard(plan.queue),
+): CommerceChatCutRemixConsole {
+  const product = safeText(input.productName, '商品');
+  const platformText = input.platforms.map(platform => PLATFORM_LABELS[platform]).join(' / ') || '目标平台';
+  const visualClipCount = plan.timeline.clips.filter(clip => clip.track === 'visual').length;
+  const subtitleClipCount = plan.timeline.clips.filter(clip => clip.track === 'subtitle').length;
+  const readyQueueCount = plan.queue.filter(item => item.status === 'ready').length;
+  const blockedQueueCount = plan.queue.filter(item => item.status === 'needs_material' || item.status === 'blocked').length;
+
+  return {
+    headline: 'chat Cut 式精简混剪控制台',
+    promise: `把 ${product} 的长素材、商品图、口播稿和平台要求切成可复核的小任务：先找可用片段，再压缩成短脚本，最后进入稳定渲染队列；客户看到的是成片包、标题矩阵和下一步，不需要操作复杂剪辑器。`,
+    operatingMode: `首版本地/开源执行：${visualClipCount} 个视觉片段、${subtitleClipCount} 段字幕、${plan.ffmpegCommands.length} 条渲染命令，覆盖 ${platformText}；图片/视频/数字人 Key 到位后只补生成层。`,
+    cutFlow: [
+      {
+        id: 'source',
+        label: '素材进来',
+        customerInput: '商品图、长视频、直播切片、口播稿、授权说明和主平台。',
+        systemAction: '统一整理成素材货架，先标记缺图、缺授权、缺尺寸或缺口播。',
+        output: `${plan.missingAssets.length} 个素材缺口 / ${input.assets.length} 个素材记录`,
+        passGate: '没有授权或来源不清的素材不能进入混剪。',
+      },
+      {
+        id: 'cut',
+        label: '切出可用片段',
+        customerInput: '客户只确认低置信片段是否能用，不需要自己剪。',
+        systemAction: '用 LosslessCut、PySceneDetect、Auto-Editor 思路做无损切片、场景检测、去停顿。',
+        output: `${visualClipCount} 个候选视觉片段`,
+        passGate: '每个片段保留原始时间戳、用途、授权状态和删除原因。',
+      },
+      {
+        id: 'script',
+        label: '压成短脚本',
+        customerInput: '确认主卖点、禁用词、售后边界和账号人设。',
+        systemAction: '把片段压成前三秒钩子、证明段、客服异议和 CTA，字幕最多两行。',
+        output: `${subtitleClipCount} 段字幕 / ${plan.publishingPacks.length} 个发布包`,
+        passGate: '口播、字幕、标题和客服话术必须同一口径。',
+      },
+      {
+        id: 'compose',
+        label: '组装时间线',
+        customerInput: '确认种草、模特证明、客服异议三类模板优先级。',
+        systemAction: '把片段、字幕、封面、BGM、尺寸和 CTA 组装成 Remotion/FFmpeg 可执行任务。',
+        output: `${plan.timeline.clips.length} 个 timeline clips`,
+        passGate: '每条时间线都有输出尺寸、字幕安全区和封面说明。',
+      },
+      {
+        id: 'qa',
+        label: '导出前质检',
+        customerInput: '只抽检成片是否看得懂、商品是否画错、承诺是否过度。',
+        systemAction: '检查 MediaInfo 参数、时长、可播放、字幕遮挡、商品主体和售后边界。',
+        output: `${templates.length} 个模板质检规则`,
+        passGate: '黑屏、错尺寸、字幕压商品、夸大承诺都不能进入发布包。',
+      },
+      {
+        id: 'queue',
+        label: '稳定队列出片',
+        customerInput: '确认先补素材还是先导出已有版本。',
+        systemAction: '按平台和尺寸拆队列；失败只隔离单条，重试不拖垮整批。',
+        output: `${readyQueueCount} 条可渲染 / ${blockedQueueCount} 条待补`,
+        passGate: renderBoard.customerPromise,
+      },
+    ],
+    defaultRecipes: [
+      {
+        id: 'proof-first',
+        label: '证明优先',
+        bestFor: '新品种草、功能解释、客户第一次看不懂卖点',
+        structure: ['痛点场景', '商品出现', '细节证明', '适合人群', '自发布 CTA'],
+        openSourceStack: ['pyscenedetect', 'lossless-cut', 'remotion', 'ffmpeg', 'mediainfo'],
+        customerOutput: '一条证明型短视频、封面提示和平台标题。',
+      },
+      {
+        id: 'model-scene',
+        label: '模特场景',
+        bestFor: '需要模特图、手持图、生活方式图增强信任',
+        structure: ['模特/场景图', '商品细节', '使用动作', '字幕解释', 'FAQ 承接'],
+        openSourceStack: ['imagemagick-libheif', 'remotion', 'editly', 'ffmpeg', 'queue-worker'],
+        customerOutput: '一条场景型短视频、模特图补充任务和客服 FAQ。',
+      },
+      {
+        id: 'support-objection',
+        label: '客服异议',
+        bestFor: '评论区追问价格、规格、物流、售后或差评原因',
+        structure: ['真实问题', '克制解释', '证据卡片', '售后边界', '人工转接提醒'],
+        openSourceStack: ['subtitle-edit', 'auto-subtitles', 'mcp-video', 'mediainfo'],
+        customerOutput: '一条异议解释短视频、可复制回复和下一轮重剪任务。',
+      },
+    ],
+    reliabilityRules: [
+      '长素材先切成小片段再组装，避免整条长视频失败。',
+      '所有命令以参数数组和任务清单保存，不拼接 shell 字符串。',
+      '每条任务都有 attempt、blocked reason、输出路径和下一步动作。',
+      '失败只回到单条任务；整批可继续导出已成功成片。',
+      '客户自发布，Wenai 不接收账号、密码、cookie 或后台 token。',
+    ],
+    customerOnlySees: [
+      '今天缺什么素材',
+      '哪些片段会被用',
+      '能导出哪些平台版本',
+      '哪些视频需要补素材或重试',
+      '发布后回填什么证据',
+    ],
+  };
+}
+
 export function evaluateCommerceRemixQuality(
   input: CommerceRemixPlanInput,
   plan = buildCommerceRemixEnginePlan(input),
@@ -4370,6 +4504,12 @@ export function buildDemoCommerceRemixTemplateBank() {
 export function buildDemoCommerceRemixWorkflowPlaybook() {
   const input = buildDemoCommerceRemixInput();
   return buildCommerceRemixWorkflowPlaybook(input, buildCommerceRemixEnginePlan(input));
+}
+
+export function buildDemoCommerceChatCutRemixConsole() {
+  const input = buildDemoCommerceRemixInput();
+  const plan = buildCommerceRemixEnginePlan(input);
+  return buildCommerceChatCutRemixConsole(input, plan, buildCommerceRemixTemplateBank(input), buildCommerceRenderReliabilityBoard(plan.queue));
 }
 
 export function buildDemoCommerceRemixExecutionRecipes() {

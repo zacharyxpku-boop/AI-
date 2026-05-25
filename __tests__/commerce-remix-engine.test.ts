@@ -18,6 +18,7 @@ import {
   buildCommerceDailyOperatorCockpit,
   buildCommerceEvidenceReadinessBoard,
   buildCommerceFirstDeliveryChecklist,
+  buildCommerceChatCutRemixConsole,
   buildCommerceGitHubRemixRadar,
   buildCommerceConversationOpsConsole,
   buildCommerceModelImageTaskPack,
@@ -819,6 +820,7 @@ describe('commerce remix engine', () => {
   it('builds a customer-readable remix workflow with no-provider fallbacks', () => {
     const plan = buildCommerceRemixEnginePlan(baseInput);
     const playbook = buildCommerceRemixWorkflowPlaybook(baseInput, plan);
+    const chatCutConsole = buildCommerceChatCutRemixConsole(baseInput, plan);
     const deliveryMap = buildCommerceCustomerDeliveryMap(baseInput);
     const systemMap = buildCommerceWorkbenchSystemMap(baseInput, plan);
 
@@ -832,6 +834,13 @@ describe('commerce remix engine', () => {
     ]);
     expect(playbook.stages.find(stage => stage.id === 'publishing-pack')?.qualityGate).toContain('不自动登录');
     expect(playbook.noProviderFallbacks.join(' ')).toContain('客户上传链接、截图、CSV');
+    expect(chatCutConsole.headline).toContain('chat Cut 式精简混剪控制台');
+    expect(chatCutConsole.cutFlow.map(step => step.id)).toEqual(['source', 'cut', 'script', 'compose', 'qa', 'queue']);
+    expect(chatCutConsole.defaultRecipes.map(recipe => recipe.id)).toEqual(['proof-first', 'model-scene', 'support-objection']);
+    expect(chatCutConsole.defaultRecipes[0].openSourceStack).toContain('pyscenedetect');
+    expect(chatCutConsole.reliabilityRules.join(' ')).toContain('失败只回到单条任务');
+    expect(chatCutConsole.customerOnlySees).toContain('哪些片段会被用');
+    expect(JSON.stringify(chatCutConsole)).not.toMatch(/apiKey|accessToken|Bearer|sk-/i);
     expect(deliveryMap.phases.map(phase => phase.id)).toEqual(['brief', 'image', 'remix', 'publish', 'support', 'return']);
     expect(deliveryMap.oneLinePromise).toContain('客户只按步骤补资料');
     expect(deliveryMap.handoffRules.join(' ')).toContain('客户自行完成');

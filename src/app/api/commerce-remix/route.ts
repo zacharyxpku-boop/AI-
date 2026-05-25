@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import {
   buildCommerceCloudDriveManifest,
   buildCommerceCloudDriveReturnPlan,
+  buildCommerceChatCutRemixConsole,
   buildCommerceCustomerReturnIntakeBoard,
   buildCommerceCustomerDeliveryMap,
   buildCommerceCustomerEvidenceUploadGuide,
@@ -43,6 +44,7 @@ import {
   buildCommerceWorkbenchSystemMap,
   buildDemoCommerceCloudDriveManifest,
   buildDemoCommerceCloudDriveReturnPlan,
+  buildDemoCommerceChatCutRemixConsole,
   buildDemoCommerceCustomerReturnIntakeBoard,
   buildDemoCommerceCustomerDeliveryMap,
   buildDemoCommerceCustomerEvidenceUploadGuide,
@@ -153,6 +155,7 @@ function buildInputResponse(input: CommerceRemixPlanInput, body: CommerceRemixRe
   const openSourceInstallMatrix = buildCommerceOpenSourceInstallMatrix(input, plan, openSourceAdapters);
   const openSourceRemixBlueprint = buildCommerceOpenSourceRemixBlueprint(input, plan, openSourceAdapters);
   const githubRemixRadar = buildCommerceGitHubRemixRadar(input, openSourceAdapters);
+  const chatCutRemixConsole = buildCommerceChatCutRemixConsole(input, plan, templates, renderReliabilityBoard);
   const executionRecipes = buildCommerceRemixExecutionRecipes(input, plan, openSourceAdapters);
   const orchestrationBoard = buildCommerceRemixOrchestrationBoard(input, plan, openSourceAdapters);
   const workflowPlaybook = buildCommerceRemixWorkflowPlaybook(input, plan);
@@ -203,6 +206,7 @@ function buildInputResponse(input: CommerceRemixPlanInput, body: CommerceRemixRe
     openSourceInstallMatrix,
     openSourceRemixBlueprint,
     githubRemixRadar,
+    chatCutRemixConsole,
     executionRecipes,
     orchestrationBoard,
     workflowPlaybook,
@@ -254,6 +258,7 @@ export async function GET() {
     openSourceInstallMatrix: buildDemoCommerceOpenSourceInstallMatrix(),
     openSourceRemixBlueprint: buildDemoCommerceOpenSourceRemixBlueprint(),
     githubRemixRadar: buildDemoCommerceGitHubRemixRadar(),
+    chatCutRemixConsole: buildDemoCommerceChatCutRemixConsole(),
     executionRecipes: buildDemoCommerceRemixExecutionRecipes(),
     orchestrationBoard: buildDemoCommerceRemixOrchestrationBoard(),
     workflowPlaybook: buildDemoCommerceRemixWorkflowPlaybook(),
