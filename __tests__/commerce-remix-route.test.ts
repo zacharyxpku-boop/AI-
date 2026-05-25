@@ -48,6 +48,8 @@ describe('/api/commerce-remix', () => {
     expect(body.servicePack.faq.length).toBeGreaterThan(0);
     expect(body.salesConversationBoard.lanes.map((lane: { id: string }) => lane.id)).toContain('repurchase');
     expect(body.salesConversationBoard.noAutomationBoundaries).toContain('不自动登录客户平台账号');
+    expect(body.conversationOpsConsole.headline).toContain('chat Cut 式电商对话工单台');
+    expect(body.conversationOpsConsole.replyPackets.map((packet: { laneId: string }) => packet.laneId)).toContain('after_sales');
     expect(body.workbenchSystemMap.lanes.map((lane: { id: string }) => lane.id)).toContain('model_image');
     expect(body.workbenchSystemMap.primaryRoute).toContain('客户自己发布');
     expect(body.dailyOperatorCockpit.headline).toContain('电商人每日运营驾驶舱');
@@ -115,6 +117,8 @@ describe('/api/commerce-remix', () => {
     expect(body.modelImageTaskPack.tasks.map((task: { id: string }) => task.id)).toContain('model-handheld-proof');
     expect(body.customerSupportWorkflow.preSaleReplies.map((item: { scenario: string }) => item.scenario)).toContain('客户觉得贵');
     expect(body.salesConversationBoard.lanes.find((lane: { id: string }) => lane.id === 'after_sales').proofToCollect).toContain('处理结果');
+    expect(body.conversationOpsConsole.triageColumns.map((column: { id: string }) => column.id)).toContain('content_loop');
+    expect(body.conversationOpsConsole.noAutomationRules).toContain('不自动群发私信、评论、短信或私域消息。');
     expect(body.workbenchSystemMap.lanes.find((lane: { id: string }) => lane.id === 'support').wenaiOutput).toContain('FAQ');
     expect(body.workbenchSystemMap.notInScope.join(' ')).toContain('cookie');
     expect(body.customerDeliveryMap.phases.map((phase: { id: string }) => phase.id)).toContain('publish');

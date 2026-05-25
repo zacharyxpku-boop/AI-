@@ -19,6 +19,7 @@ import {
   buildCommerceEvidenceReadinessBoard,
   buildCommerceFirstDeliveryChecklist,
   buildCommerceGitHubRemixRadar,
+  buildCommerceConversationOpsConsole,
   buildCommerceModelImageTaskPack,
   buildCommerceOpenSourceAdapters,
   buildCommerceOpenSourceCoverage,
@@ -460,6 +461,16 @@ describe('commerce remix engine', () => {
     expect(conversationBoard.lanes.find(lane => lane.id === 'publish_followup')?.proofToCollect).toContain('发布链接');
     expect(conversationBoard.noAutomationBoundaries).toContain('不自动登录客户平台账号');
     expect(conversationBoard.inboxFields.map(field => field.label)).toContain('客户问题截图');
+
+    const opsConsole = buildCommerceConversationOpsConsole(baseInput, conversationBoard, pack);
+    expect(opsConsole.headline).toContain('chat Cut 式电商对话工单台');
+    expect(opsConsole.triageColumns.map(column => column.id)).toEqual(['question', 'answer', 'asset', 'content_loop']);
+    expect(opsConsole.replyPackets.map(packet => packet.laneId)).toEqual(['inquiry', 'recommendation', 'publish_followup', 'after_sales', 'repurchase']);
+    expect(opsConsole.replyPackets.find(packet => packet.laneId === 'after_sales')?.whenToEscalate).toContain('退款');
+    expect(opsConsole.inboxWorkflow.join(' ')).toContain('高频问题转成下一轮标题矩阵');
+    expect(opsConsole.customerUploadFields.join(' ')).toContain('客户问题截图');
+    expect(opsConsole.noAutomationRules).toContain('不自动登录客户客服后台或平台账号。');
+    expect(JSON.stringify(opsConsole)).not.toMatch(/apiKey|accessToken|Bearer|sk-/i);
   });
 
   it('builds model image tasks without requiring image provider keys', () => {

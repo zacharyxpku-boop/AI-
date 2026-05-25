@@ -306,6 +306,29 @@ export interface CommerceSalesConversationBoard {
   handoffSummary: string[];
 }
 
+export interface CommerceConversationOpsConsole {
+  headline: string;
+  promise: string;
+  triageColumns: Array<{
+    id: 'question' | 'answer' | 'asset' | 'content_loop';
+    label: string;
+    customerSees: string;
+    operatorDoes: string;
+    proof: string;
+  }>;
+  replyPackets: Array<{
+    laneId: CommerceSalesConversationBoard['lanes'][number]['id'];
+    label: string;
+    firstReply: string;
+    assetToSend: string;
+    whenToEscalate: string;
+    nextContentOpportunity: string;
+  }>;
+  inboxWorkflow: string[];
+  customerUploadFields: string[];
+  noAutomationRules: string[];
+}
+
 export interface CommerceWorkbenchSystemLane {
   id: 'brief' | 'model_image' | 'remix' | 'publish_pack' | 'support' | 'review';
   title: string;
@@ -3460,6 +3483,111 @@ export function buildCommerceSalesConversationBoard(
   };
 }
 
+export function buildCommerceConversationOpsConsole(
+  input: CommerceRemixPlanInput,
+  board = buildCommerceSalesConversationBoard(input),
+  servicePack = buildCommerceCustomerServicePack(input),
+): CommerceConversationOpsConsole {
+  const product = safeText(input.productName, '商品');
+  const point = safeText(input.sellingPoints[0] || '', '核心卖点');
+  const laneById = new Map(board.lanes.map(lane => [lane.id, lane]));
+  const firstFaq = servicePack.faq[0]?.answer || `${product} 适合关注 ${point} 的人群。`;
+  const priceReply = servicePack.objectionReplies.find(item => item.objection.includes('价格'))?.reply
+    || `先解释 ${point} 的使用场景价值，再给规格、售后和购买边界。`;
+  const afterSalesReply = servicePack.objectionReplies.find(item => item.objection.includes('物流') || item.objection.includes('售后'))?.reply
+    || '先确认订单状态，再给补发、退换或人工处理路径。';
+
+  return {
+    headline: 'chat Cut 式电商对话工单台',
+    promise: '把售前咨询、商品推荐、评论追问、售后和复购都变成可审核工单：先给客服可复制回复和可发送素材，再把高频问题回流成下一轮标题、混剪和 FAQ；不接管客户账号、不自动群发。',
+    triageColumns: [
+      {
+        id: 'question',
+        label: '问题进来',
+        customerSees: '客户上传聊天截图、评论截图、平台和商品链接。',
+        operatorDoes: '先按售前、推荐、发布追问、售后、复购五类分流。',
+        proof: '每条工单必须有截图、平台、商品和是否转人工字段。',
+      },
+      {
+        id: 'answer',
+        label: '回复出去',
+        customerSees: '系统给一条克制版可复制回复，不夸大效果。',
+        operatorDoes: '客服复核价格、规格、物流、售后口径后再发送。',
+        proof: '回复必须能追溯到 FAQ、详情页、售后政策或客户已给资料。',
+      },
+      {
+        id: 'asset',
+        label: '素材跟上',
+        customerSees: '同时给可发送的商品卡、对比卡、短视频片段或售后卡。',
+        operatorDoes: '缺图就回到模特生图/补拍任务，缺解释就回到口播脚本。',
+        proof: '每条素材有用途、来源和不能承诺的边界。',
+      },
+      {
+        id: 'content_loop',
+        label: '回流下一轮',
+        customerSees: '高频问题自动沉淀为下一轮标题、客服 FAQ、重剪任务和发布建议。',
+        operatorDoes: '运营把问题强度、转化情况和人工处理结果放进回填区。',
+        proof: '没有真实截图或 CSV 时不虚构表现，不判断某个话术已胜出。',
+      },
+    ],
+    replyPackets: [
+      {
+        laneId: 'inquiry',
+        label: laneById.get('inquiry')?.label || '售前咨询',
+        firstReply: firstFaq,
+        assetToSend: laneById.get('inquiry')?.wenaiOutput[1] || '商品适用人群图 + FAQ',
+        whenToEscalate: '客户询问退款、医疗、安全、平台处罚或明确投诉时转人工。',
+        nextContentOpportunity: '把“适不适合我”改成 15 秒适用人群短视频和详情页 FAQ。',
+      },
+      {
+        laneId: 'recommendation',
+        label: laneById.get('recommendation')?.label || '商品推荐',
+        firstReply: priceReply,
+        assetToSend: '规格对比卡 + 使用场景图 + 价格异议解释卡',
+        whenToEscalate: '涉及库存、优惠、合同、支付或订单修改时转人工。',
+        nextContentOpportunity: '把预算、规格和使用对象做成账号矩阵里的测评标题。',
+      },
+      {
+        laneId: 'publish_followup',
+        label: laneById.get('publish_followup')?.label || '发布后追问',
+        firstReply: `先回答 ${point} 的具体使用方式，再引导客户查看商品详情或客服入口。`,
+        assetToSend: '评论区首评 + 二次解释图文 + 补拍清单',
+        whenToEscalate: '出现平台争议、侵权、虚假宣传质疑或大额售后时转人工。',
+        nextContentOpportunity: '把评论区高频追问改成下一条开场前三秒和封面文案。',
+      },
+      {
+        laneId: 'after_sales',
+        label: laneById.get('after_sales')?.label || '售后处理',
+        firstReply: afterSalesReply,
+        assetToSend: '售后处理卡 + 使用提醒图 + 差评挽回草稿',
+        whenToEscalate: '退款、投诉、破损、平台工单、安全风险一律转人工。',
+        nextContentOpportunity: '把差评原因改成详情页风险提示、客服 FAQ 和售后解释短视频。',
+      },
+      {
+        laneId: 'repurchase',
+        label: laneById.get('repurchase')?.label || '复购唤醒',
+        firstReply: `如果 ${product} 的 ${point} 场景已经用上，可以提醒客户收藏搭配方案或下一轮组合包。`,
+        assetToSend: '复购提醒文案 + 搭配商品卡 + 下一轮口播标题',
+        whenToEscalate: '涉及私域群发、会员权益、支付或订单变更时转人工。',
+        nextContentOpportunity: '把复购反馈回流到账号人设、发布时间和组合商品内容。',
+      },
+    ],
+    inboxWorkflow: [
+      '客户上传聊天截图、评论截图、售后截图或客服备注。',
+      '系统先按五类 lane 分流，再给可复制回复、可发送素材和转人工判断。',
+      '客服发送前复核商品事实、价格、规格、物流和售后边界。',
+      '运营把高频问题转成下一轮标题矩阵、混剪脚本、模特图任务或 FAQ。',
+    ],
+    customerUploadFields: board.inboxFields.map(field => `${field.label}${field.required ? '（必填）' : '（选填）'}：${field.example}`),
+    noAutomationRules: [
+      '不自动登录客户客服后台或平台账号。',
+      '不自动群发私信、评论、短信或私域消息。',
+      '不自动处理退款、付款、改订单或平台工单。',
+      '不把未经复核的 AI 回复直接发给消费者。',
+    ],
+  };
+}
+
 export function buildCommerceCustomerDeliveryMap(input: CommerceRemixPlanInput): CommerceCustomerDeliveryMap {
   const product = safeText(input.productName, '商品');
   const platforms = input.platforms.map(platform => PLATFORM_LABELS[platform]).join(' / ');
@@ -4336,6 +4464,13 @@ export function buildDemoCommerceSalesConversationBoard() {
   const input = buildDemoCommerceRemixInput();
   const servicePack = buildCommerceCustomerServicePack(input);
   return buildCommerceSalesConversationBoard(input, servicePack, buildCommerceCustomerSupportWorkflow(input, servicePack));
+}
+
+export function buildDemoCommerceConversationOpsConsole() {
+  const input = buildDemoCommerceRemixInput();
+  const servicePack = buildCommerceCustomerServicePack(input);
+  const board = buildCommerceSalesConversationBoard(input, servicePack, buildCommerceCustomerSupportWorkflow(input, servicePack));
+  return buildCommerceConversationOpsConsole(input, board, servicePack);
 }
 
 export function buildDemoCommerceWorkbenchSystemMap() {

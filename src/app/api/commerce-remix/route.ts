@@ -8,6 +8,7 @@ import {
   buildCommerceCustomerLaunchReadinessBoard,
   buildCommerceDailyOperatorCockpit,
   buildCommerceEvidenceReadinessBoard,
+  buildCommerceConversationOpsConsole,
   buildCommerceSalesConversationBoard,
   buildCommerceCustomerServicePack,
   buildCommerceCustomerSupportWorkflow,
@@ -48,6 +49,7 @@ import {
   buildDemoCommerceCustomerLaunchReadinessBoard,
   buildDemoCommerceDailyOperatorCockpit,
   buildDemoCommerceEvidenceReadinessBoard,
+  buildDemoCommerceConversationOpsConsole,
   buildDemoCommerceSalesConversationBoard,
   buildDemoCommerceCustomerServicePack,
   buildDemoCommerceCustomerSupportWorkflow,
@@ -135,6 +137,7 @@ function buildInputResponse(input: CommerceRemixPlanInput, body: CommerceRemixRe
   const modelImageTaskPack = buildCommerceModelImageTaskPack(input);
   const customerSupportWorkflow = buildCommerceCustomerSupportWorkflow(input, servicePack);
   const salesConversationBoard = buildCommerceSalesConversationBoard(input, servicePack, customerSupportWorkflow);
+  const conversationOpsConsole = buildCommerceConversationOpsConsole(input, salesConversationBoard, servicePack);
   const workbenchSystemMap = buildCommerceWorkbenchSystemMap(input, plan);
   const dailyOperatorCockpit = buildCommerceDailyOperatorCockpit(input, plan, workbenchSystemMap);
   const customerDeliveryMap = buildCommerceCustomerDeliveryMap(input);
@@ -184,6 +187,7 @@ function buildInputResponse(input: CommerceRemixPlanInput, body: CommerceRemixRe
     modelImageTaskPack,
     customerSupportWorkflow,
     salesConversationBoard,
+    conversationOpsConsole,
     workbenchSystemMap,
     dailyOperatorCockpit,
     customerDeliveryMap,
@@ -234,6 +238,7 @@ export async function GET() {
     modelImageTaskPack: buildDemoCommerceModelImageTaskPack(),
     customerSupportWorkflow: buildDemoCommerceCustomerSupportWorkflow(),
     salesConversationBoard: buildDemoCommerceSalesConversationBoard(),
+    conversationOpsConsole: buildDemoCommerceConversationOpsConsole(),
     workbenchSystemMap: buildDemoCommerceWorkbenchSystemMap(),
     dailyOperatorCockpit: buildDemoCommerceDailyOperatorCockpit(),
     customerDeliveryMap: buildDemoCommerceCustomerDeliveryMap(),

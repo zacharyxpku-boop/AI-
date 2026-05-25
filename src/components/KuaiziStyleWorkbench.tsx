@@ -11,6 +11,7 @@ import {
   buildDemoCommerceCustomerLaunchReadinessBoard,
   buildDemoCommerceDailyOperatorCockpit,
   buildDemoCommerceEvidenceReadinessBoard,
+  buildDemoCommerceConversationOpsConsole,
   buildDemoCommerceSalesConversationBoard,
   buildDemoCommerceCustomerServicePack,
   buildDemoCommerceCustomerSupportWorkflow,
@@ -254,6 +255,7 @@ export function KuaiziStyleWorkbench() {
   const modelImageTaskPack = useMemo(() => buildDemoCommerceModelImageTaskPack(), []);
   const customerSupportWorkflow = useMemo(() => buildDemoCommerceCustomerSupportWorkflow(), []);
   const salesConversationBoard = useMemo(() => buildDemoCommerceSalesConversationBoard(), []);
+  const conversationOpsConsole = useMemo(() => buildDemoCommerceConversationOpsConsole(), []);
   const workbenchSystemMap = useMemo(() => buildDemoCommerceWorkbenchSystemMap(), []);
   const dailyOperatorCockpit = useMemo(() => buildDemoCommerceDailyOperatorCockpit(), []);
   const providerActivationPlan = useMemo(() => buildDemoCommerceProviderActivationPlan(), []);
@@ -1688,7 +1690,7 @@ export function KuaiziStyleWorkbench() {
                   <div className="flex flex-col gap-2 md:flex-row md:items-end md:justify-between">
                     <div>
                       <p className="text-xs font-black uppercase tracking-[0.18em] text-rose-700">对话运营板</p>
-                      <h4 className="mt-1 text-base font-black text-slate-950">像 ChatCart 一样接住售前、推荐、售后和复购，但不接管账号</h4>
+                      <h4 className="mt-1 text-base font-black text-slate-950">像 chat Cut 一样把流程切细：接住售前、推荐、售后和复购，但不接管账号</h4>
                       <p className="mt-2 max-w-3xl text-sm leading-6 text-slate-600">{salesConversationBoard.promise}</p>
                     </div>
                     <span className="rounded bg-white px-2.5 py-1 text-xs font-black text-rose-700 ring-1 ring-rose-100">{salesConversationBoard.lanes.length} 条对话 lane</span>
@@ -1707,6 +1709,56 @@ export function KuaiziStyleWorkbench() {
                     {salesConversationBoard.noAutomationBoundaries.map(item => (
                       <div className="rounded-md bg-white px-3 py-2 text-xs font-bold leading-5 text-slate-700 ring-1 ring-rose-100" key={item}>{item}</div>
                     ))}
+                  </div>
+                  <div className="mt-5 rounded-md border border-pink-100 bg-white p-4">
+                    <div className="flex flex-col gap-3 lg:flex-row lg:items-end lg:justify-between">
+                      <div className="min-w-0">
+                        <p className="text-xs font-black uppercase tracking-[0.18em] text-pink-700">chat Cut Workflow Console</p>
+                        <h5 className="mt-1 text-base font-black leading-6 text-slate-950">{conversationOpsConsole.headline}</h5>
+                        <p className="mt-2 max-w-4xl text-sm leading-6 text-slate-600">{conversationOpsConsole.promise}</p>
+                      </div>
+                      <span className="w-fit rounded bg-pink-50 px-2.5 py-1 text-xs font-black text-pink-700 ring-1 ring-pink-100">{conversationOpsConsole.replyPackets.length} 个回复包</span>
+                    </div>
+                    <div className="mt-4 grid gap-3 lg:grid-cols-4">
+                      {conversationOpsConsole.triageColumns.map(column => (
+                        <article className="min-w-0 rounded-md bg-pink-50 p-3 ring-1 ring-pink-100" key={column.id}>
+                          <div className="text-[11px] font-black uppercase tracking-[0.12em] text-pink-700">{column.id}</div>
+                          <h6 className="mt-1 text-sm font-black leading-5 text-slate-950">{column.label}</h6>
+                          <p className="mt-2 text-xs font-bold leading-5 text-pink-800">{column.customerSees}</p>
+                          <p className="mt-2 line-clamp-3 text-xs leading-5 text-slate-600">{column.operatorDoes}</p>
+                          <p className="mt-3 rounded bg-white px-2 py-1.5 text-[11px] font-bold leading-4 text-slate-600">{column.proof}</p>
+                        </article>
+                      ))}
+                    </div>
+                    <div className="mt-4 grid gap-3 xl:grid-cols-5">
+                      {conversationOpsConsole.replyPackets.map(packet => (
+                        <article className="min-w-0 rounded-md bg-white p-3 ring-1 ring-pink-100" key={packet.laneId}>
+                          <div className="text-[11px] font-black uppercase tracking-[0.12em] text-pink-700">{packet.laneId}</div>
+                          <h6 className="mt-1 text-sm font-black leading-5 text-slate-950">{packet.label}</h6>
+                          <p className="mt-2 line-clamp-3 text-xs leading-5 text-slate-600">{packet.firstReply}</p>
+                          <p className="mt-3 rounded bg-pink-50 px-2 py-1.5 text-[11px] font-bold leading-4 text-pink-800">发送：{packet.assetToSend}</p>
+                          <p className="mt-2 line-clamp-2 text-[11px] font-bold leading-4 text-slate-500">回流：{packet.nextContentOpportunity}</p>
+                        </article>
+                      ))}
+                    </div>
+                    <div className="mt-4 grid gap-3 lg:grid-cols-[minmax(0,1fr)_minmax(280px,0.55fr)]">
+                      <div className="rounded-md bg-pink-50 p-3 ring-1 ring-pink-100">
+                        <h6 className="text-sm font-black text-slate-950">客户上传后怎么走</h6>
+                        <div className="mt-3 grid gap-2 sm:grid-cols-2">
+                          {conversationOpsConsole.inboxWorkflow.map(item => (
+                            <div className="rounded bg-white px-3 py-2 text-xs font-bold leading-5 text-slate-700 ring-1 ring-pink-100" key={item}>{item}</div>
+                          ))}
+                        </div>
+                      </div>
+                      <div className="rounded-md bg-white p-3 ring-1 ring-pink-100">
+                        <h6 className="text-sm font-black text-slate-950">不能自动化</h6>
+                        <div className="mt-3 grid gap-2">
+                          {conversationOpsConsole.noAutomationRules.map(item => (
+                            <div className="rounded bg-rose-50 px-3 py-2 text-xs font-bold leading-5 text-rose-800 ring-1 ring-rose-100" key={item}>{item}</div>
+                          ))}
+                        </div>
+                      </div>
+                    </div>
                   </div>
                 </div>
               </section>
