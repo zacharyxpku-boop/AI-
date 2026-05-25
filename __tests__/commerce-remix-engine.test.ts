@@ -17,6 +17,7 @@ import {
   buildCommerceModelImageTaskPack,
   buildCommerceOpenSourceAdapters,
   buildCommerceOpenSourceCoverage,
+  buildCommercePostPublishActionBoard,
   buildCommerceProviderActivationPlan,
   buildCommerceProviderNeedAssessment,
   buildCommercePublishingMatrixPlan,
@@ -253,6 +254,31 @@ describe('commerce remix engine', () => {
     expect(missingBoard.status).toBe('needs_evidence');
     expect(missingBoard.evidenceCards.filter(card => card.state === 'missing')).toHaveLength(3);
     expect(missingBoard.nextOwnerActions).toHaveLength(3);
+  });
+
+  it('connects customer returns to remix support and evidence actions', () => {
+    const returnPlan = buildCommerceCloudDriveReturnPlan(baseInput, buildCommerceCloudDriveManifest(baseInput));
+    const report = evaluateCommercePerformanceUploads([
+      {
+        platform: 'xiaohongshu',
+        publishedUrl: 'https://example.test/post',
+        screenshotPath: '04-customer-return/post.png',
+        csvRows: [{ title: 'Hook B', impressions: 800, clicks: 90, orders: 4, revenue: 396 }],
+      },
+    ]);
+    const returnBoard = buildCommerceCustomerReturnIntakeBoard(report, returnPlan);
+    const servicePack = buildCommerceCustomerServicePack(baseInput);
+    const supportWorkflow = buildCommerceCustomerSupportWorkflow(baseInput, servicePack);
+    const actionBoard = buildCommercePostPublishActionBoard(report, returnBoard, supportWorkflow, returnPlan);
+
+    expect(actionBoard.status).toBe('ready_for_next_round');
+    expect(actionBoard.evidenceSummary).toContain('Hook B');
+    expect(actionBoard.actionLanes.map(lane => lane.id)).toEqual(['remix', 'support', 'asset', 'evidence']);
+    expect(actionBoard.actionLanes.find(lane => lane.id === 'support')?.output).toContain('FAQ 更新');
+    expect(actionBoard.actionLanes.find(lane => lane.id === 'evidence')?.actions.join(' ')).toContain('04-customer-return');
+    expect(actionBoard.reviewScript.join(' ')).toContain('最佳标题');
+    expect(actionBoard.doNotAutomate).toContain('不自动读取平台后台。');
+    expect(JSON.stringify(actionBoard)).not.toMatch(/apiKey|accessToken|Bearer|sk-/i);
   });
 
   it('dry-runs ready render jobs into exported outputs without external providers', () => {

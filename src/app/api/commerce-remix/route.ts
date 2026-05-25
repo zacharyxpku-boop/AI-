@@ -12,6 +12,7 @@ import {
   buildCommerceModelImageTaskPack,
   buildCommerceOpenSourceAdapters,
   buildCommerceOpenSourceCoverage,
+  buildCommercePostPublishActionBoard,
   buildCommerceProviderActivationPlan,
   buildCommerceProviderNeedAssessment,
   buildCommercePublishingMatrixPlan,
@@ -35,6 +36,7 @@ import {
   buildDemoCommerceFirstDeliveryChecklist,
   buildDemoCommerceModelImageTaskPack,
   buildDemoCommerceOpenSourceCoverage,
+  buildDemoCommercePostPublishActionBoard,
   buildDemoCommerceProviderActivationPlan,
   buildDemoCommerceProviderNeedAssessment,
   buildDemoCommercePublishingMatrixPlan,
@@ -115,6 +117,7 @@ function buildInputResponse(input: CommerceRemixPlanInput, body: CommerceRemixRe
   const cloudReturnPlan = buildCommerceCloudDriveReturnPlan(input, cloudDrive);
   const selfPublishingCommandCenter = buildCommerceSelfPublishingCommandCenter(input, publishingMatrix, creatorPersonaMatrix, cloudReturnPlan);
   const customerReturnIntakeBoard = buildCommerceCustomerReturnIntakeBoard(performanceReport, cloudReturnPlan);
+  const postPublishActionBoard = buildCommercePostPublishActionBoard(performanceReport, customerReturnIntakeBoard, customerSupportWorkflow, cloudReturnPlan);
 
   return {
     mode: 'local_first',
@@ -148,6 +151,7 @@ function buildInputResponse(input: CommerceRemixPlanInput, body: CommerceRemixRe
     selfPublishingCommandCenter,
     cloudReturnPlan,
     customerReturnIntakeBoard,
+    postPublishActionBoard,
   };
 }
 
@@ -182,6 +186,7 @@ export async function GET() {
     selfPublishingCommandCenter: buildDemoCommerceSelfPublishingCommandCenter(),
     cloudReturnPlan: buildDemoCommerceCloudDriveReturnPlan(),
     customerReturnIntakeBoard: buildDemoCommerceCustomerReturnIntakeBoard(),
+    postPublishActionBoard: buildDemoCommercePostPublishActionBoard(),
   });
 }
 

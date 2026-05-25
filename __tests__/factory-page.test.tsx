@@ -62,6 +62,10 @@ describe('factory page', () => {
     expect(html).toContain('客户自发布');
     expect(html).toContain('客户回填字段');
     expect(html).toContain('回填后系统看什么');
+    expect(html).toContain('Post Publish Action Board');
+    expect(html).toContain('发布后复盘行动板');
+    expect(html).toContain('可进入下一轮');
+    expect(html).toContain('仍然不自动化');
     expect(html).toContain('建议并发');
     expect(html).toContain('客服素材');
     expect(html).toContain('售前承接');

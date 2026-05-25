@@ -159,6 +159,22 @@ export interface CommerceCustomerReturnIntakeBoard {
   nextOwnerActions: string[];
 }
 
+export interface CommercePostPublishActionBoard {
+  headline: string;
+  status: 'ready_for_next_round' | 'waiting_for_evidence';
+  evidenceSummary: string;
+  actionLanes: Array<{
+    id: 'remix' | 'support' | 'asset' | 'evidence';
+    label: string;
+    trigger: string;
+    actions: string[];
+    owner: string;
+    output: string;
+  }>;
+  reviewScript: string[];
+  doNotAutomate: string[];
+}
+
 export interface CommerceCloudDriveManifest {
   rootDir: string;
   folders: Array<{ path: string; owner: string; requiredFiles: string[] }>;
@@ -1663,6 +1679,84 @@ export function buildCommerceCustomerReturnIntakeBoard(
   };
 }
 
+export function buildCommercePostPublishActionBoard(
+  report: CommercePerformanceUploadReport,
+  returnBoard: CommerceCustomerReturnIntakeBoard,
+  supportWorkflow: CommerceCustomerSupportWorkflow,
+  returnPlan: CommerceCloudDriveReturnPlan,
+): CommercePostPublishActionBoard {
+  const ready = returnBoard.status === 'ready_for_review';
+  const bestTitle = report.bestTitle || '待客户回填表现后再判断';
+  const supportActions = [
+    supportWorkflow.preSaleReplies[0]?.assetToSend ? `把「${supportWorkflow.preSaleReplies[0].assetToSend}」补进高频售前回复。` : '补一条适合人群 FAQ。',
+    supportWorkflow.negativeReviewRecovery[0]?.nextAction || '补差评解释卡。',
+    supportWorkflow.afterSaleReplies[0]?.escalation || '明确售后转人工规则。',
+  ];
+  return {
+    headline: '发布后复盘行动板：表现、客服和下一轮重剪放在同一张板',
+    status: ready ? 'ready_for_next_round' : 'waiting_for_evidence',
+    evidenceSummary: ready
+      ? `已收到 ${report.rowCount} 行表现数据，最佳标题是「${bestTitle}」，可以安排下一轮标题、封面和客服动作。`
+      : `还缺 ${report.missingEvidence.join(' / ') || '客户回填证据'}，先补证据再做放大判断。`,
+    actionLanes: [
+      {
+        id: 'remix',
+        label: '内容重剪',
+        trigger: report.totalOrders > 0 ? '已有订单或点击信号' : '订单信号不足或前三秒不够强',
+        actions: [
+          report.nextRoundAdvice[0],
+          report.totalOrders > 0 ? '复制最佳标题的开场结构，换封面和商品细节做第二批。' : '重做前三秒钩子、封面和第一句字幕。',
+          '把客户评论里的新问题改成一条客服异议短视频。',
+        ],
+        owner: '内容运营',
+        output: '下一轮标题矩阵 + 重剪任务清单',
+      },
+      {
+        id: 'support',
+        label: '客服承接',
+        trigger: '评论、私信、售后截图暴露新问题',
+        actions: supportActions,
+        owner: '客服/售后',
+        output: 'FAQ 更新 + 差评解释 + 人工转接规则',
+      },
+      {
+        id: 'asset',
+        label: '补素材',
+        trigger: returnPlan.reviewSignals.find(signal => signal.includes('补模特图')) || '封面、模特图、细节图或口播证据不足',
+        actions: [
+          '把表现较好的标题对应到需要补拍的模特图、细节图或对比卡。',
+          '图片/视频/数字人 Key 未到位时，先导出 prompt、拍摄清单和人工补图任务。',
+          '把补素材结果写回 01-source-assets 和下一轮时间线。',
+        ],
+        owner: '素材运营',
+        output: '补素材任务 + 模特/细节/对比图清单',
+      },
+      {
+        id: 'evidence',
+        label: '证据补齐',
+        trigger: ready ? '证据齐全，进入复盘归档' : report.missingEvidence.join(' / '),
+        actions: ready
+          ? ['把发布链接、截图、CSV 归档到 04-customer-return。', '把复盘建议写入 05-next-round。', '保留原始证据，不覆盖成片和素材。']
+          : returnBoard.nextOwnerActions,
+        owner: '交付运营',
+        output: ready ? '复盘归档 + 下一轮动作包' : '客户补证据提醒',
+      },
+    ],
+    reviewScript: [
+      `先看最佳标题：${bestTitle}`,
+      report.totalOrders > 0 ? '已有订单信号，优先复制结构再换素材。' : '订单不足，先重剪前三秒和封面。',
+      '再看客服问题：高频追问进入 FAQ、差评解释和下一条内容。',
+      '最后看证据是否完整：没有链接、截图、CSV 不做虚构表现判断。',
+    ],
+    doNotAutomate: [
+      '不自动读取平台后台。',
+      '不自动替客户回复评论、私信或售后工单。',
+      '不把缺证据的播放、订单或转化写成真实表现。',
+      '不跳过人工售后和争议处理。',
+    ],
+  };
+}
+
 export function buildCommerceRenderBatchPlan(queue: CommerceRemixQueueItem[], options: { maxConcurrency?: number; retryBudget?: number } = {}): CommerceRenderBatchPlan {
   const maxConcurrency = Math.max(1, Math.min(options.maxConcurrency || 4, 8));
   const retryBudget = Math.max(1, Math.min(options.retryBudget || 2, 3));
@@ -2488,6 +2582,15 @@ export function buildDemoCommerceCustomerReturnIntakeBoard() {
     buildDemoCommercePerformanceUploadReport(),
     buildCommerceCloudDriveReturnPlan(input, buildCommerceCloudDriveManifest(input)),
   );
+}
+
+export function buildDemoCommercePostPublishActionBoard() {
+  const input = buildDemoCommerceRemixInput();
+  const report = buildDemoCommercePerformanceUploadReport();
+  const returnPlan = buildCommerceCloudDriveReturnPlan(input, buildCommerceCloudDriveManifest(input));
+  const returnBoard = buildCommerceCustomerReturnIntakeBoard(report, returnPlan);
+  const servicePack = buildCommerceCustomerServicePack(input);
+  return buildCommercePostPublishActionBoard(report, returnBoard, buildCommerceCustomerSupportWorkflow(input, servicePack), returnPlan);
 }
 
 export function buildDemoCommerceRenderBatchPlan() {

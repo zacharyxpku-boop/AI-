@@ -121,6 +121,9 @@ describe('/api/commerce-remix', () => {
     expect(body.cloudReturnPlan.nextRoundOutputs).toContain('重剪任务清单');
     expect(body.customerReturnIntakeBoard.status).toBe('ready_for_review');
     expect(body.customerReturnIntakeBoard.evidenceCards.every((card: { state: string }) => card.state === 'received')).toBe(true);
+    expect(body.postPublishActionBoard.status).toBe('ready_for_next_round');
+    expect(body.postPublishActionBoard.actionLanes.map((lane: { id: string }) => lane.id)).toContain('support');
+    expect(body.postPublishActionBoard.doNotAutomate).toContain('不自动读取平台后台。');
   });
 
   it('rejects incomplete remix requests with stable Chinese guidance', async () => {

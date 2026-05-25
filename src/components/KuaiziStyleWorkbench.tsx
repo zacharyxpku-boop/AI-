@@ -19,6 +19,7 @@ import {
   buildDemoCommerceProviderNeedAssessment,
   buildDemoCommercePublishingMatrixPlan,
   buildDemoCommercePerformanceUploadReport,
+  buildDemoCommercePostPublishActionBoard,
   buildDemoCommerceRemixDryRun,
   buildDemoCommerceRemixEnginePlan,
   buildDemoCommerceRemixExportPackage,
@@ -252,6 +253,7 @@ export function KuaiziStyleWorkbench() {
   const renderCapacity = useMemo(() => buildDemoCommerceRenderCapacityPlan(), []);
   const cloudReturnPlan = useMemo(() => buildDemoCommerceCloudDriveReturnPlan(), []);
   const customerReturnIntakeBoard = useMemo(() => buildDemoCommerceCustomerReturnIntakeBoard(), []);
+  const postPublishActionBoard = useMemo(() => buildDemoCommercePostPublishActionBoard(), []);
   const queueSummary = useMemo(() => {
     const statuses = ['needs_material', 'ready', 'rendering', 'exported'] as const;
     return statuses.map(status => ({
@@ -1008,6 +1010,52 @@ export function KuaiziStyleWorkbench() {
                     ))}
                   </div>
                 </aside>
+              </section>
+
+              <section className="rounded-lg border border-[#dbeafe] bg-white p-5 shadow-sm">
+                <div className="flex flex-col gap-3 lg:flex-row lg:items-end lg:justify-between">
+                  <div className="min-w-0">
+                    <p className="text-xs font-black uppercase tracking-[0.18em] text-blue-600">Post Publish Action Board</p>
+                    <h3 className="mt-1 text-lg font-black leading-6 text-slate-950">{postPublishActionBoard.headline}</h3>
+                    <p className="mt-2 max-w-4xl text-sm leading-6 text-slate-600">{postPublishActionBoard.evidenceSummary}</p>
+                  </div>
+                  <span className={`w-fit rounded px-3 py-2 text-xs font-black ${postPublishActionBoard.status === 'ready_for_next_round' ? 'bg-emerald-50 text-emerald-700' : 'bg-amber-50 text-amber-700'}`}>
+                    {postPublishActionBoard.status === 'ready_for_next_round' ? '可进入下一轮' : '待补证据'}
+                  </span>
+                </div>
+                <div className="mt-5 grid gap-3 lg:grid-cols-4">
+                  {postPublishActionBoard.actionLanes.map(lane => (
+                    <article className="min-w-0 rounded-md border border-blue-100 bg-blue-50 p-4" key={lane.id}>
+                      <div className="text-[11px] font-black uppercase tracking-[0.12em] text-blue-700">{lane.owner}</div>
+                      <h4 className="mt-1 text-sm font-black leading-5 text-slate-950">{lane.label}</h4>
+                      <p className="mt-2 line-clamp-2 text-xs font-bold leading-5 text-blue-700">{lane.trigger}</p>
+                      <div className="mt-3 grid gap-2">
+                        {lane.actions.slice(0, 3).map(action => (
+                          <div className="rounded bg-white px-3 py-2 text-xs font-bold leading-5 text-slate-700 ring-1 ring-blue-100" key={action}>{action}</div>
+                        ))}
+                      </div>
+                      <p className="mt-3 rounded bg-white px-3 py-2 text-xs font-black leading-5 text-slate-800 ring-1 ring-blue-100">{lane.output}</p>
+                    </article>
+                  ))}
+                </div>
+                <div className="mt-4 grid gap-3 lg:grid-cols-2">
+                  <div className="rounded-md border border-slate-200 bg-slate-50 p-4">
+                    <h4 className="text-sm font-black text-slate-950">复盘口径</h4>
+                    <div className="mt-3 grid gap-2">
+                      {postPublishActionBoard.reviewScript.map(item => (
+                        <div className="rounded bg-white px-3 py-2 text-xs font-bold leading-5 text-slate-700 ring-1 ring-slate-100" key={item}>{item}</div>
+                      ))}
+                    </div>
+                  </div>
+                  <div className="rounded-md border border-rose-100 bg-rose-50 p-4">
+                    <h4 className="text-sm font-black text-slate-950">仍然不自动化</h4>
+                    <div className="mt-3 grid gap-2">
+                      {postPublishActionBoard.doNotAutomate.map(item => (
+                        <div className="rounded bg-white px-3 py-2 text-xs font-bold leading-5 text-rose-800 ring-1 ring-rose-100" key={item}>{item}</div>
+                      ))}
+                    </div>
+                  </div>
+                </div>
               </section>
 
               <section className="rounded-lg border border-[#e2e8f5] bg-white p-5 shadow-sm">
