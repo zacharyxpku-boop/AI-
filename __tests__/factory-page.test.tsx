@@ -28,6 +28,12 @@ describe('factory page', () => {
     expect(html).toContain('Daily Operator Cockpit');
     expect(html).toContain('电商人每日运营驾驶舱');
     expect(html).toContain('客户今天只看这些命令');
+    expect(html).toContain('Customer Next Step');
+    expect(html).toContain('Provider Readiness');
+    expect(html).toContain('客户下一步指挥台');
+    expect(html).toContain('先上传商品素材');
+    expect(html).toContain('客户能看到的边界');
+    expect(html).toContain('客户不用理解');
     expect(html).toContain('首版交付清单');
     expect(html).toContain('不等 Key，也能先给客户一套可发布资产');
     expect(html).toContain('Customer Launch Readiness');

@@ -384,6 +384,34 @@ export interface CommerceDailyOperatorCockpit {
   customerCanIgnore: string[];
 }
 
+export interface CommerceCustomerNextStepCommandCenter {
+  headline: string;
+  promise: string;
+  primaryAction: {
+    label: string;
+    href: string;
+    reason: string;
+  };
+  commandCards: Array<{
+    id: 'material' | 'produce' | 'publish' | 'return';
+    label: string;
+    customerSees: string;
+    wenaiDelivers: string;
+    customerDoes: string;
+    proofToReturn: string;
+    href: string;
+  }>;
+  providerReadinessCards: Array<{
+    id: 'run-now' | 'wait-key' | 'not-first';
+    label: string;
+    status: string;
+    customerMessage: string;
+    operatorRule: string;
+  }>;
+  visibleBoundaries: string[];
+  noNeedToUnderstand: string[];
+}
+
 export interface CommerceOpenSourceAdapter {
   id: string;
   name: string;
@@ -4261,6 +4289,102 @@ export function buildCommerceDailyOperatorCockpit(
   };
 }
 
+export function buildCommerceCustomerNextStepCommandCenter(
+  input: CommerceRemixPlanInput,
+  systemMap = buildCommerceWorkbenchSystemMap(input, buildCommerceRemixEnginePlan(input)),
+  growthLoop = buildCommerceEcommerceGrowthLoopConsole(input),
+): CommerceCustomerNextStepCommandCenter {
+  const product = safeText(input.productName, '商品');
+  const laneById = new Map(systemMap.lanes.map(lane => [lane.id, lane]));
+  const proofLane = growthLoop.lanes.find(lane => lane.id === 'proof_image');
+  const remixLane = growthLoop.lanes.find(lane => lane.id === 'remix_video');
+  const publishLane = growthLoop.lanes.find(lane => lane.id === 'publish_pack');
+  const returnLane = growthLoop.lanes.find(lane => lane.id === 'return_review');
+
+  return {
+    headline: '客户下一步指挥台：先补资料，再拿发布包，最后回传证据',
+    promise: `把 ${product} 今天最该做的事压成 4 个动作：补素材、产图文视频、客户自己发布、回传表现证据；复杂的开源混剪、队列、Key 和后台流程都收在第二层。`,
+    primaryAction: {
+      label: '先上传商品素材',
+      href: '/factory/create?variant=friend_trial',
+      reason: '没有商品主图、场景图、口播或授权边界，后面的模特图、混剪、标题和客服包都会变弱。',
+    },
+    commandCards: [
+      {
+        id: 'material',
+        label: '1. 补齐商品和证明素材',
+        customerSees: proofLane?.customerQuestion || '缺少商品证明图怎么办？',
+        wenaiDelivers: proofLane?.outputPack.slice(0, 3).join(' / ') || '模特图 prompt / 场景图要求 / 细节证明卡',
+        customerDoes: laneById.get('model_image')?.customerAction || '上传商品图、使用场景和授权说明。',
+        proofToReturn: laneById.get('model_image')?.proofToCollect.slice(0, 3).join(' / ') || '商品图 / 授权说明 / 场景图',
+        href: laneById.get('model_image')?.routeHref || '/factory/create?variant=friend_trial',
+      },
+      {
+        id: 'produce',
+        label: '2. 生成混剪和发布素材',
+        customerSees: remixLane?.customerQuestion || '怎么稳定剪成能发布的视频？',
+        wenaiDelivers: remixLane?.outputPack.slice(0, 4).join(' / ') || '短视频成片 / 字幕 / 封面 / 上传检查表',
+        customerDoes: laneById.get('remix')?.customerAction || '确认成片、封面和字幕。',
+        proofToReturn: laneById.get('remix')?.proofToCollect.slice(0, 3).join(' / ') || '成片 / 字幕 / 渲染日志',
+        href: laneById.get('remix')?.routeHref || '/factory/video?variant=friend_trial',
+      },
+      {
+        id: 'publish',
+        label: '3. 客户自己发布',
+        customerSees: publishLane?.customerQuestion || '我应该用什么账号和标题发布？',
+        wenaiDelivers: publishLane?.outputPack.slice(0, 4).join(' / ') || '标题矩阵 / 前三句口播 / 发布包 / 封面建议',
+        customerDoes: '客户自己登录平台发布；Wenai 不拿账号、密码、cookie 或后台 token。',
+        proofToReturn: '发布链接 / 发布截图 / 标题截图 / 评论截图',
+        href: laneById.get('publish_pack')?.routeHref || '/factory/cast?variant=friend_trial',
+      },
+      {
+        id: 'return',
+        label: '4. 回传证据做下一轮',
+        customerSees: returnLane?.customerQuestion || '发布后怎么判断下一轮做什么？',
+        wenaiDelivers: returnLane?.outputPack.slice(0, 4).join(' / ') || '复盘摘要 / 重剪任务 / 标题迭代 / 客服补素材',
+        customerDoes: laneById.get('review')?.customerAction || '上传链接、截图、CSV 或云盘目录。',
+        proofToReturn: '表现 CSV / 评论截图 / 云盘目录 / 客服问题截图',
+        href: laneById.get('review')?.routeHref || '/factory/manage?variant=friend_trial',
+      },
+    ],
+    providerReadinessCards: [
+      {
+        id: 'run-now',
+        label: '现在能跑',
+        status: '首版可交付',
+        customerMessage: '开源混剪、标题矩阵、发布包、客服话术和回填复盘不等外部 provider。',
+        operatorRule: '先让客户补素材和证据，系统输出可发布资产包。',
+      },
+      {
+        id: 'wait-key',
+        label: '等你的 Key',
+        status: '生成层增强',
+        customerMessage: '图片、视频、数字人和 TTS Key 到位后，替换成自动生成任务。',
+        operatorRule: '未接 Key 时只交付 prompt、分镜、字幕、任务包和人工可执行说明。',
+      },
+      {
+        id: 'not-first',
+        label: '首版不碰',
+        status: '账号和后台授权',
+        customerMessage: '平台自动登录、代发、后台数据 API 不是首版 blocker。',
+        operatorRule: '客户自己发布，表现先回传链接、截图、CSV 或云盘目录。',
+      },
+    ],
+    visibleBoundaries: [
+      '图片、视频、数字人 Key 未到位时，先交付 prompt、任务包、混剪包和发布包。',
+      '平台账号由客户自己登录发布，Wenai 不托管账号密码、cookie 或后台 token。',
+      '平台表现先靠客户上传链接、截图、CSV 或云盘目录，后续再接正式授权 API。',
+      '没有真实回填证据前，不虚构播放、订单、询盘或转化。',
+    ],
+    noNeedToUnderstand: [
+      'FFmpeg / Remotion / OpenTimelineIO / PySceneDetect 等开源工具名',
+      '渲染 worker、失败重试和队列日志',
+      '内部 CRM/SKU 状态字段',
+      '平台自动登录和数据 API 的后续工程细节',
+    ],
+  };
+}
+
 export function buildCommerceProviderActivationPlan(): CommerceProviderActivationPlan {
   return {
     currentMode: '本地优先：混剪、发布包、云盘回填、客服素材和复盘建议不依赖外部 provider。',
@@ -4991,6 +5115,16 @@ export function buildDemoCommerceDailyOperatorCockpit() {
   const input = buildDemoCommerceRemixInput();
   const plan = buildCommerceRemixEnginePlan(input);
   return buildCommerceDailyOperatorCockpit(input, plan, buildCommerceWorkbenchSystemMap(input, plan));
+}
+
+export function buildDemoCommerceCustomerNextStepCommandCenter() {
+  const input = buildDemoCommerceRemixInput();
+  const plan = buildCommerceRemixEnginePlan(input);
+  return buildCommerceCustomerNextStepCommandCenter(
+    input,
+    buildCommerceWorkbenchSystemMap(input, plan),
+    buildCommerceEcommerceGrowthLoopConsole(input),
+  );
 }
 
 export function buildDemoCommerceCustomerDeliveryMap() {

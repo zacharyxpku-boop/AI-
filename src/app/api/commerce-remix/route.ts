@@ -7,6 +7,7 @@ import {
   buildCommerceCustomerDeliveryMap,
   buildCommerceCustomerEvidenceUploadGuide,
   buildCommerceCustomerLaunchReadinessBoard,
+  buildCommerceCustomerNextStepCommandCenter,
   buildCommerceDailyOperatorCockpit,
   buildCommerceEcommerceGrowthLoopConsole,
   buildCommerceEvidenceReadinessBoard,
@@ -52,6 +53,7 @@ import {
   buildDemoCommerceCustomerDeliveryMap,
   buildDemoCommerceCustomerEvidenceUploadGuide,
   buildDemoCommerceCustomerLaunchReadinessBoard,
+  buildDemoCommerceCustomerNextStepCommandCenter,
   buildDemoCommerceDailyOperatorCockpit,
   buildDemoCommerceEcommerceGrowthLoopConsole,
   buildDemoCommerceEvidenceReadinessBoard,
@@ -149,6 +151,7 @@ function buildInputResponse(input: CommerceRemixPlanInput, body: CommerceRemixRe
   const conversationOpsConsole = buildCommerceConversationOpsConsole(input, salesConversationBoard, servicePack);
   const workbenchSystemMap = buildCommerceWorkbenchSystemMap(input, plan);
   const dailyOperatorCockpit = buildCommerceDailyOperatorCockpit(input, plan, workbenchSystemMap);
+  const customerNextStepCommandCenter = buildCommerceCustomerNextStepCommandCenter(input, workbenchSystemMap, ecommerceGrowthLoopConsole);
   const customerDeliveryMap = buildCommerceCustomerDeliveryMap(input);
   const providerActivationPlan = buildCommerceProviderActivationPlan();
   const providerActivationRunbook = buildCommerceProviderActivationRunbook(providerActivationPlan);
@@ -203,6 +206,7 @@ function buildInputResponse(input: CommerceRemixPlanInput, body: CommerceRemixRe
     conversationOpsConsole,
     workbenchSystemMap,
     dailyOperatorCockpit,
+    customerNextStepCommandCenter,
     customerDeliveryMap,
     providerActivationPlan,
     providerActivationRunbook,
@@ -258,6 +262,7 @@ export async function GET() {
     conversationOpsConsole: buildDemoCommerceConversationOpsConsole(),
     workbenchSystemMap: buildDemoCommerceWorkbenchSystemMap(),
     dailyOperatorCockpit: buildDemoCommerceDailyOperatorCockpit(),
+    customerNextStepCommandCenter: buildDemoCommerceCustomerNextStepCommandCenter(),
     customerDeliveryMap: buildDemoCommerceCustomerDeliveryMap(),
     providerActivationPlan: buildDemoCommerceProviderActivationPlan(),
     providerActivationRunbook: buildDemoCommerceProviderActivationRunbook(),

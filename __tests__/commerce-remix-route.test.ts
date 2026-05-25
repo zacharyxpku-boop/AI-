@@ -132,6 +132,10 @@ describe('/api/commerce-remix', () => {
     expect(body.conversationOpsConsole.noAutomationRules).toContain('不自动群发私信、评论、短信或私域消息。');
     expect(body.workbenchSystemMap.lanes.find((lane: { id: string }) => lane.id === 'support').wenaiOutput).toContain('FAQ');
     expect(body.workbenchSystemMap.notInScope.join(' ')).toContain('cookie');
+    expect(body.customerNextStepCommandCenter.headline).toContain('客户下一步指挥台');
+    expect(body.customerNextStepCommandCenter.commandCards.map((card: { id: string }) => card.id)).toContain('publish');
+    expect(body.customerNextStepCommandCenter.providerReadinessCards.map((card: { id: string }) => card.id)).toEqual(['run-now', 'wait-key', 'not-first']);
+    expect(body.customerNextStepCommandCenter.visibleBoundaries.join(' ')).toContain('不托管账号密码');
     expect(body.customerDeliveryMap.phases.map((phase: { id: string }) => phase.id)).toContain('publish');
     expect(body.providerActivationPlan.lanes.map((lane: { id: string }) => lane.id)).toContain('image-key');
     expect(body.providerNeedAssessment.verdict).toBe('first_delivery_ready');

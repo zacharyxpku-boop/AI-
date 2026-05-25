@@ -10,6 +10,7 @@ import {
   buildDemoCommerceCustomerDeliveryMap,
   buildDemoCommerceCustomerEvidenceUploadGuide,
   buildDemoCommerceCustomerLaunchReadinessBoard,
+  buildDemoCommerceCustomerNextStepCommandCenter,
   buildDemoCommerceDailyOperatorCockpit,
   buildDemoCommerceEcommerceGrowthLoopConsole,
   buildDemoCommerceEvidenceReadinessBoard,
@@ -263,6 +264,7 @@ export function KuaiziStyleWorkbench() {
   const conversationOpsConsole = useMemo(() => buildDemoCommerceConversationOpsConsole(), []);
   const workbenchSystemMap = useMemo(() => buildDemoCommerceWorkbenchSystemMap(), []);
   const dailyOperatorCockpit = useMemo(() => buildDemoCommerceDailyOperatorCockpit(), []);
+  const customerNextStepCommandCenter = useMemo(() => buildDemoCommerceCustomerNextStepCommandCenter(), []);
   const providerActivationPlan = useMemo(() => buildDemoCommerceProviderActivationPlan(), []);
   const providerActivationRunbook = useMemo(() => buildDemoCommerceProviderActivationRunbook(), []);
   const providerNeedAssessment = useMemo(() => buildDemoCommerceProviderNeedAssessment(), []);
@@ -403,6 +405,65 @@ export function KuaiziStyleWorkbench() {
                         <p className="mt-2 text-xs font-black text-indigo-600">{step.output}</p>
                       </button>
                     ))}
+                  </div>
+                </div>
+              </section>
+
+              <section className="rounded-lg border border-[#dbe6ff] bg-white p-5 shadow-sm">
+                <div className="flex flex-col gap-4 lg:flex-row lg:items-start lg:justify-between">
+                  <div className="min-w-0">
+                    <p className="text-xs font-black uppercase tracking-[0.18em] text-blue-600">Customer Next Step</p>
+                    <h3 className="mt-1 text-lg font-black leading-6 text-slate-950">{customerNextStepCommandCenter.headline}</h3>
+                    <p className="mt-2 max-w-5xl text-sm leading-6 text-slate-500">{customerNextStepCommandCenter.promise}</p>
+                  </div>
+                  <Link className="inline-flex min-h-11 w-fit shrink-0 items-center rounded-md bg-[#14213d] px-4 py-2 text-sm font-black text-white shadow-sm" href={customerNextStepCommandCenter.primaryAction.href}>
+                    {customerNextStepCommandCenter.primaryAction.label}
+                  </Link>
+                </div>
+                <div className="mt-3 rounded-md border border-blue-100 bg-blue-50 px-3 py-2 text-xs font-bold leading-5 text-blue-800">
+                  {customerNextStepCommandCenter.primaryAction.reason}
+                </div>
+                <div className="mt-4 grid gap-3 lg:grid-cols-3">
+                  {customerNextStepCommandCenter.providerReadinessCards.map(card => (
+                    <div className="min-w-0 rounded-md border border-slate-200 bg-slate-50 p-4" key={card.id}>
+                      <div className="flex flex-wrap items-center gap-2">
+                        <p className="text-[11px] font-black uppercase tracking-[0.12em] text-slate-500">Provider Readiness</p>
+                        <span className="rounded bg-white px-2 py-1 text-[11px] font-black text-slate-800 ring-1 ring-slate-200">{card.status}</span>
+                      </div>
+                      <h4 className="mt-2 text-sm font-black leading-5 text-slate-950">{card.label}</h4>
+                      <p className="mt-2 text-xs font-bold leading-5 text-slate-700">{card.customerMessage}</p>
+                      <p className="mt-3 rounded bg-white px-2 py-1.5 text-[11px] font-bold leading-4 text-slate-500 ring-1 ring-slate-100">{card.operatorRule}</p>
+                    </div>
+                  ))}
+                </div>
+                <div className="mt-5 grid gap-3 xl:grid-cols-4">
+                  {customerNextStepCommandCenter.commandCards.map(card => (
+                    <Link className="min-w-0 rounded-md border border-blue-100 bg-blue-50 p-4 transition hover:bg-white" href={card.href} key={card.id}>
+                      <div className="text-[11px] font-black uppercase tracking-[0.12em] text-blue-700">{card.id}</div>
+                      <h4 className="mt-1 text-sm font-black leading-5 text-slate-950">{card.label}</h4>
+                      <p className="mt-2 line-clamp-2 text-xs font-bold leading-5 text-blue-700">{card.customerSees}</p>
+                      <p className="mt-2 line-clamp-2 text-xs leading-5 text-slate-600">Wenai：{card.wenaiDelivers}</p>
+                      <p className="mt-2 line-clamp-2 text-xs leading-5 text-slate-600">客户：{card.customerDoes}</p>
+                      <p className="mt-3 line-clamp-2 rounded bg-white px-2 py-1.5 text-[11px] font-bold leading-4 text-emerald-700 ring-1 ring-blue-100">回传：{card.proofToReturn}</p>
+                    </Link>
+                  ))}
+                </div>
+                <div className="mt-4 grid gap-3 lg:grid-cols-[minmax(0,1fr)_minmax(280px,0.55fr)]">
+                  <div className="rounded-md border border-slate-200 bg-slate-50 p-4">
+                    <h4 className="text-sm font-black text-slate-950">客户能看到的边界</h4>
+                    <div className="mt-3 grid gap-2 sm:grid-cols-2">
+                      {customerNextStepCommandCenter.visibleBoundaries.map(item => (
+                        <div className="rounded bg-white px-3 py-2 text-xs font-bold leading-5 text-slate-700 ring-1 ring-slate-100" key={item}>{item}</div>
+                      ))}
+                    </div>
+                  </div>
+                  <div className="rounded-md border border-amber-100 bg-amber-50 p-4">
+                    <h4 className="text-sm font-black text-slate-950">客户不用理解</h4>
+                    <div className="mt-3 grid gap-2">
+                      {customerNextStepCommandCenter.noNeedToUnderstand.map(item => (
+                        <div className="rounded bg-white px-3 py-2 text-xs font-bold leading-5 text-slate-700 ring-1 ring-amber-100" key={item}>{item}</div>
+                      ))}
+                    </div>
                   </div>
                 </div>
               </section>

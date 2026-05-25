@@ -11,6 +11,7 @@ import {
   buildCommerceCustomerDeliveryMap,
   buildCommerceCustomerEvidenceUploadGuide,
   buildCommerceCustomerLaunchReadinessBoard,
+  buildCommerceCustomerNextStepCommandCenter,
   buildCommerceSalesConversationBoard,
   buildCommerceCustomerServicePack,
   buildCommerceCustomerSupportWorkflow,
@@ -906,6 +907,19 @@ describe('commerce remix engine', () => {
     expect(cockpit.commandStrip.join(' ')).toContain('今天能交付的图、视频、标题和客服素材');
     expect(cockpit.customerCanIgnore.join(' ')).toContain('不用理解 FFmpeg');
     expect(JSON.stringify(cockpit)).not.toMatch(/apiKey|accessToken|Bearer|sk-/i);
+
+    const nextStepCenter = buildCommerceCustomerNextStepCommandCenter(baseInput, systemMap);
+    expect(nextStepCenter.headline).toContain('客户下一步指挥台');
+    expect(nextStepCenter.primaryAction.href).toBe('/factory/create?variant=friend_trial');
+    expect(nextStepCenter.commandCards.map(card => card.id)).toEqual(['material', 'produce', 'publish', 'return']);
+    expect(nextStepCenter.providerReadinessCards.map(card => card.id)).toEqual(['run-now', 'wait-key', 'not-first']);
+    expect(nextStepCenter.providerReadinessCards.find(card => card.id === 'run-now')?.status).toContain('首版可交付');
+    expect(nextStepCenter.providerReadinessCards.find(card => card.id === 'not-first')?.customerMessage).toContain('平台自动登录');
+    expect(nextStepCenter.commandCards.find(card => card.id === 'publish')?.customerDoes).toContain('客户自己登录平台发布');
+    expect(nextStepCenter.commandCards.find(card => card.id === 'return')?.proofToReturn).toContain('表现 CSV');
+    expect(nextStepCenter.visibleBoundaries.join(' ')).toContain('不托管账号密码');
+    expect(nextStepCenter.noNeedToUnderstand.join(' ')).toContain('FFmpeg');
+    expect(JSON.stringify(nextStepCenter)).not.toMatch(/apiKey|accessToken|Bearer|sk-/i);
   });
 
   it('plans platform title matrices for customer self-publishing', () => {
