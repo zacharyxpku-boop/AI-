@@ -1447,6 +1447,31 @@ export function KuaiziStyleWorkbench() {
                     </div>
                     <Link className="text-sm font-black text-indigo-600" href="/factory/video?variant=friend_trial">查看视频 / 数字人流程</Link>
                   </div>
+                  <div className="mt-5 rounded-md border border-indigo-100 bg-indigo-50 p-4">
+                    <div className="flex flex-col gap-2 lg:flex-row lg:items-end lg:justify-between">
+                      <div className="min-w-0">
+                        <p className="text-xs font-black uppercase tracking-[0.18em] text-indigo-700">Customer Remix Path</p>
+                        <h4 className="mt-1 text-base font-black leading-6 text-slate-950">客户只看 5 步：素材、片段、模板、渲染、回填</h4>
+                        <p className="mt-2 max-w-4xl text-sm leading-6 text-slate-600">{openSourceCoverage.customerPromise}</p>
+                      </div>
+                      <span className="w-fit rounded bg-white px-2.5 py-1 text-xs font-black text-indigo-700 ring-1 ring-indigo-100">
+                        {openSourceCoverage.readyNowCount}/{openSourceCoverage.totalAdapterCount} 可先用
+                      </span>
+                    </div>
+                    <div className="mt-4 grid gap-3 xl:grid-cols-5">
+                      {openSourceCoverage.layers.map((layer, index) => (
+                        <article className="min-w-0 rounded-md bg-white p-3 ring-1 ring-indigo-100" key={layer.id}>
+                          <div className="flex items-start justify-between gap-2">
+                            <h5 className="text-sm font-black leading-5 text-slate-950">{layer.label}</h5>
+                            <span className="shrink-0 rounded bg-indigo-50 px-2 py-1 text-[11px] font-black text-indigo-700">{index + 1}</span>
+                          </div>
+                          <p className="mt-2 line-clamp-2 text-xs font-bold leading-5 text-indigo-700">{layer.customerProblem}</p>
+                          <p className="mt-2 line-clamp-3 text-xs leading-5 text-slate-600">{layer.runNow}</p>
+                          <p className="mt-3 line-clamp-2 rounded bg-slate-50 px-2 py-1.5 text-[11px] font-bold leading-4 text-slate-600">{layer.outputProof}</p>
+                        </article>
+                      ))}
+                    </div>
+                  </div>
                   <div className="mt-5 grid gap-3 md:grid-cols-2">
                     {remixPlan.engineStack.map(row => (
                       <article className="min-w-0 rounded-md border border-slate-200 bg-slate-50 p-4" key={row.id}>

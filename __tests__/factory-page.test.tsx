@@ -107,6 +107,9 @@ describe('factory page', () => {
     expect(html).toContain('个账号人设');
     expect(html).toContain('Open Source Coverage');
     expect(html).toContain('开源混剪能力地图');
+    expect(html).toContain('Customer Remix Path');
+    expect(html).toContain('客户只看 5 步：素材、片段、模板、渲染、回填');
+    expect(html).toContain('给素材 -&gt; 出多平台成片包 -&gt; 自己发布 -&gt; 回填复盘');
     expect(html).toContain('Auto-Editor');
     expect(html).toContain('MediaInfo');
     expect(html).toContain('GitHub Remix Blueprint');
