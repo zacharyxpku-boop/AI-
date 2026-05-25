@@ -1008,7 +1008,7 @@ export function buildCommerceOpenSourceAdapters(): CommerceOpenSourceAdapter[] {
       repositoryUrl: 'https://github.com/FFmpeg/FFmpeg',
       useFor: '转码、裁切、拼接、字幕烧录、音频响度标准化、多尺寸导出',
       integrationMode: 'local_worker',
-      customerValue: '把商品图、视频片段、字幕和配音稳定合成 MP4，不依赖外部视频 provider。',
+      customerValue: '把商品图、视频片段、字幕和配音稳定合成 MP4，不依赖外部视频服务。',
       readiness: 'ready_now',
       guardrail: '只保存参数数组和输出路径，不拼接 shell 字符串，不接收客户账号凭据。',
     },
@@ -1110,7 +1110,7 @@ export function buildCommerceOpenSourceAdapters(): CommerceOpenSourceAdapter[] {
       integrationMode: 'task_manifest',
       customerValue: '后续可以把 Wenai 混剪步骤包装成可调度工具，但客户仍只看到发布包和验收状态。',
       readiness: 'later',
-      guardrail: '外部素材源、TTS 或云端渲染需要单独授权；首版不把它当作必需 provider。',
+      guardrail: '外部素材源、TTS 或云端渲染需要单独授权；首版不把它当作必需服务。',
     },
     {
       id: 'video-wizard',
@@ -1955,7 +1955,7 @@ export function buildCommerceGitHubRemixRadar(
       '客户自己发布并回填链接、截图、CSV 或云盘目录，系统再做下一轮重剪和客服优化。',
     ],
     notProviderDependency: [
-      '开源混剪、字幕、模板、队列和质检不是外部 provider 阻塞项。',
+      '开源混剪、字幕、模板、队列和质检不是外部平台服务阻塞项。',
       '图片、视频、数字人 Key 只增强生成层；没有 Key 仍能导出 prompt、时间线、发布包和回填清单。',
       '自动登录、cookie 托管、平台后台读取和自动发布不纳入首版交付。',
     ],
@@ -2235,7 +2235,7 @@ export function buildCommerceRemixOrchestrationBoard(
       },
     ],
     fallbackOrder: [
-      '优先走本地 FFmpeg / Remotion / 队列 worker，保证首版不用等外部 provider。',
+      '优先走本地 FFmpeg / Remotion / 队列 worker，保证首版不用等外部平台服务。',
       '遇到复杂转写、视觉检测或封装，再接 Whisper、OpenCV、GPAC 等局部 worker。',
       '图片、视频、数字人模型能力等你给 Key 后接入；没有 Key 时输出任务包和 prompt。',
       '平台发布和账号登录不接管，客户自发；只交付标题、脚本、成片、封面和回填入口。',
@@ -2248,8 +2248,8 @@ export function buildCommerceRemixOrchestrationBoard(
       '下一轮重剪任务和客服话术补充',
     ],
     notProviderBlockers: [
-      '平台自动登录不是首版 blocker',
-      '自动读取平台后台数据不是首版 blocker',
+      '平台自动登录不是首版阻塞项',
+      '自动读取平台后台数据不是首版阻塞项',
       '图片/视频/数字人 Key 未配置时仍可生成任务包',
       '大规模渲染先走本地批次和失败隔离，后续再扩 worker',
     ],
@@ -2721,7 +2721,7 @@ export function buildCommercePersonaPublishingConsole(
 
   return {
     headline: '多账号人设发布矩阵：标题、前三句口播、证据和自发布动作放在一张表',
-    promise: '客户看到的不是 SKU/CRM 术语，而是每个平台该用哪个人设、复制哪条标题、前三句怎么说、要补什么证明、发完回传什么证据。',
+    promise: '客户看到的不是商品编码和销售系统术语，而是每个平台该用哪个人设、复制哪条标题、前三句怎么说、要补什么证明、发完回传什么证据。',
     rows,
     customerHandoffChecklist: [
       '每一行都对应一个可发布版本：平台、人设、标题、前三句口播、证明素材和回填字段齐全。',
@@ -2979,7 +2979,7 @@ export function buildCommerceCloudDriveManifest(input: CommerceRemixPlanInput, r
       '云盘目录：原始素材、最终视频、封面、字幕、发布记录',
       '客户备注：哪些内容想继续放大，哪些内容不符合品牌',
     ],
-    nextConfigurableProviders: ['企业云盘同步', '对象存储签名链接', '平台 analytics API', '客户协作空间权限'],
+    nextConfigurableProviders: ['企业云盘同步', '对象存储签名链接', '平台表现数据 API', '客户协作空间权限'],
   };
 }
 
@@ -2998,7 +2998,7 @@ export function buildCommerceCloudDriveReturnPlan(
       '客户只把发布后证据放进 04-customer-return，不覆盖 01-source-assets 和 02-render-outputs',
       '每个平台一个子目录：平台名-日期-商品名，方便下次复盘追踪',
       '截图必须能看到发布时间或后台指标，CSV 必须包含标题列',
-      '云盘同步只是交付通道；没有云盘 provider 时仍可上传链接、截图和 CSV',
+      '云盘同步只是交付通道；没有企业云盘接入时仍可上传链接、截图和 CSV',
     ],
     reviewSignals: [
       `${input.platforms.map(platform => PLATFORM_LABELS[platform]).join(' / ')} 哪个平台先出现点击或订单信号`,
@@ -3235,7 +3235,7 @@ export function buildCommerceCustomerEvidenceUploadGuide(
       '不索要 Cookie 或浏览器登录态。',
       '不托管客户账号。',
       '不伪造曝光、点击、订单或评价。',
-      '不把平台 analytics API 当作首版交付前置条件。',
+      '不把平台表现数据 API 当作首版交付前置条件。',
     ],
   };
 }
@@ -4343,7 +4343,7 @@ export function buildCommerceCustomerDeliveryMap(input: CommerceRemixPlanInput):
     handoffRules: [
       '图片、视频、数字人 Key 到位后只替换执行层，不改变客户操作流程',
       '平台发布由客户自行完成；Wenai 交付可复制的标题、素材、脚本和检查表',
-      '表现数据先走链接、截图、CSV 或云盘目录，后续再接 analytics provider',
+      '表现数据先走链接、截图、CSV 或云盘目录，后续再接授权数据回流',
       '每次交付都必须能回答：客户给什么、Wenai 出什么、客户下一步做什么',
     ],
   };
@@ -4483,7 +4483,7 @@ export function buildCommerceDailyOperatorCockpit(
     customerCanIgnore: [
       '不用理解 FFmpeg、Remotion、OpenTimelineIO、PySceneDetect 这些工具名。',
       '不用把账号、密码、cookie 或后台 token 交给 Wenai。',
-      '不用等所有 provider 接完才拿第一版发布包。',
+      '不用等所有外部服务接完才拿第一版发布包。',
       '不用在多个页面猜下一步，驾驶舱直接给今天的动作。',
     ],
   };
@@ -4552,7 +4552,7 @@ export function buildCommerceCustomerNextStepCommandCenter(
         id: 'run-now',
         label: '现在能跑',
         status: '首版可交付',
-        customerMessage: '开源混剪、标题矩阵、发布包、客服话术和回填复盘不等外部 provider。',
+        customerMessage: '开源混剪、标题矩阵、发布包、客服话术和回填复盘不等外部平台服务。',
         operatorRule: '先让客户补素材和证据，系统输出可发布资产包。',
       },
       {
@@ -4566,7 +4566,7 @@ export function buildCommerceCustomerNextStepCommandCenter(
         id: 'not-first',
         label: '首版不碰',
         status: '账号和后台授权',
-        customerMessage: '平台自动登录、代发、后台数据 API 不是首版 blocker。',
+        customerMessage: '平台自动登录、代发、后台数据 API 不是首版阻塞项。',
         operatorRule: '客户自己发布，表现先回传链接、截图、CSV 或云盘目录。',
       },
     ],
@@ -4579,7 +4579,7 @@ export function buildCommerceCustomerNextStepCommandCenter(
     noNeedToUnderstand: [
       'FFmpeg / Remotion / OpenTimelineIO / PySceneDetect 等开源工具名',
       '渲染 worker、失败重试和队列日志',
-      '内部 CRM/SKU 状态字段',
+      '内部销售交接和商品状态字段',
       '平台自动登录和数据 API 的后续工程细节',
     ],
   };
@@ -4587,7 +4587,7 @@ export function buildCommerceCustomerNextStepCommandCenter(
 
 export function buildCommerceProviderActivationPlan(): CommerceProviderActivationPlan {
   return {
-    currentMode: '本地优先：混剪、发布包、云盘回填、客服素材和复盘建议不依赖外部 provider。',
+    currentMode: '本地优先：混剪、发布包、云盘回填、客服素材和复盘建议不依赖外部平台服务。',
     lanes: [
       {
         id: 'image-key',
@@ -4605,7 +4605,7 @@ export function buildCommerceProviderActivationPlan(): CommerceProviderActivatio
         currentPath: '本地时间线、字幕、FFmpeg 命令和渲染批次已经可生成任务包。',
         activateWhen: '需要真实 AI 视频生成，而不是本地素材混剪时再接。',
         requiredFromCustomer: ['视频 API Key', '任务提交接口', '结果查询或回调', '失败码和重试规则'],
-        acceptanceGate: ['每条视频有任务 ID', '结果能写回 render queue', '失败只影响单条任务', '不泄漏 Key'],
+        acceptanceGate: ['每条视频有任务 ID', '结果能写回渲染队列', '失败只影响单条任务', '不泄漏 Key'],
         fallbackUntilActivated: '继续走本地混剪、客户素材、字幕和发布包。',
         customerFacingWording: '短视频先走稳定混剪；需要 AI 生成镜头时再接视频 Key。',
       },
@@ -4642,9 +4642,9 @@ export function buildCommerceProviderActivationPlan(): CommerceProviderActivatio
     ],
     notNeededForFirstDelivery: [
       '平台自动登录',
-      '平台自动发布 OAuth',
+      '平台自动发布授权',
       '广告账户授权',
-      '自动 analytics sync',
+      '自动表现数据同步',
       '企业云盘同步',
     ],
     mustNotDo: [
@@ -4664,7 +4664,7 @@ export function buildCommerceProviderNeedAssessment(
   const platformLabels = unique(input.platforms).map(platform => PLATFORM_LABELS[platform]).join(' / ');
   return {
     verdict: 'first_delivery_ready',
-    customerSummary: `首版不需要额外外部 provider：${platformLabels || '目标平台'} 可以先交付商品脚本、开源混剪任务、标题矩阵、发布包、客服话术和客户回填入口。`,
+    customerSummary: `首版不需要额外外部平台服务：${platformLabels || '目标平台'} 可以先交付商品脚本、开源混剪任务、标题矩阵、发布包、客服话术和客户回填入口。`,
     canRunNow: [
       {
         capability: '开源混剪和稳定渲染队列',
@@ -4702,11 +4702,11 @@ export function buildCommerceProviderNeedAssessment(
     ],
     escalationTriggers: [
       '单客户每批超过 100 条成片且需要多人同时审核时，再接对象存储和分布式 worker。',
-      '客户要求系统直接发布到平台时，再评估平台 OAuth、开放接口或客户授权的辅助操作。',
-      '客户要求每天自动读取后台表现时，再接平台 analytics API 或授权数据源。',
+      '客户要求系统直接发布到平台时，再评估平台授权、开放接口或客户授权的辅助操作。',
+      '客户要求每天自动读取后台表现时，再接平台表现数据 API 或授权数据源。',
       '客户要求 AI 直接生成真人口播、视频镜头或模特图时，等待你提供对应 Key 后接入。',
     ],
-    finalRecommendation: '现在先按“本地/开源混剪 + 客户自发布 + 云盘/CSV 回填”交付；图片、视频、数字人 Key 到位后增强生成层，平台账号和后台数据暂不作为首版 blocker。',
+    finalRecommendation: '现在先按“本地/开源混剪 + 客户自发布 + 云盘/CSV 回填”交付；图片、视频、数字人 Key 到位后增强生成层，平台账号和后台数据暂不作为首版阻塞项。',
   };
 }
 
@@ -4717,9 +4717,9 @@ export function buildCommerceProviderEscalationBoard(
   const platformText = unique(input.platforms).map(platform => PLATFORM_LABELS[platform]).join(' / ') || '目标平台';
 
   return {
-    headline: '外部 provider 升级判断板',
+    headline: '外部平台服务升级判断板',
     verdict: 'not_required_for_first_delivery',
-    plainAnswer: `${platformText} 首版不需要先接平台发布、平台后台、云端渲染或账号自动化 provider；先交付开源混剪、发布包、客服素材和客户回填复盘，等真实规模和授权出现再升级。`,
+    plainAnswer: `${platformText} 首版不需要先接平台发布、平台后台、云端渲染或账号自动化服务；先交付开源混剪、发布包、客服素材和客户回填复盘，等真实规模和授权出现再升级。`,
     lanes: [
       {
         id: 'generation-keys',
@@ -4739,9 +4739,9 @@ export function buildCommerceProviderEscalationBoard(
       },
       {
         id: 'platform-publish-api',
-        label: '平台发布/OAuth/自动登录能力',
+        label: '平台发布授权/自动登录能力',
         firstDeliveryPath: '客户自己登录平台发布，Wenai 给标题、正文、封面、成片和检查表。',
-        becomesRequiredWhen: '客户明确要求系统代发，并能提供平台正式 OAuth、开放接口或书面授权流程。',
+        becomesRequiredWhen: '客户明确要求系统代发，并能提供平台正式授权、开放接口或书面授权流程。',
         proofBeforeBuying: ['平台允许自动发布', '授权不会托管密码/cookie', '失败不会误发内容', '客户愿意承担平台规则审核'],
         customerFallback: '继续客户自发布；Wenai 只辅助复制发布包和回填证据。',
       },
@@ -4761,7 +4761,7 @@ export function buildCommerceProviderEscalationBoard(
     ],
     buyOnlyAfter: [
       '已经有客户真实素材、发布包和回填证据跑过至少一轮。',
-      '能证明 provider 会减少人工成本或提升交付规模，而不是只增加复杂度。',
+      '能证明外部服务会减少人工成本或提升交付规模，而不是只增加复杂度。',
       '有验收标准：任务 ID、输出文件、失败原因、回退路径和权限边界。',
       '客户知道哪些步骤仍然需要自己确认、发布或人工复核。',
     ],
@@ -4783,9 +4783,9 @@ export function buildCommerceProviderActivationRunbook(
     'video-key': {
       id: 'activate-video-generation',
       customerInput: ['视频生成 Key 类型', '任务提交接口', '结果查询或回调', '单条失败码和重试规则'],
-      wenaiAction: ['把需要 AI 镜头的分镜转成 provider 任务', '结果写回 render queue', '失败时只重试单条镜头'],
+      wenaiAction: ['把需要 AI 镜头的分镜转成生成任务', '结果写回渲染队列', '失败时只重试单条镜头'],
       writesBackTo: ['时间线片段', '渲染队列', '成片验收清单', '失败重试记录'],
-      acceptanceEvidence: ['每个 AI 镜头有 provider task id', '返回视频能被本地混剪读取', '单条失败不阻塞整批发布包'],
+      acceptanceEvidence: ['每个 AI 镜头有任务编号', '返回视频能被本地混剪读取', '单条失败不阻塞整批发布包'],
       fallbackIfFailed: '继续用本地素材、字幕、口播和 FFmpeg/Remotion 混剪出可发布版本。',
     },
     'avatar-tts-key': {
@@ -4825,8 +4825,8 @@ export function buildCommerceProviderActivationRunbook(
     customerPromise: '图片、视频、数字人和数据接口只增强自动化层；首版混剪、发布包、客服素材和复盘入口不等待这些 Key。',
     keyHandlingRules: [
       '只记录 Key 类型、用途、验收状态和失败原因，不在页面、日志或导出包展示 Key 值。',
-      '每个 provider 先用一条小任务验收，通过后再进入批量队列。',
-      'provider 失败只影响对应素材或镜头，不影响客户自发布包和本地混剪交付。',
+      '每个生成服务先用一条小任务验收，通过后再进入批量队列。',
+      '生成服务失败只影响对应素材或镜头，不影响客户自发布包和本地混剪交付。',
     ],
     steps,
     fallbackPolicy: [
@@ -4836,7 +4836,7 @@ export function buildCommerceProviderActivationRunbook(
       '云盘或数据失败：回到客户上传链接、截图、CSV 和本地导出目录。',
     ],
     doneDefinition: [
-      '每个已接 provider 都有任务 ID、输入、输出、验收证据和失败回退记录。',
+      '每个已接生成服务都有任务 ID、输入、输出、验收证据和失败回退记录。',
       '生成结果能写回素材货架、渲染队列、发布包或复盘行动板。',
       '没有授权的账号、后台数据和客户私信不被读取或自动操作。',
     ],
@@ -4947,10 +4947,10 @@ export function buildCommerceCustomerLaunchReadinessBoard(
       },
       {
         id: 'scale-provider',
-        label: '规模化 provider 升级',
+        label: '规模化外部服务升级',
         state: 'scale_later',
-        customerSees: '单批变大、多人协作或字段稳定后，再接云盘、对象存储、多 worker、analytics API。',
-        proof: checklist.nextRoundTrigger.find(item => item.includes('多 worker')) || '规模化后再升级 provider',
+        customerSees: '单批变大、多人协作或字段稳定后，再接云盘、对象存储、多 worker、表现数据 API。',
+        proof: checklist.nextRoundTrigger.find(item => item.includes('多 worker')) || '规模化后再升级外部服务',
         doNext: '先跑至少一轮真实客户素材、发布包和回填证据，再判断是否购买或接入。',
       },
     ],

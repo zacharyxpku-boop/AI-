@@ -68,7 +68,7 @@ describe('factory page', () => {
     expect(html).toContain('客户不用理解');
     expect(html).toContain('首版交付清单');
     expect(html).toContain('不等 Key，也能先给客户一套可发布资产');
-    expect(html).toContain('Customer Launch Readiness');
+    expect(html).toContain('客户上线验收');
     expect(html).toContain('客户上线前总验收板');
     expect(html).toContain('满足这些才给客户上线');
     expect(html).toContain('不能对客户承诺');
@@ -151,7 +151,7 @@ describe('factory page', () => {
     expect(html).toContain('每个开源能力都落到输入、步骤、输出和验收');
     expect(html).toContain('开源混剪编排板');
     expect(html).toContain('客户看到的是 5 步稳定流水线');
-    expect(html).toContain('平台自动登录不是首版 blocker');
+    expect(html).toContain('平台自动登录不是首版阻塞项');
     expect(html).toContain('Reliability Board');
     expect(html).toContain('稳定渲染看板');
     expect(html).toContain('Render Operations Runbook');
@@ -168,7 +168,7 @@ describe('factory page', () => {
     expect(html).toContain('客户只看这些');
     expect(html).toContain('外部接入判断');
     expect(html).toContain('什么时候再升级');
-    expect(html).toContain('外部 provider 升级判断板');
+    expect(html).toContain('外部平台服务升级判断板');
     expect(html).toContain('满足这些再配');
     expect(html).toContain('Key 接入步骤');
     expect(html).toContain('Key 到位后的接入运行手册');
@@ -181,7 +181,7 @@ describe('factory page', () => {
     expect(html).toContain('前三句口播');
     expect(html).toContain('客户自己登录');
     expect(html).toContain('回填后系统看什么');
-    expect(html).toContain('Evidence Readiness');
+    expect(html).toContain('表现证据验收');
     expect(html).toContain('客户表现证据验收板');
     expect(html).toContain('Customer Evidence Upload Guide');
     expect(html).toContain('客户证据上传指南');
@@ -209,6 +209,17 @@ describe('factory page', () => {
     expect(html).toContain('回填收件箱');
     expect(html).toContain('可复盘');
     expect(html).toContain('已收');
+    expect(html).not.toContain('provider');
+    expect(html).not.toContain('OAuth');
+    expect(html).not.toContain('analytics sync');
+    expect(html).not.toContain('analytics API');
+    expect(html).not.toContain('CRM');
+    expect(html).not.toContain('SKU');
+    expect(html).not.toContain('Customer Launch Readiness');
+    expect(html).not.toContain('Evidence Readiness');
+    expect(html).not.toContain('Action Queue');
+    expect(html).not.toContain('External Gates');
+    expect(html).not.toContain('SYSTEM LOGS');
     expect(html).not.toContain('fixed bottom-5 right-5');
     expect(html).not.toContain('86%');
   });

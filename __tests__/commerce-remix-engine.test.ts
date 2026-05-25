@@ -630,7 +630,7 @@ describe('commerce remix engine', () => {
     expect(assessment.waitingForYourKeys.map(item => item.keyType).join(' ')).toContain('图片');
     expect(assessment.notRequiredNow).toContain('自动代客户操作电脑或浏览器');
     expect(assessment.finalRecommendation).toContain('客户自发布');
-    expect(escalationBoard.headline).toContain('外部 provider 升级判断板');
+    expect(escalationBoard.headline).toContain('外部平台服务升级判断板');
     expect(escalationBoard.verdict).toBe('not_required_for_first_delivery');
     expect(escalationBoard.lanes.map(lane => lane.id)).toEqual(['generation-keys', 'cloud-render', 'platform-publish-api', 'analytics-api']);
     expect(escalationBoard.lanes.find(lane => lane.id === 'platform-publish-api')?.firstDeliveryPath).toContain('客户自己登录平台发布');
@@ -735,7 +735,7 @@ describe('commerce remix engine', () => {
     expect(board.routes.find(route => route.id === 'render-export')?.primaryAdapterIds).toEqual(expect.arrayContaining(['queue-worker', 'ffmpeg', 'mcp-video']));
     expect(board.routes.find(route => route.id === 'qa-return-loop')?.primaryAdapterIds).toContain('mediainfo');
     expect(board.customerVisibleOutputs).toContain('每个平台的标题/文案/标签/发布清单');
-    expect(board.notProviderBlockers).toContain('平台自动登录不是首版 blocker');
+    expect(board.notProviderBlockers).toContain('平台自动登录不是首版阻塞项');
     expect(JSON.stringify(board)).not.toMatch(/apiKey|accessToken|Bearer|sk-/i);
   });
 
@@ -900,7 +900,7 @@ describe('commerce remix engine', () => {
     expect(board.lanes.find(lane => lane.id === 'publish-to-next-round')?.lastMileOwner).toBe('customer');
     expect(board.canShipWithoutKeys.join(' ')).toContain('多账号矩阵');
     expect(board.customerFinalStep.join(' ')).toContain('客户自己登录');
-    expect(board.upgradeOnlyWhen.join(' ')).toContain('平台 analytics API');
+    expect(board.upgradeOnlyWhen.join(' ')).toContain('平台表现数据 API');
     expect(board.notSolvingWithOpenSource.join(' ')).toContain('账号、密码、cookie');
     expect(JSON.stringify(board)).not.toMatch(/apiKey|accessToken|Bearer|sk-/i);
   });
