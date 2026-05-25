@@ -1174,6 +1174,37 @@ export function KuaiziStyleWorkbench() {
                       </div>
                     </div>
                   </div>
+                  <div className="mt-5 rounded-md border border-violet-100 bg-violet-50 p-4">
+                    <div className="flex flex-col gap-3 lg:flex-row lg:items-end lg:justify-between">
+                      <div className="min-w-0">
+                        <p className="text-xs font-black uppercase tracking-[0.18em] text-violet-700">GitHub Adoption Queue</p>
+                        <h4 className="mt-1 text-base font-black leading-6 text-slate-950">GitHub 开源能力接入队列</h4>
+                        <p className="mt-2 max-w-4xl text-sm leading-6 text-slate-600">
+                          不把一堆仓库名丢给客户；Wenai 先把可本地跑的混剪、字幕、时间线和队列能力接成发布包，再把大规模渲染和云端 worker 放到规模化阶段。
+                        </p>
+                      </div>
+                      <span className="w-fit rounded bg-white px-2.5 py-1 text-xs font-black text-violet-700 ring-1 ring-violet-100">
+                        {githubRemixRadar.repoFamilies.length} 类开源范式
+                      </span>
+                    </div>
+                    <div className="mt-4 grid gap-3 lg:grid-cols-3">
+                      {githubRemixRadar.adoptionQueue.map(item => (
+                        <article className="min-w-0 rounded-md bg-white p-3 ring-1 ring-violet-100" key={item.stage}>
+                          <div className="flex flex-wrap items-center gap-2">
+                            <span className="rounded bg-violet-50 px-2 py-1 text-[11px] font-black uppercase tracking-[0.12em] text-violet-700">{item.stage.replace('_', ' ')}</span>
+                            <h5 className="min-w-0 text-sm font-black leading-5 text-slate-950">{item.label}</h5>
+                          </div>
+                          <p className="mt-2 text-xs font-bold leading-5 text-violet-800">{item.reason}</p>
+                          <div className="mt-3 flex flex-wrap gap-1.5">
+                            {item.repoIds.slice(0, 5).map(id => (
+                              <span className="rounded bg-violet-50 px-2 py-1 text-[11px] font-black text-violet-700" key={id}>{id}</span>
+                            ))}
+                          </div>
+                          <p className="mt-3 rounded bg-slate-50 px-2 py-1.5 text-[11px] font-bold leading-4 text-slate-600">{item.evidenceRequired}</p>
+                        </article>
+                      ))}
+                    </div>
+                  </div>
                   <details className="mt-5 rounded-md border border-slate-200 bg-slate-50 p-3">
                     <summary className="cursor-pointer list-none rounded-md bg-white px-3 py-2 text-sm font-black text-slate-900 ring-1 ring-slate-200">
                       展开高级开源混剪验收：GitHub 蓝图、安装矩阵、适配器和冒烟测试

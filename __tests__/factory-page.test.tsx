@@ -84,6 +84,10 @@ describe('factory page', () => {
     expect(html).toContain('进入交付的规则');
     expect(html).toContain('GitHub Remix Radar');
     expect(html).toContain('GitHub 开源混剪能力雷达');
+    expect(html).toContain('GitHub Adoption Queue');
+    expect(html).toContain('GitHub 开源能力接入队列');
+    expect(html).toContain('类开源范式');
+    expect(html).toContain('大规模渲染和云端 worker');
     expect(html).toContain('客户可见的上线标准');
     expect(html).toContain('仍然不等外部 provider');
     expect(html).toContain('moneyprinterturbo');
