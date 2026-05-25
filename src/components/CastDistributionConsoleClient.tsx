@@ -51,7 +51,7 @@ const CAST_VARIANTS: Record<FactoryUiVariantId, {
     audience: '给合作者、客户负责人和投资评审看 Cast 是否真的接近筷子科技的矩阵分发能力。',
     headline: 'Cast 是账号矩阵、发布证据、广告账本和表现回流的统一调度层。',
     body: '这一层不把 PubPal、矩阵宝或自动投放当口号展示，而是把账号授权、健康度、发布槽位、广告预算、平台证据和回流指标放在同一条链路里验收。',
-    firstAction: '先看账号矩阵和广告 campaign ledger 是否有证据，再判断能不能进入真实自动发布或广告账户接入。',
+    firstAction: '先看账号矩阵和投放计划账本是否有证据，再判断能不能进入真实自动发布或广告账户接入。',
     stopLine: '没有 OAuth、广告账户授权、自动发布 API 和 analytics sync 前，不能宣称平台级自动分发或自动优化。',
   },
   operator: {
@@ -74,6 +74,25 @@ const CAST_VARIANTS: Record<FactoryUiVariantId, {
 
 function money(cents: number) {
   return `¥${(cents / 100).toFixed(2)}`;
+}
+
+function readableCastSystemText(value: string) {
+  return value
+    .replaceAll('Close channel gap:', '补齐发布账号缺口：')
+    .replaceAll('Close ad campaign gap:', '补齐投放计划缺口：')
+    .replaceAll('Ad campaign missing platform evidence URL', '投放计划缺少平台证据链接')
+    .replaceAll('Ad campaign spend exceeds budget', '投放计划花费超过预算')
+    .replaceAll('Missing channel account matrix', '缺少发布账号矩阵')
+    .replaceAll('Missing connected or manual-ready channel account', '缺少可交接的发布账号')
+    .replaceAll('Missing healthy channel account', '缺少健康发布账号')
+    .replaceAll('Missing ad campaign ledger', '缺少投放计划账本')
+    .replaceAll('manual-ready', '待人工发布')
+    .replaceAll('manual_ready', '待人工发布')
+    .replaceAll('campaign ledger', '投放计划账本')
+    .replaceAll('campaign', '投放计划')
+    .replaceAll('evidence URL', '证据链接')
+    .replaceAll('analytics sync', '表现回流')
+    .replaceAll('OAuth', '平台授权');
 }
 
 function castScore(snapshot: ChannelAccountSnapshot | null) {
@@ -102,18 +121,18 @@ export function buildCastManageOperatingChecks(snapshot: ChannelAccountSnapshot 
 
   return [
     {
-      stage: '素材版本 / Campaign 绑定',
+      stage: '素材版本 / 投放计划绑定',
       ready: campaignCount > 0,
-      evidence: `campaign ledger ${campaignCount} 条`,
+      evidence: `投放计划账本 ${campaignCount} 条`,
       next: campaignCount > 0
         ? '把每个素材版本绑定到 campaign、SKU、tracking code 和实验单元。'
-        : '先创建广告 campaign ledger；没有 campaign 就无法对齐 Smartly 式创意-媒体-情报闭环。',
+        : '先创建投放计划账本；没有投放计划就无法对齐 Smartly 式创意-媒体-情报闭环。',
     },
     {
       stage: '账号与发布槽位',
       ready: accountCount > 0 && healthyCount > 0 && slotCount > 0,
       evidence: `账号 ${accountCount} / 健康 ${healthyCount} / 槽位 ${slotCount}`,
-      next: '补齐 OAuth 前先保持 manual-ready；有健康账号和发布槽位后才允许进入发布交接。',
+      next: '补齐平台授权前先保持待人工发布；有健康账号和发布槽位后才允许进入发布交接。',
     },
     {
       stage: '预算与投放门禁',
@@ -144,7 +163,7 @@ export function buildCastManageOperatingChecks(snapshot: ChannelAccountSnapshot 
       ready: gaps.length === 0,
       evidence: gaps.length ? `阻断 ${gaps.length} 项 / 动作 ${nextActions.length} 条` : `动作队列 ${nextActions.length} 条 / 无硬阻断`,
       next: gaps.length
-        ? `先处理：${gaps[0]}。`
+        ? `先处理：${readableCastSystemText(gaps[0])}。`
         : '进入下一轮素材版本、预算策略和平台授权验收。',
     },
   ];
@@ -180,7 +199,7 @@ export function buildAdDeliveryGuardrails(snapshot: ChannelAccountSnapshot | nul
       operatorAction: overBudget
         ? '立即标记暂停，补回滚原因和平台证据 URL。'
         : missing.length > 0
-          ? `先处理广告阻断：${missing[0]}。`
+        ? `先处理广告阻断：${readableCastSystemText(missing[0])}。`
           : spendRatio >= 0.8
             ? '预算消耗接近上限，先暂停等待表现回流，不做自动加预算。'
             : '保持监控；未触发预算或证据风险时不需要暂停。',
@@ -191,7 +210,7 @@ export function buildAdDeliveryGuardrails(snapshot: ChannelAccountSnapshot | nul
       ready: evidenceCount > 0,
       evidence: `evidence URL ${evidenceCount} / active campaigns ${activeCampaignCount}`,
       operatorAction: evidenceCount > 0
-        ? '把平台 campaign URL、广告账户截图或回执绑定到 campaign ledger。'
+        ? '把平台活动 URL、广告账户截图或回执绑定到投放计划账本。'
         : '补平台证据 URL；没有证据时只能说 campaign hypothesis，不能说真实投放。',
       stopLine: '没有平台回执或广告账户证据前，不宣称自动投放已执行。',
     },
@@ -207,12 +226,12 @@ export function buildAdDeliveryGuardrails(snapshot: ChannelAccountSnapshot | nul
     {
       rule: '回滚原因',
       ready: missing.length === 0 && !overBudget && campaignCount > 0,
-      evidence: missing.length ? missing.join(' / ') : campaignCount > 0 ? 'no hard ad blockers' : 'missing campaign ledger',
+      evidence: missing.length ? missing.map(readableCastSystemText).join(' / ') : campaignCount > 0 ? '没有硬性投放阻塞' : '缺投放计划账本',
       operatorAction: missing.length
         ? '把阻断项写成回滚原因，进入下一轮 action queue。'
         : campaignCount > 0
           ? '当前广告账本没有硬阻断；下一步只允许进入真实广告账户授权验收。'
-          : '先建立 campaign ledger；没有账本就没有可回滚对象。',
+          : '先建立投放计划账本；没有账本就没有可回滚对象。',
       stopLine: '任何自动投放失败都必须保留原因、证据、预算状态和下一步 owner。',
     },
   ];
@@ -267,7 +286,7 @@ export function buildManualPublishReceiptChecks(snapshot: ChannelAccountSnapshot
       evidence: `平台证据 ${evidenceCount}`,
       operatorAction: evidenceCount > 0
         ? '把平台 URL、后台截图或 campaign 回执绑定到 ledger，作为人工发布完成证据。'
-        : '没有 evidence URL 时只能标记 manual-ready，不能标记已发布或已投放。'
+        : '没有证据链接时只能标记待人工发布，不能标记已发布或已投放。'
       ,
       externalGate: '自动回执需要发布 API、平台 post/campaign id 和 webhook 或轮询同步。',
     },
@@ -278,7 +297,7 @@ export function buildManualPublishReceiptChecks(snapshot: ChannelAccountSnapshot
       operatorAction: measuredCount > 0
         ? '把转化、收入或有效互动写回品牌学习和下一轮 action queue。'
         : gaps.length
-          ? `先处理阻断项：${gaps[0]}。`
+          ? `先处理阻断项：${readableCastSystemText(gaps[0])}。`
           : '发布后导入 CSV 或等待 analytics sync，未回流前不宣称自动优化。'
       ,
       externalGate: '自动表现回流需要 analytics API、指标映射、归因窗口和同步频率。',
@@ -305,10 +324,10 @@ export function buildCastVariantPlaybook(
     return {
       title: 'Cast 运营动作剧本',
       primaryAction: gaps.length
-        ? `先处理分发缺口：${gaps[0]}。`
+        ? `先处理分发缺口：${readableCastSystemText(gaps[0])}。`
         : '可以把 ready distribution plan 推进到手工发布、证据回填和表现导入。',
       proofToCheck: '每个发布动作都要能追到 channel account、dispatch、evidence URL、campaign budget 和 performance return。',
-      handoffBoundary: 'OAuth、自动发布、广告账户和 analytics sync 没接入前，运营只能标记 manual-ready 或 measured evidence，不能标记自动化完成。',
+      handoffBoundary: '平台授权、自动发布、广告账户和表现回流没接入前，运营只能标记待人工发布或已回填证据，不能标记自动化完成。',
       cards: [
         `账号 ${accountCount} / 已连接 ${connectedCount} / 健康 ${healthyCount}`,
         `可发布槽位 ${slotCount} / 广告 ${campaignCount} / 活跃 ${activeCampaignCount}`,
@@ -428,7 +447,7 @@ export function CastDistributionConsoleClient({
       return;
     }
     setError('');
-    setNotice('已写入账号矩阵和广告 campaign ledger，Cast readiness 已刷新。');
+    setNotice('已写入账号矩阵和投放计划账本，发布准备度已刷新。');
     setSnapshot(data.snapshot);
   }
 
@@ -462,7 +481,7 @@ export function CastDistributionConsoleClient({
           <form id="cast-schedule" onSubmit={seedMatrix} className="rounded-xl border border-slate-200 bg-white p-5 shadow-sm">
             <div className="flex items-center justify-between gap-4">
               <div>
-                <p className="text-xs font-semibold uppercase tracking-wide text-slate-500">Channel Matrix</p>
+                <p className="text-xs font-semibold uppercase tracking-wide text-slate-500">发布账号矩阵</p>
                 <h2 className="mt-1 text-lg font-semibold text-slate-950">新增发布账号</h2>
               </div>
               <span className="rounded-full bg-emerald-50 px-3 py-1 text-xs font-medium text-emerald-700">可排期</span>
@@ -528,12 +547,12 @@ export function CastDistributionConsoleClient({
       {
         time: '14:16:32',
         level: (snapshot?.adEvidenceCount || 0) > 0 ? 'INFO' : 'WARN',
-        text: `广告 campaign ${snapshot?.adCampaignCount || 0} 条，平台证据 ${snapshot?.adEvidenceCount || 0} 条。`,
+        text: `投放计划 ${snapshot?.adCampaignCount || 0} 条，平台证据 ${snapshot?.adEvidenceCount || 0} 条。`,
       },
       {
         time: '14:09:48',
         level: 'WARN',
-        text: `OAuth / 广告账户 / analytics sync 仍是外部门禁；当前只展示 manual-ready 和证据回填。`,
+        text: `平台授权 / 广告账户 / 表现回流仍是外部门禁；当前只展示待人工发布和证据回填。`,
       },
       {
         time: '14:02:17',
@@ -545,8 +564,8 @@ export function CastDistributionConsoleClient({
       { title: '平台 OAuth', detail: '抖音 / 小红书 / 微信等平台授权未配置前，不执行外部自动发布。', blocked: true },
       { title: '发布 API 网关', detail: '缺少平台 post/campaign id、失败码和回执同步能力。', blocked: true },
       { title: '广告账户授权', detail: `广告 campaign ${snapshot?.adCampaignCount || 0} 条，真实广告账户仍需外部授权。`, blocked: true },
-      { title: '发布证据回传', detail: `平台证据 ${snapshot?.adEvidenceCount || 0} 条；无证据时只允许 manual-ready。`, blocked: (snapshot?.adEvidenceCount || 0) === 0 },
-      { title: 'Analytics Sync', detail: `表现回流 ${snapshot?.measuredAdCampaignCount || 0} 条；未接通前不宣称自动优化。`, blocked: (snapshot?.measuredAdCampaignCount || 0) === 0 },
+      { title: '发布证据回传', detail: `平台证据 ${snapshot?.adEvidenceCount || 0} 条；无证据时只允许待人工发布。`, blocked: (snapshot?.adEvidenceCount || 0) === 0 },
+      { title: '表现回流接入', detail: `表现回流 ${snapshot?.measuredAdCampaignCount || 0} 条；未接通前不宣称自动优化。`, blocked: (snapshot?.measuredAdCampaignCount || 0) === 0 },
     ];
     const dispatchRows = [
       { id: 'PLAN', channel: platform || 'manual channel', slot: `${snapshot?.availableSlotCount || 0} slots`, evidence: `${snapshot?.adEvidenceCount || 0} evidence URLs`, status: (snapshot?.availableSlotCount || 0) > 0 ? '内部可排期' : '待补槽位' },
@@ -559,7 +578,7 @@ export function CastDistributionConsoleClient({
       { module: '素材匹配', progress: snapshot?.accountCount ? 100 : 55, status: snapshot?.accountCount ? '映射规则通过' : '待补账号矩阵', ready: (snapshot?.accountCount || 0) > 0 },
       { module: '渠道授权', progress: 25, status: '缺 OAuth', ready: false },
       { module: '发布证据', progress: snapshot?.adEvidenceCount ? 100 : 20, status: snapshot?.adEvidenceCount ? '有回执' : '依赖外部发布', ready: (snapshot?.adEvidenceCount || 0) > 0 },
-      { module: '效果回流', progress: snapshot?.measuredAdCampaignCount ? 100 : 20, status: snapshot?.measuredAdCampaignCount ? '已回流' : '依赖 Analytics Sync', ready: (snapshot?.measuredAdCampaignCount || 0) > 0 },
+      { module: '效果回流', progress: snapshot?.measuredAdCampaignCount ? 100 : 20, status: snapshot?.measuredAdCampaignCount ? '已回流' : '等待表现回流', ready: (snapshot?.measuredAdCampaignCount || 0) > 0 },
     ];
 
     return (
@@ -603,7 +622,7 @@ export function CastDistributionConsoleClient({
               <div className="min-w-0">
                 <header className="flex flex-col gap-4 border-b border-neutral-200 bg-white px-6 py-5 xl:flex-row xl:items-start xl:justify-between">
                   <div className="space-y-2">
-                    <p className="text-xs uppercase text-neutral-500">Cast Distribution Variant</p>
+                    <p className="text-xs uppercase text-neutral-500">发布矩阵视角</p>
                     <h2 className="text-balance text-3xl font-semibold text-neutral-950 sm:text-4xl">朋友试用 Cast 路径</h2>
                     <p className="max-w-3xl text-pretty text-sm leading-6 text-neutral-600">
                       {selectedVariant.headline} {selectedVariant.body}
@@ -629,7 +648,7 @@ export function CastDistributionConsoleClient({
                       <a href="#dispatch-evidence" className="inline-flex items-center rounded-md border border-neutral-300 bg-white px-4 py-2 text-sm font-medium text-neutral-700 shadow-sm hover:bg-neutral-50">查看证据</a>
                       <a href="#cast-readiness" className="inline-flex items-center rounded-md border border-neutral-300 bg-white px-4 py-2 text-sm font-medium text-neutral-700 shadow-sm hover:bg-neutral-50">Readiness</a>
                     </div>
-                    <div className="text-xs font-medium text-neutral-500">No fake publish · No fake OAuth · Evidence first</div>
+                    <div className="text-xs font-medium text-neutral-500">不伪装发布 · 不代管登录 · 证据优先</div>
                   </div>
 
                   <section className="rounded-lg border border-sky-100 bg-sky-50 p-4 text-sm leading-6 text-sky-800">
@@ -639,7 +658,7 @@ export function CastDistributionConsoleClient({
 
                   <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-5">
                     {[
-                      { label: '生成计划数', value: String(snapshot?.adCampaignCount || 0), detail: `campaign ledger · ${snapshot?.scheduledCount || 0} 已排期`, tone: 'neutral' },
+                      { label: '生成计划数', value: String(snapshot?.adCampaignCount || 0), detail: `投放计划账本 · ${snapshot?.scheduledCount || 0} 已排期`, tone: 'neutral' },
                       { label: '就绪分发', value: String(snapshot?.availableSlotCount || 0), detail: `健康账号 ${snapshot?.healthyAccountCount || 0}`, tone: 'emerald' },
                       { label: '已发布带证据', value: String(snapshot?.adEvidenceCount || 0), detail: '等待真实平台回执', tone: 'neutral' },
                       { label: '证据缺失', value: String(Math.max((snapshot?.adCampaignCount || 0) - (snapshot?.adEvidenceCount || 0), 0)), detail: '无证据不标记已发布', tone: 'amber' },
@@ -816,13 +835,13 @@ export function CastDistributionConsoleClient({
                   <section className="rounded-[1.75rem] border border-neutral-200 bg-white p-5 shadow-sm">
                     <div className="flex flex-col gap-2 sm:flex-row sm:items-start sm:justify-between">
                       <div>
-                        <p className="text-xs uppercase tracking-[0.22em] text-neutral-500">Manual Publish Receipt Board</p>
+                        <p className="text-xs uppercase tracking-[0.22em] text-neutral-500">人工发布回执</p>
                         <h2 className="mt-2 text-xl font-semibold text-neutral-950">人工发布回执与矩阵频控验收板</h2>
                         <p className="mt-2 max-w-3xl text-sm leading-6 text-neutral-600">
-                          没接 OAuth 时，Cast 仍需要账号健康、频控余量、去重排期、人工发布证据和表现回流；没有证据时只允许 manual-ready。
+                          没接平台授权时，Cast 仍需要账号健康、频控余量、去重排期、人工发布证据和表现回流；没有证据时只允许待人工发布。
                         </p>
                       </div>
-                      <div className="text-sm font-semibold text-neutral-700">{receiptReadyCount}/{manualReceiptChecks.length} gates</div>
+                      <div className="text-sm font-semibold text-neutral-700">{receiptReadyCount}/{manualReceiptChecks.length} 项回执门禁就绪</div>
                     </div>
                     <div className="mt-4 grid gap-3 lg:grid-cols-5">
                       {manualReceiptChecks.map(item => (
@@ -843,13 +862,13 @@ export function CastDistributionConsoleClient({
                     <form id="matrix-seed" onSubmit={seedMatrix} className="rounded-[1.75rem] border border-neutral-200 bg-white p-5 shadow-sm">
                       <div className="flex items-start justify-between gap-4">
                         <div>
-                          <p className="text-xs uppercase text-neutral-500">Matrix Seed</p>
+                          <p className="text-xs uppercase text-neutral-500">补账号矩阵</p>
                           <h2 className="mt-2 text-xl font-semibold text-neutral-950">补一个可验证账号矩阵</h2>
                           <p className="mt-2 text-sm leading-6 text-neutral-600">
-                            一次写入账号矩阵和广告 campaign ledger；没有平台证据 URL 时保持 ready，不伪装 active。
+                            一次写入账号矩阵和投放计划账本；没有平台证据链接时保持待人工发布，不伪装已经投放。
                           </p>
                         </div>
-                        <span className="rounded-full border border-amber-200 bg-amber-50 px-3 py-1 text-xs font-medium text-amber-700">manual-ready</span>
+                        <span className="rounded-full border border-amber-200 bg-amber-50 px-3 py-1 text-xs font-medium text-amber-700">待人工发布</span>
                       </div>
                       <div className="mt-5 grid gap-3">
                         <label className="text-sm text-neutral-700">
@@ -875,7 +894,7 @@ export function CastDistributionConsoleClient({
                           </label>
                         </div>
                         <label className="text-sm text-neutral-700">
-                          Campaign 名称
+                          活动名称
                           <input value={campaignName} onChange={event => setCampaignName(event.target.value)} className="mt-1 w-full rounded-xl border border-neutral-200 bg-white px-3 py-2 text-neutral-950 outline-none focus:border-neutral-400" />
                         </label>
                         <label className="text-sm text-neutral-700">
@@ -902,10 +921,10 @@ export function CastDistributionConsoleClient({
                     <section className="rounded-[1.75rem] border border-neutral-200 bg-white p-5 shadow-sm">
                       <div className="flex items-center justify-between gap-4">
                         <div>
-                          <p className="text-xs uppercase text-neutral-500">Ad Delivery Guardrails</p>
+                          <p className="text-xs uppercase text-neutral-500">投放止损门禁</p>
                           <h2 className="mt-2 text-xl font-semibold text-neutral-950">广告投放止损与放量门禁</h2>
                         </div>
-                        <div className="text-sm font-semibold text-neutral-700">{adReadyCount}/{adGuardrails.length} gates</div>
+                        <div className="text-sm font-semibold text-neutral-700">{adReadyCount}/{adGuardrails.length} 项投放门禁就绪</div>
                       </div>
                       <div className="mt-4 grid gap-3">
                         {adGuardrails.map(item => (
@@ -937,7 +956,7 @@ export function CastDistributionConsoleClient({
         <section className="rounded-[8px] border border-emerald-200/15 bg-[#0d1a17] p-5 shadow-2xl shadow-black/30">
           <div className="flex flex-col gap-4 lg:flex-row lg:items-end lg:justify-between">
             <div className="max-w-3xl">
-              <p className="text-xs uppercase tracking-[0.22em] text-emerald-200">Cast Distribution Variant</p>
+              <p className="text-xs uppercase tracking-[0.22em] text-emerald-200">发布矩阵视角</p>
               <h1 className="mt-3 text-3xl font-semibold tracking-normal text-white sm:text-4xl">分发投放控制台</h1>
               <p className="mt-3 text-sm leading-6 text-emerald-50/70">{selectedVariant.headline}</p>
               <p className="mt-2 text-sm leading-6 text-white/55">{selectedVariant.body}</p>
@@ -949,7 +968,7 @@ export function CastDistributionConsoleClient({
           accent="emerald"
           basePath="/factory/cast"
           evidenceCards={playbook.cards}
-          eyebrow="Cast Action Playbook"
+          eyebrow="发布动作剧本"
           firstScreen={selectedVariant.body}
           nextAction={selectedVariant.firstAction}
           primaryAction={playbook.primaryAction}
@@ -993,14 +1012,14 @@ export function CastDistributionConsoleClient({
         <section className="rounded-[8px] border border-lime-200/15 bg-lime-950/15 p-5">
           <div className="flex flex-col gap-2 lg:flex-row lg:items-end lg:justify-between">
             <div>
-              <p className="text-xs uppercase tracking-[0.22em] text-lime-200">Ad Delivery Guardrails</p>
+              <p className="text-xs uppercase tracking-[0.22em] text-lime-200">投放止损门禁</p>
               <h2 className="mt-2 text-xl font-semibold">广告投放止损与放量门禁</h2>
               <p className="mt-2 text-sm leading-6 text-white/55">
                 这层参考 Omneky、AdHawk、Smartly.io、Marpipe 的投放运营方式：预算 cap、暂停规则、平台证据、表现回流和回滚原因必须同屏可见；没有广告账户授权前只做人工门禁，不宣称自动优化。
               </p>
             </div>
             <div className="text-sm font-semibold text-lime-100">
-              {adGuardrails.filter(item => item.ready).length}/{adGuardrails.length} ad gates ready
+              {adGuardrails.filter(item => item.ready).length}/{adGuardrails.length} 项投放门禁就绪
             </div>
           </div>
           <div className="mt-4 grid gap-3 lg:grid-cols-5">
@@ -1023,14 +1042,14 @@ export function CastDistributionConsoleClient({
         <section className="rounded-[8px] border border-cyan-200/15 bg-cyan-950/15 p-5">
           <div className="flex flex-col gap-2 lg:flex-row lg:items-end lg:justify-between">
             <div>
-              <p className="text-xs uppercase tracking-[0.22em] text-cyan-200">Manual Publish Receipt Board</p>
+              <p className="text-xs uppercase tracking-[0.22em] text-cyan-200">人工发布回执</p>
               <h2 className="mt-2 text-xl font-semibold">人工发布回执与矩阵频控验收板</h2>
               <p className="mt-2 text-sm leading-6 text-white/55">
-                没接 OAuth 时，Cast 也不能停在计划。这里把账号健康、频控余量、去重排期、人工发布证据和表现回流拆成门禁；没有平台证据时只允许 manual-ready，不把人工流程包装成自动分发。
+                没接平台授权时，Cast 也不能停在计划。这里把账号健康、频控余量、去重排期、人工发布证据和表现回流拆成门禁；没有平台证据时只允许待人工发布，不把人工流程包装成自动分发。
               </p>
             </div>
             <div className="text-sm font-semibold text-cyan-100">
-              {manualReceiptChecks.filter(item => item.ready).length}/{manualReceiptChecks.length} receipt gates ready
+              {manualReceiptChecks.filter(item => item.ready).length}/{manualReceiptChecks.length} 项回执门禁就绪
             </div>
           </div>
           <div className="mt-4 grid gap-3 lg:grid-cols-5">
@@ -1052,9 +1071,9 @@ export function CastDistributionConsoleClient({
 
         <section className="grid gap-4">
           <form onSubmit={seedMatrix} className="rounded-[8px] border border-white/10 bg-white/[0.04] p-5">
-            <p className="text-xs uppercase tracking-[0.22em] text-emerald-200">Matrix Seed</p>
+            <p className="text-xs uppercase tracking-[0.22em] text-emerald-200">补账号矩阵</p>
             <h2 className="mt-2 text-xl font-semibold">补一个可验证账号矩阵</h2>
-            <p className="mt-2 text-sm leading-6 text-white/55">一次写入账号矩阵和广告 campaign ledger；没有平台证据 URL 时保持 ready，不伪装自动投放。</p>
+            <p className="mt-2 text-sm leading-6 text-white/55">一次写入账号矩阵和投放计划账本；没有平台证据链接时保持待人工发布，不伪装自动投放。</p>
             <div className="mt-4 grid gap-3 sm:grid-cols-2">
               <label className="text-sm text-white/70">
                 项目
@@ -1081,7 +1100,7 @@ export function CastDistributionConsoleClient({
                 <input value={budgetCents} onChange={event => setBudgetCents(event.target.value)} className="mt-1 w-full rounded-[6px] border border-white/10 bg-black/30 px-3 py-2 text-white outline-none focus:border-emerald-300" />
               </label>
               <label className="text-sm text-white/70 sm:col-span-2">
-                Campaign 名称
+                活动名称
                 <input value={campaignName} onChange={event => setCampaignName(event.target.value)} className="mt-1 w-full rounded-[6px] border border-white/10 bg-black/30 px-3 py-2 text-white outline-none focus:border-emerald-300" />
               </label>
               <label className="text-sm text-white/70 sm:col-span-2">
@@ -1104,17 +1123,17 @@ export function CastDistributionConsoleClient({
 
         <section className="grid gap-4 lg:grid-cols-3">
           <div className="rounded-[8px] border border-white/10 bg-white/[0.04] p-5">
-            <p className="text-xs uppercase tracking-[0.22em] text-white/45">Matrix</p>
+            <p className="text-xs uppercase tracking-[0.22em] text-white/45">账号矩阵</p>
             <div className="mt-3 text-3xl font-semibold">{snapshot?.accountCount || 0}</div>
             <p className="mt-2 text-sm text-white/60">账号池 · 已连接 {snapshot?.connectedAccountCount || 0} · 健康 {snapshot?.healthyAccountCount || 0}</p>
           </div>
           <div className="rounded-[8px] border border-white/10 bg-white/[0.04] p-5">
-            <p className="text-xs uppercase tracking-[0.22em] text-white/45">Slots</p>
+            <p className="text-xs uppercase tracking-[0.22em] text-white/45">发布档期</p>
             <div className="mt-3 text-3xl font-semibold">{snapshot?.availableSlotCount || 0}</div>
             <p className="mt-2 text-sm text-white/60">总上限 {snapshot?.totalDailyPublishLimit || 0} · 已排期 {snapshot?.scheduledCount || 0}</p>
           </div>
           <div className="rounded-[8px] border border-white/10 bg-white/[0.04] p-5">
-            <p className="text-xs uppercase tracking-[0.22em] text-white/45">Ads</p>
+            <p className="text-xs uppercase tracking-[0.22em] text-white/45">投放计划</p>
             <div className="mt-3 text-3xl font-semibold">{snapshot?.adCampaignCount || 0}</div>
             <p className="mt-2 text-sm text-white/60">活跃 {snapshot?.activeAdCampaignCount || 0} · 已衡量 {snapshot?.measuredAdCampaignCount || 0} · 证据 {snapshot?.adEvidenceCount || 0}</p>
           </div>
@@ -1125,7 +1144,7 @@ export function CastDistributionConsoleClient({
             <h2 className="text-lg font-semibold">Cast 缺口</h2>
             <div className="mt-3 space-y-2">
               {(gaps.length ? gaps : ['内部 Cast 账本当前没有阻断项，下一步是接真实平台授权。']).map(item => (
-                <div key={item} className="rounded-[6px] border border-white/10 bg-black/20 p-3 text-sm text-white/70">{item}</div>
+                <div key={item} className="rounded-[6px] border border-white/10 bg-black/20 p-3 text-sm text-white/70">{readableCastSystemText(item)}</div>
               ))}
             </div>
           </div>
@@ -1136,7 +1155,7 @@ export function CastDistributionConsoleClient({
                 selectedVariant.firstAction,
                 selectedVariant.stopLine,
               ]).map(item => (
-                <div key={item} className="rounded-[6px] border border-white/10 bg-black/20 p-3 text-sm text-white/70">{item}</div>
+                <div key={item} className="rounded-[6px] border border-white/10 bg-black/20 p-3 text-sm text-white/70">{readableCastSystemText(item)}</div>
               ))}
             </div>
           </div>

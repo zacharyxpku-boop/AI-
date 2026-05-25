@@ -48,12 +48,12 @@ describe('cast distribution console page', () => {
     const html = renderToStaticMarkup(page);
 
     expect(html).toContain('分发投放控制台');
-    expect(html).toContain('Cast Distribution Variant');
-    expect(html).toContain('Cast Action Playbook');
+    expect(html).toContain('发布矩阵视角');
+    expect(html).toContain('发布动作剧本');
     expect(html).toContain('Cast 运营动作剧本');
     expect(html).toContain('Smartly式 Cast/Manage 一体化验收板');
-    expect(html).toContain('Ad Delivery Guardrails');
-    expect(html).toContain('Manual Publish Receipt Board');
+    expect(html).toContain('投放止损门禁');
+    expect(html).toContain('人工发布回执');
     expect(html).toContain('人工发布回执与矩阵频控验收板');
     expect(html).toContain('账号健康门禁');
     expect(html).toContain('频控余量门禁');
@@ -63,9 +63,9 @@ describe('cast distribution console page', () => {
     expect(html).toContain('广告投放止损与放量门禁');
     expect(html).toContain('预算 cap');
     expect(html).toContain('不宣称自动优化');
-    expect(html).toContain('Matrix Seed');
+    expect(html).toContain('补账号矩阵');
     expect(html).toContain('账号矩阵');
-    expect(html).toContain('广告 campaign ledger');
+    expect(html).toContain('投放计划账本');
     expect(html).toContain('/factory/cast?projectId=launch-cast&amp;variant=partner');
     expect(html).toContain('/factory/cast?projectId=launch-cast&amp;variant=friend_trial');
   });
@@ -96,12 +96,12 @@ describe('cast distribution console page', () => {
     expect(partnerHtml).toContain('合作者视角');
     expect(partnerHtml).toContain('Cast 商业验收剧本');
     expect(partnerHtml).toContain('91M+ creative output、42M+ video distribution');
-    expect(partnerHtml).toContain('OAuth、广告账户授权、自动发布 API 和 analytics sync');
+    expect(partnerHtml).toContain('平台授权、广告账户授权、自动发布 API 和 表现回流');
 
     expect(friendHtml).toContain('Wenai 商品增长工作台');
     expect(friendHtml).toContain('发到平台，并留下证明');
     expect(friendHtml).toContain('创建一个商品增长任务');
-    expect(friendHtml).toContain('Channel Matrix');
+    expect(friendHtml).toContain('发布账号矩阵');
     expect(friendHtml).toContain('新增发布账号');
     expect(friendHtml).toContain('发布链路');
     expect(friendHtml).toContain('/factory/manage?variant=friend_trial');
@@ -145,8 +145,8 @@ describe('cast distribution console page', () => {
 
     expect(buildCastVariantPlaybook(blocked, 'operator')).toEqual(expect.objectContaining({
       title: 'Cast 运营动作剧本',
-      primaryAction: expect.stringContaining('Missing channel account matrix'),
-      handoffBoundary: expect.stringContaining('manual-ready'),
+      primaryAction: expect.stringContaining('缺少发布账号矩阵'),
+      handoffBoundary: expect.stringContaining('待人工发布'),
     }));
 
     expect(buildCastVariantPlaybook(ready, 'partner')).toEqual(expect.objectContaining({
@@ -185,7 +185,7 @@ describe('cast distribution console page', () => {
 
     expect(buildCastManageOperatingChecks(ready)).toEqual(expect.arrayContaining([
       expect.objectContaining({
-        stage: '素材版本 / Campaign 绑定',
+        stage: '素材版本 / 投放计划绑定',
         ready: true,
       }),
       expect.objectContaining({
@@ -247,7 +247,7 @@ describe('cast distribution console page', () => {
       expect.objectContaining({
         rule: '回滚原因',
         ready: false,
-        evidence: expect.stringContaining('Ad campaign missing platform evidence URL'),
+        evidence: expect.stringContaining('投放计划缺少平台证据链接'),
       }),
     ]));
 
