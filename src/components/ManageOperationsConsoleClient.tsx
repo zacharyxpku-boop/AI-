@@ -39,19 +39,19 @@ const MANAGE_VARIANTS: Record<FactoryUiVariantId, {
 }> = {
   partner: {
     label: '合作者视角',
-    audience: '看 Wenai 是否有客户审核、CRM 交接、资产权限、审计和表现回流的管理闭环。',
+    audience: '看 Wenai 是否有客户审核、销售交接、资产权限、审计和表现回流的管理闭环。',
     headline: 'Manage 是把交付从“发文件”升级成可审计运营系统。',
     body: '这一层检查客户 review、交付批准、权限策略、DLP、水印、下载/分享授权、访问审计和表现回流，证明 Wenai 不只是内容生成器。',
     firstAction: '先看客户批准、权限审计、DLP 和表现回流是否同时存在，再判断是否可给合作者做商用演示。',
-    stopLine: '没有真实对象存储、签名 URL、团队空间和外部 CRM/analytics sync 前，不能宣称企业云盘或自动运营中台。',
+    stopLine: '没有真实对象存储、签名链接、团队空间、销售系统和表现回流接入前，不能宣称企业云盘或自动运营中台。',
   },
   operator: {
     label: '运营视角',
-    audience: '给内部运营每天收口客户审核、权限、回流、CRM 下一步和阻断项。',
+    audience: '给内部运营每天收口客户审核、权限、回流、销售下一步和阻断项。',
     headline: 'Manage 的运营任务是让每个交付物都有负责人、权限、证据和下一步。',
     body: '运营只看四类缺口：客户没批、权限没闭、审计没留、回流没进。补齐后才进入复盘、续约或下一轮生产。',
     firstAction: '先补权限和客户审核缺口；没有 audit trail 时，不要把项目标记为企业级可交付。',
-    stopLine: '外部云资产或 CRM 未接入时，只能做内部账本和手工交接，不能说已经企业级自动协同。',
+    stopLine: '外部云资产或销售系统未接入时，只能做内部账本和手工交接，不能说已经企业级自动协同。',
   },
   friend_trial: {
     label: '朋友试用视角',
@@ -76,6 +76,37 @@ function manageScore(
     (permission?.dlpPassedPolicyCount || 0) >= (permission?.securityPolicyCount || 0) && (permission?.securityPolicyCount || 0) > 0,
     (permission?.accessAuditEventCount || 0) > 0,
   ].filter(Boolean).length;
+}
+
+function readableManageSystemText(value: string) {
+  return value
+    .replaceAll('Close gap:', '补齐交付缺口：')
+    .replaceAll('Close asset permission gap:', '补齐资产权限缺口：')
+    .replaceAll('Missing distribution plan', '缺少分发计划')
+    .replaceAll('Missing enterprise asset permission ledger', '缺少企业资产权限账本')
+    .replaceAll('Download/share permission missing storage object', '下载/分享权限缺少存储对象')
+    .replaceAll('CRM handoff', '销售交接')
+    .replaceAll('CRM', '销售交接')
+    .replaceAll('analytics sync', '表现回流')
+    .replaceAll('automatic analytics', '自动表现回流')
+    .replaceAll('review token', '审核链接')
+    .replaceAll('permission policy', '权限策略')
+    .replaceAll('access audit', '访问审计')
+    .replaceAll('performance return', '表现回流')
+    .replaceAll('download/share/publish', '下载/分享/发布')
+    .replaceAll('download/share', '下载/分享')
+    .replaceAll('download-ready', '下载就绪')
+    .replaceAll('downloadable assets', '可下载资产')
+    .replaceAll('share-ready', '分享就绪')
+    .replaceAll('shareable assets', '可分享资产')
+    .replaceAll('objects', '对象')
+    .replaceAll('missing objects', '缺失对象')
+    .replaceAll('blockers', '阻断项')
+    .replaceAll('access audits', '访问审计')
+    .replaceAll('permission audits', '权限审计')
+    .replaceAll('grant', '临时授权')
+    .replaceAll('storage object', '存储对象')
+    .replaceAll('security policy', '安全策略');
 }
 
 export function buildManageOperatingChecks(
@@ -111,15 +142,15 @@ export function buildManageOperatingChecks(
       ready: approvedCount > 0,
       evidence: `已批准交付 ${approvedCount} 条`,
       next: approvedCount > 0
-        ? '批准后推进 CRM 交接、分发门禁和表现回流。'
-        : '先补客户批准或返修结论；没有批准不能进入发布/CRM 闭环。',
+        ? '批准后推进销售交接、分发门禁和表现回流。'
+        : '先补客户批准或返修结论；没有批准不能进入发布和销售跟进闭环。',
     },
     {
       stage: '权限范围与受控分享',
       ready: permissionCount > 0 && clientScopeCount > 0,
       evidence: `权限策略 ${permissionCount} 条 / 客户审核范围 ${clientScopeCount} 条`,
       next: permissionCount > 0
-        ? '把 download/share/publish/approve 都接入权限检查，失败默认关闭。'
+        ? '把下载、分享、发布和批准都接入权限检查，失败默认关闭。'
         : '先写入资产权限策略；没有权限账本不能宣称企业级数据安全。',
     },
     {
@@ -143,16 +174,16 @@ export function buildManageOperatingChecks(
       ready: performanceCount > 0 && scaleDecisionCount > 0,
       evidence: `表现回流 ${performanceCount} 条 / scale 决策 ${scaleDecisionCount} 条`,
       next: performanceCount > 0
-        ? '把结果反哺品牌学习、下一轮生产计划和 CRM 续约动作。'
-        : '补 analytics sync 或手工表现导入；没有回流不能宣称自动优化。',
+        ? '把结果反哺品牌学习、下一轮生产计划和销售续约动作。'
+        : '补表现回流接入或手工表现导入；没有回流不能宣称自动优化。',
     },
     {
-      stage: 'CRM / 下一步队列',
+      stage: '销售下一步队列',
       ready: gaps.length === 0,
       evidence: gaps.length ? `阻断 ${gaps.length} 项 / 动作 ${nextActions.length} 条` : `动作队列 ${nextActions.length} 条 / 无硬阻断`,
       next: gaps.length
-        ? `先处理：${gaps[0]}。`
-        : '进入企业云资产、外部 CRM 和 analytics sync 接入验收。',
+        ? `先处理：${readableManageSystemText(gaps[0])}。`
+        : '进入企业云资产、销售系统和表现回流接入验收。',
     },
   ];
 }
@@ -171,23 +202,23 @@ export function buildAssetEnforcementChecks(permission: AssetPermissionSnapshot 
     {
       gate: '下载前门禁',
       ready: downloadableReady > 0,
-      evidence: `download-ready ${downloadableReady} / downloadable assets ${permission?.downloadableAssetCount || 0}`,
+      evidence: `下载就绪 ${downloadableReady} / 可下载资产 ${permission?.downloadableAssetCount || 0}`,
       stopLine: downloadableReady > 0
         ? '下载必须带临时 grant，并经过权限、对象和安全策略校验。'
-        : '没有 download permission、storage object、security policy 和临时 grant 前，默认不返回下载内容。',
+        : '没有下载权限、存储对象、安全策略和临时授权前，默认不返回下载内容。',
     },
     {
       gate: '分享前门禁',
       ready: shareableReady > 0,
-      evidence: `share-ready ${shareableReady} / shareable assets ${permission?.shareableAssetCount || 0}`,
+      evidence: `分享就绪 ${shareableReady} / 可分享资产 ${permission?.shareableAssetCount || 0}`,
       stopLine: shareableReady > 0
         ? '分享必须经过 share grant 和对象可用性校验，不能绕过企业资产策略。'
-        : '没有 share permission、对象 URL、DLP/水印/留存和 grant 前，默认不生成公开分享。',
+        : '没有分享权限、对象链接、DLP/水印/留存和临时授权前，默认不生成公开分享。',
     },
     {
       gate: '对象与安全策略',
       ready: securityReady && (permission?.missingStorageObjectCount || 0) === 0 && (permission?.storageObjectCount || 0) > 0,
-      evidence: `objects ${permission?.storageObjectCount || 0} / missing objects ${permission?.missingStorageObjectCount || 0} / DLP passed ${permission?.dlpPassedPolicyCount || 0}`,
+      evidence: `对象 ${permission?.storageObjectCount || 0} / 缺失对象 ${permission?.missingStorageObjectCount || 0} / DLP 通过 ${permission?.dlpPassedPolicyCount || 0}`,
       stopLine: securityReady
         ? '对象存储、DLP、水印和留存策略已经形成内部门禁；真实云盘仍需外部对象存储接入。'
         : '没有对象、DLP、水印或留存策略时，不能宣称企业云资产安全。',
@@ -195,7 +226,7 @@ export function buildAssetEnforcementChecks(permission: AssetPermissionSnapshot 
     {
       gate: '发布/交付 fail-closed',
       ready: states.length > 0 && blockerCount === 0,
-      evidence: `governed assets ${states.length} / blockers ${blockerCount}`,
+      evidence: `受管资产 ${states.length} / 阻断项 ${blockerCount}`,
       stopLine: blockerCount === 0 && states.length > 0
         ? '当前受管资产没有门禁阻断，可以进入发布/交付前的下一层平台授权校验。'
         : '任一资产存在 blocker 时，发布、交付、下载和分享都应保持阻断，不用人工口头放行。',
@@ -203,7 +234,7 @@ export function buildAssetEnforcementChecks(permission: AssetPermissionSnapshot 
     {
       gate: '访问审计',
       ready: (permission?.accessAuditEventCount || 0) > 0,
-      evidence: `access audits ${permission?.accessAuditEventCount || 0} / permission audits ${permission?.auditEventCount || 0}`,
+      evidence: `访问审计 ${permission?.accessAuditEventCount || 0} / 权限审计 ${permission?.auditEventCount || 0}`,
       stopLine: (permission?.accessAuditEventCount || 0) > 0
         ? '访问尝试已经落审计，可追踪越权、过期、grant 消耗和客户动作。'
         : '没有访问审计前，只能内部验证权限模型，不能对外承诺企业级协作审计。',
@@ -230,10 +261,10 @@ export function buildManageVariantPlaybook(
     return {
       title: 'Manage 运营动作剧本',
       primaryAction: gaps.length
-        ? `先处理管理缺口：${gaps[0]}。`
-        : '可以进入 CRM 复盘、下一轮生产计划和续约/合同交接。',
-      proofToCheck: '每个交付物都要能追到 review link、approval、permission policy、access audit、performance return 和 CRM next step。',
-      handoffBoundary: '对象存储、签名 URL、外部 CRM 和 analytics sync 未接入前，运营只能做内部审计和手工交接。',
+        ? `先处理管理缺口：${readableManageSystemText(gaps[0])}。`
+        : '可以进入销售复盘、下一轮生产计划和续约/合同交接。',
+      proofToCheck: '每个交付物都要能追到审核链接、批准记录、权限策略、访问审计、表现回流和销售下一步。',
+      handoffBoundary: '对象存储、签名链接、外部销售系统和表现回流未接入前，运营只能做内部审计和手工交接。',
       cards: [
         `客户审核 ${reviewCount} / 客户批准 ${approvedCount} / 表现回流 ${performanceCount}`,
         `权限策略 ${permissionCount} / 安全策略 ${securityCount} / 审计 ${auditCount}`,
@@ -262,10 +293,10 @@ export function buildManageVariantPlaybook(
   return {
     title: 'Manage 商业验收剧本',
     primaryAction: score >= 5
-      ? '可以进入企业云资产、CRM 同步和 analytics sync 的外部材料验收。'
-      : '先补客户批准、权限审计、DLP/水印、表现回流和 CRM handoff，再谈企业级管理能力。',
+      ? '可以进入企业云资产、销售系统同步和表现回流的外部材料验收。'
+      : '先补客户批准、权限审计、DLP/水印、表现回流和销售交接，再谈企业级管理能力。',
     proofToCheck: '合作者要看到交付物、客户审核、资产权限、安全策略、访问审计、表现回流和商业下一步在同一项目里闭环。',
-    handoffBoundary: '企业云盘、团队空间、自动 CRM、自动 analytics 和规模数字审计必须等外部系统接入后再宣称。',
+    handoffBoundary: '企业云盘、团队空间、自动销售系统、自动表现回流和规模数字审计必须等外部系统接入后再宣称。',
     cards: [
       `Manage readiness ${score}/7`,
       `审核 ${reviewCount} / 批准 ${approvedCount} / 回流 ${performanceCount}`,
@@ -335,7 +366,7 @@ export function ManageOperationsConsoleClient({
           scope: 'client_review',
           roles: ['owner', 'admin', 'crm', 'client'],
           allowedActions: ['view', 'share', 'approve'],
-          auditNote: 'Client review and CRM handoff permission created from Manage console.',
+          auditNote: '客户审核和销售交接权限由交付管理控制台创建。',
         },
         storageObject: {
           assetId,
@@ -789,7 +820,7 @@ export function ManageOperationsConsoleClient({
         <section className="rounded-[8px] border border-sky-200/15 bg-[#101722] p-5 shadow-2xl shadow-black/30">
           <div className="flex flex-col gap-4 lg:flex-row lg:items-end lg:justify-between">
             <div className="max-w-3xl">
-              <p className="text-xs uppercase tracking-[0.22em] text-sky-200">Manage Operations Variant</p>
+              <p className="text-xs uppercase tracking-[0.22em] text-sky-200">交付管理视角</p>
               <h1 className="mt-3 text-3xl font-semibold tracking-normal text-white sm:text-4xl">交付管理控制台</h1>
               <p className="mt-3 text-sm leading-6 text-sky-50/75">{selectedVariant.headline}</p>
               <p className="mt-2 text-sm leading-6 text-white/55">{selectedVariant.body}</p>
@@ -805,7 +836,7 @@ export function ManageOperationsConsoleClient({
             selectedVariant.body,
             selectedVariant.stopLine,
           ]}
-          eyebrow="Manage Operations Variant / Manage Action Playbook"
+          eyebrow="交付管理视角 / 运营动作剧本"
           firstScreen={`${selectedVariant.headline} ${selectedVariant.body}`}
           nextAction={selectedVariant.firstAction}
           primaryAction={playbook.primaryAction}
@@ -820,10 +851,10 @@ export function ManageOperationsConsoleClient({
         <section className="rounded-[8px] border border-sky-200/15 bg-white/[0.04] p-5">
           <div className="flex flex-col gap-2 lg:flex-row lg:items-end lg:justify-between">
             <div>
-              <p className="text-xs uppercase tracking-[0.22em] text-sky-200">Clico-style Manage Board</p>
+              <p className="text-xs uppercase tracking-[0.22em] text-sky-200">客户交付验收板</p>
               <h2 className="mt-2 text-xl font-semibold">Clico式客户交付与企业安全验收板</h2>
               <p className="mt-2 text-sm leading-6 text-white/55">
-                这里把客户审核、客户批准、权限范围、DLP/水印、访问审计、表现回流和 CRM 下一步放到同一块板上；缺一项就不开放企业级承诺。
+                这里把客户审核、客户批准、权限范围、DLP/水印、访问审计、表现回流和销售下一步放到同一块板上；缺一项就不开放企业级承诺。
               </p>
             </div>
             <div className="text-sm font-semibold text-sky-100">
@@ -849,14 +880,14 @@ export function ManageOperationsConsoleClient({
         <section className="rounded-[8px] border border-emerald-200/15 bg-emerald-950/15 p-5">
           <div className="flex flex-col gap-2 lg:flex-row lg:items-end lg:justify-between">
             <div>
-              <p className="text-xs uppercase tracking-[0.22em] text-emerald-200">Asset Enforcement Matrix</p>
+              <p className="text-xs uppercase tracking-[0.22em] text-emerald-200">资产访问门禁</p>
               <h2 className="mt-2 text-xl font-semibold">企业资产访问门禁矩阵</h2>
               <p className="mt-2 text-sm leading-6 text-white/55">
-                这层专门看 download/share/publish/交付前是否 fail-closed：没有权限、对象、DLP、水印、临时 grant 或访问审计时，不让素材自由流转。
+                这层专门看下载、分享、发布和交付前是否默认阻断：没有权限、对象、DLP、水印、临时授权或访问审计时，不让素材自由流转。
               </p>
             </div>
             <div className="text-sm font-semibold text-emerald-100">
-              {enforcementChecks.filter(item => item.ready).length}/{enforcementChecks.length} enforcement ready
+              {enforcementChecks.filter(item => item.ready).length}/{enforcementChecks.length} 项门禁就绪
             </div>
           </div>
           <div className="mt-4 grid gap-3 lg:grid-cols-5">
@@ -877,7 +908,7 @@ export function ManageOperationsConsoleClient({
 
         <section className="grid gap-4">
           <form onSubmit={seedManagePolicy} className="rounded-[8px] border border-white/10 bg-white/[0.04] p-5">
-            <p className="text-xs uppercase tracking-[0.22em] text-sky-200">Manage Seed</p>
+            <p className="text-xs uppercase tracking-[0.22em] text-sky-200">补交付策略</p>
             <h2 className="mt-2 text-xl font-semibold">补一个受控交付策略</h2>
             <p className="mt-2 text-sm leading-6 text-white/55">一次写入客户审核权限、受控分享对象、安全策略、DLP、水印和留存规则；不伪装企业云盘已经接入。</p>
             <div className="mt-4 grid gap-3">
@@ -909,22 +940,22 @@ export function ManageOperationsConsoleClient({
 
         <section className="grid gap-4 lg:grid-cols-4">
           <div className="rounded-[8px] border border-white/10 bg-white/[0.04] p-5">
-            <p className="text-xs uppercase tracking-[0.22em] text-white/45">Review</p>
+            <p className="text-xs uppercase tracking-[0.22em] text-white/45">客户审核</p>
             <div className="mt-3 text-3xl font-semibold">{industrialSnapshot?.clientReviewAssetCount || 0}</div>
             <p className="mt-2 text-sm text-white/60">客户批准 {industrialSnapshot?.approvedDeliverableCount || 0}</p>
           </div>
           <div className="rounded-[8px] border border-white/10 bg-white/[0.04] p-5">
-            <p className="text-xs uppercase tracking-[0.22em] text-white/45">Returns</p>
+            <p className="text-xs uppercase tracking-[0.22em] text-white/45">效果回流</p>
             <div className="mt-3 text-3xl font-semibold">{industrialSnapshot?.performanceReturnCount || 0}</div>
             <p className="mt-2 text-sm text-white/60">scale 决策 {industrialSnapshot?.scaleDecisionCount || 0}</p>
           </div>
           <div className="rounded-[8px] border border-white/10 bg-white/[0.04] p-5">
-            <p className="text-xs uppercase tracking-[0.22em] text-white/45">Permissions</p>
+            <p className="text-xs uppercase tracking-[0.22em] text-white/45">权限策略</p>
             <div className="mt-3 text-3xl font-semibold">{permissionSnapshot?.permissionRecordCount || 0}</div>
             <p className="mt-2 text-sm text-white/60">客户审核范围 {permissionSnapshot?.clientReviewScopeCount || 0}</p>
           </div>
           <div className="rounded-[8px] border border-white/10 bg-white/[0.04] p-5">
-            <p className="text-xs uppercase tracking-[0.22em] text-white/45">Security</p>
+            <p className="text-xs uppercase tracking-[0.22em] text-white/45">安全策略</p>
             <div className="mt-3 text-3xl font-semibold">{permissionSnapshot?.securityPolicyCount || 0}</div>
             <p className="mt-2 text-sm text-white/60">DLP 通过 {permissionSnapshot?.dlpPassedPolicyCount || 0} · 访问审计 {permissionSnapshot?.accessAuditEventCount || 0}</p>
           </div>
@@ -934,8 +965,8 @@ export function ManageOperationsConsoleClient({
           <div className="rounded-[8px] border border-white/10 bg-white/[0.04] p-5">
             <h2 className="text-lg font-semibold">Manage 缺口</h2>
             <div className="mt-3 space-y-2">
-              {(gaps.length ? gaps : ['内部 Manage 账本当前没有阻断项，下一步是接企业云资产、CRM 和 analytics sync。']).map(item => (
-                <div key={item} className="rounded-[6px] border border-white/10 bg-black/20 p-3 text-sm text-white/70">{item}</div>
+              {(gaps.length ? gaps : ['内部 Manage 账本当前没有阻断项，下一步是接企业云资产、销售系统和表现回流。']).map(item => (
+                <div key={item} className="rounded-[6px] border border-white/10 bg-black/20 p-3 text-sm text-white/70">{readableManageSystemText(item)}</div>
               ))}
             </div>
           </div>
@@ -946,7 +977,7 @@ export function ManageOperationsConsoleClient({
                 selectedVariant.firstAction,
                 selectedVariant.stopLine,
               ]).map(item => (
-                <div key={item} className="rounded-[6px] border border-white/10 bg-black/20 p-3 text-sm text-white/70">{item}</div>
+                <div key={item} className="rounded-[6px] border border-white/10 bg-black/20 p-3 text-sm text-white/70">{readableManageSystemText(item)}</div>
               ))}
             </div>
           </div>

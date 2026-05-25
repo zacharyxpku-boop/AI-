@@ -87,15 +87,15 @@ describe('manage operations console page', () => {
     const html = renderToStaticMarkup(page);
 
     expect(html).toContain('交付管理控制台');
-    expect(html).toContain('Manage Operations Variant');
-    expect(html).toContain('Manage Action Playbook');
+    expect(html).toContain('交付管理视角');
+    expect(html).toContain('运营动作剧本');
     expect(html).toContain('Manage 运营动作剧本');
     expect(html).toContain('Clico式客户交付与企业安全验收板');
-    expect(html).toContain('Asset Enforcement Matrix');
+    expect(html).toContain('资产访问门禁');
     expect(html).toContain('企业资产访问门禁矩阵');
-    expect(html).toContain('download/share/publish');
+    expect(html).toContain('下载、分享、发布');
     expect(html).toContain('默认阻断');
-    expect(html).toContain('Manage Seed');
+    expect(html).toContain('补交付策略');
     expect(html).toContain('客户审核权限、受控分享对象、安全策略、DLP、水印和留存规则');
     expect(html).toContain('/factory/manage?projectId=launch-manage&amp;variant=partner');
     expect(html).toContain('/factory/manage?projectId=launch-manage&amp;variant=friend_trial');
@@ -130,8 +130,8 @@ describe('manage operations console page', () => {
 
     expect(partnerHtml).toContain('合作者视角');
     expect(partnerHtml).toContain('Manage 商业验收剧本');
-    expect(partnerHtml).toContain('企业云资产、CRM 同步和 analytics sync');
-    expect(partnerHtml).toContain('企业云盘、团队空间、自动 CRM');
+    expect(partnerHtml).toContain('企业云资产、销售系统同步和表现回流');
+    expect(partnerHtml).toContain('企业云盘、团队空间、自动销售系统');
 
     expect(friendHtml).toContain('销售下一步怎么跟进');
     expect(friendHtml).toContain('商品增长工作台');
@@ -198,7 +198,7 @@ describe('manage operations console page', () => {
 
     expect(buildManageVariantPlaybook(blockedIndustrial, blockedPermission, 'operator')).toEqual(expect.objectContaining({
       title: 'Manage 运营动作剧本',
-      primaryAction: expect.stringContaining('Missing distribution plan'),
+      primaryAction: expect.stringContaining('缺少分发计划'),
       handoffBoundary: expect.stringContaining('手工交接'),
     }));
 
@@ -265,7 +265,7 @@ describe('manage operations console page', () => {
         ready: true,
       }),
       expect.objectContaining({
-        stage: 'CRM / 下一步队列',
+        stage: '销售下一步队列',
         ready: true,
       }),
     ]));
@@ -308,7 +308,7 @@ describe('manage operations console page', () => {
       expect.objectContaining({
         gate: '发布/交付 fail-closed',
         ready: false,
-        evidence: expect.stringContaining('blockers 2'),
+        evidence: expect.stringContaining('阻断项 2'),
       }),
     ]));
 
