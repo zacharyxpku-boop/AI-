@@ -27,6 +27,7 @@ import {
   buildCommerceRenderBatchPlan,
   buildCommerceRenderReliabilityBoard,
   buildCommerceSelfPublishingCommandCenter,
+  buildCommerceSuperIpTitleBoard,
   buildDemoCommerceCloudDriveManifest,
   buildDemoCommerceCloudDriveReturnPlan,
   buildDemoCommerceCustomerReturnIntakeBoard,
@@ -56,6 +57,7 @@ import {
   buildDemoCommerceRenderBatchPlan,
   buildDemoCommerceRenderReliabilityBoard,
   buildDemoCommerceSelfPublishingCommandCenter,
+  buildDemoCommerceSuperIpTitleBoard,
   evaluateCommercePerformanceUploads,
   evaluateCommerceRemixQuality,
   executeCommerceRenderBatches,
@@ -120,6 +122,7 @@ function buildInputResponse(input: CommerceRemixPlanInput, body: CommerceRemixRe
   const workflowPlaybook = buildCommerceRemixWorkflowPlaybook(input, plan);
   const publishingMatrix = buildCommercePublishingMatrixPlan(input, plan.publishingPacks);
   const creatorPersonaMatrix = buildCommerceCreatorPersonaMatrix(input, publishingMatrix);
+  const superIpTitleBoard = buildCommerceSuperIpTitleBoard(input, creatorPersonaMatrix);
   const cloudReturnPlan = buildCommerceCloudDriveReturnPlan(input, cloudDrive);
   const selfPublishingCommandCenter = buildCommerceSelfPublishingCommandCenter(input, publishingMatrix, creatorPersonaMatrix, cloudReturnPlan);
   const customerReturnIntakeBoard = buildCommerceCustomerReturnIntakeBoard(performanceReport, cloudReturnPlan);
@@ -156,6 +159,7 @@ function buildInputResponse(input: CommerceRemixPlanInput, body: CommerceRemixRe
     workflowPlaybook,
     publishingMatrix,
     creatorPersonaMatrix,
+    superIpTitleBoard,
     selfPublishingCommandCenter,
     cloudReturnPlan,
     customerReturnIntakeBoard,
@@ -193,6 +197,7 @@ export async function GET() {
     workflowPlaybook: buildDemoCommerceRemixWorkflowPlaybook(),
     publishingMatrix: buildDemoCommercePublishingMatrixPlan(),
     creatorPersonaMatrix: buildDemoCommerceCreatorPersonaMatrix(),
+    superIpTitleBoard: buildDemoCommerceSuperIpTitleBoard(),
     selfPublishingCommandCenter: buildDemoCommerceSelfPublishingCommandCenter(),
     cloudReturnPlan: buildDemoCommerceCloudDriveReturnPlan(),
     customerReturnIntakeBoard: buildDemoCommerceCustomerReturnIntakeBoard(),

@@ -28,6 +28,7 @@ import {
   buildCommerceRemixWorkflowPlaybook,
   buildCommerceRenderReliabilityBoard,
   buildCommerceSelfPublishingCommandCenter,
+  buildCommerceSuperIpTitleBoard,
   buildDemoCommerceRemixEnginePlan,
   buildFfmpegCommandManifest,
   buildCommerceRemixExportPackage,
@@ -598,6 +599,7 @@ describe('commerce remix engine', () => {
   it('plans platform title matrices for customer self-publishing', () => {
     const matrix = buildCommercePublishingMatrixPlan(baseInput);
     const personas = buildCommerceCreatorPersonaMatrix(baseInput, matrix);
+    const titleBoard = buildCommerceSuperIpTitleBoard(baseInput, personas);
 
     expect(matrix).toHaveLength(3);
     expect(matrix[0].accountAngles.map(angle => angle.accountType)).toEqual(['真实买家号', '测评种草号', '店铺官方号']);
@@ -611,6 +613,12 @@ describe('commerce remix engine', () => {
     expect(personas[0].personas[2].returnMetrics.length).toBeGreaterThanOrEqual(4);
     expect(personas[0].personas[0].sourcePatterns.join(' ')).toContain('开源提词器');
     expect(personas[0].personas[0].doNotClaim).toContain('不承诺平台自动登录或自动发布');
+    expect(titleBoard.headline).toContain('超级 IP 标题和口播作战板');
+    expect(titleBoard.titleFamilies.map(family => family.id)).toEqual(['buyer-pain-scene', 'review-proof', 'official-service']);
+    expect(titleBoard.titleFamilies[0].voiceoverBeats.join(' ')).toContain('具体使用场景');
+    expect(titleBoard.titleFamilies[1].evidenceRequired).toContain('对比图');
+    expect(titleBoard.operatingRules.join(' ')).toContain('客户自己登录平台发布');
+    expect(titleBoard.returnLoop.join(' ')).toContain('高频问题转成下一条口播开场');
   });
 
   it('turns persona matrices into a customer self-publishing command center', () => {

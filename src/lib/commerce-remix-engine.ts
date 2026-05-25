@@ -374,6 +374,25 @@ export interface CommerceCreatorPersonaMatrix {
   }>;
 }
 
+export interface CommerceSuperIpTitleBoard {
+  headline: string;
+  promise: string;
+  titleFamilies: Array<{
+    id: string;
+    label: string;
+    bestFor: string;
+    titleFormula: string;
+    openingLine: string;
+    voiceoverBeats: string[];
+    evidenceRequired: string[];
+    platformFit: string[];
+    customerAction: string;
+    remixCue: string;
+  }>;
+  operatingRules: string[];
+  returnLoop: string[];
+}
+
 export interface CommerceSelfPublishingSlot {
   id: string;
   platform: RemixPlatform;
@@ -1302,7 +1321,79 @@ export function buildCommerceCreatorPersonaMatrix(
         ],
       };
     }),
-  }));
+  })); 
+}
+
+export function buildCommerceSuperIpTitleBoard(
+  input: CommerceRemixPlanInput,
+  creatorPersonaMatrix = buildCommerceCreatorPersonaMatrix(input),
+): CommerceSuperIpTitleBoard {
+  const product = safeText(input.productName, '商品');
+  const point = safeText(input.sellingPoints[0] || '', '核心卖点');
+  const secondaryPoint = safeText(input.sellingPoints[1] || input.sellingPoints[0] || '', '使用场景');
+  const audience = safeText(input.audience, '目标用户');
+  const allPersonas = creatorPersonaMatrix.flatMap(plan => plan.personas.map(persona => ({
+    ...persona,
+    platformLabel: PLATFORM_LABELS[plan.platform],
+  })));
+  const buyerPersona = allPersonas.find(persona => persona.accountType === '真实买家号') || allPersonas[0];
+  const reviewPersona = allPersonas.find(persona => persona.accountType === '测评种草号') || allPersonas[1] || buyerPersona;
+  const officialPersona = allPersonas.find(persona => persona.accountType === '店铺官方号') || allPersonas[2] || buyerPersona;
+
+  return {
+    headline: '超级 IP 标题和口播作战板',
+    promise: '同一个商品不再重复发同一条内容，而是按真实买家、测评种草、店铺官方三种账号人格生成标题、开场、口播和证据素材。',
+    titleFamilies: [
+      {
+        id: 'buyer-pain-scene',
+        label: '真实买家：痛点场景',
+        bestFor: `${audience}第一次看到${product}时的种草内容`,
+        titleFormula: buyerPersona?.titleFormulas[0] || `${audience}先看这个${product}场景`,
+        openingLine: buyerPersona?.openingLines[0] || `先说真实感受：${point}这个问题，我会先看这个场景。`,
+        voiceoverBeats: ['先讲一个具体使用场景', `再展示${point}怎么被解决`, '最后提醒适合谁和不适合谁'],
+        evidenceRequired: ['真实使用图', '手持或开箱图', '评论区追问截图'],
+        platformFit: unique(allPersonas.filter(persona => persona.accountType === '真实买家号').map(persona => persona.platformLabel)),
+        customerAction: '客户复制标题和前三句口播，上传真实使用素材后自行发布。',
+        remixCue: '如果收藏高但点击低，下一轮保留口播结构，重剪封面和前三秒画面。',
+      },
+      {
+        id: 'review-proof',
+        label: '测评种草：证据对比',
+        bestFor: `需要解释${point}是否真实有效的内容`,
+        titleFormula: reviewPersona?.titleFormulas[1] || `${point}到底有没有用？`,
+        openingLine: reviewPersona?.openingLines[1] || `别先看价格，先看它有没有把${point}讲清楚。`,
+        voiceoverBeats: ['先提出一个判断问题', '展示细节、规格或前后对比', '说清楚限制和适合人群'],
+        evidenceRequired: ['对比图', '细节图', '规格或材质证明'],
+        platformFit: unique(allPersonas.filter(persona => persona.accountType === '测评种草号').map(persona => persona.platformLabel)),
+        customerAction: '客户复制测评标题，上传对比图或细节证明，发布后回填互动截图。',
+        remixCue: '如果评论追问规格，下一轮把规格解释变成单独的 FAQ 短视频。',
+      },
+      {
+        id: 'official-service',
+        label: '店铺官方：承接转化',
+        bestFor: '客户已经有兴趣，需要商品页、客服和售后承接时',
+        titleFormula: officialPersona?.titleFormulas[2] || `为什么客户选择${product}`,
+        openingLine: officialPersona?.openingLines[2] || `如果你是${audience}，这条可以直接照着选。`,
+        voiceoverBeats: ['先说明适用人群', `再讲${secondaryPoint}和售后边界`, '最后引导到商品页或客服咨询'],
+        evidenceRequired: ['商品主图', 'FAQ 卡片', '售后承诺截图'],
+        platformFit: unique(allPersonas.filter(persona => persona.accountType === '店铺官方号').map(persona => persona.platformLabel)),
+        customerAction: '客户用店铺官方号发布，标题和 FAQ 同步到商品页或客服快捷回复。',
+        remixCue: '如果咨询多但订单少，下一轮补价格、规格、售后承诺和客服异议处理素材。',
+      },
+    ],
+    operatingRules: [
+      '每个平台先发三种人格各一条，不重复发布同一个标题。',
+      '口播、字幕和混剪时间线使用同一份脚本来源，方便后续接数字人 Key。',
+      '客户自己登录平台发布；Wenai 只交付标题、口播、素材提示和回填字段。',
+      '没有真实回填前，不判断某个 IP 人设已经跑赢。',
+    ],
+    returnLoop: [
+      '回填标题截图后，判断哪个标题公式继续放大。',
+      '回填评论截图后，把高频问题转成下一条口播开场。',
+      '回填 CSV 后，用点击、收藏、咨询、订单判断下一轮重剪方向。',
+      '表现弱的账号人设不删除，先换封面、前三秒和证据素材再测一次。',
+    ],
+  };
 }
 
 export function buildCommerceSelfPublishingCommandCenter(
@@ -2850,6 +2941,11 @@ export function buildDemoCommercePublishingMatrixPlan() {
 export function buildDemoCommerceCreatorPersonaMatrix() {
   const input = buildDemoCommerceRemixInput();
   return buildCommerceCreatorPersonaMatrix(input);
+}
+
+export function buildDemoCommerceSuperIpTitleBoard() {
+  const input = buildDemoCommerceRemixInput();
+  return buildCommerceSuperIpTitleBoard(input, buildCommerceCreatorPersonaMatrix(input));
 }
 
 export function buildDemoCommerceSelfPublishingCommandCenter() {

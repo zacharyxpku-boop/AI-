@@ -33,6 +33,7 @@ import {
   buildDemoCommerceRenderBatchPlan,
   buildDemoCommerceRenderReliabilityBoard,
   buildDemoCommerceSelfPublishingCommandCenter,
+  buildDemoCommerceSuperIpTitleBoard,
 } from '@/lib/commerce-remix-engine';
 
 type FlowId = 'brief' | 'asset' | 'image' | 'video' | 'publish' | 'review';
@@ -252,6 +253,7 @@ export function KuaiziStyleWorkbench() {
   const workflowPlaybook = useMemo(() => buildDemoCommerceRemixWorkflowPlaybook(), []);
   const publishingMatrix = useMemo(() => buildDemoCommercePublishingMatrixPlan(), []);
   const creatorPersonaMatrix = useMemo(() => buildDemoCommerceCreatorPersonaMatrix(), []);
+  const superIpTitleBoard = useMemo(() => buildDemoCommerceSuperIpTitleBoard(), []);
   const selfPublishingCommandCenter = useMemo(() => buildDemoCommerceSelfPublishingCommandCenter(), []);
   const renderCapacity = useMemo(() => buildDemoCommerceRenderCapacityPlan(), []);
   const renderReliabilityBoard = useMemo(() => buildDemoCommerceRenderReliabilityBoard(), []);
@@ -1364,6 +1366,34 @@ export function KuaiziStyleWorkbench() {
                     <span className="rounded bg-white px-2.5 py-1 text-xs font-black text-sky-700 ring-1 ring-sky-100">
                       {creatorPersonaMatrix.reduce((sum, plan) => sum + plan.personas.length, 0)} 个账号人设
                     </span>
+                  </div>
+                  <div className="mt-4 rounded-md border border-blue-100 bg-white p-4 ring-1 ring-sky-100">
+                    <div className="flex flex-col gap-2 lg:flex-row lg:items-end lg:justify-between">
+                      <div className="min-w-0">
+                        <p className="text-xs font-black uppercase tracking-[0.18em] text-blue-700">Super IP Title Board</p>
+                        <h5 className="mt-1 text-base font-black leading-6 text-slate-950">{superIpTitleBoard.headline}</h5>
+                        <p className="mt-2 max-w-4xl text-sm leading-6 text-slate-600">{superIpTitleBoard.promise}</p>
+                      </div>
+                      <span className="w-fit rounded bg-blue-50 px-2.5 py-1 text-xs font-black text-blue-700">
+                        {superIpTitleBoard.titleFamilies.length} 套标题打法
+                      </span>
+                    </div>
+                    <div className="mt-4 grid gap-3 lg:grid-cols-3">
+                      {superIpTitleBoard.titleFamilies.map(family => (
+                        <article className="min-w-0 rounded-md bg-sky-50 p-3 ring-1 ring-sky-100" key={family.id}>
+                          <div className="text-xs font-black text-blue-700">{family.label}</div>
+                          <h6 className="mt-2 line-clamp-2 text-sm font-black leading-5 text-slate-950">{family.titleFormula}</h6>
+                          <p className="mt-2 line-clamp-2 text-xs font-bold leading-5 text-slate-700">{family.openingLine}</p>
+                          <p className="mt-3 line-clamp-3 text-xs leading-5 text-slate-600">{family.voiceoverBeats.join(' / ')}</p>
+                          <p className="mt-3 rounded bg-white px-2 py-1.5 text-[11px] font-bold leading-4 text-blue-700">{family.customerAction}</p>
+                        </article>
+                      ))}
+                    </div>
+                    <div className="mt-4 grid gap-2 md:grid-cols-4">
+                      {superIpTitleBoard.operatingRules.map(rule => (
+                        <div className="rounded-md bg-slate-50 px-3 py-2 text-xs font-bold leading-5 text-slate-700 ring-1 ring-slate-100" key={rule}>{rule}</div>
+                      ))}
+                    </div>
                   </div>
                   <div className="mt-4 grid gap-3 xl:grid-cols-5">
                     {creatorPersonaMatrix.map(plan => (

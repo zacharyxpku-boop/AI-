@@ -42,6 +42,9 @@ describe('factory page', () => {
     expect(html).toContain('个发布槽');
     expect(html).toContain('不代登规则');
     expect(html).toContain('超级 IP 和口播标题矩阵');
+    expect(html).toContain('Super IP Title Board');
+    expect(html).toContain('超级 IP 标题和口播作战板');
+    expect(html).toContain('套标题打法');
     expect(html).toContain('开源提词器思路');
     expect(html).toContain('回填：');
     expect(html).toContain('个账号人设');
