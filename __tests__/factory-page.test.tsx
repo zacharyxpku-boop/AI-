@@ -52,6 +52,10 @@ describe('factory page', () => {
     expect(html).toContain('开源混剪能力地图');
     expect(html).toContain('Auto-Editor');
     expect(html).toContain('MediaInfo');
+    expect(html).toContain('Open Source Stack Selector');
+    expect(html).toContain('开源混剪栈选择器');
+    expect(html).toContain('long-material-slicing');
+    expect(html).toContain('stable-render');
     expect(html).toContain('开源能力适配器');
     expect(html).toContain('执行配方');
     expect(html).toContain('每个开源能力都落到输入、步骤、输出和验收');

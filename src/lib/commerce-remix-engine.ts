@@ -347,6 +347,26 @@ export interface CommerceOpenSourceCoverage {
   limits: string[];
 }
 
+export interface CommerceOpenSourceStackDecision {
+  id: string;
+  customerSituation: string;
+  useWhen: string;
+  defaultAdapterIds: string[];
+  backupAdapterIds: string[];
+  operatorRule: string;
+  customerOutput: string;
+  stabilityCheck: string;
+}
+
+export interface CommerceOpenSourceStackSelector {
+  headline: string;
+  customerPromise: string;
+  defaultStack: string[];
+  decisions: CommerceOpenSourceStackDecision[];
+  scaleUpRules: string[];
+  doNotUseFor: string[];
+}
+
 export interface CommerceRemixWorkflowPlaybook {
   stages: Array<{
     id: string;
@@ -1021,6 +1041,109 @@ export function buildCommerceOpenSourceCoverage(
       '不自动登录平台账号，不保存客户 cookie。',
       '不自动读取后台表现，先走链接、截图、CSV 或云盘回填。',
       'AI 生图、AI 视频和数字人口播等你提供 Key 后接入生成层。',
+    ],
+  };
+}
+
+export function buildCommerceOpenSourceStackSelector(
+  input: CommerceRemixPlanInput,
+  plan = buildCommerceRemixEnginePlan(input),
+  adapters = buildCommerceOpenSourceAdapters(),
+): CommerceOpenSourceStackSelector {
+  const adapterIds = new Set(adapters.map(adapter => adapter.id));
+  const availableIds = (ids: string[]) => ids.filter(id => adapterIds.has(id));
+  const packageRoot = `exports/commerce-remix-${slugify(input.productName)}`;
+  const platformCount = unique(input.platforms).length;
+  const outputCount = plan.publishingPacks.reduce((sum, pack) => sum + pack.accountVariants.length, 0);
+
+  return {
+    headline: '开源混剪栈选择器：客户给什么素材，就走对应的稳定出片路线',
+    customerPromise: `Wenai 先把 ${input.productName} 的素材拆成可检查、可复核、可批量渲染的任务包；${platformCount} 个平台和 ${outputCount} 个账号角度都不需要客户理解 GitHub 工具名。`,
+    defaultStack: availableIds([
+      'mediainfo',
+      'imagemagick-libheif',
+      'lossless-cut',
+      'pyscenedetect',
+      'auto-editor',
+      'subtitle-edit',
+      'remotion',
+      'opentimelineio',
+      'ffmpeg',
+      'queue-worker',
+    ]),
+    decisions: [
+      {
+        id: 'normalize-first',
+        customerSituation: '客户给的是主图、模特图、长视频、口播音频和直播切片混在一起',
+        useWhen: '素材格式、尺寸、帧率、音轨或授权状态不统一时先走这一层',
+        defaultAdapterIds: availableIds(['mediainfo', 'imagemagick-libheif', 'ffmpeg']),
+        backupAdapterIds: availableIds(['moviepy', 'mcp-video']),
+        operatorRule: '先读媒体参数和授权标记，再标准化图片与视频；缺素材只进补拍或生图任务，不进入渲染队列。',
+        customerOutput: `${packageRoot}/normalized-assets.json + material-gaps.json`,
+        stabilityCheck: '每个素材有来源、用途、尺寸、时长和授权状态，不能把来源不明素材带进成片。',
+      },
+      {
+        id: 'long-material-slicing',
+        customerSituation: '客户只给了长视频、测评、直播回放或工厂素材',
+        useWhen: '需要从长素材里先找可证明卖点的短片段，而不是直接套模板',
+        defaultAdapterIds: availableIds(['lossless-cut', 'pyscenedetect', 'auto-editor']),
+        backupAdapterIds: availableIds(['ffmpeg', 'mcp-video']),
+        operatorRule: '无损抽段优先；场景变化和停顿检测只生成候选片段，低置信度片段进入人工复核池。',
+        customerOutput: `${packageRoot}/clip-candidates.json + shortlisted-clips`,
+        stabilityCheck: '每段候选必须保留原始时间戳，商品承诺、价格和售后限制不能被自动剪掉。',
+      },
+      {
+        id: 'speech-subtitle',
+        customerSituation: '客户给了口播、达人讲解、直播语音或数字人口播脚本',
+        useWhen: '要把声音变成标题、字幕、卖点切句和口播复用资产',
+        defaultAdapterIds: availableIds(['whisper', 'subtitle-edit']),
+        backupAdapterIds: availableIds(['auto-editor', 'ffmpeg']),
+        operatorRule: '转写只做底稿；价格、功效、售后承诺和敏感词必须进入人工校对清单。',
+        customerOutput: `${packageRoot}/subtitles.srt + caption-review.md`,
+        stabilityCheck: '字幕可复核、可回退，不能因为识别错误直接生成最终发布稿。',
+      },
+      {
+        id: 'template-composition',
+        customerSituation: '同一个商品要做多平台、多账号、多标题和多口播角度',
+        useWhen: '素材已经干净，需要把卖点、模特证明、客服异议和 CTA 编排成模板',
+        defaultAdapterIds: availableIds(['remotion', 'opentimelineio', 'editly']),
+        backupAdapterIds: availableIds(['mlt-shotcut', 'libopenshot', 'moviepy']),
+        operatorRule: '把客户能理解的商品增长流程固化成时间线，不把复杂剪辑器 UI 暴露给客户。',
+        customerOutput: `${packageRoot}/timeline.json + template-composition.json`,
+        stabilityCheck: '每条成片都有平台尺寸、安全区、字幕轨、封面和发布标题，不允许模板缺字段进入渲染。',
+      },
+      {
+        id: 'stable-render',
+        customerSituation: '需要一次性导出几十条不同平台和账号人设的成片',
+        useWhen: '输出规模超过人工逐条导出，或任何单条失败不能拖垮整批交付',
+        defaultAdapterIds: availableIds(['queue-worker', 'ffmpeg', 'mediainfo']),
+        backupAdapterIds: availableIds(['gpac-packager', 'gstreamer']),
+        operatorRule: '按平台、尺寸和账号角度拆任务；单条失败只重跑单条，成功文件立即写入发布包。',
+        customerOutput: `${packageRoot}/render-log.json + upload-ready-checklist.md`,
+        stabilityCheck: '成片必须可播放、参数可读、日志可追溯；失败项必须有 blocked reason 和重试次数。',
+      },
+      {
+        id: 'return-loop',
+        customerSituation: '客户自己发布后，把链接、截图、CSV 或云盘目录回传',
+        useWhen: '暂时没有平台后台 API 授权，但需要做下一轮标题、封面和混剪优化',
+        defaultAdapterIds: availableIds(['mediainfo', 'subtitle-edit', 'opencv-mediapipe']),
+        backupAdapterIds: availableIds(['ffmpeg', 'imagemagick-libheif']),
+        operatorRule: '只分析客户回传的证据，不伪造播放量、订单和转化；有 API 授权后再升级自动读取。',
+        customerOutput: `${packageRoot}/04-customer-return + 05-next-round`,
+        stabilityCheck: '没有真实回填就不展示虚构表现；下一轮优化必须能追溯到客户证据。',
+      },
+    ],
+    scaleUpRules: [
+      '单客户单批低于 30 条，默认 FFmpeg + 本地队列，先追求可复核和交付稳定。',
+      '单批 30-100 条，启用保守并发、单条重试、MediaInfo 参数验收和云盘发布包。',
+      '单批超过 100 条或多人同时审核，再升级对象存储、分布式 worker、GPAC 封装检查和 GStreamer 管线。',
+      '生成图片、生成视频、数字人和 TTS Key 到位后只进入素材生产层，不改变客户自发布和回填复盘边界。',
+    ],
+    doNotUseFor: [
+      '不下载或处理客户未授权素材。',
+      '不保存客户平台账号、密码、cookie 或后台 token。',
+      '不代替客户自动登录、自动发布或绕过平台发布流程。',
+      '不把开源项目名堆给客户，客户只看到素材、成片、发布包和复盘任务。',
     ],
   };
 }
@@ -3003,6 +3126,13 @@ export function buildDemoCommerceOpenSourceCoverage() {
   const plan = buildCommerceRemixEnginePlan(input);
   const adapters = buildCommerceOpenSourceAdapters();
   return buildCommerceOpenSourceCoverage(input, plan, adapters);
+}
+
+export function buildDemoCommerceOpenSourceStackSelector() {
+  const input = buildDemoCommerceRemixInput();
+  const plan = buildCommerceRemixEnginePlan(input);
+  const adapters = buildCommerceOpenSourceAdapters();
+  return buildCommerceOpenSourceStackSelector(input, plan, adapters);
 }
 
 export function buildDemoCommerceRemixOrchestrationBoard() {

@@ -16,6 +16,7 @@ import {
   buildDemoCommerceModelImageTaskPack,
   buildCommerceOpenSourceAdapters,
   buildDemoCommerceOpenSourceCoverage,
+  buildDemoCommerceOpenSourceStackSelector,
   buildDemoCommerceProviderActivationRunbook,
   buildDemoCommerceProviderActivationPlan,
   buildDemoCommerceProviderNeedAssessment,
@@ -249,6 +250,7 @@ export function KuaiziStyleWorkbench() {
   const firstDeliveryChecklist = useMemo(() => buildDemoCommerceFirstDeliveryChecklist(), []);
   const openSourceAdapters = useMemo(() => buildCommerceOpenSourceAdapters(), []);
   const openSourceCoverage = useMemo(() => buildDemoCommerceOpenSourceCoverage(), []);
+  const openSourceStackSelector = useMemo(() => buildDemoCommerceOpenSourceStackSelector(), []);
   const executionRecipes = useMemo(() => buildDemoCommerceRemixExecutionRecipes(), []);
   const orchestrationBoard = useMemo(() => buildDemoCommerceRemixOrchestrationBoard(), []);
   const workflowPlaybook = useMemo(() => buildDemoCommerceRemixWorkflowPlaybook(), []);
@@ -776,6 +778,37 @@ export function KuaiziStyleWorkbench() {
                     <div className="mt-4 grid gap-2 lg:grid-cols-4">
                       {openSourceCoverage.installOrder.map(item => (
                         <div className="rounded-md bg-white px-3 py-2 text-xs font-bold leading-5 text-slate-700 ring-1 ring-sky-100" key={item}>{item}</div>
+                      ))}
+                    </div>
+                  </div>
+                  <div className="mt-5 rounded-md border border-emerald-100 bg-emerald-50 p-4">
+                    <div className="flex flex-col gap-3 lg:flex-row lg:items-end lg:justify-between">
+                      <div className="min-w-0">
+                        <p className="text-xs font-black uppercase tracking-[0.18em] text-emerald-700">Open Source Stack Selector</p>
+                        <h4 className="mt-1 text-base font-black leading-6 text-slate-950">{openSourceStackSelector.headline}</h4>
+                        <p className="mt-2 max-w-4xl text-sm leading-6 text-slate-600">{openSourceStackSelector.customerPromise}</p>
+                      </div>
+                      <span className="w-fit rounded bg-white px-2.5 py-1 text-xs font-black text-emerald-700 ring-1 ring-emerald-100">{openSourceStackSelector.defaultStack.length} 个默认工具</span>
+                    </div>
+                    <div className="mt-4 grid gap-3 lg:grid-cols-2">
+                      {openSourceStackSelector.decisions.map(decision => (
+                        <article className="min-w-0 rounded-md bg-white p-3 ring-1 ring-emerald-100" key={decision.id}>
+                          <div className="text-[11px] font-black uppercase tracking-[0.12em] text-emerald-700">{decision.id}</div>
+                          <h5 className="mt-1 text-sm font-black leading-5 text-slate-950">{decision.customerSituation}</h5>
+                          <p className="mt-2 text-xs font-bold leading-5 text-emerald-700">{decision.useWhen}</p>
+                          <p className="mt-2 line-clamp-3 text-xs leading-5 text-slate-600">{decision.operatorRule}</p>
+                          <div className="mt-3 flex flex-wrap gap-1.5">
+                            {decision.defaultAdapterIds.slice(0, 4).map(id => (
+                              <span className="rounded bg-emerald-50 px-2 py-1 text-[11px] font-black text-emerald-700" key={id}>{id}</span>
+                            ))}
+                          </div>
+                          <p className="mt-3 line-clamp-2 rounded bg-slate-50 px-2 py-1.5 text-[11px] font-bold leading-4 text-slate-600">{decision.customerOutput}</p>
+                        </article>
+                      ))}
+                    </div>
+                    <div className="mt-4 grid gap-2 lg:grid-cols-2">
+                      {openSourceStackSelector.scaleUpRules.map(rule => (
+                        <div className="rounded-md bg-white px-3 py-2 text-xs font-bold leading-5 text-slate-700 ring-1 ring-emerald-100" key={rule}>{rule}</div>
                       ))}
                     </div>
                   </div>

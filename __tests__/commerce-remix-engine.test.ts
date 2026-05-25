@@ -18,6 +18,7 @@ import {
   buildCommerceModelImageTaskPack,
   buildCommerceOpenSourceAdapters,
   buildCommerceOpenSourceCoverage,
+  buildCommerceOpenSourceStackSelector,
   buildCommercePostPublishActionBoard,
   buildCommerceProviderActivationRunbook,
   buildCommerceProviderActivationPlan,
@@ -584,6 +585,37 @@ describe('commerce remix engine', () => {
     expect(board.customerVisibleOutputs).toContain('每个平台的标题/文案/标签/发布清单');
     expect(board.notProviderBlockers).toContain('平台自动登录不是首版 blocker');
     expect(JSON.stringify(board)).not.toMatch(/apiKey|accessToken|Bearer|sk-/i);
+  });
+
+  it('selects the open-source remix stack by customer material situation', () => {
+    const plan = buildCommerceRemixEnginePlan(baseInput);
+    const selector = buildCommerceOpenSourceStackSelector(baseInput, plan);
+
+    expect(selector.headline).toContain('开源混剪栈选择器');
+    expect(selector.defaultStack).toEqual(expect.arrayContaining([
+      'mediainfo',
+      'lossless-cut',
+      'pyscenedetect',
+      'auto-editor',
+      'subtitle-edit',
+      'ffmpeg',
+      'queue-worker',
+    ]));
+    expect(selector.decisions.map(decision => decision.id)).toEqual([
+      'normalize-first',
+      'long-material-slicing',
+      'speech-subtitle',
+      'template-composition',
+      'stable-render',
+      'return-loop',
+    ]);
+    expect(selector.decisions.find(decision => decision.id === 'long-material-slicing')?.defaultAdapterIds).toEqual(expect.arrayContaining(['lossless-cut', 'pyscenedetect', 'auto-editor']));
+    expect(selector.decisions.find(decision => decision.id === 'speech-subtitle')?.defaultAdapterIds).toEqual(expect.arrayContaining(['whisper', 'subtitle-edit']));
+    expect(selector.decisions.find(decision => decision.id === 'template-composition')?.defaultAdapterIds).toEqual(expect.arrayContaining(['remotion', 'opentimelineio', 'editly']));
+    expect(selector.decisions.find(decision => decision.id === 'stable-render')?.stabilityCheck).toContain('blocked reason');
+    expect(selector.scaleUpRules.join(' ')).toContain('GStreamer');
+    expect(selector.doNotUseFor).toContain('不保存客户平台账号、密码、cookie 或后台 token。');
+    expect(JSON.stringify(selector)).not.toMatch(/apiKey|accessToken|Bearer|sk-/i);
   });
 
   it('builds a customer-readable remix workflow with no-provider fallbacks', () => {
