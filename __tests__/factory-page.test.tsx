@@ -110,6 +110,9 @@ describe('factory page', () => {
     expect(html).toContain('moneyprinterturbo');
     expect(html).toContain('short-video-maker');
     expect(html).toContain('video-wizard');
+    expect(html).toContain('opencut-ai');
+    expect(html).toContain('clipsai');
+    expect(html).toContain('supoclip');
     expect(html).toContain('Open Source Queue Console');
     expect(html).toContain('开源混剪队列控制台');
     expect(html).toContain('Open Source Last Mile');
