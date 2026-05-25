@@ -19,13 +19,13 @@ describe('video production queue page', () => {
     const html = renderToStaticMarkup(page);
 
     expect(html).toContain('视频生产队列');
-    expect(html).toContain('Video Factory Variant');
-    expect(html).toContain('Variant Action Playbook');
+    expect(html).toContain('视频工厂视角');
+    expect(html).toContain('生产动作剧本');
     expect(html).toContain('运营执行路径');
     expect(html).toContain('试用放行判断');
     expect(html).toContain('商用成片验收');
     expect(html).toContain('AI 生成接入验收');
-    expect(html).toContain('AI 生成 provider 沙盒接入合约');
+    expect(html).toContain('AI 生成服务沙盒接入合约');
     expect(html).toContain('提交适配器门禁');
     expect(html).toContain('回调验签门禁');
     expect(html).toContain('失败恢复门禁');
@@ -41,7 +41,7 @@ describe('video production queue page', () => {
     expect(html).toContain('AI 生成执行闭环');
     expect(html).toContain('本地混剪可交付，AI 生成待接入');
     expect(html).toContain('score 0/5');
-    expect(html).toContain('AI 生成镜头 provider 回调');
+    expect(html).toContain('AI 生成镜头回调');
     expect(html).toContain('没有生成回调、成片、客户批准和表现回流前，不能宣称筷子级全自动视频工厂');
     expect(html).toContain('朋友试用放行判断');
     expect(html).toContain('非技术用户能不能从视频任务进入客户审核');
@@ -54,7 +54,12 @@ describe('video production queue page', () => {
     expect(html).toContain('Hook Bank 入场');
     expect(html).toContain('UGC Script Spine 成片');
     expect(html).toContain('卖点测试分发');
-    expect(html).toContain('Cut Production Line');
+    expect(html).toContain('成片生产线');
+    expect(html).toContain('GitHub 开源混剪蓝图');
+    expect(html).toContain('FFmpeg / fluent-ffmpeg');
+    expect(html).toContain('Remotion');
+    expect(html).toContain('Whisper / faster-whisper');
+    expect(html).toContain('稳定渲染队列');
     expect(html).toContain('AI 视频分析');
     expect(html).toContain('一键视频');
     expect(html).toContain('客户审核');
@@ -78,11 +83,11 @@ describe('video production queue page', () => {
 
     expect(partnerHtml).toContain('合作者视角');
     expect(partnerHtml).toContain('合作者验收路径');
-    expect(partnerHtml).toContain('未接 AI 生成 provider、平台 OAuth、广告账户、analytics sync 和审计规模账本前，不展示 91M+/42M+ 为 Wenai 自有能力');
+    expect(partnerHtml).toContain('未接 AI 生成服务、平台授权、广告账户、表现回流和审计规模账本前，不展示 91M+/42M+ 为 Wenai 自有能力');
     expect(partnerHtml).toContain('Cut 不是单个生成按钮，而是一条可审计的视频工业化生产线');
     expect(partnerHtml).toContain('Hookly / Omneky');
     expect(partnerHtml).toContain('筷子科技的编拍剪投管');
-    expect(partnerHtml).toContain('未接 AI 生成 provider、平台 OAuth、广告账户和 analytics sync 前，不宣称自动规模化');
+    expect(partnerHtml).toContain('未接 AI 生成服务、平台授权、广告账户和表现回流前，不宣称自动规模化');
 
     expect(friendHtml).toContain('Wenai 商品增长工作台');
     expect(friendHtml).toContain('一组卖点生成多条内容');
@@ -105,7 +110,8 @@ describe('video production queue page', () => {
     expect(html).toContain('客户能看到的系统能力');
     expect(html).toContain('GitHub 开源混剪蓝图');
     expect(html).toContain('稳定渲染队列');
-    expect(html).toContain('首版不因为外部 provider 停摆');
+    expect(html).toContain('图片、视频、数字人 Key 到位');
+    expect(html).toContain('首版输出客户自发布包');
     expect(html).toContain('/factory/cast?variant=friend_trial');
   });
 
@@ -176,7 +182,7 @@ describe('video production queue page', () => {
       expect.objectContaining({
         label: 'AI 视频解析',
         status: 'blocked',
-        externalGate: expect.stringContaining('真实多模态解析 provider'),
+        externalGate: expect.stringContaining('真实多模态解析服务'),
       }),
       expect.objectContaining({
         label: '一键视频编排',
@@ -186,7 +192,7 @@ describe('video production queue page', () => {
       expect.objectContaining({
         label: '分发表现回流',
         status: 'blocked',
-        externalGate: expect.stringContaining('平台 OAuth'),
+        externalGate: expect.stringContaining('平台授权'),
       }),
     ]));
   });
@@ -233,17 +239,17 @@ describe('video production queue page', () => {
     const html = renderToStaticMarkup(<VideoProductionQueueClient initialProjectId="video-project" />);
 
     expect(html).toContain('仅交接');
-    expect(html).toContain('供应商就绪');
+    expect(html).toContain('生成服务就绪');
     expect(html).toContain('服务时限');
     expect(html).toContain('正在加载');
     expect(html).toContain('不伪装自动生成');
-    expect(html).toContain('只有 provider、素材授权、平台账号和回流都接上');
-    expect(html).toContain('没有平台 OAuth、广告账户和 analytics sync 前，只能做计划与手工回灌');
-    expect(html).toContain('多模态视频解析 provider、合法视频源、下载/存储权限');
+    expect(html).toContain('只有生成服务、素材授权、平台账号和回流都接上');
+    expect(html).toContain('没有平台授权、广告账户和表现回流前，只能做计划与手工回灌');
+    expect(html).toContain('多模态视频解析服务、合法视频源、下载/存储权限');
     expect(html).toContain('真实剪辑引擎、素材授权、音频/字体授权和成片回调');
-    expect(html).toContain('视频生成 provider token、任务回调、失败重试和成本额度');
+    expect(html).toContain('视频生成服务 token、任务回调、失败重试和成本额度');
     expect(html).toContain('正式域名、客户权限策略、素材下载/水印策略');
-    expect(html).toContain('平台 OAuth、广告账户授权、自动发布和 analytics sync');
+    expect(html).toContain('平台授权、广告账户授权、自动发布和表现回流');
     expect(html).toContain('成片 URL');
     expect(html).not.toContain('一键生成成片');
     expect(html).not.toContain('handoff_only');
@@ -422,7 +428,7 @@ describe('video production queue page', () => {
     };
     expect(buildVideoProductionPassport(queue.items[0])).toEqual(expect.arrayContaining([
       expect.objectContaining({ title: '洞察来源', value: '1 个混剪变体', tone: 'ready' }),
-      expect.objectContaining({ title: '生产执行', value: '人工交接', detail: expect.stringContaining('外部 provider') }),
+      expect.objectContaining({ title: '生产执行', value: '人工交接', detail: expect.stringContaining('外部生成服务') }),
       expect.objectContaining({ title: '成片证据', value: '待回填成片', tone: 'locked' }),
       expect.objectContaining({ title: '客户验收', value: '审核中' }),
       expect.objectContaining({ title: '分发证据', value: '1 条计划' }),
@@ -442,7 +448,7 @@ describe('video production queue page', () => {
     expect(html).toContain('新增批量剪辑任务');
     expect(html).toContain('同一套商品素材，拆成短视频、图文脚本、口播和不同平台版本');
     expect(html).toContain('Video workflow: Travel Bag');
-    expect(html).toContain('provider_gate');
+    expect(html).toContain('生成服务检查');
     expect(html).not.toContain('payload:');
   });
 });

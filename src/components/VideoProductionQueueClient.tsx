@@ -22,7 +22,7 @@ function capabilityStatusClass(status: string) {
 }
 
 function modeLabel(mode: string) {
-  if (mode === 'provider_ready') return '供应商就绪';
+  if (mode === 'provider_ready') return '生成服务就绪';
   if (mode === 'handoff_only') return '仅交接';
   return mode;
 }
@@ -30,7 +30,7 @@ function modeLabel(mode: string) {
 function stageLabel(stage: string) {
   const map: Record<string, string> = {
     intake: '待补齐',
-    provider_gate: '供应商闸门',
+    provider_gate: '生成服务检查',
     ready_for_execution: '可执行',
     result_ingestion: '待建审核',
     client_review: '客户审核',
@@ -108,20 +108,20 @@ function reviewIdentity(value: string) {
 
 function queueText(value: string) {
   const map: Record<string, string> = {
-    'Provider generation remains handoff-only until config, consent, references, and product assets are ready.': '供应商生成仍处于仅交接状态，需要完成配置、授权、参考视频和产品素材后才能执行。',
+    'Provider generation remains handoff-only until config, consent, references, and product assets are ready.': '生成服务仍处于仅交接状态，需要完成配置、授权、参考视频和产品素材后才能执行。',
     'Produced video assets are waiting for client review approval.': '已产出的视频资产正在等待客户审核批准。',
     'Client requested revisions on at least one produced video asset.': '客户已对至少一个视频资产提出返修。',
     'Create distribution plans for the video workflow asset.': '为视频工作流资产创建分发计划。',
     'Create dispatch records and assign an owner for every target platform.': '为每个目标平台创建分发记录并分配负责人。',
-    'Attach provider credentials, legal consent, references, and product assets before provider execution.': '执行供应商生成前，需要补齐供应商凭据、授权、参考视频和产品素材。',
+    'Attach provider credentials, legal consent, references, and product assets before provider execution.': '执行自动生成前，需要补齐生成服务配置、授权、参考视频和产品素材。',
     'Ingest completed provider/editor result URLs through /api/industrial-chain/production-result.': '通过生产结果接口导入已完成的视频或剪辑结果链接。',
     'Create client review links for produced video assets.': '为已产出的视频资产创建客户审核链接。',
     'Send the review portal link to the client and capture approval or revision feedback.': '把审核链接发给客户，并收集批准或返修反馈。',
     'Publish or hand off the video, capture evidence URL, then import performance CSV.': '发布或交接视频，记录发布证据链接，然后导入表现 CSV。',
     'Missing platform distribution plans for this video workflow.': '缺少这条视频工作流的平台分发计划。',
     'Missing dispatch records for target platforms.': '缺少目标平台的执行记录。',
-    'Provider automation gate is not fully satisfied; keep execution as manual handoff.': '供应商自动化门槛未全部满足，当前保持人工交接。',
-    'Missing completed provider/editor result URL.': '缺少供应商或剪辑完成后的成片链接。',
+    'Provider automation gate is not fully satisfied; keep execution as manual handoff.': '自动生成门槛未全部满足，当前保持人工交接。',
+    'Missing completed provider/editor result URL.': '缺少生成服务或剪辑完成后的成片链接。',
     'Missing client review portal link for produced video.': '缺少成片对应的客户审核门户链接。',
     'Missing client approval or revision decision.': '缺少客户批准或返修结论。',
     'Missing post-publish performance return.': '缺少发布后的表现回流。',
@@ -147,8 +147,8 @@ function operationClosureCards(operation: OneClickVideoOperationResult) {
   }, {
     title: '运营下一步',
     body: operation.commerciallyExecutable
-      ? '进入供应商执行、成片回写、客户审核和表现回流。'
-      : '先补视频 provider、授权素材、平台账号和发布/回流证据。',
+      ? '进入生成执行、成片回写、客户审核和表现回流。'
+      : '先补视频生成服务、授权素材、平台账号和发布/回流证据。',
   }, {
     title: '禁止伪规模',
     body: '91M+ / 42M+ 只作竞品对标，未有审计账本前不能作为 Wenai 自有指标展示。',
@@ -227,7 +227,7 @@ function FriendTrialProductionConsole({
       time: '14:02:01',
       level: 'ERR',
       text: queue && queue.blockedCount > 0
-        ? `仍有 ${queue.blockedCount} 个阻断任务停留在手工交接或 provider 阶段。`
+        ? `仍有 ${queue.blockedCount} 个阻断任务停留在手工交接或生成服务阶段。`
         : '当前队列没有新增阻断项。',
     },
   ];
@@ -310,7 +310,7 @@ function FriendTrialProductionConsole({
                 外部门禁 {blockedGates.length ? `${blockedGates.length} 项待配置` : '已收敛'}
               </span>
               <span className="rounded-full border border-neutral-200 bg-neutral-50 px-3 py-1 text-xs font-medium text-neutral-700">
-                {providerReadyRatio} 供应商就绪
+                {providerReadyRatio} 生成服务就绪
               </span>
             </div>
           </header>
@@ -323,8 +323,8 @@ function FriendTrialProductionConsole({
                 value={String(queue?.itemCount || 0)}
               />
               <TrialQueueMetricCard
-                detail={`Provider ready ${providerReadyRatio}`}
-                label="供应商就绪"
+                detail={`生成服务就绪 ${providerReadyRatio}`}
+                label="生成服务"
                 tone={queue && queue.providerReadyCount === queue.itemCount ? 'success' : 'warning'}
                 value={providerReadyRatio}
               />
@@ -425,7 +425,7 @@ function FriendTrialProductionConsole({
                       <h3 className="mt-2 text-lg font-semibold text-neutral-950">关键外部门禁</h3>
                     </div>
                     <div className="text-xs font-medium text-neutral-500">
-                      {providerSandboxChecks.filter(check => check.ready).length}/{providerSandboxChecks.length} ready
+                      {providerSandboxChecks.filter(check => check.ready).length}/{providerSandboxChecks.length} 已具备
                     </div>
                   </div>
                   <div className="mt-4 grid gap-3">
@@ -492,14 +492,14 @@ function manualTrialRunbook(item: VideoProductionQueue['items'][number]) {
       title: '导出剪辑交接包',
       state: item.remixPlan.length > 0 ? '已就绪' : '待补剪辑计划',
       detail: item.remixPlan.length > 0
-        ? '已有 Hook、镜头顺序、素材说明、平台适配和风险边界，可交给剪辑师或 provider。'
+        ? '已有 Hook、镜头顺序、素材说明、平台适配和风险边界，可交给剪辑师或生成服务。'
         : '先补 Hook Bank、脚本骨架和平台时长规则，避免只给一句模糊需求。',
     },
     {
-      title: '人工/供应商执行',
-      state: item.mode === 'provider_ready' ? '可走 provider' : '人工交接',
+      title: '人工/生成服务执行',
+      state: item.mode === 'provider_ready' ? '可走生成服务' : '人工交接',
       detail: item.mode === 'provider_ready'
-        ? 'provider gate 已满足，可进入自动提交或供应商队列。'
+        ? '生成服务检查已满足，可进入自动提交或生成队列。'
         : '外部 token 未接齐时，按交接包人工剪辑；不要宣称自动成片。',
     },
     {
@@ -547,11 +547,11 @@ export function buildVideoProductionPassport(item: VideoProductionQueue['items']
     },
     {
       title: '生产执行',
-      value: providerReady ? 'provider 可提交' : '人工交接',
+      value: providerReady ? '生成服务可提交' : '人工交接',
       tone: providerReady ? 'ready' : 'attention',
       detail: providerReady
-        ? '素材、授权和 provider gate 已满足，可进入真实执行队列。'
-        : '外部 provider 未满足前，只交付剪辑包和手工回填入口。',
+        ? '素材、授权和生成服务检查已满足，可进入真实执行队列。'
+        : '外部生成服务未满足前，只交付剪辑包和手工回填入口。',
     },
     {
       title: '成片证据',
@@ -633,7 +633,7 @@ function friendTrialReadiness(queue: VideoProductionQueue | null, variant: Facto
             ? '批准后进入分发或手工发布，并补回发布证据与表现数据。'
             : '把表现回流写入品牌学习档案，进入下一轮 Compose / Cut 优化。',
     stopLine: hasResult && hasReview
-      ? '可以让朋友试用审核动作，但未接真实 provider/OAuth 前仍不能宣称自动出片或自动发布。'
+      ? '可以让朋友试用审核动作，但未接真实生成服务或平台授权前仍不能宣称自动出片或自动发布。'
       : hasReview
         ? '有审核入口但没有真实成片，只能验证客户前台，不能让朋友以为视频已经产出。'
       : '缺少 review 链接前，不要把内部队列截图发给朋友；先回写成片并生成审核入口。',
@@ -649,11 +649,11 @@ function commercialCutReadiness(queue: VideoProductionQueue | null) {
   const providerFailures = (queue?.failedProviderExecutionCount || 0) + (queue?.retryableProviderExecutionCount || 0);
   const gates = [
     {
-      label: 'AI 生成镜头 provider 回调',
+      label: 'AI 生成镜头回调',
       ok: providerCompleted,
       detail: providerCompleted
         ? `已有 ${queue?.completedProviderExecutionCount || 0} 条完成回调。`
-        : '还没有完成的 provider execution；只能算人工交接或本地队列。',
+        : '还没有完成的生成执行记录；只能算人工交接或本地队列。',
     },
     {
       label: '可打开成片资产',
@@ -682,8 +682,8 @@ function commercialCutReadiness(queue: VideoProductionQueue | null) {
     score: `${passed}/${gates.length}`,
     gates,
     risk: providerFailures > 0
-      ? `存在 ${providerFailures} 条 provider 失败或待重试记录，商用前必须处理。`
-      : '暂无 provider 失败记录；主要风险仍是外部授权与真实回流证据。',
+      ? `存在 ${providerFailures} 条生成服务失败或待重试记录，商用前必须处理。`
+      : '暂无生成服务失败记录；主要风险仍是外部授权与真实回流证据。',
     stopLine: passed === gates.length
       ? '可以进入小规模商用验收，但仍需按平台 OAuth、广告账户和资产权限继续扩展。'
       : '没有生成回调、成片、客户批准和表现回流前，不能宣称筷子级全自动视频工厂；本地/开源混剪仍可交付客户自发布包。',
@@ -720,29 +720,29 @@ export function buildVideoProviderSandboxChecks(queue: VideoProductionQueue | nu
     {
       gate: '提交适配器门禁',
       ready: providerReadyCount > 0 || submittedCount > 0 || completedCount > 0,
-      evidence: `provider-ready ${providerReadyCount} / submitted ${submittedCount}`,
-      internalMove: '保留 submit payload、clientRequestId、dispatchId、sourceHandoffAssetId 和 providerName，不把 token 写入页面或账本。',
-      externalGate: '需要 provider submit endpoint、服务端 token、沙盒账号和成本上限。',
+      evidence: `生成服务就绪 ${providerReadyCount} / 已提交 ${submittedCount}`,
+      internalMove: '保留提交内容、请求编号、执行记录、来源交接资产和服务名称，不把 token 写入页面或账本。',
+      externalGate: '需要生成服务提交地址、服务端 token、沙盒账号和成本上限。',
     },
     {
       gate: '回调验签门禁',
       ready: completedCount > 0,
       evidence: `完成回调 ${completedCount} / 失败 ${failedCount}`,
-      internalMove: '继续使用 callback nonce、webhook signature、taskId 和 result URL 对齐同一条 execution。',
-      externalGate: '需要 webhook secret、callback URL allowlist、provider 真实 signed callback 样例。',
+      internalMove: '继续使用回调随机码、签名、任务编号和成片 URL 对齐同一条执行记录。',
+      externalGate: '需要 webhook secret、callback URL allowlist、生成服务真实签名回调样例。',
     },
     {
       gate: '失败恢复门禁',
       ready: submittedCount > 0 && failedCount === 0 && retryableCount === 0,
       evidence: `失败 ${failedCount} / 可重试 ${retryableCount}`,
       internalMove: '失败时记录 errorMessage、nextRetryAt、blockedReasons 和人工回填入口，避免静默卡死。',
-      externalGate: '需要 provider 错误码、重试策略、费用失败处理和 SLA 约定。',
+      externalGate: '需要生成服务错误码、重试策略、费用失败处理和 SLA 约定。',
     },
     {
       gate: '成片入库门禁',
       ready: resultCount > 0,
       evidence: `成片 ${resultCount}`,
-      internalMove: 'provider/editor result URL 必须通过 production-result 入库，不能只停在供应商后台或聊天记录。',
+      internalMove: '生成服务或剪辑结果 URL 必须通过 production-result 入库，不能只停在供应商后台或聊天记录。',
       externalGate: '需要可打开的成片 URL、存储权限、下载/水印策略和素材授权证明。',
     },
     {
@@ -775,12 +775,12 @@ export function buildCutOperatingChecks(queue: VideoProductionQueue | null): Cut
         ? `任务 ${queue?.itemCount || 0} 条 / remix plan ${items.reduce((sum, item) => sum + item.remixPlan.length, 0)} 条`
         : '还没有视频任务和可拆解素材结构。',
       internalMove: '继续把竞品视频、Hook、scene beat、字幕节奏、风险边界写入同一条视频任务护照。',
-      externalGate: '真实多模态解析 provider、合法视频源、下载/转写/存储授权。',
+      externalGate: '真实多模态解析服务、合法视频源、下载/转写/存储授权。',
     },
     {
       label: '智能混剪',
       status: hasRemixPlan ? 'ready' : 'blocked',
-      evidence: hasRemixPlan ? '已有可交给剪辑师或 provider 的镜头顺序、素材说明和平台适配。' : '还没有可执行 remix plan。',
+      evidence: hasRemixPlan ? '已有可交给剪辑师或生成服务的镜头顺序、素材说明和平台适配。' : '还没有可执行混剪计划。',
       internalMove: '把 15s/30s/45s 版本、素材清单、字幕节奏、平台时长规则和禁用表达沉淀为可复用模板。',
       externalGate: '真实剪辑引擎、素材授权、音乐/字体授权、成片回调。',
     },
@@ -788,10 +788,10 @@ export function buildCutOperatingChecks(queue: VideoProductionQueue | null): Cut
       label: '一键视频编排',
       status: hasTask ? 'ready' : 'blocked',
       evidence: hasTask
-        ? `已能从 brief 创建生产 handoff、分发计划和 dispatch，provider ready ${queue?.providerReadyCount || 0}/${queue?.itemCount || 0}。`
+        ? `已能从商品需求创建生产交接、分发计划和执行记录，生成服务就绪 ${queue?.providerReadyCount || 0}/${queue?.itemCount || 0}。`
         : '还没有从 brief 自动生成视频工作流。',
       internalMove: '保留一键编排能力，但 UI 必须标注 AI 生成待接入，避免把编排误说成自动生成镜头。',
-      externalGate: '视频生成 provider token、webhook secret、成本上限、失败重试和回调验签。',
+      externalGate: '视频生成服务 token、webhook secret、成本上限、失败重试和回调验签。',
     },
     {
       label: 'AI 生成执行闭环',
@@ -800,7 +800,7 @@ export function buildCutOperatingChecks(queue: VideoProductionQueue | null): Cut
         ? `完成回调 ${queue?.completedProviderExecutionCount || 0} 条 / 失败或待重试 ${(queue?.failedProviderExecutionCount || 0) + (queue?.retryableProviderExecutionCount || 0)} 条`
         : `已提交 ${queue?.submittedProviderExecutionCount || 0} 条 / 完成 0 条`,
       internalMove: '继续保留 callback nonce、失败原因、retryable 状态和人工回填入口。',
-      externalGate: 'provider sandbox 账号、真实任务回调、失败码、重试策略、成本账单。',
+      externalGate: '生成服务沙盒账号、真实任务回调、失败码、重试策略、成本账单。',
     },
     {
       label: '成片入库与客户审核',
@@ -814,7 +814,7 @@ export function buildCutOperatingChecks(queue: VideoProductionQueue | null): Cut
       status: hasPerformance ? 'ready' : 'blocked',
       evidence: `已回流 ${queue?.measuredCount || 0} 条表现数据 / dispatch ${items.reduce((sum, item) => sum + item.dispatchCount, 0)} 条`,
       internalMove: '把发布证据、投放假设、表现 CSV/API 数据回写到 SKU、素材、账号和品牌学习档案。',
-      externalGate: '平台 OAuth、广告账户授权、自动发布回执、analytics sync、归因窗口。',
+      externalGate: '平台授权、广告账户授权、自动发布回执、表现回流、归因窗口。',
     },
   ];
 }
@@ -830,13 +830,13 @@ const MIXCUT_OPERATION_BOARD = [
     title: 'UGC Script Spine 成片',
     input: '真人口播骨架、产品使用场景、前后对比和 CTA',
     action: '拆成 15s / 30s / 45s 三档剪辑包，进入供应商或剪辑师交接',
-    gate: '需要视频 provider、产品素材 URL、生成授权和回调配置后，才能自动产出成片',
+    gate: '需要视频生成服务、产品素材 URL、生成授权和回调配置后，才能自动产出成片',
   },
   {
     title: '卖点测试分发',
     input: '折扣、套装、赠品、信任背书、平台活动和目标受众',
     action: '写入分发计划、dispatch、广告假设、停止条件和表现回流字段',
-    gate: '没有平台 OAuth、广告账户和 analytics sync 前，只能做计划与手工回灌',
+    gate: '没有平台授权、广告账户和表现回流前，只能做计划与手工回灌',
   },
 ];
 
@@ -846,7 +846,7 @@ const CUT_PRODUCTION_LINE = [
     input: '授权视频 URL、转写摘要、画面节奏、字幕、物体、评论区需求和互动指标',
     output: '拆出 hook、scene beats、proof point、CTA、风险表达和可混剪素材需求',
     internal: '内部可做：结构化字段、解析结果回灌、脚本约束、视频任务交接',
-    external: '外部需要：多模态视频解析 provider、合法视频源、下载/存储权限',
+    external: '外部需要：多模态视频解析服务、合法视频源、下载/存储权限',
   },
   {
     stage: '智能混剪',
@@ -860,7 +860,7 @@ const CUT_PRODUCTION_LINE = [
     input: '商品 brief、素材 URL、参考视频、授权确认、平台列表和分发目标',
     output: '创建生产 handoff、分发计划、dispatch、客户 review 链路和表现回流字段',
     internal: '内部可做：一键编排、队列状态、门禁判断、审计证据',
-    external: '外部需要：视频生成 provider token、任务回调、失败重试和成本额度',
+    external: '外部需要：视频生成服务 token、任务回调、失败重试和成本额度',
   },
   {
     stage: '客户审核',
@@ -873,9 +873,49 @@ const CUT_PRODUCTION_LINE = [
     stage: '分发回流',
     input: '平台账号、发布证据、广告假设、投放数据、自然流量和销售指标',
     output: '回写表现 CSV/API 数据，沉淀胜出结构并反哺下一轮 Compose 和 Cut',
-    internal: '内部可做：dispatch gate、campaign ledger、表现导入、复盘字段',
-    external: '外部需要：平台 OAuth、广告账户授权、自动发布和 analytics sync',
+    internal: '内部可做：发布检查、投放计划记录、表现导入、复盘字段',
+    external: '外部需要：平台授权、广告账户授权、自动发布和表现回流',
   },
+];
+
+const OPEN_SOURCE_REMIX_STACK = [
+  {
+    tool: 'FFmpeg / fluent-ffmpeg',
+    role: '基础剪辑内核',
+    use: '转码、裁切、拼接、抽帧、水印、音频响度、失败重跑',
+    output: '本地可执行的素材处理任务，不等外部生成服务也能跑混剪交接包',
+  },
+  {
+    tool: 'Remotion',
+    role: '模板化渲染',
+    use: 'React 模板、字幕层、商品图层、片头片尾、平台比例版本',
+    output: '把同一套卖点批量渲染成 9:16、1:1、16:9 和多时长版本',
+  },
+  {
+    tool: 'Whisper / faster-whisper',
+    role: '转写与字幕',
+    use: '口播转写、字幕切句、关键词高亮、静音段识别前置',
+    output: '给剪辑师、客户审核和后续标题矩阵提供可读文本证据',
+  },
+  {
+    tool: 'PySceneDetect / auto-editor',
+    role: '切片与节奏',
+    use: '场景切分、静音剔除、高光候选、镜头节奏粗排',
+    output: '把长素材或参考视频拆成可混剪片段，再交给 WenAI 生成镜头顺序',
+  },
+  {
+    tool: 'OpenCV / MediaPipe',
+    role: '画面质量检查',
+    use: '主体位置、清晰度、黑屏、重复帧、画幅安全区检查',
+    output: '进入稳定渲染队列前先剔除明显不可用素材，减少返工',
+  },
+];
+
+const STABLE_RENDER_QUEUE_STACK = [
+  '每个成片任务必须有素材清单、混剪计划、目标平台、输出比例和客户审核入口。',
+  '队列按单条任务重试，不因为一个失败任务拖死整批渲染。',
+  '失败必须记录原因、下一次重试时间、人工回填入口和是否可继续交付。',
+  '首版输出客户自发布包：成片链接、标题、封面建议、账号人设、发布时间和回流表。',
 ];
 
 const VIDEO_FACTORY_UI_VARIANTS: Record<FactoryUiVariantId, {
@@ -895,24 +935,24 @@ const VIDEO_FACTORY_UI_VARIANTS: Record<FactoryUiVariantId, {
     body: '这一屏展示 Wenai 如何把 AI 视频分析、智能混剪、一键视频、客户审核、分发回流串成闭环；Hookly / Omneky 这类广告平台提供 UGC 变体和表现优化参考，筷子科技提供编拍剪投管的全链路参照。',
     firstAction: '先看能力矩阵和外部门禁，再判断是否具备商用交付条件。',
     proof: '证明点：队列、handoff、review token、dispatch、performance return 都是同一项目账本。',
-    stopLine: '未接 AI 生成 provider、平台 OAuth、广告账户和 analytics sync 前，不宣称自动规模化；本地混剪和客户自发布包可以先交付。',
+    stopLine: '未接 AI 生成服务、平台授权、广告账户和表现回流前，不宣称自动规模化；本地混剪和客户自发布包可以先交付。',
     reference: '参考：筷子科技的编拍剪投管；Hookly/Hookshot 类平台的 hook/UGC 变体；Omneky 的广告创意表现回流。',
   },
   operator: {
     label: '运营视角',
     audience: '给内部运营、剪辑交付和增长负责人每天处理任务',
     headline: '先看卡在哪里，再把下一步动作写回队列',
-    body: '这一屏优先暴露任务阶段、provider gate、成片回写、客户审核、返修和表现回流，避免视频任务停在聊天记录、表格或供应商私信里。',
+    body: '这一屏优先暴露任务阶段、生成服务检查、成片回写、客户审核、返修和表现回流，避免视频任务停在聊天记录、表格或供应商私信里。',
     firstAction: '创建视频工作流，回写真实成片 URL，然后把 review 链接交给客户确认。',
     proof: '证明点：每个任务都有 missing evidence、runbook action、SLA、渠道和闭环分数。',
-    stopLine: '缺素材授权、provider token、平台账号或发布证据时，只能人工交接，不能进入自动发布。',
+    stopLine: '缺素材授权、生成服务 token、平台账号或发布证据时，只能人工交接，不能进入自动发布。',
     reference: '参考：Clico 的客户 review / production handoff；广告平台的任务看板和结果回灌。',
   },
   friend_trial: {
     label: '朋友试用视角',
     audience: '给非技术朋友或客户第一次打开时不迷路',
     headline: '给一个产品和参考视频，系统帮你排出可审核的视频生产流程',
-    body: '这一屏少讲内部术语，只保留三件事：创建任务、等待成片、打开审核链接。复杂的 provider、OAuth、广告账户和数据回流都放在后台边界里。',
+    body: '这一屏少讲内部术语，只保留三件事：创建任务、等待成片、打开审核链接。复杂的生成服务、平台授权、广告账户和数据回流都放在后台边界里。',
     firstAction: '填写产品名、平台、参考视频和素材链接，先生成一个可交接的视频任务。',
     proof: '证明点：朋友不需要理解 API，也能看到任务、成片、审核和下一步。',
     stopLine: '如果没有真实成片 URL，页面不能让用户误以为视频已经自动生成。',
@@ -941,7 +981,7 @@ export function buildVideoFactoryVariantPlaybook(queue: VideoProductionQueue | n
       cards: [
         `任务 ${itemCount} / 成片 ${resultCount} / 审核入口 ${reviewCount}`,
         `客户批准 ${approvedCount} / 表现回流 ${measuredCount}`,
-        '朋友不看 provider、OAuth、广告账户和内部账本，只看交付物能否验收。',
+        '朋友不看生成服务、平台授权、广告账户和内部账本，只看交付物能否验收。',
       ],
     };
   }
@@ -950,10 +990,10 @@ export function buildVideoFactoryVariantPlaybook(queue: VideoProductionQueue | n
     return {
       title: '运营执行路径',
       primaryAction: blockedCount > 0
-        ? '先处理阻断项：补素材授权、provider 配置、成片 URL、review 链接或发布回流证据。'
+        ? '先处理阻断项：补素材授权、生成服务配置、成片 URL、review 链接或发布回流证据。'
         : '继续创建视频工作流、回灌成片、生成 review 链接，并把下一步动作写回队列。',
       proofToCheck: '每个视频任务都要有 missing evidence、runbook action、owner、接口路径和可追踪的下一步。',
-      handoffBoundary: '外部 token、平台账号、广告账户或 analytics sync 未接入时，运营只能走人工交接和手动回流。',
+      handoffBoundary: '外部 token、平台账号、广告账户或表现回流未接入时，运营只能走人工交接和手动回流。',
       cards: [
         `队列任务 ${itemCount} / 阻断 ${blockedCount} / Cut readiness ${cut.score}`,
         `成片 ${resultCount} / 审核 ${reviewCount} / 批准 ${approvedCount}`,
@@ -966,7 +1006,7 @@ export function buildVideoFactoryVariantPlaybook(queue: VideoProductionQueue | n
     title: '合作者验收路径',
     primaryAction: '先看商用成片验收和规模口径保护，再判断是否已经具备商用交付边界。',
     proofToCheck: '证明 Wenai 是 Compose/Create/Cut/Cast/Manage 的闭环，不是单个生成按钮：队列、handoff、review、dispatch、performance return 必须同项目可追踪。',
-    handoffBoundary: '未接 AI 生成 provider、平台 OAuth、广告账户、analytics sync 和审计规模账本前，不展示 91M+/42M+ 为 Wenai 自有能力。',
+    handoffBoundary: '未接 AI 生成服务、平台授权、广告账户、表现回流和审计规模账本前，不展示 91M+/42M+ 为 Wenai 自有能力。',
     cards: [
       `Cut readiness ${cut.score} / ${cut.verdict}`,
       `任务 ${itemCount} / 成片 ${resultCount} / 表现回流 ${measuredCount}`,
@@ -1158,7 +1198,7 @@ export function VideoProductionQueueClient({
                 <article className="rounded-xl border border-slate-200 bg-slate-50 p-4" key={item.id}>
                   <div className="flex items-center justify-between gap-3">
                     <h3 className="truncate text-sm font-semibold text-slate-950">{item.title}</h3>
-                    <span className="rounded-full bg-white px-2 py-1 text-[11px] font-medium text-slate-500">{item.status}</span>
+                    <span className="rounded-full bg-white px-2 py-1 text-[11px] font-medium text-slate-500">{stageLabel(item.status)}</span>
                   </div>
                   <p className="mt-2 text-xs text-slate-500">{item.versions} 版本 · {item.dispatches} 分发</p>
                 </article>
@@ -1268,7 +1308,7 @@ export function VideoProductionQueueClient({
             <p className="text-xs uppercase tracking-[0.22em] text-neutral-500">商用成片验收</p>
             <h2 className="mt-2 text-xl font-semibold text-neutral-950">商用 Cut 放行门禁</h2>
             <p className="mt-2 max-w-3xl text-sm leading-6 text-neutral-600">
-              这层只判断视频工厂是否已经能进入真实商用验收：AI 生成 provider 回调、成片资产、客户审核、客户批准、发布或表现回流必须全部有证据。本地混剪和客户自发布包不因此停摆。
+              这层只判断视频工厂是否已经能进入真实商用验收：AI 生成服务回调、成片资产、客户审核、客户批准、发布或表现回流必须全部有证据。本地混剪和客户自发布包不因此停摆。
             </p>
           </div>
           <div className="flex w-fit flex-col items-start gap-2 rounded-2xl border border-neutral-200 bg-neutral-50 px-3 py-2 text-xs">
@@ -1307,13 +1347,13 @@ export function VideoProductionQueueClient({
         <div className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
           <div>
             <p className="text-xs uppercase tracking-[0.22em] text-neutral-500">AI 生成接入验收</p>
-            <h2 className="mt-2 text-xl font-semibold text-neutral-950">AI 生成 provider 沙盒接入合约</h2>
+            <h2 className="mt-2 text-xl font-semibold text-neutral-950">AI 生成服务沙盒接入合约</h2>
             <p className="mt-2 max-w-3xl text-sm leading-6 text-neutral-600">
-              这层不配置真实密钥，也不伪装自动成片。它把接入视频 provider 前必须验证的提交、回调、失败恢复、成片入库和客户验收拆成沙盒门禁，等外部材料齐后直接对照验收。
+              这层不配置真实密钥，也不伪装自动成片。它把接入视频生成服务前必须验证的提交、回调、失败恢复、成片入库和客户验收拆成沙盒门禁，等外部材料齐后直接对照验收。
             </p>
           </div>
           <div className="w-fit rounded-2xl border border-neutral-200 bg-neutral-50 px-3 py-2 text-xs text-neutral-700">
-            ready {providerSandboxChecks.filter(check => check.ready).length}/{providerSandboxChecks.length}
+            已具备 {providerSandboxChecks.filter(check => check.ready).length}/{providerSandboxChecks.length}
           </div>
         </div>
         <div className="mt-4 grid gap-3 lg:grid-cols-5">
@@ -1337,11 +1377,11 @@ export function VideoProductionQueueClient({
             <p className="text-xs uppercase tracking-[0.22em] text-neutral-500">Cut Operating Checks</p>
             <h2 className="mt-2 text-xl font-semibold text-neutral-950">视频工厂商用品质验收板</h2>
             <p className="mt-2 max-w-3xl text-sm leading-6 text-neutral-600">
-              对照筷子科技、Hookshot、Creatify、Pencil、VidMob 这一类平台，Cut 不能只看“有没有按钮”，而要逐项检查 AI 视频解析、智能混剪、一键视频、provider 执行、成片审核和表现回流是否真的闭环。
+              对照筷子科技、Hookshot、Creatify、Pencil、VidMob 这一类平台，Cut 不能只看“有没有按钮”，而要逐项检查 AI 视频解析、智能混剪、一键视频、生成执行、成片审核和表现回流是否真的闭环。
             </p>
           </div>
           <div className="w-fit rounded-2xl border border-neutral-200 bg-neutral-50 px-3 py-2 text-xs text-neutral-700">
-            ready {cutOperatingChecks.filter(check => check.status === 'ready').length}/{cutOperatingChecks.length}
+            已具备 {cutOperatingChecks.filter(check => check.status === 'ready').length}/{cutOperatingChecks.length}
           </div>
         </div>
         <div className="mt-4 grid gap-3 md:grid-cols-2 xl:grid-cols-3">
@@ -1367,11 +1407,43 @@ export function VideoProductionQueueClient({
       <section className="rounded-[2rem] border border-neutral-200 bg-white p-5 shadow-sm">
         <div className="flex flex-col gap-2 sm:flex-row sm:items-start sm:justify-between">
           <div>
+            <p className="text-xs uppercase tracking-[0.22em] text-neutral-500">GitHub 开源混剪蓝图</p>
+            <h2 className="mt-2 text-xl font-semibold text-neutral-950">先用开源栈把混剪做到稳定可交付</h2>
+          </div>
+          <p className="max-w-md text-xs leading-5 text-neutral-600">
+            图片、视频、数字人生成等你的 key；混剪先走 FFmpeg、Remotion、Whisper、切片和质量检查，把客户素材变成可审核成片和自发布包。
+          </p>
+        </div>
+        <div className="mt-4 grid gap-3 lg:grid-cols-5">
+          {OPEN_SOURCE_REMIX_STACK.map(item => (
+            <article className="rounded-2xl border border-neutral-200 bg-neutral-50 p-4" key={item.tool}>
+              <div className="text-sm font-semibold text-neutral-950">{item.tool}</div>
+              <div className="mt-1 text-xs font-medium text-cyan-700">{item.role}</div>
+              <p className="mt-2 text-xs leading-5 text-neutral-600">用途：{item.use}</p>
+              <p className="mt-2 text-xs leading-5 text-emerald-700">产出：{item.output}</p>
+            </article>
+          ))}
+        </div>
+        <div className="mt-4 rounded-2xl border border-emerald-200 bg-emerald-50 p-4">
+          <div className="text-xs font-semibold uppercase tracking-[0.18em] text-emerald-700">稳定渲染队列</div>
+          <div className="mt-3 grid gap-2 md:grid-cols-2">
+            {STABLE_RENDER_QUEUE_STACK.map(item => (
+              <div className="rounded-xl border border-emerald-100 bg-white px-3 py-2 text-xs leading-5 text-emerald-800" key={item}>
+                {item}
+              </div>
+            ))}
+          </div>
+        </div>
+      </section>
+
+      <section className="rounded-[2rem] border border-neutral-200 bg-white p-5 shadow-sm">
+        <div className="flex flex-col gap-2 sm:flex-row sm:items-start sm:justify-between">
+          <div>
             <p className="text-xs uppercase tracking-[0.22em] text-neutral-500">Cut / One-click Video Board</p>
             <h2 className="mt-2 text-xl font-semibold text-neutral-950">从 Hook 结构库到智能混剪包</h2>
           </div>
           <div className="max-w-sm text-xs leading-5 text-neutral-600">
-            这层承接创意工厂，不把“创建任务”说成“自动成片”。只有 provider、素材授权、平台账号和回流都接上，才进入真实规模化视频工厂。
+            这层承接创意工厂，不把“创建任务”说成“自动成片”。只有生成服务、素材授权、平台账号和回流都接上，才进入真实规模化视频工厂。
           </div>
         </div>
         <div className="mt-4 grid gap-3 lg:grid-cols-3">
@@ -1389,11 +1461,11 @@ export function VideoProductionQueueClient({
       <section className="rounded-[2rem] border border-neutral-200 bg-white p-5 shadow-sm">
         <div className="flex flex-col gap-2 sm:flex-row sm:items-start sm:justify-between">
           <div>
-            <p className="text-xs uppercase tracking-[0.22em] text-neutral-500">Cut Production Line</p>
+            <p className="text-xs uppercase tracking-[0.22em] text-neutral-500">成片生产线</p>
             <h2 className="mt-2 text-xl font-semibold text-neutral-950">从视频解析到分发回流的一条成片生产线</h2>
           </div>
           <p className="max-w-md text-xs leading-5 text-neutral-600">
-            这层承接 Clico 的视频任务体验，也对齐筷子式批量混剪和一键视频。Wenai 先把任务、证据、审核、返修和回流做成可验收闭环；外部 provider 接入前，不把计划页包装成真实自动成片。
+            这层对齐筷子式批量混剪和一键视频。Wenai 先把任务、证据、审核、返修和回流做成可验收闭环；外部生成服务接入前，不把计划页包装成真实自动成片。
           </p>
         </div>
         <div className="mt-4 grid gap-3 xl:grid-cols-5">
@@ -1491,7 +1563,7 @@ export function VideoProductionQueueClient({
               <p className="text-xs font-semibold uppercase text-neutral-500">Create workflow</p>
               <h2 className="mt-2 text-lg font-semibold text-neutral-950">创建视频工作流</h2>
               <p className="mt-2 text-sm leading-6 text-neutral-600">
-                只创建可交接的生产任务、分发计划和执行记录；provider 未配置时不会宣称自动成片。
+                只创建可交接的生产任务、分发计划和执行记录；生成服务未配置时不会宣称自动成片。
               </p>
             </div>
             <span className="rounded-full border border-amber-200 bg-amber-50 px-3 py-1 text-xs font-medium text-amber-700">
@@ -1558,7 +1630,7 @@ export function VideoProductionQueueClient({
             <h2 className="mt-2 text-lg font-semibold text-neutral-950">队列状态</h2>
           </div>
           <div className="text-xs text-neutral-500">
-            {queue ? `${queue.itemCount} 个任务 · 供应商就绪 ${providerReadyRatio} · 结果 ${queue.resultAssetCount} · 审核 ${queue.clientReviewCount} · 已批准 ${queue.approvedDeliverableCount}` : '正在加载 · 供应商就绪 0/0'}
+            {queue ? `${queue.itemCount} 个任务 · 生成服务就绪 ${providerReadyRatio} · 结果 ${queue.resultAssetCount} · 审核 ${queue.clientReviewCount} · 已批准 ${queue.approvedDeliverableCount}` : '正在加载 · 生成服务就绪 0/0'}
           </div>
         </div>
         <p className="mt-3 max-h-10 overflow-hidden text-sm leading-5 text-neutral-600">
@@ -1654,7 +1726,7 @@ export function VideoProductionQueueClient({
               <div className="mt-4 rounded-lg border border-sky-200 bg-sky-50 p-3">
                 <div className="flex flex-col gap-1 sm:flex-row sm:items-start sm:justify-between">
                   <div className="text-xs font-semibold uppercase text-sky-800">人工成片试跑 Runbook</div>
-                  <div className="text-xs leading-5 text-sky-700">不等 provider，也能把 Clico 式交付链路跑完</div>
+                  <div className="text-xs leading-5 text-sky-700">不等生成服务，也能把审核交付链路跑完</div>
                 </div>
                 <div className="mt-3 grid gap-2 md:grid-cols-5">
                   {manualTrialRunbook(item).map(step => (
@@ -1747,7 +1819,7 @@ export function VideoProductionQueueClient({
             selectedVariant.stopLine,
             selectedVariant.reference,
           ]}
-          eyebrow="Video Factory Variant / Variant Action Playbook"
+          eyebrow="视频工厂视角 / 生产动作剧本"
           firstScreen={`${selectedVariant.headline} ${selectedVariant.body}`}
           nextAction={selectedVariant.firstAction}
           primaryAction={variantPlaybook.primaryAction}
@@ -1805,7 +1877,7 @@ export function VideoProductionQueueClient({
               <p className="text-xs uppercase tracking-[0.22em] text-violet-200">商用成片验收</p>
               <h2 className="mt-2 text-xl font-semibold">商用 Cut 放行门禁</h2>
               <p className="mt-2 max-w-3xl text-sm leading-6 text-white/60">
-                这层只判断视频工厂是否已经能进入真实商用验收：AI 生成 provider 回调、成片资产、客户审核、客户批准、发布或表现回流必须全部有证据。本地混剪和客户自发布包不因此停摆。
+              这层只判断视频工厂是否已经能进入真实商用验收：AI 生成服务回调、成片资产、客户审核、客户批准、发布或表现回流必须全部有证据。本地混剪和客户自发布包不因此停摆。
               </p>
             </div>
             <div className="flex w-fit flex-col items-start gap-2 border border-white/10 bg-black/25 px-3 py-2 text-xs">
@@ -1844,13 +1916,13 @@ export function VideoProductionQueueClient({
           <div className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
             <div>
               <p className="text-xs uppercase tracking-[0.22em] text-cyan-200">AI 生成接入验收</p>
-              <h2 className="mt-2 text-xl font-semibold">AI 生成 provider 沙盒接入合约</h2>
+              <h2 className="mt-2 text-xl font-semibold">AI 生成服务沙盒接入合约</h2>
               <p className="mt-2 max-w-3xl text-sm leading-6 text-white/60">
-                这层不配置真实密钥，也不伪装自动成片。它把接入视频 provider 前必须验证的提交、回调、失败恢复、成片入库和客户验收拆成沙盒门禁，等外部材料齐后直接对照验收。
+                这层不配置真实密钥，也不伪装自动成片。它把接入视频生成服务前必须验证的提交、回调、失败恢复、成片入库和客户验收拆成沙盒门禁，等外部材料齐后直接对照验收。
               </p>
             </div>
             <div className="w-fit border border-white/10 bg-black/25 px-3 py-2 text-xs text-cyan-100">
-              ready {providerSandboxChecks.filter(check => check.ready).length}/{providerSandboxChecks.length}
+              已具备 {providerSandboxChecks.filter(check => check.ready).length}/{providerSandboxChecks.length}
             </div>
           </div>
           <div className="mt-4 grid gap-3 lg:grid-cols-5">
@@ -1874,11 +1946,11 @@ export function VideoProductionQueueClient({
               <p className="text-xs uppercase tracking-[0.22em] text-orange-200">Cut Operating Checks</p>
               <h2 className="mt-2 text-xl font-semibold">视频工厂商用品质验收板</h2>
               <p className="mt-2 max-w-3xl text-sm leading-6 text-white/60">
-                对照筷子科技、Hookshot、Creatify、Pencil、VidMob 这一类平台，Cut 不能只看“有没有按钮”，而要逐项检查 AI 视频解析、智能混剪、一键视频、provider 执行、成片审核和表现回流是否真的闭环。
+                对照筷子科技、Hookshot、Creatify、Pencil、VidMob 这一类平台，Cut 不能只看“有没有按钮”，而要逐项检查 AI 视频解析、智能混剪、一键视频、生成执行、成片审核和表现回流是否真的闭环。
               </p>
             </div>
             <div className="w-fit border border-white/10 bg-black/25 px-3 py-2 text-xs text-orange-100">
-              ready {cutOperatingChecks.filter(check => check.status === 'ready').length}/{cutOperatingChecks.length}
+              已具备 {cutOperatingChecks.filter(check => check.status === 'ready').length}/{cutOperatingChecks.length}
             </div>
           </div>
           <div className="mt-4 grid gap-3 md:grid-cols-2 xl:grid-cols-3">
@@ -1974,11 +2046,43 @@ export function VideoProductionQueueClient({
         <section className="border border-emerald-300/20 bg-emerald-300/[0.055] p-5">
           <div className="flex flex-col gap-2 sm:flex-row sm:items-start sm:justify-between">
             <div>
+              <p className="text-xs uppercase tracking-[0.22em] text-emerald-200">GitHub 开源混剪蓝图</p>
+              <h2 className="mt-2 text-xl font-semibold">先用开源栈把混剪做到稳定可交付</h2>
+            </div>
+            <p className="max-w-sm text-xs leading-5 text-emerald-100/80">
+              图片、视频、数字人生成等你的 key；混剪先走 FFmpeg、Remotion、Whisper、切片和质量检查，把客户素材变成可审核成片和自发布包。
+            </p>
+          </div>
+          <div className="mt-4 grid gap-3 lg:grid-cols-5">
+            {OPEN_SOURCE_REMIX_STACK.map(item => (
+              <article className="border border-white/10 bg-black/20 p-4" key={item.tool}>
+                <div className="text-sm font-semibold text-white">{item.tool}</div>
+                <div className="mt-1 text-xs font-medium text-emerald-200">{item.role}</div>
+                <p className="mt-2 text-xs leading-5 text-white/65">用途：{item.use}</p>
+                <p className="mt-2 text-xs leading-5 text-emerald-100">产出：{item.output}</p>
+              </article>
+            ))}
+          </div>
+          <div className="mt-4 border border-emerald-300/20 bg-black/20 p-4">
+            <div className="text-xs font-semibold uppercase tracking-[0.18em] text-emerald-200">稳定渲染队列</div>
+            <div className="mt-3 grid gap-2 md:grid-cols-2">
+              {STABLE_RENDER_QUEUE_STACK.map(item => (
+                <div className="border border-white/10 bg-black/20 px-3 py-2 text-xs leading-5 text-emerald-100/85" key={item}>
+                  {item}
+                </div>
+              ))}
+            </div>
+          </div>
+        </section>
+
+        <section className="border border-emerald-300/20 bg-emerald-300/[0.055] p-5">
+          <div className="flex flex-col gap-2 sm:flex-row sm:items-start sm:justify-between">
+            <div>
               <p className="text-xs uppercase tracking-[0.22em] text-emerald-200">Cut / One-click Video Board</p>
               <h2 className="mt-2 text-xl font-semibold">从 Hook 结构库到智能混剪包</h2>
             </div>
             <div className="max-w-sm text-xs leading-5 text-emerald-100/80">
-              这层承接创意工厂，不把“创建任务”说成“自动成片”。只有 provider、素材授权、平台账号和回流都接上，才进入真实规模化视频工厂。
+              这层承接创意工厂，不把“创建任务”说成“自动成片”。只有生成服务、素材授权、平台账号和回流都接上，才进入真实规模化视频工厂。
             </div>
           </div>
           <div className="mt-4 grid gap-3 lg:grid-cols-3">
@@ -1996,11 +2100,11 @@ export function VideoProductionQueueClient({
         <section className="border border-white/10 bg-white/[0.035] p-5">
           <div className="flex flex-col gap-2 sm:flex-row sm:items-start sm:justify-between">
             <div>
-              <p className="text-xs uppercase tracking-[0.22em] text-sky-200">Cut Production Line</p>
+              <p className="text-xs uppercase tracking-[0.22em] text-sky-200">成片生产线</p>
               <h2 className="mt-2 text-xl font-semibold">从视频解析到分发回流的一条成片生产线</h2>
             </div>
             <p className="max-w-md text-xs leading-5 text-white/55">
-              这层承接 Clico 的视频任务体验，也对齐筷子式批量混剪和一键视频。Wenai 先把任务、证据、审核、返修和回流做成可验收闭环；外部 provider 接入前，不把计划页包装成真实自动成片。
+              这层对齐筷子式批量混剪和一键视频。Wenai 先把任务、证据、审核、返修和回流做成可验收闭环；外部生成服务接入前，不把计划页包装成真实自动成片。
             </p>
           </div>
           <div className="mt-4 grid gap-3 xl:grid-cols-5">
@@ -2071,7 +2175,7 @@ export function VideoProductionQueueClient({
             <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
               <h2 className="text-base font-semibold">队列状态</h2>
               <div className="text-xs text-white/50">
-                {queue ? `${queue.itemCount} 个任务 · 供应商就绪 ${providerReadyRatio} · 结果 ${queue.resultAssetCount} · 审核 ${queue.clientReviewCount} · 已批准 ${queue.approvedDeliverableCount}` : '正在加载 · 供应商就绪 0/0'}
+                {queue ? `${queue.itemCount} 个任务 · 生成服务就绪 ${providerReadyRatio} · 结果 ${queue.resultAssetCount} · 审核 ${queue.clientReviewCount} · 已批准 ${queue.approvedDeliverableCount}` : '正在加载 · 生成服务就绪 0/0'}
               </div>
             </div>
             <p className="mt-2 text-xs leading-5 text-white/45">
@@ -2172,7 +2276,7 @@ export function VideoProductionQueueClient({
                   <div className="mt-3 border border-sky-300/20 bg-sky-950/20 p-3">
                     <div className="flex flex-col gap-1 sm:flex-row sm:items-start sm:justify-between">
                       <div className="text-xs font-semibold text-sky-100">人工成片试跑 Runbook</div>
-                      <div className="text-[11px] leading-5 text-sky-100/65">不等 provider，也能把 Clico 式交付链路跑完</div>
+                      <div className="text-[11px] leading-5 text-sky-100/65">不等生成服务，也能把审核交付链路跑完</div>
                     </div>
                     <div className="mt-3 grid gap-2 md:grid-cols-5">
                       {manualTrialRunbook(item).map(step => (

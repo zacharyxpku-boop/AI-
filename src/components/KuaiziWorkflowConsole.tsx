@@ -162,7 +162,7 @@ const configs: Record<WorkflowStep, WorkflowConfig> = {
     systemPillars: [
       { title: 'GitHub 开源混剪蓝图', body: '吸收 Remotion、FFmpeg、OpenTimelineIO、PySceneDetect、Auto-Editor、Revideo、Twick 等开源范式。', proof: '客户只看到时间线、字幕、成片、标题和发布包。' },
       { title: '稳定渲染队列', body: '每条视频有素材清单、尺寸、标题角度、输出路径、重试次数和 blocked reason。', proof: '单条失败只重跑单条，不拖垮整批。' },
-      { title: '数字人等 Key', body: '图片、视频、数字人 Key 到位后接入生成层；未到位时继续导出口播稿和本地混剪包。', proof: '首版不因为外部 provider 停摆。' },
+      { title: '数字人等 Key', body: '图片、视频、数字人 Key 到位后接入生成层；未到位时继续导出口播稿和本地混剪包。', proof: '首版输出客户自发布包。' },
     ],
     tasks: [
       { title: '确认首批 3 条视频脚本', owner: '客户', status: '待确认' },
