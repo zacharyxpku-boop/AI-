@@ -53,7 +53,7 @@ export default async function FactoryPage({
               </p>
             </div>
             <div className="rounded-md border border-amber-300/25 bg-amber-300/10 p-4 text-[13px] leading-6 text-amber-50">
-              当前边界：内部闭环可跑；图片、视频、数字人等 API Key 可按客户现有资源接入；发布先交付内容包和回填表，需要代操作时只做客户授权范围内的辅助执行。
+              当前边界：内部闭环可跑；图片、视频、数字人等生成服务 Key 到位后增强；首版先交付内容包、发布清单和回填表，客户自己登录平台发布。
             </div>
           </div>
 

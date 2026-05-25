@@ -1431,10 +1431,10 @@ export function KuaiziStyleWorkbench() {
                     <span className="rounded-full bg-slate-100 px-2.5 py-1 text-xs font-black text-slate-600">1/6</span>
                   </div>
                   <p className="mt-5 text-sm leading-6 text-slate-600">
-                    先选一个商品和一个主要平台，生成首轮标题、图片任务、视频任务和发布文案。最后一步可以导出给客户自己发，也可以在客户授权后辅助执行。
+                    先选一个商品和一个主要平台，生成首轮标题、图片任务、视频任务和发布文案。最后一步导出给客户自己发布，再把链接、截图、CSV 或云盘目录回传。
                   </p>
                   <div className="mt-5 grid gap-2">
-                    {['商品和主平台已确认', '素材和授权边界已确认', '发布方式已选择：客户自发 / 授权辅助'].map((item, index) => (
+                    {['商品和主平台已确认', '素材和授权边界已确认', '发布方式已选择：客户自发 / 发布包回填'].map((item, index) => (
                       <div className="flex items-center gap-3 rounded-md border border-emerald-200 bg-emerald-50 px-3 py-2.5 text-sm font-black text-emerald-900" key={item}>
                         <span className="grid size-5 shrink-0 place-items-center rounded-full bg-emerald-600 text-xs text-white">{index + 1}</span>
                         <span className="min-w-0 flex-1">{item}</span>
@@ -2801,7 +2801,7 @@ export function KuaiziStyleWorkbench() {
                 <div className="flex flex-col gap-3 md:flex-row md:items-end md:justify-between">
                   <div>
                     <h3 className="text-lg font-black text-slate-950">能力分层：API 生成、本地混剪、发布包三条路</h3>
-                    <p className="mt-1 text-sm text-slate-500">能接 API 的直接接；能用开源组件完成的做成本地任务；最后发布环节给客户自发或授权辅助两条路。</p>
+                    <p className="mt-1 text-sm text-slate-500">能接生成服务的直接增强；能用开源组件完成的做成本地任务；最后发布环节坚持客户自发，Wenai 交付发布包和回填入口。</p>
                   </div>
                 </div>
                 <div className="mt-5 grid gap-3 md:hidden">

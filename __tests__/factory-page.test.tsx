@@ -226,6 +226,9 @@ describe('factory page', () => {
     expect(html).not.toContain('Action Queue');
     expect(html).not.toContain('External Gates');
     expect(html).not.toContain('SYSTEM LOGS');
+    expect(html).not.toContain('授权辅助');
+    expect(html).not.toContain('需要代操作');
+    expect(html).not.toContain('辅助执行');
     expect(html).not.toContain('fixed bottom-5 right-5');
     expect(html).not.toContain('86%');
   });

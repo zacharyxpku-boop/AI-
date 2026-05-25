@@ -57,7 +57,7 @@ const customerNextActions = [
 const providerBoundaryChips = [
   '现在能跑：混剪、标题、客服、发布包',
   '等你的 Key：图片、视频、数字人、TTS',
-  '首版不碰：自动登录、代发、后台数据 API',
+  '首版边界：客户自发布，不代登不代发',
 ] as const;
 
 const lastMileCards = [
@@ -80,7 +80,7 @@ const lastMileCards = [
 
 const configs: Record<WorkflowStep, WorkflowConfig> = {
   creative: {
-    eyebrow: 'Step 01',
+    eyebrow: '步骤 01',
     title: '先把商品资料变成客户能直接选择的卖点脚本',
     subtitle: '客户输入商品、平台和人群，系统把卖点、场景、口播、图文和禁用词整理成一页可执行 brief，不再让客户面对抽象模块。',
     primaryLabel: '去整理素材',
@@ -112,7 +112,7 @@ const configs: Record<WorkflowStep, WorkflowConfig> = {
     ],
   },
   create: {
-    eyebrow: 'Step 02',
+    eyebrow: '步骤 02',
     title: '把商品图、模特图、证明图和客服素材整理成货架',
     subtitle: '图片生成等你的 Key；当前先把商品素材、模特生图 prompt、授权检查和客服 FAQ 做成可执行生产包。',
     primaryLabel: '去生成视频',
@@ -144,7 +144,7 @@ const configs: Record<WorkflowStep, WorkflowConfig> = {
     ],
   },
   video: {
-    eyebrow: 'Step 03',
+    eyebrow: '步骤 03',
     title: '本地混剪先稳定出片，视频和数字人 Key 到位后增强',
     subtitle: '图片视频数字人等 Key 等你给；混剪先走开源/本地工作流，把脚本、素材、字幕、封面、BGM 和尺寸封成稳定渲染任务。',
     primaryLabel: '去生成发布包',
@@ -176,7 +176,7 @@ const configs: Record<WorkflowStep, WorkflowConfig> = {
     ],
   },
   cast: {
-    eyebrow: 'Step 04',
+    eyebrow: '步骤 04',
     title: '把内容变成客户自己能发布的多平台发布包',
     subtitle: '多账号矩阵先不碰自动登录，重点把每个平台的标题、正文、标签、封面、素材和回填表做准，客户拿到就能发。',
     primaryLabel: '去复盘跟进',
@@ -189,7 +189,7 @@ const configs: Record<WorkflowStep, WorkflowConfig> = {
     cards: [
       { label: '发布包', value: '5 个渠道', detail: '每个平台有对应标题、文案、封面和素材。' },
       { label: '客户自发', value: '推荐路径', detail: '客户拿到内容包后直接复制发布。' },
-      { label: '授权辅助', value: '后续增强', detail: '只有客户明确授权时才做辅助执行，不作为当前上线阻塞。' },
+      { label: '回填证据', value: '下一轮入口', detail: '发布后回传链接、截图、CSV 或云盘目录。' },
     ],
     systemPillars: [
       { title: '多账号标题矩阵', body: '参考超级 IP 和口播结构，为真实买家号、测评种草号、店铺官方号生成不同标题。', proof: '每个平台都有标题、首句、正文、标签和封面提示。' },
@@ -208,7 +208,7 @@ const configs: Record<WorkflowStep, WorkflowConfig> = {
     ],
   },
   manage: {
-    eyebrow: 'Step 05',
+    eyebrow: '步骤 05',
     title: '把链接、截图、CSV、云盘和客服问题变成下一轮动作',
     subtitle: '平台数据直连先不作为阻塞。客户上传发布链接、后台截图、CSV、云盘资料和客服反馈，系统判断哪条放大、哪条重剪、哪类 FAQ 要补。',
     primaryLabel: '回到工作台',
@@ -308,7 +308,7 @@ export function KuaiziWorkflowConsole({ active }: { active: WorkflowStep }) {
             })}
           </nav>
           <div className="mt-5 rounded-md border border-slate-200 bg-slate-50 p-3 text-xs leading-5 text-slate-600">
-            当前策略：能用已有 API Key 的直接接入；能用开源组件完成的封成本地任务；最后发布给“客户自发”和“授权辅助”两条路径。
+            当前策略：生成服务 Key 到位后增强图片、视频和数字人；开源组件先封成本地混剪任务；最后发布坚持客户自发，Wenai 交付发布包和回填入口。
           </div>
         </aside>
 
@@ -355,7 +355,7 @@ export function KuaiziWorkflowConsole({ active }: { active: WorkflowStep }) {
           <section className="mt-5 rounded-md border border-emerald-100 bg-emerald-50 p-4 shadow-sm">
             <div className="flex flex-col gap-2 sm:flex-row sm:items-end sm:justify-between">
               <div className="min-w-0">
-                <p className="text-xs font-black uppercase tracking-[0.18em] text-emerald-700">Last Mile</p>
+                <p className="text-xs font-black uppercase tracking-[0.18em] text-emerald-700">最后一公里</p>
                 <h2 className="mt-1 text-lg font-black leading-6 text-slate-950">每个子页面都保留同一个最后一公里边界</h2>
                 <p className="mt-1 text-sm leading-6 text-slate-600">开源混剪做到可发布资产；平台发布和真实表现证据由客户回到工作台。</p>
               </div>
@@ -402,7 +402,7 @@ export function KuaiziWorkflowConsole({ active }: { active: WorkflowStep }) {
               <section className="rounded-md border border-indigo-100 bg-indigo-50 p-4 shadow-sm">
                 <div className="flex flex-col gap-2 sm:flex-row sm:items-end sm:justify-between">
                   <div>
-                    <p className="text-xs font-black uppercase tracking-[0.18em] text-indigo-600">System Capability</p>
+                    <p className="text-xs font-black uppercase tracking-[0.18em] text-indigo-600">系统能力</p>
                     <h2 className="mt-1 text-lg font-black text-slate-950">客户能看到的系统能力</h2>
                   </div>
                   <span className="w-fit rounded-md bg-white px-2.5 py-1 text-xs font-black text-indigo-700 ring-1 ring-indigo-100">清楚，不杂</span>
@@ -421,7 +421,7 @@ export function KuaiziWorkflowConsole({ active }: { active: WorkflowStep }) {
               <section className="rounded-md border border-slate-200 bg-white p-4 shadow-sm">
                 <div className="flex flex-col gap-2 sm:flex-row sm:items-end sm:justify-between">
                   <div>
-                    <p className="text-xs font-black uppercase tracking-[0.18em] text-slate-400">Deliverables</p>
+                    <p className="text-xs font-black uppercase tracking-[0.18em] text-slate-400">交付物</p>
                     <h2 className="mt-1 text-lg font-black text-slate-950">这一页最后交付什么</h2>
                   </div>
                   <span className="rounded-md bg-slate-100 px-2.5 py-1 text-xs font-black text-slate-600">不用外部登录也能推进</span>
@@ -442,7 +442,7 @@ export function KuaiziWorkflowConsole({ active }: { active: WorkflowStep }) {
               <section className="rounded-md border border-slate-200 bg-white p-4 shadow-sm">
                 <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
                   <div>
-                    <p className="text-xs font-black uppercase tracking-[0.18em] text-slate-400">Task Board</p>
+                    <p className="text-xs font-black uppercase tracking-[0.18em] text-slate-400">任务板</p>
                     <h2 className="mt-1 text-lg font-black text-slate-950">这一步要完成的事</h2>
                   </div>
                   <Link href="/factory?variant=friend_trial" className="text-sm font-black text-blue-700">查看完整流程</Link>
@@ -460,7 +460,7 @@ export function KuaiziWorkflowConsole({ active }: { active: WorkflowStep }) {
             </div>
 
             <aside className="min-w-0 rounded-md border border-slate-200 bg-white p-4 shadow-sm xl:sticky xl:top-5 xl:self-start">
-              <p className="text-xs font-black uppercase tracking-[0.18em] text-slate-400">Next step</p>
+              <p className="text-xs font-black uppercase tracking-[0.18em] text-slate-400">下一步</p>
               <h2 className="mt-2 text-xl font-black text-slate-950">下一步怎么走</h2>
               <p className="mt-2 text-sm leading-6 text-slate-500">子界面和主界面使用同一套导航与视觉语言，点击进去不会像进入另一个产品。</p>
               <div className="mt-4 space-y-2 text-sm text-slate-600">

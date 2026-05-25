@@ -462,7 +462,8 @@ describe('listing factory demo data', () => {
     expect(source).toContain('Cut');
     expect(source).toContain('Cast');
     expect(source).toContain('Manage');
-    expect(source).toContain('客户授权范围内的辅助执行');
+    expect(source).toContain('客户自己登录平台发布');
+    expect(source).not.toContain('客户授权范围内的辅助执行');
     expect(source).toContain('Brief 资产库');
     expect(source).toContain('类目洞察库');
     expect(source).toContain('商务推进后台');
