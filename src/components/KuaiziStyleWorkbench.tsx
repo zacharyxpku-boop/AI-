@@ -1119,7 +1119,12 @@ export function KuaiziStyleWorkbench() {
                       </article>
                     ))}
                   </div>
-                  <div className="mt-5 rounded-md border border-sky-100 bg-sky-50 p-4">
+                  <details className="mt-5 rounded-md border border-slate-200 bg-slate-50 p-3">
+                    <summary className="cursor-pointer list-none rounded-md bg-white px-3 py-2 text-sm font-black text-slate-900 ring-1 ring-slate-200">
+                      展开高级开源混剪验收：GitHub 蓝图、安装矩阵、适配器和冒烟测试
+                    </summary>
+                    <div className="mt-4 space-y-5">
+                  <div className="rounded-md border border-sky-100 bg-sky-50 p-4">
                     <div className="flex flex-col gap-3 lg:flex-row lg:items-end lg:justify-between">
                       <div className="min-w-0">
                         <p className="text-xs font-black uppercase tracking-[0.18em] text-sky-700">Open Source Coverage</p>
@@ -1158,7 +1163,7 @@ export function KuaiziStyleWorkbench() {
                       ))}
                     </div>
                   </div>
-                  <div className="mt-5 rounded-md border border-violet-100 bg-violet-50 p-4">
+                  <div className="rounded-md border border-violet-100 bg-violet-50 p-4">
                     <div className="flex flex-col gap-3 lg:flex-row lg:items-end lg:justify-between">
                       <div className="min-w-0">
                         <p className="text-xs font-black uppercase tracking-[0.18em] text-violet-700">GitHub Remix Blueprint</p>
@@ -1202,7 +1207,7 @@ export function KuaiziStyleWorkbench() {
                       </div>
                     </div>
                   </div>
-                  <div className="mt-5 rounded-md border border-fuchsia-100 bg-fuchsia-50 p-4">
+                  <div className="rounded-md border border-fuchsia-100 bg-fuchsia-50 p-4">
                     <div className="flex flex-col gap-3 lg:flex-row lg:items-end lg:justify-between">
                       <div className="min-w-0">
                         <p className="text-xs font-black uppercase tracking-[0.18em] text-fuchsia-700">GitHub Remix Radar</p>
@@ -1256,7 +1261,7 @@ export function KuaiziStyleWorkbench() {
                       </div>
                     </div>
                   </div>
-                  <div className="mt-5 rounded-md border border-teal-100 bg-teal-50 p-4">
+                  <div className="rounded-md border border-teal-100 bg-teal-50 p-4">
                     <div className="flex flex-col gap-3 lg:flex-row lg:items-end lg:justify-between">
                       <div className="min-w-0">
                         <p className="text-xs font-black uppercase tracking-[0.18em] text-teal-700">Open Source Queue Console</p>
@@ -1315,7 +1320,7 @@ export function KuaiziStyleWorkbench() {
                       ))}
                     </div>
                   </div>
-                  <div className="mt-5 rounded-md border border-emerald-100 bg-emerald-50 p-4">
+                  <div className="rounded-md border border-emerald-100 bg-emerald-50 p-4">
                     <div className="flex flex-col gap-3 lg:flex-row lg:items-end lg:justify-between">
                       <div className="min-w-0">
                         <p className="text-xs font-black uppercase tracking-[0.18em] text-emerald-700">Open Source Stack Selector</p>
@@ -1346,7 +1351,7 @@ export function KuaiziStyleWorkbench() {
                     ))}
                   </div>
                 </div>
-                <div className="mt-5 rounded-md border border-lime-100 bg-lime-50 p-4">
+                <div className="rounded-md border border-lime-100 bg-lime-50 p-4">
                   <div className="flex flex-col gap-3 lg:flex-row lg:items-end lg:justify-between">
                     <div className="min-w-0">
                       <p className="text-xs font-black uppercase tracking-[0.18em] text-lime-700">Install & Smoke Test Matrix</p>
@@ -1392,7 +1397,7 @@ export function KuaiziStyleWorkbench() {
                     </div>
                   </div>
                 </div>
-                <div className="mt-5 rounded-md border border-indigo-100 bg-indigo-50 p-4">
+                <div className="rounded-md border border-indigo-100 bg-indigo-50 p-4">
                   <div className="flex flex-col gap-2 md:flex-row md:items-end md:justify-between">
                       <div>
                         <p className="text-xs font-black uppercase tracking-[0.18em] text-indigo-600">开源能力适配器</p>
@@ -1413,7 +1418,7 @@ export function KuaiziStyleWorkbench() {
                       ))}
                     </div>
                   </div>
-                  <div className="mt-5 rounded-md border border-slate-200 bg-slate-50 p-4">
+                  <div className="rounded-md border border-slate-200 bg-slate-50 p-4">
                     <div className="flex flex-col gap-2 md:flex-row md:items-end md:justify-between">
                       <div>
                         <p className="text-xs font-black uppercase tracking-[0.18em] text-slate-500">执行配方</p>
@@ -1432,7 +1437,7 @@ export function KuaiziStyleWorkbench() {
                       ))}
                     </div>
                   </div>
-                  <div className="mt-5 rounded-md border border-cyan-100 bg-cyan-50 p-4">
+                  <div className="rounded-md border border-cyan-100 bg-cyan-50 p-4">
                     <div className="flex flex-col gap-2 md:flex-row md:items-end md:justify-between">
                       <div>
                         <p className="text-xs font-black uppercase tracking-[0.18em] text-cyan-700">开源混剪编排板</p>
@@ -1462,6 +1467,8 @@ export function KuaiziStyleWorkbench() {
                       ))}
                     </div>
                   </div>
+                    </div>
+                  </details>
                 </div>
 
                 <aside className="rounded-lg border border-[#d8e4ff] bg-[#f4f8ff] p-5 text-slate-950 shadow-sm">
@@ -1952,7 +1959,11 @@ export function KuaiziStyleWorkbench() {
                     </div>
                   </article>
                 </div>
-                <div className="mt-5 rounded-md border border-rose-100 bg-rose-50 p-4">
+                <details className="mt-5 rounded-md border border-rose-100 bg-rose-50 p-3">
+                  <summary className="cursor-pointer list-none rounded-md bg-white px-3 py-2 text-sm font-black text-slate-900 ring-1 ring-rose-100">
+                    展开客服对话工单明细：售前、推荐、售后、复购和不能自动化的边界
+                  </summary>
+                  <div className="mt-4 rounded-md bg-rose-50 p-1">
                   <div className="flex flex-col gap-2 md:flex-row md:items-end md:justify-between">
                     <div>
                       <p className="text-xs font-black uppercase tracking-[0.18em] text-rose-700">对话运营板</p>
@@ -2026,7 +2037,8 @@ export function KuaiziStyleWorkbench() {
                       </div>
                     </div>
                   </div>
-                </div>
+                  </div>
+                </details>
               </section>
 
               <section className="rounded-lg border border-[#e2e8f5] bg-white p-5 shadow-sm">
@@ -2079,7 +2091,12 @@ export function KuaiziStyleWorkbench() {
                     </article>
                   ))}
                 </div>
-                <div className="mt-5 rounded-md border border-cyan-100 bg-cyan-50 p-4">
+                <details className="mt-5 rounded-md border border-cyan-100 bg-cyan-50 p-3">
+                  <summary className="cursor-pointer list-none rounded-md bg-white px-3 py-2 text-sm font-black text-slate-900 ring-1 ring-cyan-100">
+                    展开多账号矩阵明细：人设、标题、口播、质量门和客户回填字段
+                  </summary>
+                  <div className="mt-4 space-y-5">
+                <div className="rounded-md border border-cyan-100 bg-cyan-50 p-4">
                   <div className="flex flex-col gap-3 lg:flex-row lg:items-end lg:justify-between">
                     <div className="min-w-0">
                       <p className="text-xs font-black uppercase tracking-[0.18em] text-cyan-700">Persona Publishing Console</p>
@@ -2139,7 +2156,7 @@ export function KuaiziStyleWorkbench() {
                     </div>
                   </div>
                 </div>
-                <div className="mt-5 rounded-md border border-emerald-100 bg-emerald-50 p-4">
+                <div className="rounded-md border border-emerald-100 bg-emerald-50 p-4">
                   <div className="flex flex-col gap-3 lg:flex-row lg:items-end lg:justify-between">
                     <div className="min-w-0">
                       <p className="text-xs font-black uppercase tracking-[0.18em] text-emerald-700">Self Publishing Command Center</p>
@@ -2195,7 +2212,7 @@ export function KuaiziStyleWorkbench() {
                     </div>
                   </div>
                 </div>
-                <div className="mt-5 rounded-md border border-sky-100 bg-sky-50 p-4">
+                <div className="rounded-md border border-sky-100 bg-sky-50 p-4">
                   <div className="flex flex-col gap-2 md:flex-row md:items-end md:justify-between">
                     <div>
                       <p className="text-xs font-black uppercase tracking-[0.18em] text-sky-700">Creator Persona Matrix</p>
@@ -2307,6 +2324,8 @@ export function KuaiziStyleWorkbench() {
                     ))}
                   </div>
                 </div>
+                  </div>
+                </details>
               </section>
 
               <section className="rounded-lg border border-[#e2e8f5] bg-white p-5 shadow-sm">
