@@ -485,6 +485,61 @@ export function KuaiziStyleWorkbench() {
                 </div>
               </section>
 
+              <section className="rounded-lg border border-[#d9e8ff] bg-white p-5 shadow-sm">
+                <div className="flex flex-col gap-3 lg:flex-row lg:items-end lg:justify-between">
+                  <div className="min-w-0">
+                    <p className="text-xs font-black uppercase tracking-[0.18em] text-sky-600">Today Render Queue</p>
+                    <h3 className="mt-1 text-lg font-black leading-6 text-slate-950">今天队列能不能稳定出片，客户一眼看懂</h3>
+                    <p className="mt-2 max-w-5xl text-sm leading-6 text-slate-500">
+                      混剪不只是一键生成视频；Wenai 把每条成片拆成素材预检、模板时间线、批量渲染、单条重试和发布包回填，失败不会拖垮整批。
+                    </p>
+                  </div>
+                  <Link className="inline-flex min-h-11 w-fit shrink-0 items-center rounded-md bg-sky-600 px-4 py-2 text-sm font-black text-white shadow-sm" href="/factory/video?variant=friend_trial">
+                    查看视频队列
+                  </Link>
+                </div>
+                <div className="mt-4 grid gap-3 md:grid-cols-4">
+                  {queueSummary.map(item => (
+                    <article className="min-w-0 rounded-md border border-sky-100 bg-sky-50 p-4" key={item.status}>
+                      <div className="text-[11px] font-black uppercase tracking-[0.12em] text-sky-700">{item.status}</div>
+                      <div className="mt-2 flex items-end justify-between gap-3">
+                        <h4 className="text-sm font-black leading-5 text-slate-950">{item.label}</h4>
+                        <span className="text-2xl font-black leading-none text-sky-700">{item.count}</span>
+                      </div>
+                      <p className="mt-2 text-xs font-bold leading-5 text-slate-600">
+                        {item.status === 'needs_material' ? '先补素材或授权，不进入渲染并发。' : item.status === 'ready' ? '可进入本地/开源渲染批次。' : item.status === 'rendering' ? '正在执行，记录 batch、attempt 和输出路径。' : '已进入发布包，等待客户自发布回填。'}
+                      </p>
+                    </article>
+                  ))}
+                </div>
+                <div className="mt-4 grid gap-3 lg:grid-cols-3">
+                  <div className="rounded-md border border-emerald-100 bg-emerald-50 p-4">
+                    <h4 className="text-sm font-black text-slate-950">失败隔离</h4>
+                    <div className="mt-3 grid gap-2">
+                      {renderCapacity.failureIsolation.map(item => (
+                        <div className="rounded bg-white px-3 py-2 text-xs font-bold leading-5 text-slate-700 ring-1 ring-emerald-100" key={item}>{item}</div>
+                      ))}
+                    </div>
+                  </div>
+                  <div className="rounded-md border border-indigo-100 bg-indigo-50 p-4">
+                    <h4 className="text-sm font-black text-slate-950">批次容量</h4>
+                    <p className="mt-3 rounded bg-white px-3 py-2 text-xs font-bold leading-5 text-indigo-800 ring-1 ring-indigo-100">
+                      当前拆成 {batchPlan.batches.length} 个批次，建议并发 {renderCapacity.recommendedConcurrency}，预估每小时 {renderCapacity.estimatedOutputsPerHour} 条输出。
+                    </p>
+                    <div className="mt-3 grid gap-2">
+                      {renderReliabilityBoard.batchControls.slice(0, 2).map(item => (
+                        <div className="rounded bg-white px-3 py-2 text-xs font-bold leading-5 text-slate-700 ring-1 ring-indigo-100" key={item}>{item}</div>
+                      ))}
+                    </div>
+                  </div>
+                  <div className="rounded-md border border-amber-100 bg-amber-50 p-4">
+                    <h4 className="text-sm font-black text-slate-950">什么时候再升级</h4>
+                    <p className="mt-3 rounded bg-white px-3 py-2 text-xs font-bold leading-5 text-amber-800 ring-1 ring-amber-100">{renderReliabilityBoard.scaleDecision.currentMode}</p>
+                    <p className="mt-3 rounded bg-white px-3 py-2 text-xs font-bold leading-5 text-slate-700 ring-1 ring-amber-100">{renderReliabilityBoard.scaleDecision.whenToScale[0]}</p>
+                  </div>
+                </div>
+              </section>
+
               <section className="rounded-lg border border-[#dbe6ff] bg-white p-5 shadow-sm">
                 <div className="flex flex-col gap-3 md:flex-row md:items-end md:justify-between">
                   <div className="min-w-0">

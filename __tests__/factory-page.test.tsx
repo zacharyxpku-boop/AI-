@@ -32,6 +32,10 @@ describe('factory page', () => {
     expect(html).toContain('Provider Readiness');
     expect(html).toContain('客户下一步指挥台');
     expect(html).toContain('先上传商品素材');
+    expect(html).toContain('Today Render Queue');
+    expect(html).toContain('今天队列能不能稳定出片，客户一眼看懂');
+    expect(html).toContain('失败隔离');
+    expect(html).toContain('什么时候再升级');
     expect(html).toContain('客户能看到的边界');
     expect(html).toContain('客户不用理解');
     expect(html).toContain('首版交付清单');
