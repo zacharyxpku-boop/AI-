@@ -32,6 +32,11 @@ describe('factory page', () => {
     expect(html).toContain('Provider Readiness');
     expect(html).toContain('客户下一步指挥台');
     expect(html).toContain('先上传商品素材');
+    expect(html).toContain('Remix To Publish Control');
+    expect(html).toContain('开源混剪、口播标题、客户自发布，先合成一条稳定流水线');
+    expect(html).toContain('今天就能稳定混剪');
+    expect(html).toContain('多账号标题和口播不做代登');
+    expect(html).toContain('发布后用证据驱动下一轮');
     expect(html).toContain('Today Render Queue');
     expect(html).toContain('今天队列能不能稳定出片，客户一眼看懂');
     expect(html).toContain('失败隔离');

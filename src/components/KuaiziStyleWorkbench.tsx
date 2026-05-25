@@ -426,6 +426,70 @@ export function KuaiziStyleWorkbench() {
                 </div>
               </section>
 
+              <section className="rounded-lg border border-[#cfe8ff] bg-white p-5 shadow-sm">
+                <div className="flex flex-col gap-3 lg:flex-row lg:items-end lg:justify-between">
+                  <div className="min-w-0">
+                    <p className="text-xs font-black uppercase tracking-[0.18em] text-cyan-700">Remix To Publish Control</p>
+                    <h3 className="mt-1 text-lg font-black leading-6 text-slate-950">开源混剪、口播标题、客户自发布，先合成一条稳定流水线</h3>
+                    <p className="mt-2 max-w-5xl text-sm leading-6 text-slate-500">
+                      图片、视频、数字人和 TTS 等 Key 到位后增强生成层；首版先把 GitHub 开源混剪范式、账号人设标题、发布包和云盘回传证据接成可交付闭环，客户不用理解仓库名，也不用交出账号密码。
+                    </p>
+                  </div>
+                  <Link className="inline-flex min-h-11 w-fit shrink-0 items-center rounded-md bg-cyan-700 px-4 py-2 text-sm font-black text-white shadow-sm" href="/factory/video?variant=friend_trial">
+                    进入混剪队列
+                  </Link>
+                </div>
+                <div className="mt-4 grid gap-3 xl:grid-cols-3">
+                  <article className="min-w-0 rounded-md border border-cyan-100 bg-cyan-50 p-4">
+                    <div className="flex items-start justify-between gap-3">
+                      <h4 className="text-sm font-black leading-5 text-slate-950">今天就能稳定混剪</h4>
+                      <span className="shrink-0 rounded bg-white px-2 py-1 text-[11px] font-black text-cyan-700 ring-1 ring-cyan-100">{chatCutRemixConsole.cutFlow.length} 步</span>
+                    </div>
+                    <p className="mt-2 text-xs font-bold leading-5 text-cyan-800">{chatCutRemixConsole.promise}</p>
+                    <div className="mt-3 grid gap-2 sm:grid-cols-2">
+                      {chatCutRemixConsole.cutFlow.slice(0, 4).map(step => (
+                        <div className="rounded bg-white px-3 py-2 text-xs ring-1 ring-cyan-100" key={step.id}>
+                          <div className="font-black leading-5 text-slate-950">{step.label}</div>
+                          <p className="mt-1 line-clamp-2 font-bold leading-5 text-slate-600">{step.output}</p>
+                        </div>
+                      ))}
+                    </div>
+                  </article>
+                  <article className="min-w-0 rounded-md border border-indigo-100 bg-indigo-50 p-4">
+                    <div className="flex items-start justify-between gap-3">
+                      <h4 className="text-sm font-black leading-5 text-slate-950">多账号标题和口播不做代登</h4>
+                      <span className="shrink-0 rounded bg-white px-2 py-1 text-[11px] font-black text-indigo-700 ring-1 ring-indigo-100">{personaPublishingConsole.rows.length} 槽</span>
+                    </div>
+                    <p className="mt-2 text-xs font-bold leading-5 text-indigo-800">{personaPublishingConsole.promise}</p>
+                    <div className="mt-3 grid gap-2">
+                      {personaPublishingConsole.rows.slice(0, 3).map(row => (
+                        <div className="rounded bg-white px-3 py-2 text-xs ring-1 ring-indigo-100" key={row.id}>
+                          <div className="font-black leading-5 text-slate-950">{row.platformLabel} · {row.accountType}</div>
+                          <p className="mt-1 line-clamp-1 font-bold leading-5 text-indigo-700">{row.title}</p>
+                          <p className="mt-1 line-clamp-1 text-slate-500">客户动作：{row.customerCopyAction}</p>
+                        </div>
+                      ))}
+                    </div>
+                  </article>
+                  <article className="min-w-0 rounded-md border border-emerald-100 bg-emerald-50 p-4">
+                    <div className="flex items-start justify-between gap-3">
+                      <h4 className="text-sm font-black leading-5 text-slate-950">发布后用证据驱动下一轮</h4>
+                      <span className="shrink-0 rounded bg-white px-2 py-1 text-[11px] font-black text-emerald-700 ring-1 ring-emerald-100">云盘回传</span>
+                    </div>
+                    <p className="mt-2 text-xs font-bold leading-5 text-emerald-800">{selfPublishingCommandCenter.promise}</p>
+                    <div className="mt-3 grid gap-2">
+                      {selfPublishingCommandCenter.evidenceInbox.slice(0, 3).map(item => (
+                        <div className="rounded bg-white px-3 py-2 text-xs ring-1 ring-emerald-100" key={item.label}>
+                          <div className="font-black leading-5 text-slate-950">{item.label}</div>
+                          <p className="mt-1 line-clamp-1 font-bold leading-5 text-emerald-700">{item.accepted}</p>
+                          <p className="mt-1 line-clamp-2 text-slate-500">{item.why}</p>
+                        </div>
+                      ))}
+                    </div>
+                  </article>
+                </div>
+              </section>
+
               <section className="rounded-lg border border-[#dbe6ff] bg-white p-5 shadow-sm">
                 <div className="flex flex-col gap-4 lg:flex-row lg:items-start lg:justify-between">
                   <div className="min-w-0">
