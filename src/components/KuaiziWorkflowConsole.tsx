@@ -14,6 +14,7 @@ type WorkflowConfig = {
   accent: string;
   outcome: string;
   cards: Array<{ label: string; value: string; detail: string }>;
+  systemPillars: Array<{ title: string; body: string; proof: string }>;
   tasks: Array<{ title: string; owner: string; status: string }>;
   deliverables: Array<{ title: string; body: string; status: string }>;
 };
@@ -43,6 +44,11 @@ const configs: Record<WorkflowStep, WorkflowConfig> = {
       { label: '内容角度', value: '3 条候选脚本', detail: '痛点、场景、优惠各一条，客户能直接选。' },
       { label: '下一步', value: '补素材', detail: '脚本会告诉客户还缺哪些图、视频或授权。' },
     ],
+    systemPillars: [
+      { title: '商品 brief', body: '把商品链接、卖点、人群、禁用词和参考账号收成一页。', proof: '客户不用理解模块，只看今天先拍什么。' },
+      { title: '平台脚本', body: '小红书、TikTok、Shopify、Meta、视频号分开生成标题和口播。', proof: '每个平台都有首句、卖点、证据和 CTA。' },
+      { title: '素材反推', body: '脚本会反推缺主图、模特图、场景图还是口播素材。', proof: '缺口直接进入素材页，不靠口头沟通。' },
+    ],
     tasks: [
       { title: '填写商品一句话卖点', owner: '客户', status: '待填写' },
       { title: '选择首条口播脚本方向', owner: '运营', status: '下一步' },
@@ -69,6 +75,11 @@ const configs: Record<WorkflowStep, WorkflowConfig> = {
       { label: '可用素材', value: '6 个', detail: '主图、包装图、场景图、视频片段归档。' },
       { label: '模特生图', value: 'Key 到位即接', detail: '支持模特图、穿搭图、手持图、局部细节图的任务拆解。' },
       { label: '缺口', value: '1 项待补', detail: '缺授权图或高清商品图时直接提示客户。' },
+    ],
+    systemPillars: [
+      { title: '模特生图任务包', body: 'Key 到位后接图片生成；Key 未到位先导出 prompt、构图和补图清单。', proof: '每张图都有用途、输入、质量检查和回退路径。' },
+      { title: '商品证明图', body: '主图、细节图、对比图、使用场景图和规格图按发布用途归档。', proof: '素材进入视频和发布包前先检查授权。' },
+      { title: '客服可用素材', body: '把材质、尺码、物流、售后承诺同步给客服和 FAQ。', proof: '素材不只服务内容，也承接咨询。' },
     ],
     tasks: [
       { title: '上传缺失的商品高清图', owner: '客户', status: '待上传' },
@@ -97,6 +108,11 @@ const configs: Record<WorkflowStep, WorkflowConfig> = {
       { label: '数字人口播', value: '可接入', detail: '有数字人 Key 时进入生成，没有时导出脚本。' },
       { label: '开源混剪', value: '本地优先', detail: 'Remotion 思路做模板，FFmpeg 做合成，时间线 JSON 做任务交接。' },
     ],
+    systemPillars: [
+      { title: 'GitHub 开源混剪蓝图', body: '吸收 Remotion、FFmpeg、OpenTimelineIO、PySceneDetect、Auto-Editor、Revideo、Twick 等开源范式。', proof: '客户只看到时间线、字幕、成片、标题和发布包。' },
+      { title: '稳定渲染队列', body: '每条视频有素材清单、尺寸、标题角度、输出路径、重试次数和 blocked reason。', proof: '单条失败只重跑单条，不拖垮整批。' },
+      { title: '数字人等 Key', body: '图片、视频、数字人 Key 到位后接入生成层；未到位时继续导出口播稿和本地混剪包。', proof: '首版不因为外部 provider 停摆。' },
+    ],
     tasks: [
       { title: '确认首批 3 条视频脚本', owner: '客户', status: '待确认' },
       { title: '选择竖版封面和字幕样式', owner: '运营', status: '下一步' },
@@ -124,6 +140,11 @@ const configs: Record<WorkflowStep, WorkflowConfig> = {
       { label: '客户自发', value: '推荐路径', detail: '客户拿到内容包后直接复制发布。' },
       { label: '授权辅助', value: '后续增强', detail: '只有客户明确授权时才做辅助执行，不作为当前上线阻塞。' },
     ],
+    systemPillars: [
+      { title: '多账号标题矩阵', body: '参考超级 IP 和口播结构，为真实买家号、测评种草号、店铺官方号生成不同标题。', proof: '每个平台都有标题、首句、正文、标签和封面提示。' },
+      { title: '客户自己发布', body: 'Wenai 交付发布包和复制清单，不保存客户账号、密码、cookie 或登录态。', proof: '发布边界清楚，客户可直接执行。' },
+      { title: '回填收件箱', body: '发布后客户上传链接、截图、CSV 或云盘备注。', proof: '下一轮复盘不依赖平台自动读取。' },
+    ],
     tasks: [
       { title: '导出小红书发布包', owner: '系统', status: '可执行' },
       { title: '确认 TikTok Shop 发布时间', owner: '客户', status: '待确认' },
@@ -150,6 +171,11 @@ const configs: Record<WorkflowStep, WorkflowConfig> = {
       { label: '可复盘内容', value: '4 条', detail: '来自链接、截图、客户反馈或 CSV。' },
       { label: '下一轮建议', value: '3 项', detail: '继续放大、换角度、补素材。' },
       { label: '客服素材', value: '可生成', detail: 'FAQ、差评解释、物流/尺码/材质话术和售后卡片。' },
+    ],
+    systemPillars: [
+      { title: '云盘回填复盘', body: '客户把发布链接、截图、CSV、云盘目录或备注上传回来。', proof: '没有平台 API 也能判断下一轮方向。' },
+      { title: '客服和售后承接', body: '把评论区问题、差评原因、物流/尺码/材质问题变成客服话术。', proof: '内容带来的咨询能被接住。' },
+      { title: '后续可接数据 API', body: '等客户授权、字段稳定、失败可回退 CSV 后，再接 analytics 或平台 API。', proof: '不先为 provider 付费或卡首版交付。' },
     ],
     tasks: [
       { title: '回填首批发布链接', owner: '客户', status: '待回填' },
@@ -273,6 +299,25 @@ export function KuaiziWorkflowConsole({ active }: { active: WorkflowStep }) {
                     <p className="mt-2 text-sm leading-6 text-slate-500">{card.detail}</p>
                   </article>
                 ))}
+              </section>
+
+              <section className="rounded-md border border-indigo-100 bg-indigo-50 p-4 shadow-sm">
+                <div className="flex flex-col gap-2 sm:flex-row sm:items-end sm:justify-between">
+                  <div>
+                    <p className="text-xs font-black uppercase tracking-[0.18em] text-indigo-600">System Capability</p>
+                    <h2 className="mt-1 text-lg font-black text-slate-950">客户能看到的系统能力</h2>
+                  </div>
+                  <span className="w-fit rounded-md bg-white px-2.5 py-1 text-xs font-black text-indigo-700 ring-1 ring-indigo-100">清楚，不杂</span>
+                </div>
+                <div className="mt-4 grid gap-3 lg:grid-cols-3">
+                  {config.systemPillars.map(item => (
+                    <article className="min-w-0 rounded-md bg-white p-3 ring-1 ring-indigo-100" key={item.title}>
+                      <h3 className="break-words text-sm font-black leading-5 text-slate-950">{item.title}</h3>
+                      <p className="mt-2 text-sm leading-6 text-slate-600">{item.body}</p>
+                      <p className="mt-3 rounded bg-slate-50 px-2 py-1.5 text-xs font-bold leading-5 text-indigo-700">{item.proof}</p>
+                    </article>
+                  ))}
+                </div>
               </section>
 
               <section className="rounded-md border border-slate-200 bg-white p-4 shadow-sm">

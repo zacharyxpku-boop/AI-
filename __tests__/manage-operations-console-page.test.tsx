@@ -161,6 +161,21 @@ describe('manage operations console page', () => {
     expect(friendHtml).toContain('查看完整服务链路');
   });
 
+  it('renders friend trial Manage as the shared Wenai review and support workflow', async () => {
+    const page = await ManageFactoryPage({
+      searchParams: Promise.resolve({ projectId: 'friend-manage', variant: 'friend_trial' }),
+    });
+    const html = renderToStaticMarkup(page);
+
+    expect(html).toContain('Wenai 商品增长工作台');
+    expect(html).toContain('客户能看到的系统能力');
+    expect(html).toContain('云盘回填复盘');
+    expect(html).toContain('客服和售后承接');
+    expect(html).toContain('后续可接数据 API');
+    expect(html).toContain('没有平台 API 也能判断下一轮方向');
+    expect(html).toContain('/factory?variant=friend_trial');
+  });
+
   it('builds role-specific Manage playbooks from review, permission, and audit evidence', () => {
     const blockedIndustrial = industrial();
     const blockedPermission = permission();

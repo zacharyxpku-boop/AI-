@@ -95,6 +95,20 @@ describe('video production queue page', () => {
     expect(friendHtml).toContain('/factory?variant=friend_trial');
   });
 
+  it('renders friend trial Video as the shared Wenai open-source remix workflow', async () => {
+    const page = await VideoFactoryPage({
+      searchParams: Promise.resolve({ projectId: 'friend-video', variant: 'friend_trial' }),
+    });
+    const html = renderToStaticMarkup(page);
+
+    expect(html).toContain('Wenai 商品增长工作台');
+    expect(html).toContain('客户能看到的系统能力');
+    expect(html).toContain('GitHub 开源混剪蓝图');
+    expect(html).toContain('稳定渲染队列');
+    expect(html).toContain('首版不因为外部 provider 停摆');
+    expect(html).toContain('/factory/cast?variant=friend_trial');
+  });
+
   it('builds variant-specific video factory action playbooks from queue evidence', () => {
     const queue: VideoProductionQueue = {
       orgId: 'test-org',

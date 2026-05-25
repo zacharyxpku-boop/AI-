@@ -107,6 +107,21 @@ describe('cast distribution console page', () => {
     expect(friendHtml).toContain('/factory/manage?variant=friend_trial');
   });
 
+  it('renders friend trial Cast as the shared Wenai self-publishing workflow', async () => {
+    const page = await CastFactoryPage({
+      searchParams: Promise.resolve({ projectId: 'friend-cast', variant: 'friend_trial' }),
+    });
+    const html = renderToStaticMarkup(page);
+
+    expect(html).toContain('Wenai 商品增长工作台');
+    expect(html).toContain('客户能看到的系统能力');
+    expect(html).toContain('多账号标题矩阵');
+    expect(html).toContain('客户自己发布');
+    expect(html).toContain('不保存客户账号、密码、cookie 或登录态');
+    expect(html).toContain('回填收件箱');
+    expect(html).toContain('/factory/manage?variant=friend_trial');
+  });
+
   it('builds role-specific Cast playbooks from account and ad evidence', () => {
     const blocked = snapshot();
     const ready = snapshot({
