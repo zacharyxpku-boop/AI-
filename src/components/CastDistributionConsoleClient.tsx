@@ -50,9 +50,9 @@ const CAST_VARIANTS: Record<FactoryUiVariantId, {
     label: '合作者视角',
     audience: '给合作者、客户负责人和投资评审看 Cast 是否真的接近筷子科技的矩阵分发能力。',
     headline: 'Cast 是账号矩阵、发布证据、广告账本和表现回流的统一调度层。',
-    body: '这一层不把 PubPal、矩阵宝或自动投放当口号展示，而是把账号授权、健康度、发布槽位、广告预算、平台证据和回流指标放在同一条链路里验收。',
+    body: '这一层不把矩阵分发或自动投放当口号展示，而是把账号授权、健康度、发布槽位、广告预算、平台证据和回流指标放在同一条链路里验收。',
     firstAction: '先看账号矩阵和投放计划账本是否有证据，再判断能不能进入真实自动发布或广告账户接入。',
-    stopLine: '没有 OAuth、广告账户授权、自动发布 API 和 analytics sync 前，不能宣称平台级自动分发或自动优化。',
+    stopLine: '没有平台授权、广告账户授权、自动发布接口和表现回流前，不能宣称平台级自动分发或自动优化。',
   },
   operator: {
     label: '运营视角',
@@ -65,12 +65,56 @@ const CAST_VARIANTS: Record<FactoryUiVariantId, {
   friend_trial: {
     label: '朋友试用视角',
     audience: '给非技术朋友只看一件事：内容是否能从可发布计划走到有证据的结果。',
-    headline: '朋友不需要理解 OAuth，只要看到能发到哪里、谁负责、有没有结果。',
+    headline: '朋友不需要理解平台授权，只要看到能发到哪里、谁负责、有没有结果。',
     body: '这一视角隐藏内部投放术语，把复杂的账号矩阵压缩成“可发布 / 待补材料 / 已有回流”三个判断。',
     firstAction: '先准备一个平台账号、一个可发布槽位和一条证据链接；没有真实结果时不要让朋友误以为已自动投放。',
     stopLine: '没有真实发布证据和表现回流时，只能试用流程，不能试用自动分发效果。',
   },
 };
+
+const SELF_PUBLISH_TITLE_MATRIX = [
+  {
+    platform: '小红书',
+    persona: '测评种草号',
+    title: '这只通勤包，终于把电脑和化妆包分开了',
+    opening: '我最怕包里翻半天找不到钥匙，所以先看分区。',
+    action: '复制标题、首句、3 张封面备选和 8 个标签。',
+  },
+  {
+    platform: 'TikTok Shop',
+    persona: '口播成交号',
+    title: 'I tested this travel bag for 7 days',
+    opening: 'Three details made it feel built for daily commutes.',
+    action: '复制 15 秒口播、屏幕字幕、商品锚点和 CTA。',
+  },
+  {
+    platform: '视频号',
+    persona: '店铺官方号',
+    title: '一个包解决上班、短途和健身三种场景',
+    opening: '今天不讲参数，直接看三个真实使用场景。',
+    action: '复制口播稿、封面字、发布时间和客服承接话术。',
+  },
+  {
+    platform: 'Shopify / 独立站',
+    persona: '详情页转化',
+    title: 'Organized carry for workdays and short trips',
+    opening: 'Built for customers who carry a laptop, essentials, and one extra plan.',
+    action: '复制首屏卖点、FAQ、规格提醒和售后边界。',
+  },
+];
+
+const SELF_PUBLISH_BOUNDARIES = [
+  '客户自己登录平台发布，Wenai 不保存账号、密码、cookie 或登录态。',
+  '每个平台输出标题、首句、正文、标签、封面提示、素材清单和发布时间。',
+  '发完只要回填链接、截图、CSV 或云盘目录，就能进入下一轮复盘。',
+];
+
+const PERFORMANCE_INBOX_ITEMS = [
+  '发布链接：小红书笔记、短视频、商品页、广告活动链接。',
+  '截图证据：后台曝光、点击、成交、评论区和私信反馈。',
+  'CSV / 表格：平台导出的曝光、点击、订单、销售额和花费。',
+  '云盘目录：成片、封面、评论截图、达人反馈和复盘备注统一归档。',
+];
 
 function money(cents: number) {
   return `¥${(cents / 100).toFixed(2)}`;
@@ -125,7 +169,7 @@ export function buildCastManageOperatingChecks(snapshot: ChannelAccountSnapshot 
       ready: campaignCount > 0,
       evidence: `投放计划账本 ${campaignCount} 条`,
       next: campaignCount > 0
-        ? '把每个素材版本绑定到 campaign、SKU、tracking code 和实验单元。'
+        ? '把每个素材版本绑定到发布计划、SKU、追踪码和实验单元。'
         : '先创建投放计划账本；没有投放计划就无法对齐 Smartly 式创意-媒体-情报闭环。',
     },
     {
@@ -147,8 +191,8 @@ export function buildCastManageOperatingChecks(snapshot: ChannelAccountSnapshot 
       ready: evidenceCount > 0,
       evidence: `平台证据 URL ${evidenceCount} 条`,
       next: evidenceCount > 0
-        ? '把回执继续绑定到 dispatch、campaign 和客户审核后的资产版本。'
-        : '没有 evidence URL 时只能标记为待发布或手工交接，不能宣称已自动发布。',
+        ? '把回执继续绑定到执行记录、发布计划和客户审核后的资产版本。'
+        : '没有证据链接时只能标记为待发布或手工交接，不能宣称已自动发布。',
     },
     {
       stage: '表现回流',
@@ -156,10 +200,10 @@ export function buildCastManageOperatingChecks(snapshot: ChannelAccountSnapshot 
       evidence: `已衡量广告 ${measuredCount} 条`,
       next: measuredCount > 0
         ? '把 impressions、clicks、orders、revenue 反哺品牌学习和下一轮脚本。'
-        : '补 analytics sync 或手工 CSV 回流；没有回流就不能宣称自动优化。',
+        : '补手工 CSV、截图或云盘回流；没有回流就不能宣称自动优化。',
     },
     {
-      stage: '下一轮 Action Queue',
+      stage: '下一轮动作队列',
       ready: gaps.length === 0,
       evidence: gaps.length ? `阻断 ${gaps.length} 项 / 动作 ${nextActions.length} 条` : `动作队列 ${nextActions.length} 条 / 无硬阻断`,
       next: gaps.length
@@ -195,7 +239,7 @@ export function buildAdDeliveryGuardrails(snapshot: ChannelAccountSnapshot | nul
     {
       rule: '暂停规则',
       ready: campaignCount > 0 && (overBudget || missing.length > 0 || spendRatio >= 0.8),
-      evidence: `campaigns ${campaignCount} / gaps ${missing.length} / spend ${(spendRatio * 100).toFixed(0)}%`,
+      evidence: `发布计划 ${campaignCount} / 缺口 ${missing.length} / 花费 ${(spendRatio * 100).toFixed(0)}%`,
       operatorAction: overBudget
         ? '立即标记暂停，补回滚原因和平台证据 URL。'
         : missing.length > 0
@@ -208,18 +252,18 @@ export function buildAdDeliveryGuardrails(snapshot: ChannelAccountSnapshot | nul
     {
       rule: '平台证据',
       ready: evidenceCount > 0,
-      evidence: `evidence URL ${evidenceCount} / active campaigns ${activeCampaignCount}`,
+      evidence: `证据链接 ${evidenceCount} / 活动中 ${activeCampaignCount}`,
       operatorAction: evidenceCount > 0
         ? '把平台活动 URL、广告账户截图或回执绑定到投放计划账本。'
-        : '补平台证据 URL；没有证据时只能说 campaign hypothesis，不能说真实投放。',
+        : '补平台证据链接；没有证据时只能说发布假设，不能说真实投放。',
       stopLine: '没有平台回执或广告账户证据前，不宣称自动投放已执行。',
     },
     {
       rule: '放量规则',
       ready: measuredCount > 0 && !overBudget,
-      evidence: `measured campaigns ${measuredCount} / spend ${money(spendCents)}`,
+      evidence: `已回流 ${measuredCount} / 花费 ${money(spendCents)}`,
       operatorAction: measuredCount > 0
-        ? '只有 measured campaign 才能进入下一轮预算建议、素材复用和品牌学习。'
+        ? '只有已回流的发布计划才能进入下一轮预算建议、素材复用和品牌学习。'
         : '先导入 impressions、clicks、orders、revenue；没有表现回流时不做放量建议。',
       stopLine: '没有转化或收入回流前，不把方向性数据当作自动放量依据。',
     },
@@ -228,7 +272,7 @@ export function buildAdDeliveryGuardrails(snapshot: ChannelAccountSnapshot | nul
       ready: missing.length === 0 && !overBudget && campaignCount > 0,
       evidence: missing.length ? missing.map(readableCastSystemText).join(' / ') : campaignCount > 0 ? '没有硬性投放阻塞' : '缺投放计划账本',
       operatorAction: missing.length
-        ? '把阻断项写成回滚原因，进入下一轮 action queue。'
+        ? '把阻断项写成回滚原因，进入下一轮动作队列。'
         : campaignCount > 0
           ? '当前广告账本没有硬阻断；下一步只允许进入真实广告账户授权验收。'
           : '先建立投放计划账本；没有账本就没有可回滚对象。',
@@ -255,10 +299,10 @@ export function buildManualPublishReceiptChecks(snapshot: ChannelAccountSnapshot
       ready: accountCount > 0 && healthyCount > 0 && rateLimitedCount === 0,
       evidence: `账号 ${accountCount} / 健康 ${healthyCount} / 限频 ${rateLimitedCount}`,
       operatorAction: healthyCount > 0
-        ? '优先使用 healthy/warmup 账号；at-risk、blocked、rate-limited 账号不能进入发布排期。'
-        : '先补一个 manual_ready 且健康的账号，否则矩阵分发只能停在计划。'
+        ? '优先使用健康或预热完成的账号；风险、封禁、限频账号不能进入发布排期。'
+        : '先补一个待人工发布且健康的账号，否则矩阵分发只能停在计划。'
       ,
-      externalGate: '真实自动发布仍需要平台 OAuth、账号授权和发布权限。',
+      externalGate: '真实自动发布仍需要平台授权、账号授权和发布权限。',
     },
     {
       gate: '频控余量门禁',
@@ -268,15 +312,15 @@ export function buildManualPublishReceiptChecks(snapshot: ChannelAccountSnapshot
         ? '把下一条内容排到有余量的账号槽位，避免同账号过密发布。'
         : '先减少排期或换账号，不能继续塞入同一个账号。'
       ,
-      externalGate: '自动限频需要平台返回 rate limit、账号健康和发布失败码。',
+      externalGate: '自动限频需要平台返回频控、账号健康和发布失败码。',
     },
     {
       gate: '去重排期门禁',
       ready: campaignCount > 0 && scheduledCount <= Math.max(totalLimit, 1),
-      evidence: `campaign ${campaignCount} / scheduled ${scheduledCount}`,
+      evidence: `发布计划 ${campaignCount} / 已排期 ${scheduledCount}`,
       operatorAction: campaignCount > 0
-        ? '同一素材必须绑定 campaign/dispatch 后再排期，避免重复发同一版本。'
-        : '先建立 campaign/dispatch 账本；没有版本归属就不进入矩阵排期。'
+        ? '同一素材必须绑定发布计划和执行记录后再排期，避免重复发同一版本。'
+        : '先建立发布计划和执行记录；没有版本归属就不进入矩阵排期。'
       ,
       externalGate: '跨平台自动去重仍需要发布回执、asset_ref 和平台内容 ID。',
     },
@@ -285,22 +329,22 @@ export function buildManualPublishReceiptChecks(snapshot: ChannelAccountSnapshot
       ready: evidenceCount > 0,
       evidence: `平台证据 ${evidenceCount}`,
       operatorAction: evidenceCount > 0
-        ? '把平台 URL、后台截图或 campaign 回执绑定到 ledger，作为人工发布完成证据。'
+        ? '把平台链接、后台截图或发布回执绑定到账本，作为人工发布完成证据。'
         : '没有证据链接时只能标记待人工发布，不能标记已发布或已投放。'
       ,
-      externalGate: '自动回执需要发布 API、平台 post/campaign id 和 webhook 或轮询同步。',
+      externalGate: '自动回执需要发布接口、平台内容 ID 和回执同步。',
     },
     {
       gate: '表现回流门禁',
       ready: measuredCount > 0,
-      evidence: `已回流 campaign ${measuredCount}`,
+      evidence: `已回流发布计划 ${measuredCount}`,
       operatorAction: measuredCount > 0
-        ? '把转化、收入或有效互动写回品牌学习和下一轮 action queue。'
+        ? '把转化、收入或有效互动写回品牌学习和下一轮动作队列。'
         : gaps.length
           ? `先处理阻断项：${readableCastSystemText(gaps[0])}。`
-          : '发布后导入 CSV 或等待 analytics sync，未回流前不宣称自动优化。'
+          : '发布后导入 CSV、截图或云盘资料，未回流前不宣称自动优化。'
       ,
-      externalGate: '自动表现回流需要 analytics API、指标映射、归因窗口和同步频率。',
+      externalGate: '自动表现回流需要平台数据接口、指标映射、归因窗口和同步频率。',
     },
   ];
 }
@@ -326,7 +370,7 @@ export function buildCastVariantPlaybook(
       primaryAction: gaps.length
         ? `先处理分发缺口：${readableCastSystemText(gaps[0])}。`
         : '可以把 ready distribution plan 推进到手工发布、证据回填和表现导入。',
-      proofToCheck: '每个发布动作都要能追到 channel account、dispatch、evidence URL、campaign budget 和 performance return。',
+      proofToCheck: '每个发布动作都要能追到发布账号、执行记录、证据链接、预算和表现回流。',
       handoffBoundary: '平台授权、自动发布、广告账户和表现回流没接入前，运营只能标记待人工发布或已回填证据，不能标记自动化完成。',
       cards: [
         `账号 ${accountCount} / 已连接 ${connectedCount} / 健康 ${healthyCount}`,
@@ -344,7 +388,7 @@ export function buildCastVariantPlaybook(
         ? '把一个已准备好的平台账号、发布时间和证据入口展示给朋友；只验证流程，不宣称自动投放。'
         : '先补一个健康账号和可用发布槽位，否则朋友会卡在“到底能发到哪里”。',
       proofToCheck: '朋友只看三项：平台账号是否明确、下一次发布是否有槽位、发布后是否能看到证据或回流。',
-      handoffBoundary: '没有真实 evidence URL 或表现 CSV 时，页面必须说清楚这是流程试用，不是自动分发效果试用。',
+      handoffBoundary: '没有真实证据链接、截图或表现 CSV 时，页面必须说清楚这是流程试用，不是自动分发效果试用。',
       cards: [
         `可用账号 ${healthyCount}/${accountCount}`,
         `可发布槽位 ${slotCount}`,
@@ -356,8 +400,8 @@ export function buildCastVariantPlaybook(
   return {
     title: 'Cast 商业验收剧本',
     primaryAction: score >= 5
-      ? '可以进入外部平台接入验收：逐项配置 OAuth、广告账户、自动发布 API 和 analytics sync。'
-      : '先补内部账号矩阵、广告账本、发布槽位和证据回流，再谈 PubPal/矩阵分发能力。',
+      ? '可以进入外部平台接入验收：逐项配置平台授权、广告账户、自动发布接口和表现回流。'
+      : '先补内部账号矩阵、广告账本、发布槽位和证据回流，再谈矩阵分发能力。',
     proofToCheck: '合作者要看到账号池、授权状态、健康度、发布频率、广告预算、平台证据和回流指标在同一项目账本里闭环。',
     handoffBoundary: '91M+ creative output、42M+ video distribution 只能作为竞品规模对标；Wenai 没有审计账本前不能当自有规模展示。',
     cards: [
@@ -455,37 +499,68 @@ export function CastDistributionConsoleClient({
     return (
       <FactoryFriendTrialExperience
         active="cast"
-        title="发到平台，并留下证明"
-        subtitle="把内容排到抖音、小红书、视频号等渠道，发布链接、截图和状态都能给客户看。"
+        title="生成多账号发布包，客户自己发并回填证明"
+        subtitle="为小红书、TikTok、视频号、独立站等渠道生成标题、首句、正文、标签、封面提示和回填清单；客户自己登录平台发布。"
         metrics={[
-          { label: '发布渠道', value: '待确认', detail: '账号/排期', tone: 'emerald' },
-          { label: '发布动作', value: '待安排', detail: '先审核后发布', tone: 'slate' },
-          { label: '发布证明', value: '待回填', detail: '链接/截图', tone: 'amber' },
+          { label: '标题矩阵', value: '4 平台', detail: '账号人设/首句', tone: 'emerald' },
+          { label: '发布动作', value: '客户自发', detail: '不代管登录', tone: 'slate' },
+          { label: '回填证明', value: '4 类型', detail: '链接/截图/CSV/云盘', tone: 'amber' },
         ]}
         funnel={[
           { label: '账号', value: 82 },
           { label: '排期', value: 74 },
           { label: '发布', value: 62 },
           { label: '证明', value: 54 },
-          { label: '回收', value: 42 },
+          { label: '回填', value: 42 },
         ]}
         actions={[
-          { role: '运营', title: '安排发布', value: '选择渠道、排期和负责人', href: '#cast-schedule' },
-          { role: '客户', title: '查看证明', value: '发布后补链接或截图，客户能追溯', href: '#cast-proof' },
+          { role: '运营', title: '生成标题矩阵', value: '按平台、人设和商品卖点生成可复制发布包', href: '#title-matrix' },
+          { role: '客户', title: '自己发布并回填', value: '发布后补链接、截图、CSV 或云盘目录', href: '#cast-proof' },
           { role: '销售', title: '进入跟进', value: '把真实反馈交给负责人处理', href: '/factory/manage?variant=friend_trial' },
         ]}
         nextHref="/factory/manage?variant=friend_trial"
         nextLabel="去看效果"
       >
+        <section id="title-matrix" className="rounded-xl border border-indigo-100 bg-indigo-50 p-4 shadow-sm">
+          <div className="flex flex-col gap-2 sm:flex-row sm:items-end sm:justify-between">
+            <div>
+              <p className="text-xs font-black uppercase tracking-[0.18em] text-indigo-600">Self-publish package</p>
+              <h2 className="mt-1 text-lg font-black text-slate-950">多账号标题矩阵</h2>
+            </div>
+            <span className="w-fit rounded-md bg-white px-2.5 py-1 text-xs font-black text-indigo-700 ring-1 ring-indigo-100">
+              超级IP / 口播 / 店铺号分开写
+            </span>
+          </div>
+          <div className="mt-4 grid gap-3 lg:grid-cols-4">
+            {SELF_PUBLISH_TITLE_MATRIX.map(item => (
+              <article className="min-w-0 rounded-md bg-white p-3 ring-1 ring-indigo-100" key={`${item.platform}-${item.persona}`}>
+                <div className="flex items-start justify-between gap-2">
+                  <div>
+                    <p className="text-xs font-black text-indigo-600">{item.platform}</p>
+                    <h3 className="mt-1 break-words text-sm font-black leading-5 text-slate-950">{item.persona}</h3>
+                  </div>
+                  <span className="shrink-0 rounded bg-indigo-50 px-2 py-1 text-[11px] font-black text-indigo-700">可复制</span>
+                </div>
+                <p className="mt-3 break-words text-sm font-black leading-5 text-slate-900">{item.title}</p>
+                <p className="mt-2 text-xs font-bold leading-5 text-slate-600">{item.opening}</p>
+                <p className="mt-3 rounded bg-slate-50 px-2 py-1.5 text-xs font-bold leading-5 text-indigo-700">{item.action}</p>
+              </article>
+            ))}
+          </div>
+        </section>
+
         <section className="grid gap-6 xl:grid-cols-[0.9fr_1.1fr]">
           <form id="cast-schedule" onSubmit={seedMatrix} className="rounded-xl border border-slate-200 bg-white p-5 shadow-sm">
             <div className="flex items-center justify-between gap-4">
               <div>
                 <p className="text-xs font-semibold uppercase tracking-wide text-slate-500">发布账号矩阵</p>
-                <h2 className="mt-1 text-lg font-semibold text-slate-950">新增发布账号</h2>
+                <h2 className="mt-1 text-lg font-semibold text-slate-950">新增发布账号与排期</h2>
               </div>
               <span className="rounded-full bg-emerald-50 px-3 py-1 text-xs font-medium text-emerald-700">可排期</span>
             </div>
+            <p className="mt-3 text-sm leading-6 text-slate-500">
+              这里只记录客户准备用哪个账号、什么时间发、发完回填什么证据；不保存客户账号、密码、cookie 或登录态。
+            </p>
             <div className="mt-5 grid gap-3 sm:grid-cols-2">
               {[
                 ['项目', projectId, setProjectId],
@@ -518,7 +593,7 @@ export function CastDistributionConsoleClient({
           <section id="cast-proof" className="overflow-hidden rounded-xl border border-slate-200 bg-white shadow-sm">
             <div className="flex items-center justify-between border-b border-slate-100 px-5 py-4">
               <h2 className="text-sm font-semibold text-slate-950">发布链路</h2>
-              <span className="text-xs font-medium text-slate-500">链接/截图</span>
+              <span className="text-xs font-medium text-slate-500">链接/截图/CSV/云盘</span>
             </div>
             <div className="grid gap-3 p-5 sm:grid-cols-2">
               {manualReceiptChecks.slice(0, 4).map(item => (
@@ -530,6 +605,31 @@ export function CastDistributionConsoleClient({
               ))}
             </div>
           </section>
+        </section>
+
+        <section className="grid gap-4 lg:grid-cols-[0.9fr_1.1fr]">
+          <div className="rounded-xl border border-emerald-100 bg-emerald-50 p-4 shadow-sm">
+            <p className="text-xs font-black uppercase tracking-[0.18em] text-emerald-700">Publish boundary</p>
+            <h2 className="mt-1 text-lg font-black text-slate-950">客户自己发布</h2>
+            <div className="mt-4 grid gap-2">
+              {SELF_PUBLISH_BOUNDARIES.map(item => (
+                <div className="rounded-md bg-white px-3 py-2 text-sm font-bold leading-6 text-emerald-800 ring-1 ring-emerald-100" key={item}>
+                  {item}
+                </div>
+              ))}
+            </div>
+          </div>
+          <div className="rounded-xl border border-slate-200 bg-white p-4 shadow-sm">
+            <p className="text-xs font-black uppercase tracking-[0.18em] text-slate-400">Performance inbox</p>
+            <h2 className="mt-1 text-lg font-black text-slate-950">回填收件箱</h2>
+            <div className="mt-4 grid gap-2 sm:grid-cols-2">
+              {PERFORMANCE_INBOX_ITEMS.map(item => (
+                <div className="rounded-md border border-slate-100 bg-slate-50 px-3 py-2 text-sm font-bold leading-6 text-slate-700" key={item}>
+                  {item}
+                </div>
+              ))}
+            </div>
+          </div>
         </section>
       </FactoryFriendTrialExperience>
     );
@@ -986,7 +1086,7 @@ export function CastDistributionConsoleClient({
               <p className="text-xs uppercase tracking-[0.22em] text-emerald-200">Smartly-style Operating Board</p>
               <h2 className="mt-2 text-xl font-semibold">Smartly式 Cast/Manage 一体化验收板</h2>
               <p className="mt-2 text-sm leading-6 text-white/55">
-                这里把素材版本、账号、预算、campaign、平台回执、表现回流和下一轮 action queue 放到同一块板上；缺一项就保持手工门禁。
+                这里把素材版本、账号、预算、发布计划、平台回执、表现回流和下一轮动作放到同一块板上；缺一项就保持手工门禁。
               </p>
             </div>
             <div className="text-sm font-semibold text-emerald-100">

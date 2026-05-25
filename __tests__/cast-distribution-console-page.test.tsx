@@ -96,14 +96,16 @@ describe('cast distribution console page', () => {
     expect(partnerHtml).toContain('合作者视角');
     expect(partnerHtml).toContain('Cast 商业验收剧本');
     expect(partnerHtml).toContain('91M+ creative output、42M+ video distribution');
-    expect(partnerHtml).toContain('平台授权、广告账户授权、自动发布 API 和 表现回流');
+    expect(partnerHtml).toContain('平台授权、广告账户、自动发布接口和表现回流');
 
     expect(friendHtml).toContain('Wenai 商品增长工作台');
-    expect(friendHtml).toContain('发到平台，并留下证明');
+    expect(friendHtml).toContain('生成多账号发布包，客户自己发并回填证明');
     expect(friendHtml).toContain('创建一个商品增长任务');
     expect(friendHtml).toContain('发布账号矩阵');
-    expect(friendHtml).toContain('新增发布账号');
+    expect(friendHtml).toContain('新增发布账号与排期');
     expect(friendHtml).toContain('发布链路');
+    expect(friendHtml).toContain('TikTok Shop');
+    expect(friendHtml).toContain('客户自己登录平台发布');
     expect(friendHtml).toContain('/factory/manage?variant=friend_trial');
   });
 
@@ -205,7 +207,7 @@ describe('cast distribution console page', () => {
         ready: true,
       }),
       expect.objectContaining({
-        stage: '下一轮 Action Queue',
+        stage: '下一轮动作队列',
         ready: true,
       }),
     ]));
@@ -237,7 +239,7 @@ describe('cast distribution console page', () => {
       expect.objectContaining({
         rule: '平台证据',
         ready: false,
-        operatorAction: expect.stringContaining('没有证据时只能说 campaign hypothesis'),
+        operatorAction: expect.stringContaining('没有证据时只能说发布假设'),
       }),
       expect.objectContaining({
         rule: '放量规则',
@@ -315,7 +317,7 @@ describe('cast distribution console page', () => {
       expect.objectContaining({ gate: '表现回流门禁', ready: true }),
       expect.objectContaining({
         gate: '人工发布回执门禁',
-        externalGate: expect.stringContaining('发布 API'),
+        externalGate: expect.stringContaining('发布接口'),
       }),
     ]));
   });
