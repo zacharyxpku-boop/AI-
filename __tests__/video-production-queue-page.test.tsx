@@ -108,9 +108,9 @@ describe('video production queue page', () => {
 
     expect(html).toContain('Wenai 商品增长工作台');
     expect(html).toContain('客户能看到的系统能力');
-    expect(html).toContain('GitHub 开源混剪蓝图');
+    expect(html).toContain('稳定视频生产线');
     expect(html).toContain('稳定渲染队列');
-    expect(html).toContain('图片、视频、数字人 Key 到位');
+    expect(html).toContain('数字人口播增强');
     expect(html).toContain('首版输出客户自发布包');
     expect(html).toContain('/factory/cast?variant=friend_trial');
   });

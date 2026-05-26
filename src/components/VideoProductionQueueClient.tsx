@@ -949,14 +949,14 @@ const VIDEO_FACTORY_UI_VARIANTS: Record<FactoryUiVariantId, {
     reference: '参考：Clico 的客户 review / production handoff；广告平台的任务看板和结果回灌。',
   },
   friend_trial: {
-    label: '朋友试用视角',
-    audience: '给非技术朋友或客户第一次打开时不迷路',
+    label: '客户试用视角',
+    audience: '给客户第一次打开时不迷路',
     headline: '给一个产品和参考视频，系统帮你排出可审核的视频生产流程',
-    body: '这一屏少讲内部术语，只保留三件事：创建任务、等待成片、打开审核链接。复杂的生成服务、平台授权、广告账户和数据回流都放在后台边界里。',
+    body: '这一屏只保留三件事：创建任务、等待成片、打开审核链接。',
     firstAction: '填写产品名、平台、参考视频和素材链接，先生成一个可交接的视频任务。',
-    proof: '证明点：朋友不需要理解 API，也能看到任务、成片、审核和下一步。',
-    stopLine: '如果没有真实成片 URL，页面不能让用户误以为视频已经自动生成。',
-    reference: '参考：短视频广告工具的一键试用体验，但保留 Wenai 的审核与回流闭环。',
+    proof: '证明点：客户能看到任务、成片、审核和下一步。',
+    stopLine: '如果没有真实成片，页面只显示待生成或待审核。',
+    reference: '客户只看任务、成片、审核和回填。',
   },
 };
 

@@ -47,21 +47,21 @@ const CREATE_VARIANTS: Record<FactoryUiVariantId, {
     stopLine: '外部生成服务未接入时，只能创建生产交接包和结果回填入口，不能标记自动生成完成。',
   },
   friend_trial: {
-    label: '朋友试用视角',
-    audience: '给非技术朋友看能不能从一个商品需求得到可审核的生产包。',
-    headline: '朋友只需要看到：输入商品、生成生产包、等待结果、进入审核。',
-    body: '这一视角把生成服务、对象存储、DLP、版权和销售交接术语放到后台边界里，前台只展示清楚的下一步。',
-    firstAction: '先创建一个商品 brief、一个参考 benchmark 和一个待生产脚本；没有真实成品 URL 时不展示“已生成”。',
-    stopLine: '没有真实成品和审核入口时，只能试用 Create 流程，不能试用自动成片效果。',
+    label: '客户试用视角',
+    audience: '给客户看怎么从商品资料拿到图片、视频和客服素材。',
+    headline: '客户只需要看到：上传商品、整理素材、生成内容、进入审核。',
+    body: '客户只需要上传商品图、参考图和卖点，页面给出下一步和可审核素材。',
+    firstAction: '先创建一个商品任务、一个参考样例和一组待生产脚本；没有成品时不展示“已生成”。',
+    stopLine: '没有可审核成品时，只展示素材准备和下一步，不把草稿说成成品。',
   },
 };
 
 const ECOMMERCE_ASSET_SHELF = [
   {
     title: '模特生图任务包',
-    status: '等你的图片 Key',
+    status: '待生成',
     body: '先把模特年龄、气质、动作、手持方式、穿搭、背景和构图写成可复用 prompt。',
-    proof: 'Key 到位后直接进入生成；Key 未到位也能交给摄影、设计或外部工具执行。',
+    proof: '素材齐后进入生成；素材未齐时先给摄影或设计补拍清单。',
   },
   {
     title: '商品证明图',
@@ -365,11 +365,11 @@ export function CreateAssetConsoleClient({
       <FactoryFriendTrialExperience
         active="create"
         title="把商品图、模特图、证明图和客服素材整理成货架"
-        subtitle="图片生成等你的 Key；当前先把商品素材、模特生图 prompt、授权检查和客服 FAQ 做成可执行生产包。"
+        subtitle="先上传商品图、参考图和卖点，生成可审核的图片任务、素材清单和客服 FAQ。"
         metrics={[
           { label: '素材资产', value: `${assetCount} 个`, detail: '图片/视频/口播/FAQ', tone: 'slate' },
           { label: '可复用', value: `${reusableCount} 个`, detail: '下轮继续用', tone: 'emerald' },
-          { label: '模特生图', value: '等 Key', detail: '先出 prompt 包', tone: 'amber' },
+          { label: '模特生图', value: '待生成', detail: '先补参考图', tone: 'amber' },
         ]}
         funnel={[
           { label: 'Brief', value: 88 },

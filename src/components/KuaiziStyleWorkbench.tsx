@@ -104,9 +104,9 @@ const flowSteps: FlowStep[] = [
     label: '生成商品图',
     short: '图片',
     href: '/factory/create?variant=friend_trial',
-    title: '用已有图片 API Key 生成主图、场景图、卖点图',
-    body: '已有图片 Key 就直接接入生成；暂时没有 Key 时，先导出 prompt 和素材包。',
-    output: '输出：商品图任务 + prompt 包',
+    title: '把商品图做成主图、场景图和卖点图',
+    body: '选择风格、上传参考图，生成可审核的图片任务和素材清单。',
+    output: '输出：商品图任务 + 素材包',
     accent: 'from-amber-400 via-orange-400 to-pink-500',
   },
   {
@@ -114,8 +114,8 @@ const flowSteps: FlowStep[] = [
     label: '合成短视频',
     short: '视频',
     href: '/factory/video?variant=friend_trial',
-    title: '用视频 API / 开源混剪组件生成多版本短视频',
-    body: '按脚本、商品图、片段、尺寸和平台节奏组装任务，可接 API，也可导出给本地混剪执行。',
+    title: '把脚本、商品图和片段合成多版本短视频',
+    body: '按平台尺寸和节奏生成视频任务，客户只需要确认素材和成片。',
     output: '输出：视频队列 + 分镜说明',
     accent: 'from-indigo-500 via-purple-500 to-pink-500',
   },
@@ -199,29 +199,29 @@ const customerSystemCards = [
     tone: 'border-slate-200 bg-slate-50 text-slate-700',
   },
   {
-    label: '生图等 Key',
-    headline: '模特生图、场景图、数字人先做任务包',
-    body: '图片、视频、数字人 Key 到位后增强生成；没 Key 时先给 prompt、素材要求和验收标准。',
-    output: '得到：模特图任务 / 场景图 prompt / 数字人口播稿',
+    label: '图片先成包',
+    headline: '主图、场景图、模特图按风格生成',
+    body: '客户只选风格和参考图，系统给出可审核的图片任务和成片清单。',
+    output: '得到：模特图任务 / 场景图 / 卖点图',
     tone: 'border-amber-100 bg-amber-50 text-amber-800',
   },
   {
-    label: '混剪先跑通',
-    headline: '开源混剪收成一条稳定出片线',
-    body: '切片、字幕、模板、封面、尺寸和质检统一进队列，像 chat Cut 一样只改关键动作。',
+    label: '视频先成片',
+    headline: '脚本、字幕、封面和尺寸一次整理',
+    body: '客户只确认素材和风格，系统生成可审核的视频任务和发布版本。',
     output: '得到：时间线 / MP4 / 失败重试路径',
     tone: 'border-cyan-100 bg-cyan-50 text-cyan-800',
   },
   {
-    label: '标题按人设',
-    headline: '多账号矩阵生成平台原生标题',
-    body: '真实买家号、测评种草号、店铺官方号各有标题、前三句口播和证明素材。',
+    label: '文案按平台',
+    headline: '每个平台都有标题、正文和口播开头',
+    body: '小红书、TikTok、视频号和独立站分开生成，客户直接复制使用。',
     output: '得到：小红书 / TikTok / 视频号 / 独立站发布包',
     tone: 'border-indigo-100 bg-indigo-50 text-indigo-800',
   },
   {
     label: '客户自发布',
-    headline: '不代登账号，只交付可复制发布包',
+    headline: '交付可复制、可检查、可回填的发布包',
     body: '客户自己登录平台发布，Wenai 给标题、正文、封面、标签、发布时间和回填字段。',
     output: '得到：发布清单 / 云盘目录 / 回填入口',
     tone: 'border-emerald-100 bg-emerald-50 text-emerald-800',
@@ -329,7 +329,7 @@ function CommerceHeroPreview() {
         </div>
       </div>
       <div className="mt-3 grid grid-cols-3 gap-2">
-        {['不开账号', '等 Key 增强', '先云盘回填'].map(item => (
+        {['客户自发布', '可先交付', '证据回填'].map(item => (
           <div className="rounded bg-indigo-50 px-2 py-2 text-center text-[11px] font-black text-indigo-700 ring-1 ring-indigo-100" key={item}>{item}</div>
         ))}
       </div>
@@ -348,6 +348,7 @@ function IconMark({ children }: { children: string }) {
 export function KuaiziStyleWorkbench() {
   const [selectedId, setSelectedId] = useState<FlowId>('brief');
   const [query, setQuery] = useState('');
+  const showInternalReportPanels = false;
   const selectedStep = flowSteps.find(step => step.id === selectedId) ?? flowSteps[0];
   const filteredProjects = useMemo(() => {
     const value = query.trim().toLowerCase();
@@ -465,7 +466,7 @@ export function KuaiziStyleWorkbench() {
               <div className="min-w-0">
                 <div className="flex flex-wrap items-center gap-2">
                   <h1 className="text-lg font-black tracking-tight md:text-xl">Wenai 商品增长工作台</h1>
-                  <span className="rounded-md bg-blue-50 px-2 py-1 text-xs font-bold text-blue-700 ring-1 ring-blue-100">生成服务可增强</span>
+                  <span className="rounded-md bg-blue-50 px-2 py-1 text-xs font-bold text-blue-700 ring-1 ring-blue-100">图片视频可增强</span>
                   <span className="rounded-md bg-emerald-50 px-2 py-1 text-xs font-bold text-emerald-700 ring-1 ring-emerald-100">可先交付发布包</span>
                 </div>
                 <p className="mt-1 line-clamp-2 max-w-3xl text-sm leading-6 text-slate-500">
@@ -497,15 +498,20 @@ export function KuaiziStyleWorkbench() {
                         ))}
                       </div>
                       <div className="mt-5 grid gap-2 sm:grid-cols-2">
-                        {customerNextStepCommandCenter.commandCards.map(card => (
-                          <Link className="min-w-0 rounded-md border border-white/80 bg-white/88 p-3 text-left shadow-sm transition hover:bg-white" href={card.href} key={card.id}>
+                        {[
+                          { label: '1 选商品', body: '填商品卖点、目标平台和参考图。', href: '/factory/creative?variant=friend_trial' },
+                          { label: '2 生内容', body: '生成图片任务、短视频任务和发布文案。', href: '/factory/create?variant=friend_trial' },
+                          { label: '3 拿发布包', body: '客户复制发布，再回填链接和截图。', href: '/factory/cast?variant=friend_trial' },
+                          { label: '4 看复盘', body: '根据表现决定重剪、补图或放大。', href: '/factory/manage?variant=friend_trial' },
+                        ].map(card => (
+                          <Link className="min-w-0 rounded-md border border-white/80 bg-white/88 p-3 text-left shadow-sm transition hover:bg-white" href={card.href} key={card.label}>
                             <div className="flex items-center gap-2">
                               <span className="grid size-6 shrink-0 place-items-center rounded bg-[#14213d] text-[11px] font-black text-white">
                                 {card.label.slice(0, 1)}
                               </span>
-                              <h3 className="min-w-0 truncate text-xs font-black text-slate-950">{card.label.replace(/^\d+\.\s*/, '')}</h3>
+                              <h3 className="min-w-0 truncate text-xs font-black text-slate-950">{card.label.replace(/^\d+\s*/, '')}</h3>
                             </div>
-                            <p className="mt-2 line-clamp-2 text-[11px] font-bold leading-4 text-slate-600">{card.customerDoes}</p>
+                            <p className="mt-2 line-clamp-2 text-[11px] font-bold leading-4 text-slate-600">{card.body}</p>
                           </Link>
                         ))}
                       </div>
@@ -541,7 +547,7 @@ export function KuaiziStyleWorkbench() {
                     <h3 className="mt-1 text-lg font-black leading-6 text-slate-950">点一个入口，完成一件电商任务</h3>
                   </div>
                   <div className="grid w-full max-w-md grid-cols-2 gap-2 sm:grid-cols-3">
-                    {['等 Key 也能交付', '不代登账号', '先云盘回填'].map(item => (
+                    {['先拿发布包', '客户自发布', '发布后回填'].map(item => (
                       <span className="rounded-md bg-slate-50 px-3 py-2 text-center text-xs font-black leading-4 text-slate-700 ring-1 ring-slate-200" key={item}>{item}</span>
                     ))}
                   </div>
@@ -560,48 +566,10 @@ export function KuaiziStyleWorkbench() {
                     </Link>
                   ))}
                 </div>
-                <details className="mt-3 rounded-md border border-slate-200 bg-slate-50 p-3">
-                  <summary className="cursor-pointer list-none rounded bg-white px-3 py-2 text-sm font-black text-slate-900 ring-1 ring-slate-200">
-                    展开交付边界和开源学习
-                  </summary>
-                  <div className="mt-4 grid gap-3 lg:grid-cols-[minmax(0,1fr)_minmax(280px,0.42fr)]">
-                    <div className="rounded-md border border-slate-200 bg-slate-50 p-4">
-                      <h4 className="text-sm font-black text-slate-950">客户路径不变复杂</h4>
-                      <div className="mt-3 grid gap-2 sm:grid-cols-3">
-                        {['给商品资料', '拿发布包自发布', '回传链接截图或 CSV'].map(item => (
-                          <div className="rounded bg-white px-3 py-2 text-xs font-bold leading-5 text-slate-700 ring-1 ring-slate-200" key={item}>{item}</div>
-                        ))}
-                      </div>
-                    </div>
-                    <div className="rounded-md border border-slate-200 bg-white p-4">
-                      <h4 className="text-sm font-black text-slate-950">扩量前必须证明</h4>
-                      <p className="mt-2 text-xs font-bold leading-5 text-slate-600">样片、小批次、抽检、回填都通过后，再考虑多 worker、对象存储或平台数据接口。</p>
-                    </div>
-                  </div>
-                  <div className="mt-4 rounded-md border border-slate-200 bg-slate-50 p-4">
-                    <div className="flex flex-col gap-2 sm:flex-row sm:items-end sm:justify-between">
-                      <div className="min-w-0">
-                        <h4 className="text-sm font-black text-slate-950">截图里的开源方向怎么学</h4>
-                        <p className="mt-1 text-xs font-bold leading-5 text-slate-600">只吸收能增强电商交付的部分，凡是涉及代登、cookie、自动发布的能力都留在客户自愿的后续模式。</p>
-                      </div>
-                      <span className="w-fit rounded bg-white px-2.5 py-1 text-xs font-black text-slate-700 ring-1 ring-slate-200">{skillLearningRows.length} 个方向</span>
-                    </div>
-                    <div className="mt-3 grid gap-3 md:grid-cols-3">
-                      {skillLearningRows.map(row => (
-                        <article className="min-w-0 rounded bg-white p-3 ring-1 ring-slate-200" key={row[0]}>
-                          <div className="flex items-start justify-between gap-2">
-                            <h5 className="min-w-0 text-sm font-black leading-5 text-slate-950">{row[0]}</h5>
-                            <span className="shrink-0 rounded bg-slate-100 px-2 py-1 text-[11px] font-black text-slate-600">{row[3]}</span>
-                          </div>
-                          <p className="mt-2 text-xs font-black leading-5 text-indigo-700">{row[1]}</p>
-                          <p className="mt-1 text-xs font-bold leading-5 text-slate-600">{row[2]}</p>
-                        </article>
-                      ))}
-                    </div>
-                  </div>
-                </details>
               </section>
 
+              {showInternalReportPanels ? (
+              <div aria-hidden="true">
               <section className="rounded-lg border border-[#cfe8ff] bg-white p-5 shadow-sm">
                 <div className="flex flex-col gap-3 lg:flex-row lg:items-end lg:justify-between">
                   <div className="min-w-0">
@@ -1607,6 +1575,8 @@ export function KuaiziStyleWorkbench() {
                   </div>
                 </div>
               </section>
+              </div>
+              ) : null}
 
               <section className="grid gap-5 xl:grid-cols-[minmax(0,1fr)_360px]">
                 <div className="rounded-lg border border-[#e2e8f5] bg-white p-5 shadow-sm">
@@ -1661,6 +1631,8 @@ export function KuaiziStyleWorkbench() {
                 </aside>
               </section>
 
+              {showInternalReportPanels ? (
+              <div aria-hidden="true">
               <section className="grid w-full min-w-0 max-w-[calc(100vw-2rem)] grid-cols-[minmax(0,1fr)] gap-5 overflow-hidden xl:max-w-none xl:grid-cols-[minmax(0,1fr)_420px]">
                 <div className="w-full min-w-0 max-w-full overflow-hidden rounded-lg border border-[#e2e8f5] bg-white p-4 shadow-sm sm:p-5">
                   <div className="flex flex-col gap-2 md:flex-row md:items-end md:justify-between">
@@ -3073,6 +3045,8 @@ export function KuaiziStyleWorkbench() {
                   </table>
                 </div>
               </section>
+              </div>
+              ) : null}
             </div>
           </div>
         </section>

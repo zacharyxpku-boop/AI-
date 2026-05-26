@@ -99,10 +99,10 @@ describe('cast distribution console page', () => {
     expect(partnerHtml).toContain('平台授权、广告账户、自动发布接口和表现回流');
 
     expect(friendHtml).toContain('Wenai 商品增长工作台');
-    expect(friendHtml).toContain('生成多账号发布包，客户自己发并回填证明');
+    expect(friendHtml).toContain('生成平台发布包，客户自己发并回填证明');
     expect(friendHtml).toContain('创建一个商品增长任务');
-    expect(friendHtml).toContain('发布账号矩阵');
-    expect(friendHtml).toContain('新增发布账号与排期');
+    expect(friendHtml).toContain('平台发布文案');
+    expect(friendHtml).toContain('新增平台与排期');
     expect(friendHtml).toContain('发布链路');
     expect(friendHtml).toContain('TikTok Shop');
     expect(friendHtml).toContain('客户自己登录平台发布');
@@ -117,9 +117,9 @@ describe('cast distribution console page', () => {
 
     expect(html).toContain('Wenai 商品增长工作台');
     expect(html).toContain('客户能看到的系统能力');
-    expect(html).toContain('多账号标题矩阵');
+    expect(html).toContain('平台发布文案');
     expect(html).toContain('客户自己发布');
-    expect(html).toContain('不保存客户账号、密码、cookie 或登录态');
+    expect(html).toContain('发布后客户上传链接、截图、CSV 或云盘备注');
     expect(html).toContain('回填收件箱');
     expect(html).toContain('/factory/manage?variant=friend_trial');
   });

@@ -36,14 +36,14 @@ const customerNextActions = [
   },
   {
     label: '生成',
-    title: '生成混剪和发布素材',
-    body: '开源混剪、标题矩阵、客服话术和发布包先交付。',
+    title: '生成视频和发布素材',
+    body: '视频合成、标题文案、客服话术和发布包先交付。',
     href: '/factory/video?variant=friend_trial',
   },
   {
     label: '自发',
     title: '客户自己发布',
-    body: 'Wenai 不拿账号、密码、cookie 或后台 token。',
+    body: '客户自己登录平台发布，Wenai 只交付可复制发布包。',
     href: '/factory/cast?variant=friend_trial',
   },
   {
@@ -55,20 +55,20 @@ const customerNextActions = [
 ] as const;
 
 const providerBoundaryChips = [
-  '现在能跑：混剪、标题、客服、发布包',
-  '等你的 Key：图片、视频、数字人、TTS',
-  '首版边界：客户自发布，不代登不代发',
+    '现在能跑：视频、标题、客服、发布包',
+  '图片、视频、数字人可后续增强',
+  '首版边界：客户自发布，发布后回填',
 ] as const;
 
 const lastMileCards = [
   {
-    title: '开源/本地先交付',
+    title: '先把内容包交付',
     body: '长素材切片、字幕口播、模板时间线、稳定渲染和发布包先跑起来。',
     proof: '客户看到成片、标题、封面、发布清单和回填字段。',
   },
   {
     title: '客户自己发布',
-    body: 'Wenai 不拿账号、密码、cookie、后台 token，也不绕过平台流程。',
+    body: 'Wenai 只交付发布包、素材清单和回填入口。',
     proof: '客户登录自己的平台账号，复制发布包即可执行。',
   },
   {
@@ -114,7 +114,7 @@ const configs: Record<WorkflowStep, WorkflowConfig> = {
   create: {
     eyebrow: '步骤 02',
     title: '把商品图、模特图、证明图和客服素材整理成货架',
-    subtitle: '图片生成等你的 Key；当前先把商品素材、模特生图 prompt、授权检查和客服 FAQ 做成可执行生产包。',
+    subtitle: '先把商品素材、参考图、卖点图要求和客服 FAQ 做成可执行生产包。',
     primaryLabel: '去生成视频',
     primaryHref: '/factory/video?variant=friend_trial',
     toolName: '素材与图片生成',
@@ -124,11 +124,11 @@ const configs: Record<WorkflowStep, WorkflowConfig> = {
     outcome: '电商人最关心的不是“生成图片”，而是主图、穿搭图、手持图、使用场景图能不能批量补齐。',
     cards: [
       { label: '可用素材', value: '6 个', detail: '主图、包装图、场景图、视频片段归档。' },
-      { label: '模特生图', value: '等 Key', detail: '先输出模特、姿态、场景和构图 prompt。' },
+      { label: '模特生图', value: '可增强', detail: '先输出模特、姿态、场景和构图任务。' },
       { label: '客服素材', value: '可生成', detail: '尺码、材质、物流、售后和 FAQ 同步整理。' },
     ],
     systemPillars: [
-      { title: '模特生图任务包', body: 'Key 到位后接图片生成；Key 未到位先导出 prompt、构图和补图清单。', proof: '每张图都有用途、输入、质量检查和回退路径。' },
+      { title: '模特生图任务包', body: '先把模特风格、姿态、场景和构图整理成可执行任务；生成能力增强后直接进入图片生产。', proof: '每张图都有用途、输入、质量检查和回退路径。' },
       { title: '商品证明图', body: '主图、细节图、材质图、规格图、对比图和使用场景图按发布用途归档。', proof: '素材进入视频和发布包前先检查授权。' },
       { title: '客服与售后承接', body: '把材质、尺码、物流、售后承诺、评论区异议同步给客服和 FAQ。', proof: '内容带来的咨询能被接住。' },
     ],
@@ -139,14 +139,14 @@ const configs: Record<WorkflowStep, WorkflowConfig> = {
     ],
     deliverables: [
       { title: '商品影棚', body: '主图、白底图、场景图、卖点图、规格图和对比图按用途归档。', status: '可用' },
-      { title: '模特与人群', body: '用商品和人群定位生成模特风格、年龄、动作、场景和构图任务。', status: '等 Key' },
+      { title: '模特与人群', body: '用商品和人群定位生成模特风格、年龄、动作、场景和构图任务。', status: '可增强' },
       { title: '客服素材包', body: '把尺码、材质、物流、售后、常见异议整理成客服话术和售后卡片。', status: '可生成' },
     ],
   },
   video: {
     eyebrow: '步骤 03',
-    title: '本地混剪先稳定出片，视频和数字人 Key 到位后增强',
-    subtitle: '图片视频数字人等 Key 等你给；混剪先走开源/本地工作流，把脚本、素材、字幕、封面、BGM 和尺寸封成稳定渲染任务。',
+    title: '先稳定出片，后续增强视频和数字人能力',
+    subtitle: '先把脚本、素材、字幕、封面、BGM 和尺寸整理成稳定生产任务，让客户先拿到可审核、可发布的内容包。',
     primaryLabel: '去生成发布包',
     primaryHref: '/factory/cast?variant=friend_trial',
     toolName: '视频与数字人生产',
@@ -156,13 +156,13 @@ const configs: Record<WorkflowStep, WorkflowConfig> = {
     outcome: '目标不是炫酷剪辑台，而是让同一组素材稳定产出多平台短视频、数字人口播和多语版本。',
     cards: [
       { label: '视频任务', value: '8 条', detail: '按平台尺寸、脚本角度和素材组合生成。' },
-      { label: '数字人口播', value: '可接入', detail: '有数字人 Key 时进入生成，没有时导出脚本。' },
-      { label: '开源混剪', value: '本地优先', detail: 'Remotion 思路做模板，FFmpeg 做合成，时间线 JSON 做任务交接。' },
+      { label: '数字人口播', value: '可增强', detail: '先导出口播稿和字幕，增强后进入数字人生产。' },
+      { label: '批量合成', value: '稳定优先', detail: '按脚本、素材、字幕、封面和尺寸生成可复核任务。' },
     ],
     systemPillars: [
-      { title: 'GitHub 开源混剪蓝图', body: '吸收 Remotion、FFmpeg、OpenTimelineIO、PySceneDetect、Auto-Editor、Revideo、Twick 等开源范式。', proof: '客户只看到时间线、字幕、成片、标题和发布包。' },
+      { title: '稳定视频生产线', body: '把素材、字幕、封面、尺寸和发布时间线整理成可审核的视频任务。', proof: '客户只看到时间线、字幕、成片、标题和发布包。' },
       { title: '稳定渲染队列', body: '每条视频有素材清单、尺寸、标题角度、输出路径、重试次数和 blocked reason。', proof: '单条失败只重跑单条，不拖垮整批。' },
-      { title: '数字人等 Key', body: '图片、视频、数字人 Key 到位后接入生成层；未到位时继续导出口播稿和本地混剪包。', proof: '首版输出客户自发布包。' },
+      { title: '数字人口播增强', body: '先交付口播稿、字幕和素材包；增强能力接入后再自动生成数字人口播。', proof: '首版输出客户自发布包。' },
     ],
     tasks: [
       { title: '确认首批 3 条视频脚本', owner: '客户', status: '待确认' },
@@ -172,13 +172,13 @@ const configs: Record<WorkflowStep, WorkflowConfig> = {
     deliverables: [
       { title: '时间线任务', body: '脚本、镜头、素材、字幕、封面、音频和输出尺寸统一成可重跑任务。', status: '可封装' },
       { title: '稳定渲染队列', body: '待补素材、可渲染、渲染中、已导出四种状态；失败只重跑单条任务。', status: '工程化中' },
-      { title: '数字人口播', body: 'Key 到位后接数字人/TTS；未接前先交付口播稿、字幕和素材包。', status: '等 Key' },
+      { title: '数字人口播', body: '先交付口播稿、字幕和素材包；增强能力接入后再生成数字人口播。', status: '可增强' },
     ],
   },
   cast: {
     eyebrow: '步骤 04',
     title: '把内容变成客户自己能发布的多平台发布包',
-    subtitle: '多账号矩阵先不碰自动登录，重点把每个平台的标题、正文、标签、封面、素材和回填表做准，客户拿到就能发。',
+    subtitle: '重点把每个平台的标题、正文、标签、封面、素材和回填表做准，客户拿到就能发。',
     primaryLabel: '去复盘跟进',
     primaryHref: '/factory/manage?variant=friend_trial',
     toolName: '发布包与分发',
@@ -192,8 +192,8 @@ const configs: Record<WorkflowStep, WorkflowConfig> = {
       { label: '回填证据', value: '下一轮入口', detail: '发布后回传链接、截图、CSV 或云盘目录。' },
     ],
     systemPillars: [
-      { title: '多账号标题矩阵', body: '参考超级 IP 和口播结构，为真实买家号、测评种草号、店铺官方号生成不同标题。', proof: '每个平台都有标题、首句、正文、标签和封面提示。' },
-      { title: '客户自己发布', body: 'Wenai 交付发布包和复制清单，不保存客户账号、密码、cookie 或登录态。', proof: '发布边界清楚，客户可直接执行。' },
+      { title: '平台发布文案', body: '按小红书、TikTok、视频号和独立站分别生成标题、首句和正文。', proof: '每个平台都有标题、首句、正文、标签和封面提示。' },
+      { title: '客户自己发布', body: 'Wenai 交付发布包和复制清单，客户自己登录平台发布。', proof: '发布边界清楚，客户可直接执行。' },
       { title: '回填收件箱', body: '发布后客户上传链接、截图、CSV 或云盘备注。', proof: '下一轮复盘不依赖平台自动读取。' },
     ],
     tasks: [
@@ -308,7 +308,7 @@ export function KuaiziWorkflowConsole({ active }: { active: WorkflowStep }) {
             })}
           </nav>
           <div className="mt-5 rounded-md border border-slate-200 bg-slate-50 p-3 text-xs leading-5 text-slate-600">
-            当前策略：生成服务 Key 到位后增强图片、视频和数字人；开源组件先封成本地混剪任务；最后发布坚持客户自发，Wenai 交付发布包和回填入口。
+            当前策略：先交付图片、视频、文案、发布包和回填入口；后续生成能力增强时，不改变客户操作路径。
           </div>
         </aside>
 
@@ -357,9 +357,9 @@ export function KuaiziWorkflowConsole({ active }: { active: WorkflowStep }) {
               <div className="min-w-0">
                 <p className="text-xs font-black uppercase tracking-[0.18em] text-emerald-700">最后一公里</p>
                 <h2 className="mt-1 text-lg font-black leading-6 text-slate-950">每个子页面都保留同一个最后一公里边界</h2>
-                <p className="mt-1 text-sm leading-6 text-slate-600">开源混剪做到可发布资产；平台发布和真实表现证据由客户回到工作台。</p>
+                <p className="mt-1 text-sm leading-6 text-slate-600">Wenai 先做到可发布资产；平台发布和真实表现证据由客户回到工作台。</p>
               </div>
-              <span className="w-fit rounded-md bg-white px-2.5 py-1 text-xs font-black text-emerald-700 ring-1 ring-emerald-100">不代登，不虚构</span>
+              <span className="w-fit rounded-md bg-white px-2.5 py-1 text-xs font-black text-emerald-700 ring-1 ring-emerald-100">客户自发布，不虚构</span>
             </div>
             <div className="mt-4 grid gap-3 lg:grid-cols-3">
               {lastMileCards.map(card => (

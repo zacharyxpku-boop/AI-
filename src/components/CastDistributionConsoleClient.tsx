@@ -63,12 +63,12 @@ const CAST_VARIANTS: Record<FactoryUiVariantId, {
     stopLine: '外部平台未接入时，只能做手工发布交接和证据回填，不能标记自动发布完成。',
   },
   friend_trial: {
-    label: '朋友试用视角',
-    audience: '给非技术朋友只看一件事：内容是否能从可发布计划走到有证据的结果。',
-    headline: '朋友不需要理解平台授权，只要看到能发到哪里、谁负责、有没有结果。',
-    body: '这一视角隐藏内部投放术语，把复杂的账号矩阵压缩成“可发布 / 待补材料 / 已有回流”三个判断。',
-    firstAction: '先准备一个平台账号、一个可发布槽位和一条证据链接；没有真实结果时不要让朋友误以为已自动投放。',
-    stopLine: '没有真实发布证据和表现回流时，只能试用流程，不能试用自动分发效果。',
+    label: '客户试用视角',
+    audience: '给客户看内容能发到哪里、谁负责、发完怎么回填。',
+    headline: '客户只需要看到：发布平台、发布时间、负责人和回填入口。',
+    body: '页面把复杂分发压缩成“可发布 / 待补材料 / 已回填”三个判断。',
+    firstAction: '先准备一个发布平台、一个发布时间和一条回填记录；没有真实结果时不展示已发布。',
+    stopLine: '没有发布证据和表现回填时，只展示发布计划，不把计划说成结果。',
   },
 };
 
@@ -104,7 +104,7 @@ const SELF_PUBLISH_TITLE_MATRIX = [
 ];
 
 const SELF_PUBLISH_BOUNDARIES = [
-  '客户自己登录平台发布，Wenai 不保存账号、密码、cookie 或登录态。',
+  '客户自己登录平台发布，Wenai 只交付可复制、可检查、可回填的发布包。',
   '每个平台输出标题、首句、正文、标签、封面提示、素材清单和发布时间。',
   '发完只要回填链接、截图、CSV 或云盘目录，就能进入下一轮复盘。',
 ];
@@ -499,22 +499,22 @@ export function CastDistributionConsoleClient({
     return (
       <FactoryFriendTrialExperience
         active="cast"
-        title="生成多账号发布包，客户自己发并回填证明"
+        title="生成平台发布包，客户自己发并回填证明"
         subtitle="为小红书、TikTok、视频号、独立站等渠道生成标题、首句、正文、标签、封面提示和回填清单；客户自己登录平台发布。"
         metrics={[
-          { label: '标题矩阵', value: '4 平台', detail: '账号人设/首句', tone: 'emerald' },
+          { label: '发布文案', value: '4 平台', detail: '标题/首句', tone: 'emerald' },
           { label: '发布动作', value: '客户自发', detail: '不代管登录', tone: 'slate' },
           { label: '回填证明', value: '4 类型', detail: '链接/截图/CSV/云盘', tone: 'amber' },
         ]}
         funnel={[
-          { label: '账号', value: 82 },
+          { label: '平台', value: 82 },
           { label: '排期', value: 74 },
           { label: '发布', value: 62 },
           { label: '证明', value: 54 },
           { label: '回填', value: 42 },
         ]}
         actions={[
-          { role: '运营', title: '生成标题矩阵', value: '按平台、人设和商品卖点生成可复制发布包', href: '#title-matrix' },
+          { role: '运营', title: '生成发布文案', value: '按平台和商品卖点生成可复制发布包', href: '#title-matrix' },
           { role: '客户', title: '自己发布并回填', value: '发布后补链接、截图、CSV 或云盘目录', href: '#cast-proof' },
           { role: '销售', title: '进入跟进', value: '把真实反馈交给负责人处理', href: '/factory/manage?variant=friend_trial' },
         ]}
@@ -525,7 +525,7 @@ export function CastDistributionConsoleClient({
           <div className="flex flex-col gap-2 sm:flex-row sm:items-end sm:justify-between">
             <div>
               <p className="text-xs font-black uppercase tracking-[0.18em] text-indigo-600">Self-publish package</p>
-              <h2 className="mt-1 text-lg font-black text-slate-950">多账号标题矩阵</h2>
+              <h2 className="mt-1 text-lg font-black text-slate-950">平台发布文案</h2>
             </div>
             <span className="w-fit rounded-md bg-white px-2.5 py-1 text-xs font-black text-indigo-700 ring-1 ring-indigo-100">
               超级IP / 口播 / 店铺号分开写
@@ -553,19 +553,19 @@ export function CastDistributionConsoleClient({
           <form id="cast-schedule" onSubmit={seedMatrix} className="rounded-xl border border-slate-200 bg-white p-5 shadow-sm">
             <div className="flex items-center justify-between gap-4">
               <div>
-                <p className="text-xs font-semibold uppercase tracking-wide text-slate-500">发布账号矩阵</p>
-                <h2 className="mt-1 text-lg font-semibold text-slate-950">新增发布账号与排期</h2>
+                <p className="text-xs font-semibold uppercase tracking-wide text-slate-500">发布计划</p>
+                <h2 className="mt-1 text-lg font-semibold text-slate-950">新增平台与排期</h2>
               </div>
               <span className="rounded-full bg-emerald-50 px-3 py-1 text-xs font-medium text-emerald-700">可排期</span>
             </div>
             <p className="mt-3 text-sm leading-6 text-slate-500">
-              这里只记录客户准备用哪个账号、什么时间发、发完回填什么证据；不保存客户账号、密码、cookie 或登录态。
+              这里只记录客户准备发到哪个平台、什么时间发、发完回填什么证据。
             </p>
             <div className="mt-5 grid gap-3 sm:grid-cols-2">
               {[
                 ['项目', projectId, setProjectId],
                 ['平台', platform, setPlatform],
-                ['账号', handle, setHandle],
+                ['发布身份', handle, setHandle],
                 ['活动', campaignName, setCampaignName],
               ].map(([label, value, setter]) => (
                 <label className="text-sm text-slate-700" key={String(label)}>
@@ -580,7 +580,7 @@ export function CastDistributionConsoleClient({
             </div>
             <div className="mt-4 flex flex-wrap gap-2">
               <button disabled={loading} className="rounded-lg bg-slate-950 px-4 py-2 text-sm font-semibold text-white disabled:bg-slate-200 disabled:text-slate-500">
-                写入账号
+                保存计划
               </button>
               <button type="button" onClick={() => refresh()} disabled={loading} className="rounded-lg border border-slate-200 bg-white px-4 py-2 text-sm font-medium text-slate-700 disabled:text-slate-400">
                 刷新
