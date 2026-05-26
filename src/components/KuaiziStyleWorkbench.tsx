@@ -189,6 +189,51 @@ const operatingSystemRows = [
   ['数据回下一轮', '链接、截图、CSV、云盘目录、客户备注', '生成下一轮标题、素材缺口和重剪建议'],
 ] as const;
 
+const customerSystemCards = [
+  {
+    label: '商品先变任务',
+    headline: '客户只补商品资料和目标平台',
+    body: '系统把卖点、素材缺口、禁用词、证明素材和客服风险一次拆清楚。',
+    output: '得到：商品 Brief / 缺图清单 / 风险提醒',
+    tone: 'border-slate-200 bg-slate-50 text-slate-700',
+  },
+  {
+    label: '生图等 Key',
+    headline: '模特生图、场景图、数字人先做任务包',
+    body: '图片、视频、数字人 Key 到位后增强生成；没 Key 时先给 prompt、素材要求和验收标准。',
+    output: '得到：模特图任务 / 场景图 prompt / 数字人口播稿',
+    tone: 'border-amber-100 bg-amber-50 text-amber-800',
+  },
+  {
+    label: '混剪先跑通',
+    headline: '开源混剪收成一条稳定出片线',
+    body: '切片、字幕、模板、封面、尺寸和质检统一进队列，像 chat Cut 一样只改关键动作。',
+    output: '得到：时间线 / MP4 / 失败重试路径',
+    tone: 'border-cyan-100 bg-cyan-50 text-cyan-800',
+  },
+  {
+    label: '标题按人设',
+    headline: '多账号矩阵生成平台原生标题',
+    body: '真实买家号、测评种草号、店铺官方号各有标题、前三句口播和证明素材。',
+    output: '得到：小红书 / TikTok / 视频号 / 独立站发布包',
+    tone: 'border-indigo-100 bg-indigo-50 text-indigo-800',
+  },
+  {
+    label: '客户自发布',
+    headline: '不代登账号，只交付可复制发布包',
+    body: '客户自己登录平台发布，Wenai 给标题、正文、封面、标签、发布时间和回填字段。',
+    output: '得到：发布清单 / 云盘目录 / 回填入口',
+    tone: 'border-emerald-100 bg-emerald-50 text-emerald-800',
+  },
+  {
+    label: '客服接住流量',
+    headline: '售前、售后、差评和复购同一套话术',
+    body: '内容带来的咨询不会丢给人工临时编，FAQ、异议处理和售后卡片直接承接。',
+    output: '得到：客服 FAQ / 售后卡 / 下一轮复盘建议',
+    tone: 'border-rose-100 bg-rose-50 text-rose-800',
+  },
+] as const;
+
 const publishingRows = [
   ['小红书', '标题 3 版、正文 2 版、标签、封面、首评引导。'],
   ['TikTok', '3 秒钩子、口播脚本、字幕、封面、Shop CTA。'],
@@ -422,6 +467,52 @@ export function KuaiziStyleWorkbench() {
                         <p className="mt-2 hidden text-xs font-black text-indigo-600 sm:line-clamp-1 sm:block lg:line-clamp-2">{step.output}</p>
                       </button>
                     ))}
+                  </div>
+                </div>
+              </section>
+
+              <section className="rounded-lg border border-[#dde7f3] bg-white p-5 shadow-sm">
+                <div className="flex flex-col gap-3 lg:flex-row lg:items-end lg:justify-between">
+                  <div className="min-w-0">
+                    <p className="text-xs font-black uppercase tracking-[0.18em] text-slate-500">客户一眼看懂</p>
+                    <h3 className="mt-1 text-xl font-black leading-7 text-slate-950">电商人一眼看懂的六件事：上新、出图、混剪、发布、客服、复盘</h3>
+                    <p className="mt-2 max-w-5xl text-sm leading-6 text-slate-500">
+                      Wenai 不把能力拆成客户看不懂的工具名，而是按电商人每天的动作组织：先把商品资料变任务，再把素材变内容，客户自己发布，回填证据后继续放大。
+                    </p>
+                  </div>
+                  <div className="grid w-full max-w-md grid-cols-2 gap-2 sm:grid-cols-3">
+                    {['等 Key 也能交付', '不代登账号', '先云盘回填'].map(item => (
+                      <span className="rounded-md bg-slate-50 px-3 py-2 text-center text-xs font-black leading-4 text-slate-700 ring-1 ring-slate-200" key={item}>{item}</span>
+                    ))}
+                  </div>
+                </div>
+                <div className="mt-5 grid gap-3 md:grid-cols-2 xl:grid-cols-3">
+                  {customerSystemCards.map((card, index) => (
+                    <article className={`min-w-0 rounded-md border p-4 ${card.tone}`} key={card.label}>
+                      <div className="flex items-start gap-3">
+                        <span className="grid size-8 shrink-0 place-items-center rounded bg-white text-xs font-black text-slate-900 ring-1 ring-black/5">{index + 1}</span>
+                        <div className="min-w-0">
+                          <p className="text-[11px] font-black uppercase tracking-[0.12em]">{card.label}</p>
+                          <h4 className="mt-1 text-sm font-black leading-5 text-slate-950">{card.headline}</h4>
+                        </div>
+                      </div>
+                      <p className="mt-3 text-sm font-bold leading-6 text-slate-600">{card.body}</p>
+                      <p className="mt-3 rounded bg-white px-3 py-2 text-xs font-black leading-5 text-slate-700 ring-1 ring-black/5">{card.output}</p>
+                    </article>
+                  ))}
+                </div>
+                <div className="mt-4 grid gap-3 lg:grid-cols-[minmax(0,1fr)_minmax(280px,0.42fr)]">
+                  <div className="rounded-md border border-slate-200 bg-slate-50 p-4">
+                    <h4 className="text-sm font-black text-slate-950">客户路径不变复杂</h4>
+                    <div className="mt-3 grid gap-2 sm:grid-cols-3">
+                      {['给商品资料', '拿发布包自发布', '回传链接截图或 CSV'].map(item => (
+                        <div className="rounded bg-white px-3 py-2 text-xs font-bold leading-5 text-slate-700 ring-1 ring-slate-200" key={item}>{item}</div>
+                      ))}
+                    </div>
+                  </div>
+                  <div className="rounded-md border border-slate-200 bg-white p-4">
+                    <h4 className="text-sm font-black text-slate-950">扩量前必须证明</h4>
+                    <p className="mt-2 text-xs font-bold leading-5 text-slate-600">样片、小批次、抽检、回填都通过后，再考虑多 worker、对象存储或平台数据接口。</p>
                   </div>
                 </div>
               </section>

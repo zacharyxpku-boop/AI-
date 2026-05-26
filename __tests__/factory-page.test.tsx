@@ -33,6 +33,16 @@ describe('factory page', () => {
     expect(html).toContain('客户下一步指挥台');
     expect(html).toContain('先上传商品素材');
     expect(html).toContain('混剪到发布控制台');
+    expect(html).toContain('客户一眼看懂');
+    expect(html).toContain('电商人一眼看懂的六件事：上新、出图、混剪、发布、客服、复盘');
+    expect(html).toContain('商品先变任务');
+    expect(html).toContain('生图等 Key');
+    expect(html).toContain('混剪先跑通');
+    expect(html).toContain('标题按人设');
+    expect(html).toContain('客户路径不变复杂');
+    expect(html).toContain('给商品资料');
+    expect(html).toContain('回传链接截图或 CSV');
+    expect(html).toContain('扩量前必须证明');
     expect(html).toContain('开源混剪、口播标题、客户自发布，先合成一条稳定流水线');
     expect(html).toContain('今天就能稳定混剪');
     expect(html).toContain('多账号标题和口播不做代登');
