@@ -125,6 +125,21 @@ const lastMileCards = [
   },
 ] as const;
 
+const kuaiziServiceNav = [
+  ['编导灵感', '/factory/creative?variant=friend_trial'],
+  ['素材生产', '/factory/create?variant=friend_trial'],
+  ['合成量产', '/factory/video?variant=friend_trial'],
+  ['投放分发', '/factory/cast?variant=friend_trial'],
+  ['筷子云盘', '/factory/create?variant=friend_trial'],
+  ['手机协同', '/factory/cast?variant=friend_trial'],
+  ['直播切片', '/factory/video?variant=friend_trial'],
+  ['创意洞察', '/factory/manage?variant=friend_trial'],
+  ['视频翻译', '/factory/video?variant=friend_trial'],
+  ['矩阵宝', '/factory/cast?variant=friend_trial'],
+  ['KOC流量包', '/factory/cast?variant=friend_trial'],
+  ['评论管理', '/factory/manage?variant=friend_trial'],
+] as const;
+
 const configs: Record<WorkflowStep, WorkflowConfig> = {
   creative: {
     eyebrow: '步骤 01',
@@ -328,6 +343,326 @@ function WorkflowIllustration({ config }: { config: WorkflowConfig }) {
   );
 }
 
+function KuaiziModuleWorkbench({
+  active,
+  audienceGoal,
+  platform,
+  productName,
+  withTaskContext,
+}: {
+  active: WorkflowStep;
+  audienceGoal: string;
+  platform: string;
+  productName: string;
+  withTaskContext: (href: string) => string;
+}) {
+  const product = productName.trim() || '当前商品';
+  const goal = audienceGoal.trim() || '先完成一轮可发布内容';
+
+  if (active === 'creative') {
+    const tools = [
+      ['写脚本', '把卖点拆成开场、证明、场景、CTA'],
+      ['AI 影棚', '反推主图、场景图、模特图需求'],
+      ['AI 复刻', '参考爆款结构，不复制具体表达'],
+      ['元素替换', '换人群、换场景、换卖点角度'],
+      ['多语配音', '先出多语口播稿和字幕'],
+      ['数字人口播', '生成口播任务和审核脚本'],
+    ];
+    return (
+      <section className="mt-5 overflow-hidden rounded-lg border border-[#dbe6ff] bg-white shadow-sm">
+        <div className="grid min-h-[520px] lg:grid-cols-[260px_minmax(0,1fr)_320px]">
+          <aside className="border-b border-slate-200 bg-[#f1f5ff] p-4 lg:border-b-0 lg:border-r">
+            <p className="text-xs font-black text-slate-400">开始工作</p>
+            <h2 className="mt-2 text-xl font-black text-[#17223d]">商品内容起稿台</h2>
+            <div className="mt-4 grid gap-2">
+              {['商品 brief', '竞品拆解', '评论区钩子', '平台脚本', '禁用词检查'].map((item, index) => (
+                <button className={`min-h-10 rounded-md px-3 text-left text-sm font-black ${index === 0 ? 'bg-[#14233f] text-white' : 'bg-white text-slate-700 ring-1 ring-slate-200'}`} key={item} type="button">
+                  {item}
+                </button>
+              ))}
+            </div>
+          </aside>
+          <div className="min-w-0 p-5">
+            <div className="flex flex-wrap items-center justify-between gap-3">
+              <div>
+                <p className="text-xs font-black uppercase tracking-[0.16em] text-indigo-600">编导灵感</p>
+                <h3 className="mt-1 text-2xl font-black text-slate-950">像筷子开始工作页一样，一屏进入全部生产工具</h3>
+              </div>
+              <Link className="rounded-md bg-[#315cff] px-4 py-2 text-sm font-black text-white" href={withTaskContext('/factory/create?variant=friend_trial')}>整理素材</Link>
+            </div>
+            <div className="mt-5 grid gap-3 sm:grid-cols-2 xl:grid-cols-3">
+              {tools.map(([title, body], index) => (
+                <Link className="min-h-[126px] rounded-lg border border-slate-200 bg-slate-50 p-4 transition hover:-translate-y-0.5 hover:bg-white hover:shadow-md" href={withTaskContext(index < 2 ? '/factory/create?variant=friend_trial' : '/factory/video?variant=friend_trial')} key={title}>
+                  <span className="grid size-9 place-items-center rounded-md bg-white text-sm font-black text-indigo-700 ring-1 ring-slate-200">{index + 1}</span>
+                  <h4 className="mt-3 text-base font-black text-slate-950">{title}</h4>
+                  <p className="mt-2 text-xs font-bold leading-5 text-slate-500">{body}</p>
+                </Link>
+              ))}
+            </div>
+          </div>
+          <aside className="border-t border-slate-200 bg-white p-4 lg:border-l lg:border-t-0">
+            <p className="text-xs font-black uppercase tracking-[0.16em] text-slate-400">脚本大纲</p>
+            <h3 className="mt-2 text-lg font-black text-slate-950">{product}</h3>
+            <div className="mt-4 grid gap-2">
+              {[
+                ['目标平台', platform],
+                ['这轮目标', goal],
+                ['首屏钩子', '3 秒内说明痛点和使用场景'],
+                ['下一步', '脚本反推缺图、缺视频、缺 FAQ'],
+              ].map(([label, value]) => (
+                <div className="rounded-md bg-slate-50 p-3 ring-1 ring-slate-100" key={label}>
+                  <p className="text-[11px] font-black text-slate-400">{label}</p>
+                  <p className="mt-1 text-sm font-bold leading-5 text-slate-800">{value}</p>
+                </div>
+              ))}
+            </div>
+          </aside>
+        </div>
+      </section>
+    );
+  }
+
+  if (active === 'create') {
+    const folders = ['全部文件', '我创建的', '回收站', '立泽', '二手车', '旅居', 'Kuaizi总部案例', 'AI视频'];
+    const assets = [
+      ['mp4', '口播素材 27', '00:17'],
+      ['mp4', '场景切片 26', '00:46'],
+      ['jpg', '白底主图', '今天更新'],
+      ['jpg', '卖点长图', '今天更新'],
+      ['工程', '0410-3', '混剪工程'],
+      ['音频', '多语配音', '100+ 音色'],
+    ];
+    return (
+      <section className="mt-5 overflow-hidden rounded-lg border border-[#dbe6ff] bg-white shadow-sm">
+        <div className="grid min-h-[560px] lg:grid-cols-[230px_minmax(0,1fr)_280px]">
+          <aside className="border-b border-slate-200 bg-[#f6f8ff] p-4 lg:border-b-0 lg:border-r">
+            <p className="text-xs font-black text-blue-600">筷子云盘</p>
+            <div className="mt-4 grid gap-1">
+              {folders.map((item, index) => (
+                <button className={`flex min-h-9 items-center justify-between rounded-md px-3 text-left text-sm font-bold ${index === 0 ? 'bg-white text-blue-700 ring-1 ring-blue-100' : 'text-slate-600 hover:bg-white'}`} key={item} type="button">
+                  <span>{item}</span>
+                  <span className="text-xs text-slate-400">{index === 0 ? '5116' : index * 7 + 1}</span>
+                </button>
+              ))}
+            </div>
+            <div className="mt-5 rounded-md bg-white p-3 ring-1 ring-slate-200">
+              <p className="text-xs font-black text-slate-400">团队存储空间</p>
+              <p className="mt-2 text-2xl font-black text-slate-950">51.7T</p>
+              <p className="text-xs font-bold text-slate-500">已使用</p>
+            </div>
+          </aside>
+          <div className="min-w-0 p-5">
+            <div className="flex flex-wrap items-center justify-between gap-3">
+              <div className="flex flex-wrap gap-4 text-sm font-black text-slate-700">
+                {['全部', '素材', '工程', '成片', '视频', '图片', '图集', '音频'].map((tab, index) => (
+                  <button className={index === 0 ? 'text-blue-700 underline decoration-2 underline-offset-8' : ''} key={tab} type="button">{tab}</button>
+                ))}
+              </div>
+              <div className="flex flex-wrap gap-2">
+                {['上传素材', '新建文件夹', '新建工程', '素材采集'].map(item => (
+                  <button className="rounded-md border border-slate-200 bg-white px-3 py-2 text-xs font-black text-slate-700" key={item} type="button">{item}</button>
+                ))}
+              </div>
+            </div>
+            <p className="mt-6 text-sm font-black text-slate-950">今天</p>
+            <div className="mt-3 grid gap-4 sm:grid-cols-2 xl:grid-cols-3">
+              {assets.map(([kind, title, meta], index) => (
+                <Link className="group min-w-0 rounded-lg border border-slate-200 bg-slate-50 p-3 transition hover:bg-white hover:shadow-md" href={withTaskContext(index < 4 ? '/factory/video?variant=friend_trial' : '/factory/cast?variant=friend_trial')} key={title}>
+                  <div className="aspect-video rounded-md bg-[linear-gradient(135deg,#e0edff,#f8fafc_45%,#ffe4f1)] p-2">
+                    <span className="rounded bg-slate-700 px-2 py-1 text-[11px] font-black text-white">{kind}</span>
+                  </div>
+                  <h4 className="mt-2 truncate text-sm font-black text-slate-950">{title}</h4>
+                  <p className="mt-1 text-xs font-bold text-slate-500">{meta}</p>
+                </Link>
+              ))}
+            </div>
+          </div>
+          <aside className="border-t border-slate-200 bg-white p-4 lg:border-l lg:border-t-0">
+            <p className="text-xs font-black uppercase tracking-[0.16em] text-slate-400">权限与质检</p>
+            <h3 className="mt-2 text-lg font-black text-slate-950">当前素材包</h3>
+            <div className="mt-4 grid gap-2">
+              {['主图已归档', '场景图待补 2 张', 'FAQ 已生成', '授权说明待确认'].map(item => (
+                <div className="rounded-md bg-slate-50 px-3 py-2 text-sm font-bold text-slate-700 ring-1 ring-slate-100" key={item}>{item}</div>
+              ))}
+            </div>
+            <Link className="mt-4 flex min-h-10 items-center justify-center rounded-md bg-[#315cff] px-4 text-sm font-black text-white" href={withTaskContext('/factory/video?variant=friend_trial')}>进入合成量产</Link>
+          </aside>
+        </div>
+      </section>
+    );
+  }
+
+  if (active === 'video') {
+    return (
+      <section className="mt-5 overflow-hidden rounded-lg border border-slate-800 bg-[#080b12] text-white shadow-sm">
+        <div className="grid min-h-[620px] lg:grid-cols-[320px_minmax(0,1fr)_320px]">
+          <aside className="border-b border-white/10 bg-[#0d111a] p-4 lg:border-b-0 lg:border-r">
+            <div className="flex items-center justify-between gap-3">
+              <p className="text-sm font-black text-blue-300">素材调试</p>
+              <button className="rounded bg-blue-600 px-3 py-1.5 text-xs font-black" type="button">脚本导入</button>
+            </div>
+            <div className="mt-4 grid grid-cols-3 gap-2">
+              {Array.from({ length: 9 }).map((_, index) => (
+                <div className="min-h-[86px] rounded border border-white/10 bg-black/40 p-2" key={index}>
+                  <div className="mx-auto h-12 w-9 rounded bg-[linear-gradient(135deg,#fbcfe8,#93c5fd)]" />
+                  <p className="mt-2 truncate text-[10px] text-slate-300">镜头 {index + 1}</p>
+                </div>
+              ))}
+            </div>
+            <div className="mt-4 rounded border border-white/10 bg-black/40 p-3">
+              <p className="text-xs font-black text-slate-400">音频分组</p>
+              <div className="mt-2 h-12 rounded bg-[linear-gradient(90deg,#1d4ed8,#38bdf8,#1d4ed8)] opacity-80" />
+            </div>
+          </aside>
+          <div className="min-w-0 p-4">
+            <div className="flex flex-wrap items-center justify-between gap-3 border-b border-white/10 pb-3">
+              <div className="flex gap-2">
+                {['素材调试', '极速裂变', '组合优化'].map((tab, index) => (
+                  <button className={`rounded-md px-3 py-2 text-sm font-black ${index === 1 ? 'bg-blue-600 text-white' : 'bg-white/5 text-slate-300'}`} key={tab} type="button">{tab}</button>
+                ))}
+              </div>
+              <Link className="rounded-md bg-slate-800 px-3 py-2 text-xs font-black text-slate-200" href={withTaskContext('/factory/cast?variant=friend_trial')}>保存草稿</Link>
+            </div>
+            <div className="mt-4 grid gap-4 xl:grid-cols-[minmax(0,1fr)_220px]">
+              <div className="grid min-h-[270px] place-items-center rounded-lg border border-white/10 bg-black">
+                <div className="aspect-[9/16] h-[260px] rounded-lg bg-[linear-gradient(180deg,#1e293b,#f472b6_55%,#fef3c7)] p-3">
+                  <div className="mt-36 rounded bg-black/65 p-2 text-center text-xs font-black">Demo Product 15s 预览</div>
+                </div>
+              </div>
+              <div className="rounded-lg border border-white/10 bg-[#111827] p-3">
+                <p className="text-xs font-black text-blue-300">组合优化</p>
+                {['字幕样式', '滤镜', '贴纸装饰', '口播音色'].map(item => (
+                  <label className="mt-3 block text-xs font-bold text-slate-300" key={item}>
+                    {item}
+                    <input className="mt-2 h-2 w-full accent-blue-500" max="100" min="0" type="range" />
+                  </label>
+                ))}
+              </div>
+            </div>
+            <div className="mt-4 rounded-lg border border-orange-500/40 bg-black/40 p-3">
+              <div className="flex items-center justify-between gap-3">
+                <p className="text-sm font-black text-orange-300">时间线</p>
+                <p className="text-xs text-slate-400">16s - 22s / 9 个分组 / 132 个镜头</p>
+              </div>
+              <div className="mt-3 grid gap-2">
+                {['开头', '产品总体外观', '气垫展示', '气垫使用', '口红外观'].map(item => (
+                  <div className="grid grid-cols-6 gap-1 rounded border border-orange-500/30 bg-orange-950/20 p-1" key={item}>
+                    {Array.from({ length: 6 }).map((_, index) => <span className="h-10 rounded bg-white/12" key={index} />)}
+                    <span className="col-span-6 text-center text-[11px] font-black text-orange-200">{item}</span>
+                  </div>
+                ))}
+              </div>
+            </div>
+          </div>
+          <aside className="border-t border-white/10 bg-[#0d111a] p-4 lg:border-l lg:border-t-0">
+            <p className="text-xs font-black text-blue-300">脚本策略概览</p>
+            <h3 className="mt-2 text-lg font-black">批量合成设置</h3>
+            <div className="mt-4 grid gap-2">
+              {['固定分组顺序', '智能混剪', '跟随音频', '失败单条重试'].map(item => (
+                <div className="rounded border border-white/10 bg-white/5 px-3 py-2 text-xs font-bold text-slate-300" key={item}>{item}</div>
+              ))}
+            </div>
+            <Link className="mt-5 flex min-h-12 items-center justify-center rounded-md bg-gradient-to-r from-blue-600 via-fuchsia-600 to-rose-500 text-sm font-black" href={withTaskContext('/factory/cast?variant=friend_trial')}>生成视频</Link>
+          </aside>
+        </div>
+      </section>
+    );
+  }
+
+  if (active === 'cast') {
+    const channels = ['抖音', '快手', '视频号', '快手+', '逛逛', '小红书', 'TikTok', 'Meta'];
+    return (
+      <section className="mt-5 overflow-hidden rounded-lg border border-[#dbe6ff] bg-white shadow-sm">
+        <div className="grid min-h-[540px] lg:grid-cols-[minmax(0,1fr)_320px]">
+          <div className="min-w-0 p-5">
+            <p className="text-xs font-black uppercase tracking-[0.16em] text-indigo-600">矩阵宝发布</p>
+            <h2 className="mt-2 text-2xl font-black text-slate-950">把发布模式、渠道、标题和回填放在一个发布台</h2>
+            <div className="mt-5 grid gap-3 md:grid-cols-3">
+              {[
+                ['AI智能分发', '按平台尺寸、标题和发布时间生成发布包'],
+                ['KOC视频任务', '把成片拆成达人可执行任务'],
+                ['授权转发', '客户自己发布或授权后再自动化'],
+              ].map(([title, body], index) => (
+                <button className={`min-h-[116px] rounded-lg border p-4 text-left ${index === 0 ? 'border-blue-300 bg-blue-50' : 'border-slate-200 bg-slate-50'}`} key={title} type="button">
+                  <h3 className="text-base font-black text-slate-950">{title}</h3>
+                  <p className="mt-2 text-xs font-bold leading-5 text-slate-500">{body}</p>
+                </button>
+              ))}
+            </div>
+            <p className="mt-6 text-sm font-black text-slate-950">发布渠道</p>
+            <div className="mt-3 grid gap-3 sm:grid-cols-2 xl:grid-cols-4">
+              {channels.map((item, index) => (
+                <button className="min-h-20 rounded-lg border border-slate-200 bg-slate-50 p-3 text-left transition hover:bg-white hover:shadow-sm" key={item} type="button">
+                  <span className="grid size-8 place-items-center rounded-full bg-white text-xs font-black text-blue-700 ring-1 ring-slate-200">{index + 1}</span>
+                  <h4 className="mt-2 text-sm font-black text-slate-950">{item}</h4>
+                  <p className="text-[11px] font-bold text-slate-500">标题 / 正文 / 封面 / 标签</p>
+                </button>
+              ))}
+            </div>
+          </div>
+          <aside className="border-t border-slate-200 bg-[#f8faff] p-4 lg:border-l lg:border-t-0">
+            <p className="text-xs font-black text-slate-400">标题与发布包</p>
+            <h3 className="mt-2 text-lg font-black text-slate-950">{platform} 发布内容</h3>
+            <textarea className="mt-4 min-h-36 w-full resize-none rounded-md border border-slate-200 bg-white p-3 text-sm font-bold leading-6 text-slate-800" readOnly value={`${product}｜${goal}\n#新品 #好物推荐 #真实使用\n封面：痛点 + 商品图 + 结果承诺`} />
+            <div className="mt-3 grid grid-cols-2 gap-2">
+              {['AI生成标题', '批量导入', '发布历史', '回填表'].map(item => (
+                <button className="min-h-10 rounded-md bg-white px-3 text-xs font-black text-slate-700 ring-1 ring-slate-200" key={item} type="button">{item}</button>
+              ))}
+            </div>
+            <Link className="mt-4 flex min-h-11 items-center justify-center rounded-md bg-[#315cff] text-sm font-black text-white" href={withTaskContext('/factory/manage?variant=friend_trial')}>进入创意洞察</Link>
+          </aside>
+        </div>
+      </section>
+    );
+  }
+
+  const rows = [
+    ['让我看看是谁还没开智...', '晨光官方旗舰店', '2026-04-28', '4', '1', '1', '0'],
+    ['春日面部瑜伽加好工具', '绿木轩木艺', '2026-04-27', '3', '0', '0', '0'],
+    ['26年中考必备的三样物品', '晨光学习用品旗舰店', '2026-04-27', '2', '0', '0', '1'],
+    ['今年家里有中考的孩子', '好物推荐', '2026-04-27', '1', '0', '0', '0'],
+  ];
+  return (
+    <section className="mt-5 overflow-hidden rounded-lg border border-[#dbe6ff] bg-white shadow-sm">
+      <div className="p-5">
+        <div className="flex flex-wrap items-center justify-between gap-3">
+          <div>
+            <p className="text-xs font-black uppercase tracking-[0.16em] text-indigo-600">创意洞察</p>
+            <h2 className="mt-2 text-2xl font-black text-slate-950">账号、视频表现、解析和收藏一张表完成复盘</h2>
+          </div>
+          <button className="rounded-full bg-[#315cff] px-4 py-2 text-sm font-black text-white" type="button">搜索视频</button>
+        </div>
+        <div className="mt-5 flex gap-5 overflow-x-auto pb-2">
+          {['添加对标账号', '全部', '维生素B源头工厂', '晨光官方旗舰店', '刀刻梅Yao', '好物推荐'].map((item, index) => (
+            <div className="w-24 shrink-0 text-center" key={item}>
+              <div className={`mx-auto grid size-16 place-items-center rounded-full border-4 ${index === 0 ? 'border-rose-300 bg-[#14233f] text-white' : 'border-slate-200 bg-[linear-gradient(135deg,#fef3c7,#bfdbfe)]'} text-xs font-black`}>{index === 0 ? '+' : item.slice(0, 2)}</div>
+              <p className="mt-2 truncate text-xs font-bold text-slate-700">{item}</p>
+            </div>
+          ))}
+        </div>
+        <div className="mt-5 overflow-hidden rounded-lg border border-slate-200">
+          <div className="grid grid-cols-[minmax(280px,1.4fr)_160px_120px_repeat(4,90px)_120px] bg-slate-100 px-3 py-3 text-xs font-black text-slate-500">
+            {['视频', '账号', '发布时间', '点赞', '转发', '评论', '收藏', '操作'].map(item => <span key={item}>{item}</span>)}
+          </div>
+          {rows.map((row, index) => (
+            <div className="grid min-h-24 grid-cols-[minmax(280px,1.4fr)_160px_120px_repeat(4,90px)_120px] items-center border-t border-slate-100 px-3 py-3 text-sm font-bold text-slate-800" key={row[0]}>
+              <div className="flex min-w-0 items-center gap-3">
+                <div className="grid size-16 shrink-0 place-items-end rounded-md bg-[linear-gradient(135deg,#fde68a,#c7d2fe)] p-1 text-xs font-black text-slate-700">{index + 1}</div>
+                <div className="min-w-0">
+                  <p className="truncate font-black">{row[0]}</p>
+                  <p className="mt-1 text-xs text-slate-500">00:{index + 21}</p>
+                </div>
+              </div>
+              {row.slice(1).map((cell, cellIndex) => <span key={`${row[0]}-${cellIndex}`}>{cell}</span>)}
+              <div className="flex gap-2 text-blue-600"><button className="font-black" type="button">解析</button><button className="font-black" type="button">收藏</button></div>
+            </div>
+          ))}
+        </div>
+      </div>
+    </section>
+  );
+}
+
 function buildStepInteraction(active: WorkflowStep, productName: string, platform: string, assetReady: boolean, audienceGoal: string): StepInteraction {
   const product = productName.trim() || '当前商品';
   const goal = audienceGoal.trim() || '先完成一轮可发布内容';
@@ -525,6 +860,25 @@ export function KuaiziWorkflowConsole({
               );
             })}
           </nav>
+          <div className="mt-5 border-t border-slate-200 pt-4">
+            <p className="px-3 text-xs font-black text-slate-400">服务</p>
+            <div className="mt-2 grid gap-1">
+              {kuaiziServiceNav.map(([label, href]) => {
+                const isActiveService =
+                  (active === 'creative' && label === '编导灵感') ||
+                  (active === 'create' && (label === '素材生产' || label === '筷子云盘')) ||
+                  (active === 'video' && (label === '合成量产' || label === '直播切片' || label === '视频翻译')) ||
+                  (active === 'cast' && (label === '投放分发' || label === '矩阵宝' || label === 'KOC流量包')) ||
+                  (active === 'manage' && (label === '创意洞察' || label === '评论管理'));
+                return (
+                  <Link className={`flex min-h-9 items-center justify-between rounded-md px-3 text-sm font-bold ${isActiveService ? 'bg-[#e6ebfb] text-[#17223d]' : 'text-slate-600 hover:bg-slate-100'}`} href={withTaskContext(href)} key={label}>
+                    <span className="min-w-0 truncate">{label}</span>
+                    {label === 'KOC流量包' ? <span className="rounded bg-rose-500 px-1.5 py-0.5 text-[10px] font-black text-white">5点/条</span> : null}
+                  </Link>
+                );
+              })}
+            </div>
+          </div>
           <div className="mt-5 rounded-md border border-slate-200 bg-slate-50 p-3 text-xs leading-5 text-slate-600">
             当前策略：先交付图片、视频、文案、发布包和回填入口；后续生成能力增强时，不改变客户操作路径。
           </div>
@@ -806,6 +1160,14 @@ export function KuaiziWorkflowConsole({
               </div>
             </div>
           </section>
+
+          <KuaiziModuleWorkbench
+            active={active}
+            audienceGoal={audienceGoal}
+            platform={platform}
+            productName={productName}
+            withTaskContext={withTaskContext}
+          />
 
           <section className="hidden">
             <div className="flex flex-col gap-3 xl:flex-row xl:items-start xl:justify-between">
