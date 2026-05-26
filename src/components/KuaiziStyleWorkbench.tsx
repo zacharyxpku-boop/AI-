@@ -152,6 +152,66 @@ const serviceNav = [
   { label: '复盘跟进', href: '/factory/manage?variant=friend_trial' },
 ];
 
+const kuaiziDenseModules = [
+  {
+    label: '开始工作',
+    title: '一排 AI 工具入口',
+    body: '像筷子首页一样，把写脚本、AI 影棚、AI 复刻、元素替换、配音、数字人口播和一键剪辑放在首屏。',
+    href: '/factory/creative?variant=friend_trial',
+    tone: 'from-violet-500 via-fuchsia-500 to-rose-400',
+    chips: ['写脚本', 'AI影棚', 'AI复刻', '元素替换'],
+  },
+  {
+    label: '筷子云盘',
+    title: '素材、工程、成片同屏管理',
+    body: '保留文件夹树、素材网格、工程卡、协作者权限和容量状态，客户知道素材从哪里进、到哪里用。',
+    href: '/factory/create?variant=friend_trial',
+    tone: 'from-sky-500 via-blue-500 to-indigo-500',
+    chips: ['全部文件', '素材', '工程', '成片'],
+  },
+  {
+    label: '素材生产',
+    title: '图片、模特、场景、客服素材',
+    body: '不是只给一个“素材清单”，而是显示主图、模特图、场景图、卖点图、FAQ 的生产队列。',
+    href: '/factory/create?variant=friend_trial',
+    tone: 'from-emerald-500 via-cyan-500 to-blue-500',
+    chips: ['商品图', '模特图', '场景图', 'FAQ'],
+  },
+  {
+    label: '合成量产',
+    title: '深色剪辑台和组合优化',
+    body: '对齐筷子 Video Pro：左侧素材组，中间预览，右侧字幕/滤镜/装饰层，底部时间线和生成按钮。',
+    href: '/factory/video?variant=friend_trial',
+    tone: 'from-slate-800 via-indigo-700 to-fuchsia-600',
+    chips: ['素材调试', '极速裂变', '组合优化', '时间线'],
+  },
+  {
+    label: '投放分发',
+    title: '矩阵发布渠道和标题区',
+    body: '保留抖音、快手、视频号、小红书、逛逛等渠道卡片，以及标题、AI 生成标题、批量导入。',
+    href: '/factory/cast?variant=friend_trial',
+    tone: 'from-blue-500 via-cyan-500 to-sky-400',
+    chips: ['抖音', '快手', '视频号', '小红书'],
+  },
+  {
+    label: '创意洞察',
+    title: '账号榜单和爆款视频表',
+    body: '把账号头像、搜索、视频列表、点赞、转发、评论、收藏和解析动作放出来，能力不能被收缩。',
+    href: '/factory/manage?variant=friend_trial',
+    tone: 'from-orange-400 via-rose-500 to-pink-500',
+    chips: ['账号', '榜单', '解析', '收藏'],
+  },
+] as const;
+
+const kuaiziMiniAssets = [
+  ['mp4', '直播切片 27', '00:17', '/factory/video?variant=friend_trial'],
+  ['jpg', '商品主图 26', '今日更新', '/factory/create?variant=friend_trial'],
+  ['工程', '0410-3', '混剪工程', '/factory/video?variant=friend_trial'],
+  ['文件夹', '导出发布包', '32 个文件', '/factory/cast?variant=friend_trial'],
+  ['音频', '多语配音', '100+ 音色', '/factory/video?variant=friend_trial'],
+  ['表格', '发布回填', '链接 / 截图 / CSV', '/factory/manage?variant=friend_trial'],
+] as const;
+
 const projects: Project[] = [
   { title: '宠物口腔护理新品上新', category: '短视频', status: '脚本已生成', next: '补 3 张商品图', href: '/factory/video?variant=friend_trial', accent: 'from-rose-200 to-pink-100', image: '/seed/photoshoot-mode-01.jpg' },
   { title: '厨房收纳套装小红书种草', category: '图文', status: '素材已齐', next: '生成卖点图', href: '/factory/create?variant=friend_trial', accent: 'from-lime-200 to-emerald-100', image: '/seed/case-novahome-image.jpg' },
@@ -612,6 +672,94 @@ export function KuaiziStyleWorkbench() {
                       <span className="mt-3 inline-flex rounded bg-white px-2 py-1 text-[11px] font-black text-slate-700 ring-1 ring-black/5">进入</span>
                     </Link>
                   ))}
+                </div>
+              </section>
+
+              <section className="rounded-lg border border-[#dbe6ff] bg-white p-4 shadow-sm">
+                <div className="flex flex-col gap-3 lg:flex-row lg:items-end lg:justify-between">
+                  <div className="min-w-0">
+                    <p className="text-xs font-black uppercase tracking-[0.18em] text-indigo-600">筷子式能力工作台</p>
+                    <h3 className="mt-1 text-lg font-black leading-6 text-slate-950">不收缩功能：把客户会用到的入口、素材、工程、成片、分发和洞察放回同一张工作台</h3>
+                    <p className="mt-2 max-w-5xl text-sm font-bold leading-6 text-slate-500">
+                      参考筷子科技的结构：左侧全局导航，中间高密度卡片和素材网格，右侧任务/权限/配置面板。客户不是只看步骤，而是能看到每个能力在哪里、点击后产出什么。
+                    </p>
+                  </div>
+                  <div className="flex flex-wrap gap-2">
+                    {['工具入口', '素材云盘', '视频剪辑台', '矩阵发布', '创意洞察'].map(item => (
+                      <span className="rounded-md bg-indigo-50 px-3 py-2 text-xs font-black text-indigo-700 ring-1 ring-indigo-100" key={item}>{item}</span>
+                    ))}
+                  </div>
+                </div>
+
+                <div className="mt-4 grid gap-3 xl:grid-cols-[minmax(0,1fr)_360px]">
+                  <div className="min-w-0">
+                    <div className="grid gap-3 md:grid-cols-2 xl:grid-cols-3">
+                      {kuaiziDenseModules.map(module => (
+                        <Link className="group min-w-0 overflow-hidden rounded-lg border border-slate-200 bg-slate-50 shadow-sm transition hover:-translate-y-0.5 hover:bg-white hover:shadow-md" href={module.href} key={module.label}>
+                          <div className={`h-24 bg-gradient-to-br ${module.tone} p-3`}>
+                            <div className="flex h-full items-end justify-between">
+                              <span className="rounded bg-white/90 px-2 py-1 text-xs font-black text-slate-800">{module.label}</span>
+                              <span className="grid size-8 place-items-center rounded-full bg-white/85 text-sm font-black text-slate-950">+</span>
+                            </div>
+                          </div>
+                          <div className="p-3">
+                            <h4 className="break-words text-sm font-black leading-5 text-slate-950">{module.title}</h4>
+                            <p className="mt-2 line-clamp-3 text-xs font-bold leading-5 text-slate-500">{module.body}</p>
+                            <div className="mt-3 flex flex-wrap gap-1.5">
+                              {module.chips.map(chip => (
+                                <span className="rounded bg-white px-2 py-1 text-[11px] font-black text-slate-600 ring-1 ring-slate-200" key={chip}>{chip}</span>
+                              ))}
+                            </div>
+                          </div>
+                        </Link>
+                      ))}
+                    </div>
+
+                    <div className="mt-4 rounded-lg border border-slate-200 bg-slate-50 p-3">
+                      <div className="flex flex-wrap items-center justify-between gap-2">
+                        <h4 className="text-sm font-black text-slate-950">云盘素材 / 工程 / 成片</h4>
+                        <div className="flex flex-wrap gap-2">
+                          {['全部', '素材', '工程', '成片', '视频', '图片', '音频'].map(tab => (
+                            <span className="rounded bg-white px-2.5 py-1 text-xs font-black text-slate-600 ring-1 ring-slate-200" key={tab}>{tab}</span>
+                          ))}
+                        </div>
+                      </div>
+                      <div className="mt-3 grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
+                        {kuaiziMiniAssets.map(([kind, title, meta, href]) => (
+                          <Link className="min-w-0 rounded-md bg-white p-3 ring-1 ring-slate-200 transition hover:ring-indigo-200" href={href} key={title}>
+                            <div className="aspect-video rounded-md bg-[linear-gradient(135deg,#eef2ff,#f8fafc_45%,#e0f2fe)] p-2">
+                              <span className="rounded bg-slate-700 px-2 py-1 text-[11px] font-black text-white">{kind}</span>
+                            </div>
+                            <h5 className="mt-2 truncate text-sm font-black text-slate-950">{title}</h5>
+                            <p className="mt-1 text-xs font-bold text-slate-500">{meta}</p>
+                          </Link>
+                        ))}
+                      </div>
+                    </div>
+                  </div>
+
+                  <aside className="min-w-0 rounded-lg border border-slate-200 bg-white p-4 shadow-sm">
+                    <p className="text-xs font-black uppercase tracking-[0.18em] text-slate-400">右侧配置面板</p>
+                    <h4 className="mt-1 text-lg font-black leading-6 text-slate-950">当前选择：{selectedStep.label}</h4>
+                    <p className="mt-2 text-sm font-bold leading-6 text-slate-500">{selectedStep.body}</p>
+                    <div className="mt-4 grid gap-2">
+                      {[
+                        ['输入', '商品资料、素材、账号或直播链接'],
+                        ['配置', '平台、尺寸、字幕、配音、发布时间'],
+                        ['生成', selectedStep.output],
+                        ['回流', '客户回填链接、截图、CSV 后复盘'],
+                      ].map(([label, value], index) => (
+                        <div className="grid grid-cols-[28px_64px_minmax(0,1fr)] items-start gap-2 rounded-md bg-slate-50 p-2 ring-1 ring-slate-100" key={label}>
+                          <span className="grid size-7 place-items-center rounded bg-slate-950 text-[11px] font-black text-white">{index + 1}</span>
+                          <span className="text-xs font-black text-slate-500">{label}</span>
+                          <span className="text-xs font-bold leading-5 text-slate-700">{value}</span>
+                        </div>
+                      ))}
+                    </div>
+                    <Link className="mt-4 flex min-h-10 items-center justify-center rounded-md bg-gradient-to-r from-[#6b5cff] via-[#a63dff] to-[#ff6c8f] px-4 text-sm font-black text-white shadow-sm" href={selectedStep.href}>
+                      进入这个能力
+                    </Link>
+                  </aside>
                 </div>
               </section>
 

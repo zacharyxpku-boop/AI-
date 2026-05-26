@@ -23,6 +23,11 @@ describe('factory page', () => {
     expect(html).toContain('这轮想达成什么');
     expect(html).toContain('用这个商品开始');
     expect(html).toContain('提交后直接进入对应子页面');
+    expect(html).toContain('筷子式能力工作台');
+    expect(html).toContain('不收缩功能');
+    expect(html).toContain('云盘素材 / 工程 / 成片');
+    expect(html).toContain('视频剪辑台');
+    expect(html).toContain('矩阵发布');
     expect(html).toContain('生内容');
     expect(html).toContain('拿发布包');
     expect(html).toContain('看复盘');

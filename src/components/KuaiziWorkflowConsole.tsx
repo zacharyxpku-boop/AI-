@@ -46,6 +46,34 @@ const workflowNav: Array<{ id: WorkflowStep; label: string; href: string }> = [
 
 const workflowStepOrder: WorkflowStep[] = ['creative', 'create', 'video', 'cast', 'manage'];
 
+const stepWorkbenchModules: Record<WorkflowStep, Array<{ label: string; body: string; href: string; state: string }>> = {
+  creative: [
+    { label: '开场引入', body: '3 秒钩子、痛点句、评论区话题', href: '/factory/creative?variant=friend_trial', state: '可生成' },
+    { label: '产品卖点', body: '利益点、证据点、禁用词提醒', href: '/factory/creative?variant=friend_trial', state: '可编辑' },
+    { label: '平台脚本', body: '小红书、TikTok、视频号、独立站', href: '/factory/cast?variant=friend_trial', state: '可分发' },
+  ],
+  create: [
+    { label: '商品图库', body: '主图、白底图、细节图、规格图', href: '/factory/create?variant=friend_trial', state: '可归档' },
+    { label: '模特生图', body: '人设、姿态、场景、构图任务', href: '/factory/create?variant=friend_trial', state: '可接 API' },
+    { label: '客服素材', body: 'FAQ、售后卡、差评解释、物流话术', href: '/factory/manage?variant=friend_trial', state: '可生成' },
+  ],
+  video: [
+    { label: '素材调试', body: '素材分组、音频分组、镜头组合', href: '/factory/video?variant=friend_trial', state: '可执行' },
+    { label: '极速裂变', body: '同素材多标题、多字幕、多尺寸', href: '/factory/video?variant=friend_trial', state: '可排队' },
+    { label: '组合优化', body: '脚本策略、预览视频、失败重试', href: '/factory/video?variant=friend_trial', state: '可合成' },
+  ],
+  cast: [
+    { label: '发布渠道', body: '抖音、快手、视频号、小红书、Meta', href: '/factory/cast?variant=friend_trial', state: '可选择' },
+    { label: 'AI 标题', body: '批量标题、标签、首评引导', href: '/factory/cast?variant=friend_trial', state: '可生成' },
+    { label: '发布回填', body: '链接、截图、CSV、云盘目录', href: '/factory/manage?variant=friend_trial', state: '可复盘' },
+  ],
+  manage: [
+    { label: '创意洞察', body: '账号榜单、热视频、点赞评论收藏', href: '/factory/manage?variant=friend_trial', state: '可解析' },
+    { label: '客服承接', body: '咨询问题、FAQ、售后话术', href: '/factory/manage?variant=friend_trial', state: '可生成' },
+    { label: '下一轮任务', body: '放大、重剪、补图、换标题', href: '/factory/creative?variant=friend_trial', state: '可启动' },
+  ],
+};
+
 const customerNextActions = [
   {
     label: '补素材',
@@ -444,6 +472,7 @@ export function KuaiziWorkflowConsole({
   const nextHref = config.primaryHref;
   const nextLabel = active === 'manage' ? '回到工作台' : config.primaryLabel;
   const progressPercent = Math.round(((activeIndex + 1) / workflowStepOrder.length) * 100);
+  const workbenchModules = stepWorkbenchModules[active];
   const [productName, setProductName] = useState(initialProductName);
   const [platform, setPlatform] = useState(initialPlatform);
   const [audienceGoal, setAudienceGoal] = useState(initialAudienceGoal);
@@ -453,6 +482,17 @@ export function KuaiziWorkflowConsole({
     () => buildStepInteraction(active, productName, platform, assetReady, audienceGoal),
     [active, productName, platform, assetReady, audienceGoal],
   );
+  const taskQuery = useMemo(() => {
+    const params = new URLSearchParams();
+    params.set('variant', 'friend_trial');
+    params.set('generated', generated ? '1' : '0');
+    params.set('productName', productName);
+    params.set('platform', platform);
+    params.set('audienceGoal', audienceGoal);
+    params.set('assetReady', assetReady ? '1' : '0');
+    return params.toString();
+  }, [assetReady, audienceGoal, generated, platform, productName]);
+  const withTaskContext = (href: string) => `${href.split('?')[0]}?${taskQuery}`;
 
   useEffect(() => {
     setProductName(initialProductName);
@@ -476,7 +516,7 @@ export function KuaiziWorkflowConsole({
               return (
                 <Link
                   key={item.id}
-                  href={item.href}
+                  href={withTaskContext(item.href)}
                   className={`flex min-h-10 items-center justify-between rounded-md px-3 text-sm font-bold transition ${isActive ? 'bg-[#14233f] text-white' : 'text-slate-600 hover:bg-slate-100 hover:text-slate-950'}`}
                 >
                   <span className="min-w-0 truncate">{item.label}</span>
@@ -502,7 +542,7 @@ export function KuaiziWorkflowConsole({
             </div>
             <div className="flex shrink-0 flex-wrap gap-2">
               <button className="min-h-10 rounded-md border border-slate-200 bg-white px-4 text-sm font-bold text-slate-600" type="button">搜索工具 Ctrl K</button>
-              <Link className="min-h-10 rounded-md bg-gradient-to-r from-[#6b5cff] via-[#a63dff] to-[#ff6c8f] px-5 py-2.5 text-sm font-black text-white shadow-sm" href={config.primaryHref}>
+              <Link className="min-h-10 rounded-md bg-gradient-to-r from-[#6b5cff] via-[#a63dff] to-[#ff6c8f] px-5 py-2.5 text-sm font-black text-white shadow-sm" href={withTaskContext(config.primaryHref)}>
                 下一步：{config.primaryLabel}
               </Link>
             </div>
@@ -628,6 +668,34 @@ export function KuaiziWorkflowConsole({
                     ))}
                   </div>
 
+                  <div className="rounded-lg border border-slate-200 bg-white/92 p-4 text-left shadow-sm">
+                    <div className="flex flex-col gap-2 sm:flex-row sm:items-end sm:justify-between">
+                      <div className="min-w-0">
+                        <p className="text-xs font-black uppercase tracking-[0.18em] text-indigo-600">能力操作台</p>
+                        <h3 className="mt-1 text-base font-black text-slate-950">保留筷子式工具密度，不把能力收缩成单个按钮</h3>
+                      </div>
+                      <div className="flex flex-wrap gap-2">
+                        {['筛选', '批量', '预览', '生成', '导出'].map(item => (
+                          <span className="rounded bg-slate-50 px-2.5 py-1 text-xs font-black text-slate-600 ring-1 ring-slate-200" key={item}>{item}</span>
+                        ))}
+                      </div>
+                    </div>
+                    <div className="mt-3 grid gap-3 md:grid-cols-3">
+                      {workbenchModules.map((module, index) => (
+                        <Link className="min-w-0 rounded-md border border-slate-200 bg-slate-50 p-3 transition hover:border-indigo-200 hover:bg-indigo-50" href={withTaskContext(module.href)} key={module.label}>
+                          <div className="flex items-start justify-between gap-2">
+                            <div>
+                              <p className="text-[11px] font-black text-indigo-600">0{index + 1}</p>
+                              <h4 className="mt-1 text-sm font-black text-slate-950">{module.label}</h4>
+                            </div>
+                            <span className="shrink-0 rounded bg-white px-2 py-1 text-[11px] font-black text-slate-600 ring-1 ring-slate-200">{module.state}</span>
+                          </div>
+                          <p className="mt-2 line-clamp-2 text-xs font-bold leading-5 text-slate-600">{module.body}</p>
+                        </Link>
+                      ))}
+                    </div>
+                  </div>
+
                   <div className={`rounded-lg border p-4 text-left shadow-sm transition ${generated ? 'border-emerald-200 bg-emerald-50' : 'border-slate-200 bg-white/82'}`}>
                     <div className="flex flex-wrap items-center justify-between gap-2">
                       <p className="text-xs font-black uppercase tracking-[0.18em] text-slate-500">生成预览</p>
@@ -663,7 +731,7 @@ export function KuaiziWorkflowConsole({
                       ))}
                     </div>
                     <div className="mt-3 flex flex-wrap gap-2">
-                      <Link className="flex min-h-10 items-center justify-center rounded-md bg-slate-950 px-4 text-sm font-black text-white" href={generated ? nextHref : '#task-form'}>
+                      <Link className="flex min-h-10 items-center justify-center rounded-md bg-slate-950 px-4 text-sm font-black text-white" href={generated ? withTaskContext(nextHref) : '#task-form'}>
                         {generated ? nextLabel : '先生成本页产出'}
                       </Link>
                       <Link className="flex min-h-10 items-center justify-center rounded-md border border-slate-200 bg-white px-4 text-sm font-black text-slate-700" href="/factory?variant=friend_trial">
@@ -704,7 +772,7 @@ export function KuaiziWorkflowConsole({
                                   ? 'bg-emerald-50 text-emerald-800 ring-1 ring-emerald-100'
                                   : 'bg-white text-slate-600 ring-1 ring-slate-100'
                             }`}
-                            href={item.href}
+                            href={withTaskContext(item.href)}
                             key={item.id}
                           >
                             <span className="grid size-6 place-items-center rounded bg-white/80 text-[10px] text-slate-700">{index + 1}</span>
@@ -727,7 +795,7 @@ export function KuaiziWorkflowConsole({
                     </div>
                   </div>
                   <div className="mt-4 grid grid-cols-2 gap-2">
-                    <Link className="flex min-h-10 items-center justify-center rounded-md bg-slate-950 px-3 text-sm font-black text-white" href={config.primaryHref}>
+                    <Link className="flex min-h-10 items-center justify-center rounded-md bg-slate-950 px-3 text-sm font-black text-white" href={withTaskContext(config.primaryHref)}>
                       {config.primaryLabel}
                     </Link>
                     <Link className="flex min-h-10 items-center justify-center rounded-md border border-slate-200 bg-white px-3 text-sm font-black text-slate-700" href="/factory?variant=friend_trial">
@@ -754,7 +822,7 @@ export function KuaiziWorkflowConsole({
             </div>
             <div className="mt-4 grid gap-2 sm:grid-cols-2 xl:grid-cols-4">
               {customerNextActions.map((item, index) => (
-                <Link className="min-w-0 rounded-md border border-slate-200 bg-slate-50 p-3 transition hover:border-indigo-200 hover:bg-indigo-50" href={item.href} key={item.label}>
+                <Link className="min-w-0 rounded-md border border-slate-200 bg-slate-50 p-3 transition hover:border-indigo-200 hover:bg-indigo-50" href={withTaskContext(item.href)} key={item.label}>
                   <div className="flex items-center gap-2">
                     <span className="grid size-7 shrink-0 place-items-center rounded-md bg-slate-950 text-[11px] font-black text-white">{index + 1}</span>
                     <span className="rounded bg-white px-2 py-1 text-[11px] font-black text-slate-600 ring-1 ring-slate-200">{item.label}</span>
@@ -795,7 +863,7 @@ export function KuaiziWorkflowConsole({
                     <h2 className="mt-2 break-words text-2xl font-black md:text-3xl">{config.toolMeta}</h2>
                     <p className="mt-3 text-sm leading-6 text-slate-500">{config.outcome}</p>
                     <div className={`mt-4 h-2 w-full max-w-[360px] rounded-full bg-gradient-to-r ${config.accent}`} />
-                    <Link className="mt-5 inline-flex min-h-11 max-w-full items-center justify-center rounded-md bg-slate-950 px-4 text-sm font-black text-white" href={config.primaryHref}>
+                    <Link className="mt-5 inline-flex min-h-11 max-w-full items-center justify-center rounded-md bg-slate-950 px-4 text-sm font-black text-white" href={withTaskContext(config.primaryHref)}>
                       <span className="truncate">{config.primaryLabel}</span>
                     </Link>
                   </div>
@@ -879,7 +947,7 @@ export function KuaiziWorkflowConsole({
               <p className="mt-2 text-sm leading-6 text-slate-500">子界面和主界面使用同一套导航与视觉语言，点击进去不会像进入另一个产品。</p>
               <div className="mt-4 space-y-2 text-sm text-slate-600">
                 {workflowNav.map(item => (
-                  <Link key={item.id} href={item.href} className={`flex min-h-10 items-center justify-between rounded-md px-3 font-bold ${item.id === active ? 'bg-slate-950 text-white' : 'bg-slate-50 hover:bg-slate-100'}`}>
+                  <Link key={item.id} href={withTaskContext(item.href)} className={`flex min-h-10 items-center justify-between rounded-md px-3 font-bold ${item.id === active ? 'bg-slate-950 text-white' : 'bg-slate-50 hover:bg-slate-100'}`}>
                     <span className="min-w-0 truncate">{item.label}</span>
                     <span className="shrink-0">›</span>
                   </Link>

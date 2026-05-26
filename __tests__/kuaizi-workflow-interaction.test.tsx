@@ -26,6 +26,8 @@ describe('KuaiziWorkflowConsole customer interaction', () => {
       expect(html).toContain('Wenai 生成');
       expect(html).toContain('拿去用');
       expect(html).toContain('生成预览');
+      expect(html).toContain('能力操作台');
+      expect(html).toContain('保留筷子式工具密度');
       expect(html).toContain('可交付结果');
       expect(html).toContain('整条任务进度');
       expect(html).toContain('本页怎么用');
@@ -55,5 +57,7 @@ describe('KuaiziWorkflowConsole customer interaction', () => {
     expect(html).toContain('Demo Product 的素材任务');
     expect(html).toContain('围绕「测试新品首发」');
     expect(html).toContain('素材任务交付件');
+    expect(html).toContain('productName=Demo+Product');
+    expect(html).toContain('audienceGoal=%E6%B5%8B%E8%AF%95%E6%96%B0%E5%93%81%E9%A6%96%E5%8F%91');
   });
 });
