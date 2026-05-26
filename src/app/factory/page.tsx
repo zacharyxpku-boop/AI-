@@ -25,7 +25,7 @@ export default async function FactoryPage({
   searchParams?: Promise<{ variant?: string }>;
 }) {
   const params = searchParams ? await searchParams : {};
-  const selectedVariantId = normalizeFactoryUiVariantId(params.variant);
+  const selectedVariantId = params.variant ? normalizeFactoryUiVariantId(params.variant) : 'friend_trial';
 
   if (selectedVariantId === 'friend_trial') {
     return <KuaiziStyleWorkbench />;

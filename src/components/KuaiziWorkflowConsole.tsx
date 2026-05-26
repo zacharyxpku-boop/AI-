@@ -503,7 +503,7 @@ export function KuaiziWorkflowConsole({
   }, [active, initialAssetReady, initialAudienceGoal, initialGenerated, initialPlatform, initialProductName]);
 
   return (
-    <main className="min-h-screen bg-[#f4f6fb] text-[#15213f]">
+    <main className="min-h-screen bg-[#f4f6fb] text-[#15213f]" style={{ backgroundColor: '#f4f6fb' }}>
       <div className="mx-auto flex min-h-screen w-full max-w-[1440px] flex-col lg:flex-row">
         <aside className="border-b border-slate-200 bg-white/95 px-4 py-4 lg:sticky lg:top-0 lg:h-screen lg:w-[248px] lg:border-b-0 lg:border-r">
           <Link href="/factory?variant=friend_trial" className="flex min-h-11 items-center gap-3 rounded-md bg-[#dfe7f8] px-3 text-sm font-black text-[#17223d]">

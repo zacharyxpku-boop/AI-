@@ -483,7 +483,7 @@ export function KuaiziStyleWorkbench() {
   }, [remixPlan]);
 
   return (
-    <main className="min-h-screen overflow-x-hidden bg-[#f7f9ff] text-slate-950">
+    <main className="min-h-screen overflow-x-hidden bg-[#f7f9ff] text-slate-950" style={{ backgroundColor: '#f7f9ff' }}>
       <div className="flex min-h-screen min-w-0 overflow-x-hidden">
         <aside className="hidden w-[224px] shrink-0 flex-col border-r border-[#dbe4f3] bg-[#eef4ff] xl:flex">
           <div className="px-5 pb-5 pt-7">

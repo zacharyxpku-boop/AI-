@@ -4,6 +4,18 @@ import { describe, expect, it } from 'vitest';
 import FactoryPage from '@/app/factory/page';
 
 describe('factory page', () => {
+  it('defaults the customer entry to the friend trial workbench', async () => {
+    const page = await FactoryPage({
+      searchParams: Promise.resolve({}),
+    });
+    const html = renderToStaticMarkup(page);
+
+    expect(html).toContain('/factory/creative?variant=friend_trial');
+    expect(html).toContain('/factory/create?variant=friend_trial');
+    expect(html).not.toContain('bg-slate-950 px-6 py-8 text-white');
+    expect(html).not.toContain('UI Variant Workflow');
+  });
+
   it('keeps the friend trial homepage focused on customer actions', async () => {
     const page = await FactoryPage({
       searchParams: Promise.resolve({ variant: 'friend_trial' }),

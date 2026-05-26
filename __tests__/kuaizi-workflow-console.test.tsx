@@ -21,16 +21,16 @@ describe('kuaizi workflow console', () => {
     },
     {
       active: 'video' as const,
-      title: '本地混剪先稳定出片，视频和数字人 Key 到位后增强',
-      pillar: 'GitHub 开源混剪蓝图',
-      proof: '单条失败只重跑单条，不拖垮整批。',
+      title: '先稳定出片，后续增强视频和数字人能力',
+      pillar: '稳定视频生产线',
+      proof: '客户只看到时间线、字幕、成片、标题和发布包。',
       next: '/factory/cast?variant=friend_trial',
     },
     {
       active: 'cast' as const,
       title: '把内容变成客户自己能发布的多平台发布包',
-      pillar: '多账号标题矩阵',
-      proof: '发布边界清楚，客户可直接执行。',
+      pillar: '平台发布文案',
+      proof: '每个平台都有标题、首句、正文、标签和封面提示。',
       next: '/factory/manage?variant=friend_trial',
     },
     {

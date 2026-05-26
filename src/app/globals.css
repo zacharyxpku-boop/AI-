@@ -53,8 +53,8 @@ body {
 }
 
 body {
-  background: var(--color-bg-root);
-  color: var(--color-text-secondary);
+  background: #f4f6fb;
+  color: #15213f;
   font-family: var(--font-display), system-ui, sans-serif;
   -webkit-font-smoothing: antialiased;
 }
