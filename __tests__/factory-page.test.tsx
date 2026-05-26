@@ -43,6 +43,11 @@ describe('factory page', () => {
     expect(html).toContain('给商品资料');
     expect(html).toContain('回传链接截图或 CSV');
     expect(html).toContain('扩量前必须证明');
+    expect(html).toContain('截图里的开源方向怎么学');
+    expect(html).toContain('Baoyu skills');
+    expect(html).toContain('HyperFrames');
+    expect(html).toContain('social-auto-upload');
+    expect(html).toContain('不接自动登录、不保存 cookie');
     expect(html).toContain('开源混剪、口播标题、客户自发布，先合成一条稳定流水线');
     expect(html).toContain('今天就能稳定混剪');
     expect(html).toContain('多账号标题和口播不做代登');
@@ -106,6 +111,10 @@ describe('factory page', () => {
     expect(html).toContain('队列治理');
     expect(html).toContain('云盘交付结构');
     expect(html).toContain('首批每个平台至少抽检');
+    expect(html).toContain('开源混剪交付文件');
+    expect(html).toContain('opensource-delivery-manifest.json');
+    expect(html).toContain('execution-recipes.json');
+    expect(html).toContain('本地优先栈、执行配方、验收门和失败回退');
     expect(html).toContain('多账号矩阵先不做自动登录');
     expect(html).toContain('客户自发布操作台');
     expect(html).toContain('客户自发布操作台');

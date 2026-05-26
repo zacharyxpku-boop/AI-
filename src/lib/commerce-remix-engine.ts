@@ -90,7 +90,17 @@ export interface CommerceRemixEnginePlan {
 
 export interface CommerceRemixPackageArtifact {
   path: string;
-  kind: 'timeline' | 'ffmpeg_commands' | 'concat_manifest' | 'subtitles' | 'voiceover_script' | 'publishing_packs' | 'handoff' | 'customer_upload';
+  kind:
+    | 'timeline'
+    | 'ffmpeg_commands'
+    | 'opensource_manifest'
+    | 'execution_recipes'
+    | 'concat_manifest'
+    | 'subtitles'
+    | 'voiceover_script'
+    | 'publishing_packs'
+    | 'handoff'
+    | 'customer_upload';
   description: string;
   content: string;
 }
@@ -1207,6 +1217,36 @@ export function buildCommerceOpenSourceAdapters(): CommerceOpenSourceAdapter[] {
       customerValue: '把“换商品就换参数”的电商视频做成可复用配置，降低批量出片成本。',
       readiness: 'ready_now',
       guardrail: '只生成 Wenai 可审计 JSON 配方，不直接绕过质量门禁批量发布。',
+    },
+    {
+      id: 'hyperframes',
+      name: 'HyperFrames code video workflow',
+      repositoryUrl: 'https://github.com/heygen-com/hyperframes',
+      useFor: '用 HTML/CSS/JS 组合可预览、可参数化、可渲染的视频 composition，适合商品卡片、知识卡片和解释型短视频',
+      integrationMode: 'task_manifest',
+      customerValue: '把电商知识卡片、卖点说明和客服 FAQ 做成可预览的视频模板，减少纯剪辑软件的不确定性。',
+      readiness: 'later',
+      guardrail: '先学习“代码生成视频”的 composition 范式；不接 HeyGen 账号、不调用未配置的付费生成服务。',
+    },
+    {
+      id: 'baoyu-skills',
+      name: 'Baoyu content skills pattern',
+      repositoryUrl: 'https://github.com/jimliu/baoyu-skills',
+      useFor: '学习卡片、漫画、PPT、知识图和长图的结构化内容生成方式，补强电商种草卡片和客户汇报素材',
+      integrationMode: 'task_manifest',
+      customerValue: '让一个商品不只出视频，也能出小红书卡片、知识图、售后说明卡和客户复盘 PPT。',
+      readiness: 'ready_now',
+      guardrail: '只借鉴内容结构和交付形态；不把无授权图片、字体、模板或外部账号写入客户包。',
+    },
+    {
+      id: 'social-auto-upload',
+      name: 'social-auto-upload publishing automation pattern',
+      repositoryUrl: 'https://github.com/dreammis/social-auto-upload',
+      useFor: '学习多平台发布字段、标题/正文/标签/封面映射、发布前检查和失败提示',
+      integrationMode: 'task_manifest',
+      customerValue: '先把客户自发布包做得更接近平台真实字段；未来如客户本机自愿授权，再评估本机自动化。',
+      readiness: 'later',
+      guardrail: '首版不接自动上传、不保存 cookie、不代登平台账号；只学习平台字段和发布检查表。',
     },
     {
       id: 'whisper',
@@ -2923,10 +2963,59 @@ function hasNoSecretLeak(content: string) {
   return !/(api[_-]?key|access[_-]?token|bearer\s+|sk-[a-z0-9]|secret)/i.test(content);
 }
 
+function buildOpenSourceDeliveryManifest(
+  input: CommerceRemixPlanInput,
+  plan: CommerceRemixEnginePlan,
+  adapters: CommerceOpenSourceAdapter[],
+  recipes: CommerceRemixExecutionRecipe[],
+) {
+  const adapterById = new Map(adapters.map(adapter => [adapter.id, adapter]));
+  const requiredAdapterIds = ['ffmpeg', 'remotion', 'opentimelineio', 'moviepy', 'editly', 'pyscenedetect', 'auto-editor', 'lossless-cut', 'subtitle-edit', 'imagemagick-libheif', 'mediainfo', 'queue-worker', 'baoyu-skills'];
+  const readyAdapters = requiredAdapterIds
+    .map(id => adapterById.get(id))
+    .filter((adapter): adapter is CommerceOpenSourceAdapter => Boolean(adapter));
+
+  return {
+    customerPromise: `${input.productName} 的首版混剪不等图片、视频或数字人 Key；先用本地/开源能力交付时间线、成片、字幕、封面、发布包和回填清单。`,
+    customerSeesOnly: ['成片 MP4', '封面图', '平台标题正文', '客服话术', '回填入口'],
+    localFirstStack: readyAdapters.map(adapter => ({
+      id: adapter.id,
+      name: adapter.name,
+      useFor: adapter.useFor,
+      customerValue: adapter.customerValue,
+      guardrail: adapter.guardrail,
+    })),
+    executionRecipeIds: recipes.map(recipe => recipe.id),
+    queueProof: {
+      totalItems: plan.queue.length,
+      ffmpegCommands: plan.ffmpegCommands.length,
+      timelineClips: plan.timeline.clips.length,
+      renderSizes: Array.from(new Set(plan.queue.map(item => item.renderSize))),
+      platformPacks: plan.publishingPacks.map(pack => PLATFORM_LABELS[pack.platform]),
+    },
+    acceptanceGates: [
+      '每个任务都有 timeline.json、ffmpeg-commands.json、字幕文件和发布包。',
+      '每条成片必须有 MediaInfo 参数、可播放检查、字幕安全区和人工抽检记录。',
+      '长素材切片只处理客户授权素材；切点建议必须人工复核后再进入发布包。',
+      '单条失败只重试当前队列项，不阻塞同批其他平台版本。',
+      '客户自发布后只回填链接、截图、CSV 或云盘目录，不提供账号密码、cookie 或后台登录权限。',
+    ],
+    fallbackOrder: [
+      'Remotion 模板不可用时，保留 timeline.json，回到 FFmpeg 参数数组。',
+      '长素材切片不可用时，客户上传人工选段，仍可进入模板混剪。',
+      '字幕转写不可用时，使用口播稿和人工字幕底稿。',
+      '浏览器轻编辑不可用时，运营只改前三秒、封面、标题和证明素材，再重跑失败条。',
+    ],
+  };
+}
+
 export function buildCommerceRemixExportPackage(input: CommerceRemixPlanInput, plan = buildCommerceRemixEnginePlan(input)): CommerceRemixExportPackage {
   const packageId = `commerce-remix-${slugify(input.productName)}`;
   const rootDir = `exports/${packageId}`;
   const cloudDriveManifest = buildCommerceCloudDriveManifest(input, rootDir);
+  const openSourceAdapters = buildCommerceOpenSourceAdapters();
+  const executionRecipes = buildCommerceRemixExecutionRecipes(input, plan, openSourceAdapters);
+  const openSourceDeliveryManifest = buildOpenSourceDeliveryManifest(input, plan, openSourceAdapters, executionRecipes);
   const artifacts: CommerceRemixPackageArtifact[] = [
     {
       path: `${rootDir}/timeline.json`,
@@ -2939,6 +3028,18 @@ export function buildCommerceRemixExportPackage(input: CommerceRemixPlanInput, p
       kind: 'ffmpeg_commands',
       description: 'FFmpeg 参数数组清单，不拼 shell 字符串，便于安全重试。',
       content: stringifyArtifact(plan.ffmpegCommands),
+    },
+    {
+      path: `${rootDir}/opensource-delivery-manifest.json`,
+      kind: 'opensource_manifest',
+      description: '开源混剪能力交付清单：本地优先栈、客户可见结果、验收门和失败回退。',
+      content: stringifyArtifact(openSourceDeliveryManifest),
+    },
+    {
+      path: `${rootDir}/execution-recipes.json`,
+      kind: 'execution_recipes',
+      description: '每个混剪能力的输入、步骤、输出、验收和不可用时的替代路径。',
+      content: stringifyArtifact(executionRecipes),
     },
     {
       path: `${rootDir}/concat-manifest.txt`,

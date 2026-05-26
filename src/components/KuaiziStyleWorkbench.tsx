@@ -234,6 +234,12 @@ const customerSystemCards = [
   },
 ] as const;
 
+const skillLearningRows = [
+  ['Baoyu skills', '卡片、漫画、PPT、知识图', '学结构化内容生成，补电商种草卡、客服说明卡和客户复盘 PPT。', '可学进首版'],
+  ['HyperFrames', '用代码生成可预览视频', '学 HTML/CSS/JS composition，把商品知识卡和 FAQ 做成可参数化视频模板。', '后续增强'],
+  ['social-auto-upload', '多平台发布字段和检查', '只学标题、正文、标签、封面字段映射；不接自动登录、不保存 cookie。', '只做边界参考'],
+] as const;
+
 const publishingRows = [
   ['小红书', '标题 3 版、正文 2 版、标签、封面、首评引导。'],
   ['TikTok', '3 秒钩子、口播脚本、字幕、封面、Shop CTA。'],
@@ -343,6 +349,10 @@ export function KuaiziStyleWorkbench() {
   const evidenceReadinessBoard = useMemo(() => buildDemoCommerceEvidenceReadinessBoard(), []);
   const customerEvidenceUploadGuide = useMemo(() => buildDemoCommerceCustomerEvidenceUploadGuide(), []);
   const postPublishActionBoard = useMemo(() => buildDemoCommercePostPublishActionBoard(), []);
+  const openSourcePackageArtifacts = useMemo(
+    () => remixPackage.artifacts.filter(artifact => artifact.kind === 'opensource_manifest' || artifact.kind === 'execution_recipes'),
+    [remixPackage],
+  );
   const queueSummary = useMemo(() => {
     const statuses = ['needs_material', 'ready', 'rendering', 'exported'] as const;
     return statuses.map(status => ({
@@ -513,6 +523,27 @@ export function KuaiziStyleWorkbench() {
                   <div className="rounded-md border border-slate-200 bg-white p-4">
                     <h4 className="text-sm font-black text-slate-950">扩量前必须证明</h4>
                     <p className="mt-2 text-xs font-bold leading-5 text-slate-600">样片、小批次、抽检、回填都通过后，再考虑多 worker、对象存储或平台数据接口。</p>
+                  </div>
+                </div>
+                <div className="mt-4 rounded-md border border-slate-200 bg-slate-50 p-4">
+                  <div className="flex flex-col gap-2 sm:flex-row sm:items-end sm:justify-between">
+                    <div className="min-w-0">
+                      <h4 className="text-sm font-black text-slate-950">截图里的开源方向怎么学</h4>
+                      <p className="mt-1 text-xs font-bold leading-5 text-slate-600">只吸收能增强电商交付的部分，凡是涉及代登、cookie、自动发布的能力都留在客户自愿的后续模式。</p>
+                    </div>
+                    <span className="w-fit rounded bg-white px-2.5 py-1 text-xs font-black text-slate-700 ring-1 ring-slate-200">{skillLearningRows.length} 个方向</span>
+                  </div>
+                  <div className="mt-3 grid gap-3 md:grid-cols-3">
+                    {skillLearningRows.map(row => (
+                      <article className="min-w-0 rounded bg-white p-3 ring-1 ring-slate-200" key={row[0]}>
+                        <div className="flex items-start justify-between gap-2">
+                          <h5 className="min-w-0 text-sm font-black leading-5 text-slate-950">{row[0]}</h5>
+                          <span className="shrink-0 rounded bg-slate-100 px-2 py-1 text-[11px] font-black text-slate-600">{row[3]}</span>
+                        </div>
+                        <p className="mt-2 text-xs font-black leading-5 text-indigo-700">{row[1]}</p>
+                        <p className="mt-1 text-xs font-bold leading-5 text-slate-600">{row[2]}</p>
+                      </article>
+                    ))}
                   </div>
                 </div>
               </section>
@@ -1578,17 +1609,17 @@ export function KuaiziStyleWorkbench() {
                 </aside>
               </section>
 
-              <section className="grid gap-5 xl:grid-cols-[minmax(0,1fr)_420px]">
-                <div className="rounded-lg border border-[#e2e8f5] bg-white p-5 shadow-sm">
+              <section className="grid w-full min-w-0 max-w-[calc(100vw-2rem)] grid-cols-[minmax(0,1fr)] gap-5 overflow-hidden xl:max-w-none xl:grid-cols-[minmax(0,1fr)_420px]">
+                <div className="w-full min-w-0 max-w-full overflow-hidden rounded-lg border border-[#e2e8f5] bg-white p-4 shadow-sm sm:p-5">
                   <div className="flex flex-col gap-2 md:flex-row md:items-end md:justify-between">
-                    <div>
+                    <div className="min-w-0">
                       <p className="text-xs font-black uppercase tracking-[0.18em] text-indigo-500">稳定混剪引擎</p>
                       <p className="mt-2 max-w-3xl text-sm leading-6 text-slate-500">混剪底盘覆盖时间线交换、无损切片、场景检测、字幕校对、图片格式标准化、FFmpeg 合成和批量队列；客户看到的是稳定交付包，不需要理解这些开源项目。</p>
                       <h3 className="mt-1 text-lg font-black text-slate-950">混剪不等外部平台，先做成稳定的本地渲染系统</h3>
                     </div>
-                    <Link className="text-sm font-black text-indigo-600" href="/factory/video?variant=friend_trial">查看视频 / 数字人流程</Link>
+                    <Link className="w-fit max-w-full break-words text-sm font-black text-indigo-600" href="/factory/video?variant=friend_trial">查看视频 / 数字人流程</Link>
                   </div>
-                  <div className="mt-5 rounded-md border border-indigo-100 bg-indigo-50 p-4">
+                  <div className="mt-5 min-w-0 overflow-hidden rounded-md border border-indigo-100 bg-indigo-50 p-3 sm:p-4">
                     <div className="flex flex-col gap-2 lg:flex-row lg:items-end lg:justify-between">
                       <div className="min-w-0">
                         <p className="text-xs font-black uppercase tracking-[0.18em] text-indigo-700">客户混剪路径</p>
@@ -1613,12 +1644,12 @@ export function KuaiziStyleWorkbench() {
                       ))}
                     </div>
                   </div>
-                  <div className="mt-5 grid gap-3 md:grid-cols-2">
+                  <div className="mt-5 grid min-w-0 gap-3 md:grid-cols-2">
                     {remixPlan.engineStack.map(row => (
-                      <article className="min-w-0 rounded-md border border-slate-200 bg-slate-50 p-4" key={row.id}>
-                        <div className="flex items-start justify-between gap-3">
+                      <article className="min-w-0 overflow-hidden rounded-md border border-slate-200 bg-slate-50 p-4" key={row.id}>
+                        <div className="flex min-w-0 flex-col gap-2 sm:flex-row sm:items-start sm:justify-between sm:gap-3">
                           <h4 className="min-w-0 text-sm font-black text-slate-950">{row.role}</h4>
-                          <span className="max-w-[54%] shrink rounded bg-indigo-50 px-2 py-1 text-right text-[11px] font-black leading-4 text-indigo-700 [overflow-wrap:anywhere]">{row.openSourceReference}</span>
+                          <span className="w-fit max-w-full rounded bg-indigo-50 px-2 py-1 text-left text-[11px] font-black leading-4 text-indigo-700 [overflow-wrap:anywhere] sm:max-w-[54%] sm:text-right">{row.openSourceReference}</span>
                         </div>
                         <p className="mt-2 text-sm leading-6 text-slate-600">{row.reason}</p>
                       </article>
@@ -2191,6 +2222,26 @@ export function KuaiziStyleWorkbench() {
                   </div>
                   <div className="mt-3 rounded-md border border-indigo-100 bg-indigo-50 px-3 py-2 text-xs font-black leading-5 text-indigo-700">
                     已接本地接口：/api/commerce-remix，可直接生成任务包、质量门禁、渲染批次和客户回填复盘。
+                  </div>
+                  <div className="mt-3 rounded-md border border-violet-100 bg-violet-50 p-3">
+                    <div className="flex items-start justify-between gap-3">
+                      <div className="min-w-0">
+                        <div className="text-xs font-black tracking-[0.16em] text-violet-700">开源混剪交付文件</div>
+                        <p className="mt-1 text-xs font-bold leading-5 text-slate-700">任务包不只给成片，还带本地优先栈、执行配方、验收门和失败回退。</p>
+                      </div>
+                      <span className="shrink-0 rounded bg-white px-2 py-1 text-[11px] font-black text-violet-700 ring-1 ring-violet-100">{openSourcePackageArtifacts.length} 个</span>
+                    </div>
+                    <div className="mt-3 grid min-w-0 grid-cols-[minmax(0,1fr)] gap-2">
+                      {openSourcePackageArtifacts.map(artifact => (
+                        <div className="min-w-0 max-w-full overflow-hidden rounded bg-white px-3 py-2 text-xs ring-1 ring-violet-100" key={artifact.path}>
+                          <div className="flex min-w-0 flex-col gap-1 sm:flex-row sm:items-center sm:justify-between sm:gap-2">
+                            <span className="min-w-0 truncate font-black text-slate-800">{artifact.path.split('/').pop()}</span>
+                            <span className="w-fit max-w-full break-words font-bold text-violet-700">{artifact.kind}</span>
+                          </div>
+                          <p className="mt-1 line-clamp-2 text-[11px] font-bold leading-4 text-slate-500">{artifact.description}</p>
+                        </div>
+                      ))}
+                    </div>
                   </div>
                   <div className="mt-3 space-y-2">
                     {remixPackage.artifacts.slice(0, 4).map(artifact => (

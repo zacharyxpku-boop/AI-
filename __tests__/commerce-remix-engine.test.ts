@@ -202,6 +202,8 @@ describe('commerce remix engine', () => {
     expect(pack.artifacts.map(artifact => artifact.kind)).toEqual([
       'timeline',
       'ffmpeg_commands',
+      'opensource_manifest',
+      'execution_recipes',
       'concat_manifest',
       'subtitles',
       'voiceover_script',
@@ -209,6 +211,15 @@ describe('commerce remix engine', () => {
       'handoff',
       'customer_upload',
     ]);
+    const openSourceManifest = pack.artifacts.find(artifact => artifact.kind === 'opensource_manifest');
+    const executionRecipes = pack.artifacts.find(artifact => artifact.kind === 'execution_recipes');
+    expect(openSourceManifest?.path).toContain('opensource-delivery-manifest.json');
+    expect(openSourceManifest?.content).toContain('首版混剪不等图片、视频或数字人 Key');
+    expect(openSourceManifest?.content).toContain('MediaInfo 参数、可播放检查、字幕安全区和人工抽检记录');
+    expect(openSourceManifest?.content).toContain('不提供账号密码、cookie 或后台登录权限');
+    expect(executionRecipes?.path).toContain('execution-recipes.json');
+    expect(executionRecipes?.content).toContain('recipe-template-manifest');
+    expect(executionRecipes?.content).toContain('fallbackWhenUnavailable');
     expect(pack.artifacts.find(artifact => artifact.kind === 'subtitles')?.content).toContain('00:00:00,000 --> 00:00:04,000');
     expect(pack.artifacts.find(artifact => artifact.kind === 'voiceover_script')?.content).toContain('Feeding outside gets easier');
     expect(JSON.stringify(pack)).not.toMatch(/apiKey|accessToken|Bearer|sk-/i);
@@ -539,6 +550,9 @@ describe('commerce remix engine', () => {
       'revideo',
       'twick-sdk',
       'vidosy',
+      'hyperframes',
+      'baoyu-skills',
+      'social-auto-upload',
       'whisper',
       'opencv-mediapipe',
       'mlt-shotcut',
@@ -579,6 +593,11 @@ describe('commerce remix engine', () => {
     expect(adapters.find(adapter => adapter.id === 'revideo')?.repositoryUrl).toBe('https://github.com/redotvideo/revideo');
     expect(adapters.find(adapter => adapter.id === 'twick-sdk')?.repositoryUrl).toBe('https://github.com/ncounterspecialist/twick');
     expect(adapters.find(adapter => adapter.id === 'vidosy')?.repositoryUrl).toBe('https://github.com/aaurelions/vidosy');
+    expect(adapters.find(adapter => adapter.id === 'hyperframes')?.repositoryUrl).toBe('https://github.com/heygen-com/hyperframes');
+    expect(adapters.find(adapter => adapter.id === 'baoyu-skills')?.repositoryUrl).toBe('https://github.com/jimliu/baoyu-skills');
+    expect(adapters.find(adapter => adapter.id === 'baoyu-skills')?.readiness).toBe('ready_now');
+    expect(adapters.find(adapter => adapter.id === 'social-auto-upload')?.repositoryUrl).toBe('https://github.com/dreammis/social-auto-upload');
+    expect(adapters.find(adapter => adapter.id === 'social-auto-upload')?.guardrail).toContain('不保存 cookie');
     expect(adapters.find(adapter => adapter.id === 'opentimelineio')?.repositoryUrl).toBe('https://github.com/AcademySoftwareFoundation/OpenTimelineIO');
     expect(adapters.find(adapter => adapter.id === 'editly')?.repositoryUrl).toBe('https://github.com/mifi/editly');
     expect(adapters.find(adapter => adapter.id === 'mcp-video')?.readiness).toBe('ready_now');
