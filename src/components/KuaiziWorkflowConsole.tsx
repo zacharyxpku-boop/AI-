@@ -494,75 +494,75 @@ function KuaiziModuleWorkbench({
 
   if (active === 'video') {
     return (
-      <section className="mt-5 overflow-hidden rounded-lg border border-slate-800 bg-[#080b12] text-white shadow-sm">
+      <section className="mt-5 overflow-hidden rounded-lg border border-[#d8e4ff] bg-[#f7faff] text-slate-950 shadow-sm">
         <div className="grid min-h-[620px] lg:grid-cols-[320px_minmax(0,1fr)_320px]">
-          <aside className="border-b border-white/10 bg-[#0d111a] p-4 lg:border-b-0 lg:border-r">
+          <aside className="border-b border-[#d8e4ff] bg-[#eef4ff] p-4 lg:border-b-0 lg:border-r">
             <div className="flex items-center justify-between gap-3">
-              <p className="text-sm font-black text-blue-300">素材调试</p>
-              <button className="rounded bg-blue-600 px-3 py-1.5 text-xs font-black" type="button">脚本导入</button>
+              <p className="text-sm font-black text-[#315cff]">素材调试</p>
+              <button className="rounded bg-[#315cff] px-3 py-1.5 text-xs font-black text-white" type="button">脚本导入</button>
             </div>
             <div className="mt-4 grid grid-cols-3 gap-2">
               {Array.from({ length: 9 }).map((_, index) => (
-                <div className="min-h-[86px] rounded border border-white/10 bg-black/40 p-2" key={index}>
+                <div className="min-h-[86px] rounded border border-slate-200 bg-white p-2 shadow-sm" key={index}>
                   <div className="mx-auto h-12 w-9 rounded bg-[linear-gradient(135deg,#fbcfe8,#93c5fd)]" />
-                  <p className="mt-2 truncate text-[10px] text-slate-300">镜头 {index + 1}</p>
+                  <p className="mt-2 truncate text-[10px] font-bold text-slate-500">镜头 {index + 1}</p>
                 </div>
               ))}
             </div>
-            <div className="mt-4 rounded border border-white/10 bg-black/40 p-3">
-              <p className="text-xs font-black text-slate-400">音频分组</p>
+            <div className="mt-4 rounded border border-slate-200 bg-white p-3 shadow-sm">
+              <p className="text-xs font-black text-slate-500">音频分组</p>
               <div className="mt-2 h-12 rounded bg-[linear-gradient(90deg,#1d4ed8,#38bdf8,#1d4ed8)] opacity-80" />
             </div>
           </aside>
           <div className="min-w-0 p-4">
-            <div className="flex flex-wrap items-center justify-between gap-3 border-b border-white/10 pb-3">
+            <div className="flex flex-wrap items-center justify-between gap-3 border-b border-slate-200 pb-3">
               <div className="flex gap-2">
                 {['素材调试', '极速裂变', '组合优化'].map((tab, index) => (
-                  <button className={`rounded-md px-3 py-2 text-sm font-black ${index === 1 ? 'bg-blue-600 text-white' : 'bg-white/5 text-slate-300'}`} key={tab} type="button">{tab}</button>
+                  <button className={`rounded-md px-3 py-2 text-sm font-black ${index === 1 ? 'bg-[#315cff] text-white' : 'bg-white text-slate-600 ring-1 ring-slate-200'}`} key={tab} type="button">{tab}</button>
                 ))}
               </div>
-              <Link className="rounded-md bg-slate-800 px-3 py-2 text-xs font-black text-slate-200" href={withTaskContext('/factory/cast?variant=friend_trial')}>保存草稿</Link>
+              <Link className="rounded-md bg-slate-950 px-3 py-2 text-xs font-black text-white" href={withTaskContext('/factory/cast?variant=friend_trial')}>保存草稿</Link>
             </div>
             <div className="mt-4 grid gap-4 xl:grid-cols-[minmax(0,1fr)_220px]">
-              <div className="grid min-h-[270px] place-items-center rounded-lg border border-white/10 bg-black">
+              <div className="grid min-h-[270px] place-items-center rounded-lg border border-slate-200 bg-white shadow-inner">
                 <div className="aspect-[9/16] h-[260px] rounded-lg bg-[linear-gradient(180deg,#1e293b,#f472b6_55%,#fef3c7)] p-3">
                   <div className="mt-36 rounded bg-black/65 p-2 text-center text-xs font-black">Demo Product 15s 预览</div>
                 </div>
               </div>
-              <div className="rounded-lg border border-white/10 bg-[#111827] p-3">
-                <p className="text-xs font-black text-blue-300">组合优化</p>
+              <div className="rounded-lg border border-slate-200 bg-white p-3 shadow-sm">
+                <p className="text-xs font-black text-[#315cff]">组合优化</p>
                 {['字幕样式', '滤镜', '贴纸装饰', '口播音色'].map(item => (
-                  <label className="mt-3 block text-xs font-bold text-slate-300" key={item}>
+                  <label className="mt-3 block text-xs font-bold text-slate-600" key={item}>
                     {item}
                     <input className="mt-2 h-2 w-full accent-blue-500" max="100" min="0" type="range" />
                   </label>
                 ))}
               </div>
             </div>
-            <div className="mt-4 rounded-lg border border-orange-500/40 bg-black/40 p-3">
+            <div className="mt-4 rounded-lg border border-[#f3d7a5] bg-[#fff8ea] p-3">
               <div className="flex items-center justify-between gap-3">
-                <p className="text-sm font-black text-orange-300">时间线</p>
-                <p className="text-xs text-slate-400">16s - 22s / 9 个分组 / 132 个镜头</p>
+                <p className="text-sm font-black text-amber-800">时间线</p>
+                <p className="text-xs font-bold text-slate-500">16s - 22s / 9 个分组 / 132 个镜头</p>
               </div>
               <div className="mt-3 grid gap-2">
                 {['开头', '产品总体外观', '气垫展示', '气垫使用', '口红外观'].map(item => (
-                  <div className="grid grid-cols-6 gap-1 rounded border border-orange-500/30 bg-orange-950/20 p-1" key={item}>
-                    {Array.from({ length: 6 }).map((_, index) => <span className="h-10 rounded bg-white/12" key={index} />)}
-                    <span className="col-span-6 text-center text-[11px] font-black text-orange-200">{item}</span>
+                  <div className="grid grid-cols-6 gap-1 rounded border border-amber-200 bg-white p-1 shadow-sm" key={item}>
+                    {Array.from({ length: 6 }).map((_, index) => <span className="h-10 rounded bg-amber-100" key={index} />)}
+                    <span className="col-span-6 text-center text-[11px] font-black text-amber-800">{item}</span>
                   </div>
                 ))}
               </div>
             </div>
           </div>
-          <aside className="border-t border-white/10 bg-[#0d111a] p-4 lg:border-l lg:border-t-0">
-            <p className="text-xs font-black text-blue-300">脚本策略概览</p>
+          <aside className="border-t border-[#d8e4ff] bg-[#eef4ff] p-4 lg:border-l lg:border-t-0">
+            <p className="text-xs font-black text-[#315cff]">脚本策略概览</p>
             <h3 className="mt-2 text-lg font-black">批量合成设置</h3>
             <div className="mt-4 grid gap-2">
               {['固定分组顺序', '智能混剪', '跟随音频', '失败单条重试'].map(item => (
-                <div className="rounded border border-white/10 bg-white/5 px-3 py-2 text-xs font-bold text-slate-300" key={item}>{item}</div>
+                <div className="rounded border border-slate-200 bg-white px-3 py-2 text-xs font-bold text-slate-600 shadow-sm" key={item}>{item}</div>
               ))}
             </div>
-            <Link className="mt-5 flex min-h-12 items-center justify-center rounded-md bg-gradient-to-r from-blue-600 via-fuchsia-600 to-rose-500 text-sm font-black" href={withTaskContext('/factory/cast?variant=friend_trial')}>生成视频</Link>
+            <Link className="mt-5 flex min-h-12 items-center justify-center rounded-md bg-gradient-to-r from-[#315cff] via-[#a63dff] to-[#ff3f8c] text-sm font-black text-white" href={withTaskContext('/factory/cast?variant=friend_trial')}>生成视频</Link>
           </aside>
         </div>
       </section>
