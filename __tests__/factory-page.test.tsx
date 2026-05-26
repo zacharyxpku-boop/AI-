@@ -38,7 +38,8 @@ describe('factory page', () => {
     expect(html).toContain('先上传商品素材');
     expect(html).toContain('混剪到发布控制台');
     expect(html).toContain('客户一眼看懂');
-    expect(html).toContain('电商人一眼看懂的六件事：上新、出图、混剪、发布、客服、复盘');
+    expect(html).toContain('点一个入口，完成一件电商任务');
+    expect(html).toContain('展开交付边界和开源学习');
     expect(html).toContain('商品先变任务');
     expect(html).toContain('生图等 Key');
     expect(html).toContain('混剪先跑通');
