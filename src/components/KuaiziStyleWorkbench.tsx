@@ -347,9 +347,13 @@ function IconMark({ children }: { children: string }) {
 
 export function KuaiziStyleWorkbench() {
   const [selectedId, setSelectedId] = useState<FlowId>('brief');
+  const [starterProductName, setStarterProductName] = useState('便携宠物慢食碗');
+  const [starterPlatform, setStarterPlatform] = useState('小红书');
+  const [starterGoal, setStarterGoal] = useState('先完成一轮可发布内容');
   const [query, setQuery] = useState('');
   const showInternalReportPanels = false;
   const selectedStep = flowSteps.find(step => step.id === selectedId) ?? flowSteps[0];
+  const selectedStepPath = selectedStep.href.split('?')[0];
   const filteredProjects = useMemo(() => {
     const value = query.trim().toLowerCase();
     if (!value) return projects;
@@ -515,6 +519,49 @@ export function KuaiziStyleWorkbench() {
                           </Link>
                         ))}
                       </div>
+                      <form action={selectedStepPath} className="mt-4 rounded-lg border border-slate-200 bg-white/92 p-3 text-left shadow-sm" method="get">
+                        <input name="variant" type="hidden" value="friend_trial" />
+                        <input name="generated" type="hidden" value="1" />
+                        <div className="grid gap-3 md:grid-cols-[minmax(0,1fr)_150px]">
+                          <label className="text-xs font-black text-slate-500">
+                            先填一个商品
+                            <input
+                              className="mt-2 h-10 w-full rounded-md border border-slate-200 px-3 text-sm font-bold text-slate-900 outline-none focus:border-indigo-400 focus:ring-2 focus:ring-indigo-100"
+                              name="productName"
+                              onChange={event => setStarterProductName(event.target.value)}
+                              value={starterProductName}
+                            />
+                          </label>
+                          <label className="text-xs font-black text-slate-500">
+                            平台
+                            <select
+                              className="mt-2 h-10 w-full rounded-md border border-slate-200 px-3 text-sm font-bold text-slate-900 outline-none focus:border-indigo-400 focus:ring-2 focus:ring-indigo-100"
+                              name="platform"
+                              onChange={event => setStarterPlatform(event.target.value)}
+                              value={starterPlatform}
+                            >
+                              {['小红书', 'TikTok', '视频号', '独立站', 'Meta'].map(item => (
+                                <option key={item} value={item}>{item}</option>
+                              ))}
+                            </select>
+                          </label>
+                          <label className="text-xs font-black text-slate-500 md:col-span-2">
+                            这轮想达成什么
+                            <input
+                              className="mt-2 h-10 w-full rounded-md border border-slate-200 px-3 text-sm font-bold text-slate-900 outline-none focus:border-indigo-400 focus:ring-2 focus:ring-indigo-100"
+                              name="audienceGoal"
+                              onChange={event => setStarterGoal(event.target.value)}
+                              value={starterGoal}
+                            />
+                          </label>
+                        </div>
+                        <div className="mt-3 flex flex-wrap items-center gap-2">
+                          <button className="min-h-10 rounded-md bg-slate-950 px-4 text-sm font-black text-white shadow-sm" type="submit">
+                            用这个商品开始：{selectedStep.short}
+                          </button>
+                          <p className="text-xs font-bold leading-5 text-slate-500">提交后直接进入对应子页面，并带着你的商品、平台和目标生成产出。</p>
+                        </div>
+                      </form>
                     </div>
                     <div className="relative mx-auto w-full max-w-[540px]">
                       <CommerceHeroPreview />

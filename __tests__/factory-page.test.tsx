@@ -19,6 +19,10 @@ describe('factory page', () => {
     expect(html).toContain('从一个商品，生成一整套可发布内容');
     expect(html).toContain('点一个入口，完成一件电商任务');
     expect(html).toContain('选商品');
+    expect(html).toContain('先填一个商品');
+    expect(html).toContain('这轮想达成什么');
+    expect(html).toContain('用这个商品开始');
+    expect(html).toContain('提交后直接进入对应子页面');
     expect(html).toContain('生内容');
     expect(html).toContain('拿发布包');
     expect(html).toContain('看复盘');

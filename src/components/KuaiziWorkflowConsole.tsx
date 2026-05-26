@@ -24,10 +24,16 @@ type WorkflowConfig = {
 
 type StepInteraction = {
   actionLabel: string;
+  artifactTitle: string;
+  artifactSections: Array<{ label: string; value: string }>;
+  customerAction: string;
+  evidencePrompt: string;
   helper: string;
+  operatorAction: string;
   previewTitle: string;
   previewItems: string[];
   nextInstruction: string;
+  stepChecklist: string[];
 };
 
 const workflowNav: Array<{ id: WorkflowStep; label: string; href: string }> = [
@@ -37,6 +43,8 @@ const workflowNav: Array<{ id: WorkflowStep; label: string; href: string }> = [
   { id: 'cast', label: '发布包 / 分发', href: '/factory/cast?variant=friend_trial' },
   { id: 'manage', label: '复盘跟进', href: '/factory/manage?variant=friend_trial' },
 ];
+
+const workflowStepOrder: WorkflowStep[] = ['creative', 'create', 'video', 'cast', 'manage'];
 
 const customerNextActions = [
   {
@@ -292,28 +300,48 @@ function WorkflowIllustration({ config }: { config: WorkflowConfig }) {
   );
 }
 
-function buildStepInteraction(active: WorkflowStep, productName: string, platform: string, assetReady: boolean): StepInteraction {
+function buildStepInteraction(active: WorkflowStep, productName: string, platform: string, assetReady: boolean, audienceGoal: string): StepInteraction {
   const product = productName.trim() || '当前商品';
-  const assetLine = assetReady ? '素材已够，直接进入生成。' : '先补主图、场景图或授权说明。';
+  const goal = audienceGoal.trim() || '先完成一轮可发布内容';
+  const assetLine = assetReady ? '素材已齐，可以直接进入生成。' : '素材未齐，系统会先列出缺口和补齐顺序。';
 
   if (active === 'creative') {
     return {
       actionLabel: '生成卖点脚本',
+      artifactTitle: '卖点脚本交付件',
+      artifactSections: [
+        { label: '标题方向', value: `${platform}：${product}，围绕「${goal}」先出 3 个标题。` },
+        { label: '口播脚本', value: '开头 3 秒痛点、商品证明、使用场景、行动引导各一段。' },
+        { label: '素材缺口', value: assetLine },
+      ],
+      customerAction: '填写商品名、目标平台和这轮想解决的问题。',
+      evidencePrompt: '确认一个脚本方向，或补充不能使用的夸张词、竞品词。',
       helper: '输入商品后，先拿到可以给客户确认的 3 个内容方向。',
+      operatorAction: 'Wenai 会把商品信息拆成标题、口播、图文和禁用词提醒。',
       previewTitle: `${product} 的首批脚本`,
       previewItems: [
-        `${platform} 标题：${product}，先解决一个真实使用痛点`,
+        `${platform} 标题：${product}，围绕「${goal}」先解决一个真实使用痛点`,
         '口播结构：痛点开场 / 商品证明 / 使用场景 / 行动引导',
         assetLine,
       ],
       nextInstruction: '确认一个脚本方向后，去素材页补齐图片和授权。',
+      stepChecklist: ['填商品和平台', '选择卖点方向', '确认素材缺口'],
     };
   }
 
   if (active === 'create') {
     return {
       actionLabel: '生成素材清单',
+      artifactTitle: '素材任务交付件',
+      artifactSections: [
+        { label: '图片任务', value: '白底图、细节图、场景图、卖点图按平台用途拆开。' },
+        { label: '证明材料', value: `围绕「${goal}」检查授权、参数、FAQ 和售后承诺。` },
+        { label: '下一步', value: assetReady ? '素材齐，直接进入视频和图文版本。' : '先补主图、参考图、授权或客服 FAQ。' },
+      ],
+      customerAction: '确认已有素材是否齐全，缺什么就按清单补什么。',
+      evidencePrompt: '上传或记录商品图、场景图、授权说明、FAQ。',
       helper: '把商品图、场景图、证明图和客服 FAQ 变成可执行清单。',
+      operatorAction: 'Wenai 会把素材变成图片任务、视频任务和客服素材任务。',
       previewTitle: `${product} 的素材任务`,
       previewItems: [
         `主图：白底图、细节图、使用场景图各 1 组`,
@@ -321,13 +349,23 @@ function buildStepInteraction(active: WorkflowStep, productName: string, platfor
         assetLine,
       ],
       nextInstruction: '素材齐后，进入视频页生成短视频和图文版本。',
+      stepChecklist: ['核对商品图', '补证明和授权', '进入视频生成'],
     };
   }
 
   if (active === 'video') {
     return {
       actionLabel: '生成内容版本',
+      artifactTitle: '短视频与图文交付件',
+      artifactSections: [
+        { label: '短视频', value: `${platform}：15 秒口播、封面标题、字幕和镜头顺序。` },
+        { label: '图文', value: `围绕「${goal}」输出封面图标题、正文和评论区引导。` },
+        { label: '失败兜底', value: assetReady ? '可直接导出发布包。' : '素材不足时先导出口播稿和补素材清单。' },
+      ],
+      customerAction: '选择要先发布的视频角度和图文角度。',
+      evidencePrompt: '确认封面、口播、字幕和尺寸是否能发布。',
       helper: '把一个卖点拆成短视频、图文和口播稿，先预览再交付。',
+      operatorAction: 'Wenai 会生成多个平台版本，并把可发布版本送到发布包。',
       previewTitle: `${product} 的内容版本`,
       previewItems: [
         `${platform} 版本：15 秒口播 + 封面标题 + 正文草稿`,
@@ -335,13 +373,23 @@ function buildStepInteraction(active: WorkflowStep, productName: string, platfor
         assetReady ? '可进入发布包。' : '缺素材时先导出口播稿和补素材清单。',
       ],
       nextInstruction: '选择一个版本后，去发布页拿可复制发布包。',
+      stepChecklist: ['选内容角度', '确认封面和字幕', '导出发布包'],
     };
   }
 
   if (active === 'cast') {
     return {
       actionLabel: '生成发布包',
+      artifactTitle: '平台发布包',
+      artifactSections: [
+        { label: '复制内容', value: `${platform} 标题、正文、标签、封面提示和首评引导。` },
+        { label: '客户动作', value: '客户自己登录平台发布，不需要把账号交给 Wenai。' },
+        { label: '回填字段', value: '发布链接、截图、CSV 或云盘目录。' },
+      ],
+      customerAction: '复制发布包，登录自己的平台账号发布。',
+      evidencePrompt: '发布后把链接、截图或数据表回填到复盘页。',
       helper: '客户不需要授权账号，直接拿标题、正文、标签和回填表。',
+      operatorAction: 'Wenai 负责整理可复制内容和发布检查表。',
       previewTitle: `${product} 的发布包`,
       previewItems: [
         `${platform}：标题、正文、标签、封面提示已整理`,
@@ -349,12 +397,22 @@ function buildStepInteraction(active: WorkflowStep, productName: string, platfor
         assetReady ? '发布包可复制。' : '缺封面或素材时先回到素材页补齐。',
       ],
       nextInstruction: '客户自己发布后，进入复盘页回填证据。',
+      stepChecklist: ['复制发布包', '客户自行发布', '回填发布证据'],
     };
   }
 
   return {
     actionLabel: '生成复盘建议',
+    artifactTitle: '下一轮复盘交付件',
+    artifactSections: [
+      { label: '表现判断', value: `${platform}：先看点击、收藏、评论、咨询和客户反馈。` },
+      { label: '下一轮动作', value: `围绕「${goal}」判断放大、重剪、换角度或补 FAQ。` },
+      { label: '销售跟进', value: '把复盘建议和客服问题同步给负责人。' },
+    ],
+    customerAction: '回填发布链接、截图、CSV 或客户备注。',
+    evidencePrompt: '上传证据越完整，下一轮建议越具体。',
     helper: '把客户回填的链接、截图或 CSV 变成下一轮动作。',
+    operatorAction: 'Wenai 会把表现证据转成下一轮脚本、素材和客服建议。',
     previewTitle: `${product} 的复盘动作`,
     previewItems: [
       `${platform} 数据：先看点击、收藏、评论和咨询问题`,
@@ -362,38 +420,47 @@ function buildStepInteraction(active: WorkflowStep, productName: string, platfor
       assetReady ? '可发送给销售跟进。' : '缺回填证据时先让客户补链接或截图。',
     ],
     nextInstruction: '确认建议后，回到工作台开启下一轮商品任务。',
+    stepChecklist: ['回填证据', '生成复盘建议', '开启下一轮任务'],
   };
 }
 
 export function KuaiziWorkflowConsole({
   active,
   initialAssetReady,
+  initialAudienceGoal = '先完成一轮可发布内容',
   initialGenerated = false,
   initialPlatform = '小红书',
   initialProductName = '便携宠物慢食碗',
 }: {
   active: WorkflowStep;
   initialAssetReady?: boolean;
+  initialAudienceGoal?: string;
   initialGenerated?: boolean;
   initialPlatform?: string;
   initialProductName?: string;
 }) {
   const config = configs[active];
+  const activeIndex = workflowStepOrder.indexOf(active);
+  const nextHref = config.primaryHref;
+  const nextLabel = active === 'manage' ? '回到工作台' : config.primaryLabel;
+  const progressPercent = Math.round(((activeIndex + 1) / workflowStepOrder.length) * 100);
   const [productName, setProductName] = useState(initialProductName);
   const [platform, setPlatform] = useState(initialPlatform);
+  const [audienceGoal, setAudienceGoal] = useState(initialAudienceGoal);
   const [assetReady, setAssetReady] = useState(initialAssetReady ?? active !== 'create');
   const [generated, setGenerated] = useState(initialGenerated);
   const interaction = useMemo(
-    () => buildStepInteraction(active, productName, platform, assetReady),
-    [active, productName, platform, assetReady],
+    () => buildStepInteraction(active, productName, platform, assetReady, audienceGoal),
+    [active, productName, platform, assetReady, audienceGoal],
   );
 
   useEffect(() => {
     setProductName(initialProductName);
     setPlatform(initialPlatform);
+    setAudienceGoal(initialAudienceGoal);
     setAssetReady(initialAssetReady ?? active !== 'create');
     setGenerated(initialGenerated);
-  }, [active, initialAssetReady, initialGenerated, initialPlatform, initialProductName]);
+  }, [active, initialAssetReady, initialAudienceGoal, initialGenerated, initialPlatform, initialProductName]);
 
   return (
     <main className="min-h-screen bg-[#f4f6fb] text-[#15213f]">
@@ -458,11 +525,24 @@ export function KuaiziWorkflowConsole({
                 <div className="space-y-4">
                   <form
                     className="rounded-lg border border-slate-200 bg-white/92 p-4 text-left shadow-sm"
+                    id="task-form"
                     method="get"
                   >
                     <input name="variant" type="hidden" value="friend_trial" />
                     <input name="generated" type="hidden" value="1" />
-                    <div className="flex flex-col gap-3 lg:flex-row lg:items-end">
+                    <div className="mb-4 grid gap-3 lg:grid-cols-3">
+                      {[
+                        ['你先做', interaction.customerAction],
+                        ['Wenai 生成', interaction.operatorAction],
+                        ['拿去用', interaction.evidencePrompt],
+                      ].map(([label, body]) => (
+                        <div className="rounded-md bg-slate-50 px-3 py-2 ring-1 ring-slate-100" key={label}>
+                          <p className="text-[11px] font-black text-indigo-600">{label}</p>
+                          <p className="mt-1 text-xs font-bold leading-5 text-slate-600">{body}</p>
+                        </div>
+                      ))}
+                    </div>
+                    <div className="flex flex-col gap-3 lg:grid lg:grid-cols-[minmax(220px,1fr)_170px_minmax(220px,1fr)] lg:items-end">
                       <label className="min-w-0 flex-1 text-xs font-black text-slate-500">
                         商品
                         <input
@@ -492,6 +572,19 @@ export function KuaiziWorkflowConsole({
                           ))}
                         </select>
                       </label>
+                      <label className="min-w-0 flex-1 text-xs font-black text-slate-500">
+                        这轮目标
+                        <input
+                          className="mt-2 h-11 w-full rounded-md border border-slate-200 bg-white px-3 text-sm font-bold text-slate-900 outline-none transition focus:border-indigo-400 focus:ring-2 focus:ring-indigo-100"
+                          name="audienceGoal"
+                          onChange={(event) => {
+                            setAudienceGoal(event.target.value);
+                            setGenerated(false);
+                          }}
+                          placeholder="例如：拉新 / 测爆款 / 清库存"
+                          value={audienceGoal}
+                        />
+                      </label>
                       <label className="flex h-11 items-center gap-2 rounded-md border border-slate-200 bg-slate-50 px-3 text-xs font-black text-slate-600">
                         <input
                           checked={assetReady}
@@ -515,6 +608,9 @@ export function KuaiziWorkflowConsole({
                       </button>
                     </div>
                     <p className="mt-3 text-xs font-bold leading-5 text-slate-500">{interaction.helper}</p>
+                    <p className="mt-2 rounded-md bg-indigo-50 px-3 py-2 text-xs font-black leading-5 text-indigo-800 ring-1 ring-indigo-100">
+                      当前任务：{productName || '未命名商品'} / {platform} / {audienceGoal || '先完成一轮可发布内容'}
+                    </p>
                   </form>
 
                   <div className="grid gap-3 sm:grid-cols-2 xl:grid-cols-3">
@@ -547,6 +643,34 @@ export function KuaiziWorkflowConsole({
                     </div>
                     <p className="mt-3 text-xs font-black text-indigo-700">{generated ? interaction.nextInstruction : '这一步会告诉用户当前页面到底产出什么。'}</p>
                   </div>
+
+                  <div className="rounded-lg border border-slate-200 bg-white/92 p-4 text-left shadow-sm">
+                    <div className="flex flex-wrap items-center justify-between gap-2">
+                      <div>
+                        <p className="text-xs font-black uppercase tracking-[0.18em] text-slate-500">可交付结果</p>
+                        <h3 className="mt-1 text-base font-black text-slate-950">{interaction.artifactTitle}</h3>
+                      </div>
+                      <span className="rounded-md bg-indigo-50 px-2 py-1 text-xs font-black text-indigo-700 ring-1 ring-indigo-100">
+                        {generated ? '已按当前输入更新' : '点击生成后出现'}
+                      </span>
+                    </div>
+                    <div className="mt-3 grid gap-2">
+                      {interaction.artifactSections.map(section => (
+                        <div className="grid gap-2 rounded-md bg-slate-50 p-3 ring-1 ring-slate-100 sm:grid-cols-[92px_minmax(0,1fr)]" key={section.label}>
+                          <p className="text-xs font-black text-slate-500">{section.label}</p>
+                          <p className="break-words text-xs font-bold leading-5 text-slate-800">{generated ? section.value : '先填写上面的任务信息，再生成这一项。'}</p>
+                        </div>
+                      ))}
+                    </div>
+                    <div className="mt-3 flex flex-wrap gap-2">
+                      <Link className="flex min-h-10 items-center justify-center rounded-md bg-slate-950 px-4 text-sm font-black text-white" href={generated ? nextHref : '#task-form'}>
+                        {generated ? nextLabel : '先生成本页产出'}
+                      </Link>
+                      <Link className="flex min-h-10 items-center justify-center rounded-md border border-slate-200 bg-white px-4 text-sm font-black text-slate-700" href="/factory?variant=friend_trial">
+                        回到总工作台
+                      </Link>
+                    </div>
+                  </div>
                 </div>
 
                 <div className="rounded-lg border border-slate-200 bg-white/90 p-4 text-left shadow-sm">
@@ -559,6 +683,48 @@ export function KuaiziWorkflowConsole({
                   </div>
                   <div className="mt-4">
                     <WorkflowIllustration config={config} />
+                  </div>
+                  <div className="mt-4 rounded-md bg-slate-50 p-3 ring-1 ring-slate-100">
+                    <div className="flex items-center justify-between gap-3">
+                      <p className="text-xs font-black text-slate-500">整条任务进度</p>
+                      <p className="text-xs font-black text-indigo-700">{progressPercent}%</p>
+                    </div>
+                    <div className="mt-2 h-2 overflow-hidden rounded-full bg-white ring-1 ring-slate-200">
+                      <div className={`h-full rounded-full bg-gradient-to-r ${config.accent}`} style={{ width: `${progressPercent}%` }} />
+                    </div>
+                    <div className="mt-3 grid gap-2">
+                      {workflowNav.map((item, index) => {
+                        const state = index < activeIndex ? '已完成' : index === activeIndex ? '当前步骤' : '下一步';
+                        return (
+                          <Link
+                            className={`grid min-h-9 grid-cols-[26px_minmax(0,1fr)_64px] items-center gap-2 rounded-md px-2 text-xs font-black ${
+                              item.id === active
+                                ? 'bg-slate-950 text-white'
+                                : index < activeIndex
+                                  ? 'bg-emerald-50 text-emerald-800 ring-1 ring-emerald-100'
+                                  : 'bg-white text-slate-600 ring-1 ring-slate-100'
+                            }`}
+                            href={item.href}
+                            key={item.id}
+                          >
+                            <span className="grid size-6 place-items-center rounded bg-white/80 text-[10px] text-slate-700">{index + 1}</span>
+                            <span className="min-w-0 truncate">{item.label}</span>
+                            <span className="text-right text-[10px] opacity-80">{state}</span>
+                          </Link>
+                        );
+                      })}
+                    </div>
+                  </div>
+                  <div className="mt-4 rounded-md border border-indigo-100 bg-indigo-50 p-3">
+                    <p className="text-xs font-black text-indigo-700">本页怎么用</p>
+                    <div className="mt-2 grid gap-2">
+                      {interaction.stepChecklist.map((item, index) => (
+                        <div className="flex gap-2 rounded bg-white px-2 py-1.5 text-xs font-bold leading-5 text-slate-700 ring-1 ring-indigo-100" key={item}>
+                          <span className="grid size-5 shrink-0 place-items-center rounded bg-indigo-600 text-[10px] font-black text-white">{index + 1}</span>
+                          <span>{item}</span>
+                        </div>
+                      ))}
+                    </div>
                   </div>
                   <div className="mt-4 grid grid-cols-2 gap-2">
                     <Link className="flex min-h-10 items-center justify-center rounded-md bg-slate-950 px-3 text-sm font-black text-white" href={config.primaryHref}>

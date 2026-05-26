@@ -15,6 +15,7 @@ export default async function ManageFactoryPage({
   searchParams,
 }: {
   searchParams?: Promise<{
+    audienceGoal?: string;
     assetReady?: string;
     generated?: string;
     platform?: string;
@@ -32,6 +33,7 @@ export default async function ManageFactoryPage({
       <KuaiziWorkflowConsole
         active="manage"
         initialAssetReady={params.assetReady === '1' ? true : params.generated === '1' ? false : undefined}
+        initialAudienceGoal={params.audienceGoal || undefined}
         initialGenerated={params.generated === '1'}
         initialPlatform={params.platform || undefined}
         initialProductName={params.productName || undefined}
