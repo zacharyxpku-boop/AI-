@@ -13,14 +13,29 @@ export const metadata: Metadata = {
 export default async function VideoFactoryPage({
   searchParams,
 }: {
-  searchParams?: Promise<{ projectId?: string; variant?: string }>;
+  searchParams?: Promise<{
+    assetReady?: string;
+    generated?: string;
+    platform?: string;
+    productName?: string;
+    projectId?: string;
+    variant?: string;
+  }>;
 }) {
   const params = searchParams ? await searchParams : {};
   const projectId = params.projectId || 'default-project';
   const selectedVariantId = normalizeFactoryUiVariantId(params.variant);
 
   if (selectedVariantId === 'friend_trial') {
-    return <KuaiziWorkflowConsole active="video" />;
+    return (
+      <KuaiziWorkflowConsole
+        active="video"
+        initialAssetReady={params.assetReady === '1' ? true : params.generated === '1' ? false : undefined}
+        initialGenerated={params.generated === '1'}
+        initialPlatform={params.platform || undefined}
+        initialProductName={params.productName || undefined}
+      />
+    );
   }
 
   const queue = await getIndustrialVideoProductionQueue('anon', projectId);

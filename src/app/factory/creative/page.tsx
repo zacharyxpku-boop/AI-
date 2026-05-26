@@ -12,13 +12,28 @@ export const metadata: Metadata = {
 export default async function CreativeFactoryPage({
   searchParams,
 }: {
-  searchParams?: Promise<{ projectId?: string; variant?: string }>;
+  searchParams?: Promise<{
+    assetReady?: string;
+    generated?: string;
+    platform?: string;
+    productName?: string;
+    projectId?: string;
+    variant?: string;
+  }>;
 }) {
   const params = searchParams ? await searchParams : {};
   const selectedVariantId = normalizeFactoryUiVariantId(params.variant);
 
   if (selectedVariantId === 'friend_trial') {
-    return <KuaiziWorkflowConsole active="creative" />;
+    return (
+      <KuaiziWorkflowConsole
+        active="creative"
+        initialAssetReady={params.assetReady === '1' ? true : undefined}
+        initialGenerated={params.generated === '1'}
+        initialPlatform={params.platform || undefined}
+        initialProductName={params.productName || undefined}
+      />
+    );
   }
 
   return (

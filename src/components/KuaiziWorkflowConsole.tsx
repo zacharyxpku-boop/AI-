@@ -1,4 +1,7 @@
+'use client';
+
 import Link from 'next/link';
+import { useEffect, useMemo, useState } from 'react';
 
 type WorkflowStep = 'creative' | 'create' | 'video' | 'cast' | 'manage';
 
@@ -17,6 +20,14 @@ type WorkflowConfig = {
   systemPillars: Array<{ title: string; body: string; proof: string }>;
   tasks: Array<{ title: string; owner: string; status: string }>;
   deliverables: Array<{ title: string; body: string; status: string }>;
+};
+
+type StepInteraction = {
+  actionLabel: string;
+  helper: string;
+  previewTitle: string;
+  previewItems: string[];
+  nextInstruction: string;
 };
 
 const workflowNav: Array<{ id: WorkflowStep; label: string; href: string }> = [
@@ -281,8 +292,108 @@ function WorkflowIllustration({ config }: { config: WorkflowConfig }) {
   );
 }
 
-export function KuaiziWorkflowConsole({ active }: { active: WorkflowStep }) {
+function buildStepInteraction(active: WorkflowStep, productName: string, platform: string, assetReady: boolean): StepInteraction {
+  const product = productName.trim() || '当前商品';
+  const assetLine = assetReady ? '素材已够，直接进入生成。' : '先补主图、场景图或授权说明。';
+
+  if (active === 'creative') {
+    return {
+      actionLabel: '生成卖点脚本',
+      helper: '输入商品后，先拿到可以给客户确认的 3 个内容方向。',
+      previewTitle: `${product} 的首批脚本`,
+      previewItems: [
+        `${platform} 标题：${product}，先解决一个真实使用痛点`,
+        '口播结构：痛点开场 / 商品证明 / 使用场景 / 行动引导',
+        assetLine,
+      ],
+      nextInstruction: '确认一个脚本方向后，去素材页补齐图片和授权。',
+    };
+  }
+
+  if (active === 'create') {
+    return {
+      actionLabel: '生成素材清单',
+      helper: '把商品图、场景图、证明图和客服 FAQ 变成可执行清单。',
+      previewTitle: `${product} 的素材任务`,
+      previewItems: [
+        `主图：白底图、细节图、使用场景图各 1 组`,
+        `平台：${platform} 优先准备封面图和首屏卖点图`,
+        assetLine,
+      ],
+      nextInstruction: '素材齐后，进入视频页生成短视频和图文版本。',
+    };
+  }
+
+  if (active === 'video') {
+    return {
+      actionLabel: '生成内容版本',
+      helper: '把一个卖点拆成短视频、图文和口播稿，先预览再交付。',
+      previewTitle: `${product} 的内容版本`,
+      previewItems: [
+        `${platform} 版本：15 秒口播 + 封面标题 + 正文草稿`,
+        '生成 3 个角度：痛点、场景、优惠',
+        assetReady ? '可进入发布包。' : '缺素材时先导出口播稿和补素材清单。',
+      ],
+      nextInstruction: '选择一个版本后，去发布页拿可复制发布包。',
+    };
+  }
+
+  if (active === 'cast') {
+    return {
+      actionLabel: '生成发布包',
+      helper: '客户不需要授权账号，直接拿标题、正文、标签和回填表。',
+      previewTitle: `${product} 的发布包`,
+      previewItems: [
+        `${platform}：标题、正文、标签、封面提示已整理`,
+        '发布后回填：链接、截图、CSV 或云盘备注',
+        assetReady ? '发布包可复制。' : '缺封面或素材时先回到素材页补齐。',
+      ],
+      nextInstruction: '客户自己发布后，进入复盘页回填证据。',
+    };
+  }
+
+  return {
+    actionLabel: '生成复盘建议',
+    helper: '把客户回填的链接、截图或 CSV 变成下一轮动作。',
+    previewTitle: `${product} 的复盘动作`,
+    previewItems: [
+      `${platform} 数据：先看点击、收藏、评论和咨询问题`,
+      '下一轮建议：放大胜出角度、重剪弱版本、补客服 FAQ',
+      assetReady ? '可发送给销售跟进。' : '缺回填证据时先让客户补链接或截图。',
+    ],
+    nextInstruction: '确认建议后，回到工作台开启下一轮商品任务。',
+  };
+}
+
+export function KuaiziWorkflowConsole({
+  active,
+  initialAssetReady,
+  initialGenerated = false,
+  initialPlatform = '小红书',
+  initialProductName = '便携宠物慢食碗',
+}: {
+  active: WorkflowStep;
+  initialAssetReady?: boolean;
+  initialGenerated?: boolean;
+  initialPlatform?: string;
+  initialProductName?: string;
+}) {
   const config = configs[active];
+  const [productName, setProductName] = useState(initialProductName);
+  const [platform, setPlatform] = useState(initialPlatform);
+  const [assetReady, setAssetReady] = useState(initialAssetReady ?? active !== 'create');
+  const [generated, setGenerated] = useState(initialGenerated);
+  const interaction = useMemo(
+    () => buildStepInteraction(active, productName, platform, assetReady),
+    [active, productName, platform, assetReady],
+  );
+
+  useEffect(() => {
+    setProductName(initialProductName);
+    setPlatform(initialPlatform);
+    setAssetReady(initialAssetReady ?? active !== 'create');
+    setGenerated(initialGenerated);
+  }, [active, initialAssetReady, initialGenerated, initialPlatform, initialProductName]);
 
   return (
     <main className="min-h-screen bg-[#f4f6fb] text-[#15213f]">
@@ -344,19 +455,98 @@ export function KuaiziWorkflowConsole({ active }: { active: WorkflowStep }) {
               </div>
 
               <div className="relative mx-auto mt-10 grid max-w-6xl gap-5 xl:grid-cols-[minmax(0,1fr)_380px] xl:items-center">
-                <div className="grid gap-3 sm:grid-cols-2 xl:grid-cols-3">
-                  {config.cards.map((card, index) => (
-                    <article className="group min-h-[156px] rounded-lg border border-slate-200 bg-white/90 p-4 text-left shadow-sm transition hover:-translate-y-0.5 hover:shadow-md" key={card.label}>
-                      <div className={`h-20 rounded-lg bg-gradient-to-br ${config.accent} opacity-95`}>
-                        <div className="flex h-full items-end justify-between p-3">
-                          <span className="rounded-full bg-white/90 px-2 py-1 text-[11px] font-black text-slate-700">{String(index + 1).padStart(2, '0')}</span>
-                          <span className="grid size-8 place-items-center rounded-full bg-white/90 text-sm font-black text-slate-950">+</span>
+                <div className="space-y-4">
+                  <form
+                    className="rounded-lg border border-slate-200 bg-white/92 p-4 text-left shadow-sm"
+                    method="get"
+                  >
+                    <input name="variant" type="hidden" value="friend_trial" />
+                    <input name="generated" type="hidden" value="1" />
+                    <div className="flex flex-col gap-3 lg:flex-row lg:items-end">
+                      <label className="min-w-0 flex-1 text-xs font-black text-slate-500">
+                        商品
+                        <input
+                          className="mt-2 h-11 w-full rounded-md border border-slate-200 bg-white px-3 text-sm font-bold text-slate-900 outline-none transition focus:border-indigo-400 focus:ring-2 focus:ring-indigo-100"
+                          name="productName"
+                          onChange={(event) => {
+                            setProductName(event.target.value);
+                            setGenerated(false);
+                          }}
+                          placeholder="输入商品名"
+                          value={productName}
+                        />
+                      </label>
+                      <label className="min-w-0 flex-1 text-xs font-black text-slate-500">
+                        平台
+                        <select
+                          className="mt-2 h-11 w-full rounded-md border border-slate-200 bg-white px-3 text-sm font-bold text-slate-900 outline-none transition focus:border-indigo-400 focus:ring-2 focus:ring-indigo-100"
+                          name="platform"
+                          onChange={(event) => {
+                            setPlatform(event.target.value);
+                            setGenerated(false);
+                          }}
+                          value={platform}
+                        >
+                          {['小红书', 'TikTok', '视频号', '独立站', 'Meta'].map(item => (
+                            <option key={item} value={item}>{item}</option>
+                          ))}
+                        </select>
+                      </label>
+                      <label className="flex h-11 items-center gap-2 rounded-md border border-slate-200 bg-slate-50 px-3 text-xs font-black text-slate-600">
+                        <input
+                          checked={assetReady}
+                          className="size-4 accent-indigo-600"
+                          name="assetReady"
+                          onChange={(event) => {
+                            setAssetReady(event.target.checked);
+                            setGenerated(false);
+                          }}
+                          type="checkbox"
+                          value="1"
+                        />
+                        素材已齐
+                      </label>
+                      <button
+                        className="h-11 rounded-md bg-slate-950 px-5 text-sm font-black text-white shadow-sm transition hover:bg-slate-800"
+                        onClick={() => setGenerated(true)}
+                        type="submit"
+                      >
+                        {interaction.actionLabel}
+                      </button>
+                    </div>
+                    <p className="mt-3 text-xs font-bold leading-5 text-slate-500">{interaction.helper}</p>
+                  </form>
+
+                  <div className="grid gap-3 sm:grid-cols-2 xl:grid-cols-3">
+                    {config.cards.map((card, index) => (
+                      <article className="group min-h-[156px] rounded-lg border border-slate-200 bg-white/90 p-4 text-left shadow-sm transition hover:-translate-y-0.5 hover:shadow-md" key={card.label}>
+                        <div className={`h-20 rounded-lg bg-gradient-to-br ${config.accent} opacity-95`}>
+                          <div className="flex h-full items-end justify-between p-3">
+                            <span className="rounded-full bg-white/90 px-2 py-1 text-[11px] font-black text-slate-700">{String(index + 1).padStart(2, '0')}</span>
+                            <span className="grid size-8 place-items-center rounded-full bg-white/90 text-sm font-black text-slate-950">+</span>
+                          </div>
                         </div>
-                      </div>
-                      <h3 className="mt-3 break-words text-base font-black leading-6 text-slate-950">{card.label}</h3>
-                      <p className="mt-1 line-clamp-2 text-xs font-bold leading-5 text-slate-500">{card.detail}</p>
-                    </article>
-                  ))}
+                        <h3 className="mt-3 break-words text-base font-black leading-6 text-slate-950">{card.label}</h3>
+                        <p className="mt-1 line-clamp-2 text-xs font-bold leading-5 text-slate-500">{card.detail}</p>
+                      </article>
+                    ))}
+                  </div>
+
+                  <div className={`rounded-lg border p-4 text-left shadow-sm transition ${generated ? 'border-emerald-200 bg-emerald-50' : 'border-slate-200 bg-white/82'}`}>
+                    <div className="flex flex-wrap items-center justify-between gap-2">
+                      <p className="text-xs font-black uppercase tracking-[0.18em] text-slate-500">生成预览</p>
+                      <span className={`rounded-md px-2 py-1 text-xs font-black ${generated ? 'bg-white text-emerald-700 ring-1 ring-emerald-100' : 'bg-slate-100 text-slate-500'}`}>
+                        {generated ? '已生成' : '等待点击生成'}
+                      </span>
+                    </div>
+                    <h3 className="mt-2 text-base font-black text-slate-950">{generated ? interaction.previewTitle : '先填写商品，再点击生成'}</h3>
+                    <div className="mt-3 grid gap-2">
+                      {(generated ? interaction.previewItems : ['输入商品名', '选择发布平台', '确认素材是否齐全']).map(item => (
+                        <div className="rounded-md bg-white px-3 py-2 text-xs font-bold leading-5 text-slate-700 ring-1 ring-slate-100" key={item}>{item}</div>
+                      ))}
+                    </div>
+                    <p className="mt-3 text-xs font-black text-indigo-700">{generated ? interaction.nextInstruction : '这一步会告诉用户当前页面到底产出什么。'}</p>
+                  </div>
                 </div>
 
                 <div className="rounded-lg border border-slate-200 bg-white/90 p-4 text-left shadow-sm">
