@@ -17,6 +17,10 @@ describe('factory page', () => {
     expect(html).toContain('/factory/manage?variant=friend_trial');
     expect(html).toContain('搜索工具 Ctrl K');
     expect(html).toContain('从一个商品，生成一整套可发布内容');
+    expect(html).toContain('今日商品工程');
+    expect(html).toContain('便携宠物慢食碗 · 首轮内容包');
+    expect(html).toContain('5 条时间线 + 失败单条重试');
+    expect(html).toContain('不开账号');
     expect(html).toContain('电商增长闭环');
     expect(html).toContain('功能很多，但客户只看到一条商品增长流水线');
     expect(html).toContain('商品资料进来');

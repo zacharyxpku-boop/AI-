@@ -250,11 +250,10 @@ const publishingRows = [
 
 function MiniIllustration({ step, large = false }: { step: FlowStep; large?: boolean }) {
   return (
-    <div className={`relative overflow-hidden rounded-xl bg-gradient-to-br ${step.accent} ${large ? 'min-h-[260px] p-6' : 'h-24 p-3'}`}>
-      <div className="absolute -right-8 -top-8 size-36 rounded-full bg-white/25 blur-2xl" />
-      <div className="absolute -bottom-10 left-8 size-32 rounded-full bg-slate-950/18 blur-2xl" />
-      <div className="relative grid h-full grid-cols-[1fr_0.7fr] gap-3">
-        <div className="flex min-w-0 flex-col justify-between rounded-lg bg-white/86 p-3 shadow-sm">
+    <div className={`relative overflow-hidden rounded-lg bg-gradient-to-br ${step.accent} ${large ? 'min-h-[260px] p-4 sm:p-5' : 'h-24 p-3'}`}>
+      <div className="absolute inset-0 bg-[linear-gradient(90deg,rgba(255,255,255,0.18)_1px,transparent_1px),linear-gradient(180deg,rgba(255,255,255,0.16)_1px,transparent_1px)] bg-[size:24px_24px]" />
+      <div className="relative grid h-full grid-cols-[1fr_0.72fr] gap-3">
+        <div className="flex min-w-0 flex-col justify-between rounded-md bg-white/90 p-3 ring-1 ring-white/60">
           <div className="flex items-center gap-2">
             <span className="size-3 rounded-full bg-rose-400" />
             <span className="h-2 w-16 rounded-full bg-slate-200" />
@@ -272,11 +271,66 @@ function MiniIllustration({ step, large = false }: { step: FlowStep; large?: boo
             </div>
           ) : null}
         </div>
-        <div className="relative min-w-0 rounded-lg bg-white/60 p-2">
-          <div className={`absolute bottom-3 left-3 rounded-full bg-white/80 ${large ? 'size-20' : 'size-12'}`} />
-          <div className={`absolute bottom-7 right-5 rounded-md bg-slate-950/70 ${large ? 'h-24 w-10' : 'h-12 w-6'}`} />
-          <div className={`absolute right-3 top-3 rounded-lg bg-white/55 ${large ? 'size-16' : 'size-10'}`} />
+        <div className="relative min-w-0 rounded-md bg-white/70 p-2 ring-1 ring-white/60">
+          <div className={`absolute left-3 top-3 rounded-md bg-white/85 ${large ? 'h-12 w-20' : 'h-8 w-14'}`} />
+          <div className={`absolute bottom-4 left-3 rounded-md bg-slate-950/75 ${large ? 'h-20 w-12' : 'h-10 w-7'}`} />
+          <div className={`absolute bottom-5 right-4 rounded-md bg-white/80 ${large ? 'h-24 w-16' : 'h-12 w-10'}`} />
+          <div className="absolute right-3 top-3 grid gap-1">
+            <span className="block h-1.5 w-12 rounded bg-white/80" />
+            <span className="block h-1.5 w-8 rounded bg-white/60" />
+          </div>
         </div>
+      </div>
+    </div>
+  );
+}
+
+function CommerceHeroPreview() {
+  return (
+    <div className="rounded-lg border border-white/80 bg-white/90 p-3 shadow-sm ring-1 ring-slate-200/80">
+      <div className="flex items-center justify-between gap-3 border-b border-slate-100 pb-3">
+        <div className="min-w-0">
+          <p className="text-[11px] font-black uppercase tracking-[0.14em] text-indigo-600">今日商品工程</p>
+          <h3 className="mt-1 truncate text-sm font-black text-slate-950">便携宠物慢食碗 · 首轮内容包</h3>
+        </div>
+        <span className="shrink-0 rounded bg-emerald-50 px-2 py-1 text-[11px] font-black text-emerald-700 ring-1 ring-emerald-100">可交付</span>
+      </div>
+      <div className="mt-3 grid gap-3 sm:grid-cols-[0.9fr_1.1fr]">
+        <div className="min-w-0 rounded-md bg-slate-950 p-3 text-white">
+          <div className="grid aspect-[4/5] place-items-end rounded bg-[linear-gradient(135deg,#dbeafe,#fef3c7_48%,#fecdd3)] p-3">
+            <div className="w-full rounded bg-white/88 p-2 text-slate-950">
+              <div className="h-2 w-16 rounded bg-slate-900" />
+              <div className="mt-2 h-1.5 w-24 rounded bg-slate-300" />
+              <div className="mt-2 grid grid-cols-3 gap-1">
+                <span className="h-6 rounded bg-indigo-100" />
+                <span className="h-6 rounded bg-emerald-100" />
+                <span className="h-6 rounded bg-amber-100" />
+              </div>
+            </div>
+          </div>
+          <p className="mt-2 text-[11px] font-bold leading-4 text-slate-300">模特证明图 / 场景图 / 细节图进入素材货架</p>
+        </div>
+        <div className="grid min-w-0 gap-2">
+          {[
+            ['01', '脚本', '3 个标题方向 + 前三句口播'],
+            ['02', '混剪', '5 条时间线 + 失败单条重试'],
+            ['03', '发布包', '小红书 / TikTok / 视频号'],
+            ['04', '回填', '链接、截图、CSV、云盘目录'],
+          ].map(row => (
+            <div className="grid grid-cols-[34px_minmax(0,1fr)] gap-2 rounded-md border border-slate-200 bg-slate-50 px-3 py-2" key={row[0]}>
+              <span className="grid size-7 place-items-center rounded bg-white text-[11px] font-black text-slate-700 ring-1 ring-slate-200">{row[0]}</span>
+              <div className="min-w-0">
+                <div className="text-xs font-black text-slate-950">{row[1]}</div>
+                <div className="mt-0.5 truncate text-[11px] font-bold text-slate-500">{row[2]}</div>
+              </div>
+            </div>
+          ))}
+        </div>
+      </div>
+      <div className="mt-3 grid grid-cols-3 gap-2">
+        {['不开账号', '等 Key 增强', '先云盘回填'].map(item => (
+          <div className="rounded bg-indigo-50 px-2 py-2 text-center text-[11px] font-black text-indigo-700 ring-1 ring-indigo-100" key={item}>{item}</div>
+        ))}
       </div>
     </div>
   );
@@ -429,9 +483,10 @@ export function KuaiziStyleWorkbench() {
           <div className="flex-1 px-4 py-5 md:px-6">
             <div className="mx-auto max-w-[1560px] space-y-5 pb-16">
               <section className="overflow-hidden rounded-lg border border-[#dbe6ff] bg-white shadow-sm">
-                <div className="relative bg-[radial-gradient(circle_at_18%_0%,#ddf7ff_0,transparent_24%),radial-gradient(circle_at_70%_0%,#ffe3f3_0,transparent_30%),linear-gradient(135deg,#fbfdff_0%,#f5f8ff_48%,#ffffff_100%)] px-5 py-9">
+                <div className="relative bg-[linear-gradient(135deg,#fbfdff_0%,#f1f6ff_52%,#ffffff_100%)] px-5 py-9">
+                  <div className="absolute inset-0 bg-[linear-gradient(90deg,rgba(30,64,175,0.06)_1px,transparent_1px),linear-gradient(180deg,rgba(30,64,175,0.05)_1px,transparent_1px)] bg-[size:32px_32px]" />
                   <div className="mx-auto grid max-w-6xl gap-8 lg:grid-cols-[minmax(0,0.95fr)_minmax(360px,0.72fr)] lg:items-center">
-                    <div className="min-w-0 text-center lg:text-left">
+                    <div className="relative min-w-0 text-center lg:text-left">
                       <p className="text-xs font-black uppercase tracking-[0.18em] text-indigo-600">商品内容工厂</p>
                       <h2 className="mt-3 text-3xl font-black leading-tight tracking-tight text-[#15213f] md:text-5xl">从一个商品，生成一整套可发布内容</h2>
                       <p className="mt-4 max-w-2xl text-sm leading-7 text-slate-600 lg:text-base">
@@ -456,8 +511,8 @@ export function KuaiziStyleWorkbench() {
                         ))}
                       </div>
                     </div>
-                    <div className="mx-auto w-full max-w-[520px]">
-                      <MiniIllustration step={selectedStep} large />
+                    <div className="relative mx-auto w-full max-w-[540px]">
+                      <CommerceHeroPreview />
                     </div>
                   </div>
 
