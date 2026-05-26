@@ -315,17 +315,75 @@ export function KuaiziWorkflowConsole({ active }: { active: WorkflowStep }) {
         <section className="min-w-0 flex-1 px-4 py-5 sm:px-6 lg:px-8">
           <header className="flex flex-col gap-3 rounded-md border border-white bg-white/85 p-4 shadow-sm md:flex-row md:items-center md:justify-between">
             <div className="min-w-0">
-              <p className="text-xs font-black uppercase tracking-[0.18em] text-slate-400">{config.eyebrow}</p>
-              <h1 className="mt-1 break-words text-2xl font-black text-[#15213f] md:text-[30px]">{config.title}</h1>
-              <p className="mt-2 max-w-3xl text-sm leading-6 text-slate-500">{config.subtitle}</p>
+              <div className="flex flex-wrap items-center gap-2">
+                <h1 className="text-lg font-black tracking-tight md:text-xl">Wenai 商品增长工作台</h1>
+                <span className="rounded-md bg-blue-50 px-2 py-1 text-xs font-bold text-blue-700 ring-1 ring-blue-100">{config.status}</span>
+                <span className="rounded-md bg-emerald-50 px-2 py-1 text-xs font-bold text-emerald-700 ring-1 ring-emerald-100">客户能看懂</span>
+              </div>
+              <p className="mt-1 line-clamp-2 max-w-3xl text-sm leading-6 text-slate-500">选商品、点工具、拿发布包；当前页面是第 {config.eyebrow.replace('步骤 ', '')} 步。</p>
             </div>
             <div className="flex shrink-0 flex-wrap gap-2">
-              <span className="rounded-md bg-blue-50 px-2.5 py-1 text-xs font-bold text-blue-700 ring-1 ring-blue-100">{config.status}</span>
-              <span className="rounded-md bg-emerald-50 px-2.5 py-1 text-xs font-bold text-emerald-700 ring-1 ring-emerald-100">客户能看懂</span>
+              <button className="min-h-10 rounded-md border border-slate-200 bg-white px-4 text-sm font-bold text-slate-600" type="button">搜索工具 Ctrl K</button>
+              <Link className="min-h-10 rounded-md bg-gradient-to-r from-[#6b5cff] via-[#a63dff] to-[#ff6c8f] px-5 py-2.5 text-sm font-black text-white shadow-sm" href={config.primaryHref}>
+                下一步：{config.primaryLabel}
+              </Link>
             </div>
           </header>
 
-          <section className="mt-5 rounded-md border border-slate-200 bg-white p-4 shadow-sm">
+          <section className="mt-5 overflow-hidden rounded-lg border border-[#dbe6ff] bg-white shadow-sm">
+            <div className="relative min-h-[520px] bg-[linear-gradient(135deg,#fbfdff_0%,#f1f6ff_52%,#ffffff_100%)] px-5 py-10">
+              <div className="absolute inset-0 bg-[linear-gradient(90deg,rgba(30,64,175,0.06)_1px,transparent_1px),linear-gradient(180deg,rgba(30,64,175,0.05)_1px,transparent_1px)] bg-[size:32px_32px]" />
+              <div className="relative mx-auto max-w-5xl text-center">
+                <p className="text-xs font-black uppercase tracking-[0.18em] text-indigo-600">{config.eyebrow}</p>
+                <h2 className="mx-auto mt-3 max-w-3xl text-3xl font-black leading-tight tracking-tight text-[#15213f] md:text-5xl">{config.title}</h2>
+                <p className="mx-auto mt-4 max-w-2xl text-sm font-bold leading-7 text-slate-600">{config.subtitle}</p>
+                <div className="mx-auto mt-6 inline-flex rounded-full bg-white p-1 shadow-sm ring-1 ring-slate-200">
+                  <span className="rounded-full bg-slate-950 px-6 py-2 text-sm font-black text-white">AI 工具</span>
+                  <span className="rounded-full px-6 py-2 text-sm font-black text-slate-500">小 W</span>
+                </div>
+              </div>
+
+              <div className="relative mx-auto mt-10 grid max-w-6xl gap-5 xl:grid-cols-[minmax(0,1fr)_380px] xl:items-center">
+                <div className="grid gap-3 sm:grid-cols-2 xl:grid-cols-3">
+                  {config.cards.map((card, index) => (
+                    <article className="group min-h-[156px] rounded-lg border border-slate-200 bg-white/90 p-4 text-left shadow-sm transition hover:-translate-y-0.5 hover:shadow-md" key={card.label}>
+                      <div className={`h-20 rounded-lg bg-gradient-to-br ${config.accent} opacity-95`}>
+                        <div className="flex h-full items-end justify-between p-3">
+                          <span className="rounded-full bg-white/90 px-2 py-1 text-[11px] font-black text-slate-700">{String(index + 1).padStart(2, '0')}</span>
+                          <span className="grid size-8 place-items-center rounded-full bg-white/90 text-sm font-black text-slate-950">+</span>
+                        </div>
+                      </div>
+                      <h3 className="mt-3 break-words text-base font-black leading-6 text-slate-950">{card.label}</h3>
+                      <p className="mt-1 line-clamp-2 text-xs font-bold leading-5 text-slate-500">{card.detail}</p>
+                    </article>
+                  ))}
+                </div>
+
+                <div className="rounded-lg border border-slate-200 bg-white/90 p-4 text-left shadow-sm">
+                  <div className="flex items-center justify-between gap-3">
+                    <div>
+                      <p className="text-xs font-black uppercase tracking-[0.18em] text-indigo-600">当前工具</p>
+                      <h3 className="mt-1 text-lg font-black text-slate-950">{config.toolName}</h3>
+                    </div>
+                    <span className="rounded-md bg-emerald-50 px-2.5 py-1 text-xs font-black text-emerald-700 ring-1 ring-emerald-100">{config.status}</span>
+                  </div>
+                  <div className="mt-4">
+                    <WorkflowIllustration config={config} />
+                  </div>
+                  <div className="mt-4 grid grid-cols-2 gap-2">
+                    <Link className="flex min-h-10 items-center justify-center rounded-md bg-slate-950 px-3 text-sm font-black text-white" href={config.primaryHref}>
+                      {config.primaryLabel}
+                    </Link>
+                    <Link className="flex min-h-10 items-center justify-center rounded-md border border-slate-200 bg-white px-3 text-sm font-black text-slate-700" href="/factory?variant=friend_trial">
+                      回工作台
+                    </Link>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </section>
+
+          <section className="hidden">
             <div className="flex flex-col gap-3 xl:flex-row xl:items-start xl:justify-between">
               <div className="min-w-0">
                 <div className="text-xs font-black uppercase tracking-[0.18em] text-indigo-600">客户下一步</div>
@@ -352,7 +410,7 @@ export function KuaiziWorkflowConsole({ active }: { active: WorkflowStep }) {
             </div>
           </section>
 
-          <section className="mt-5 rounded-md border border-emerald-100 bg-emerald-50 p-4 shadow-sm">
+          <section className="hidden">
             <div className="flex flex-col gap-2 sm:flex-row sm:items-end sm:justify-between">
               <div className="min-w-0">
                 <p className="text-xs font-black uppercase tracking-[0.18em] text-emerald-700">最后一公里</p>
