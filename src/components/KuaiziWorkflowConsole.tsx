@@ -447,7 +447,95 @@ function KuaiziModuleWorkbench({
       ['音频', '多语配音', '100+ 音色', '口播音色库', 'from-[#fce7f3] via-[#e0e7ff] to-[#ccfbf1]'],
       ['表格', '发布回填表', '链接 / 截图 / CSV', '复盘证据', 'from-[#e2e8f0] via-[#fef9c3] to-[#dbeafe]'],
     ] as const;
+    const studioTabs = ['AI影棚', 'AI复刻', '元素替换', 'AI配音', '数字人'] as const;
+    const studioResults = [
+      ['00:05', '宠物牙粉口播', '柔光客厅 / 英文字幕 / TikTok Shop', 'from-[#dbeafe] via-[#fef3c7] to-[#fbcfe8]'],
+      ['00:15', '喜糖礼盒场景图', '中式礼盒 / 窗边自然光 / 详情页主图', 'from-[#fee2e2] via-[#fef9c3] to-[#dbeafe]'],
+      ['00:15', '洗护产品模特图', '银发模特 / 轻奢棚拍 / 商品替换', 'from-[#e0f2fe] via-[#f0fdf4] to-[#fce7f3]'],
+      ['00:05', '数字人口播预览', '产品手持 / 中文口播 / 可再次编辑', 'from-[#ede9fe] via-[#cffafe] to-[#fef3c7]'],
+    ] as const;
     return (
+      <>
+      <section className="mt-5 overflow-hidden rounded-lg border border-[#dbe6ff] bg-white shadow-sm">
+        <div className="grid min-h-[560px] lg:grid-cols-[540px_minmax(0,1fr)]">
+          <aside className="border-b border-slate-200 bg-white p-5 lg:border-b-0 lg:border-r">
+            <div className="flex flex-wrap items-center gap-5 border-b border-slate-100 pb-3">
+              {studioTabs.map((tab, index) => (
+                <button className={`text-sm font-black ${index === 0 ? 'text-[#315cff] underline decoration-2 underline-offset-8' : 'text-slate-500 hover:text-slate-900'}`} key={tab} type="button">
+                  {tab}
+                </button>
+              ))}
+            </div>
+            <div className="mt-5 overflow-hidden rounded-lg bg-[linear-gradient(135deg,#0f1b52,#1e40af_42%,#7c3aed)] p-4 text-white shadow-sm">
+              <div className="grid min-h-[106px] grid-cols-[minmax(0,1fr)_120px] gap-3">
+                <div>
+                  <p className="text-xs font-black text-white/70">AI影棚</p>
+                  <h3 className="mt-2 text-xl font-black leading-tight">上传产品图，生成商品图、场景图和短视频素材</h3>
+                  <p className="mt-2 text-xs font-bold leading-5 text-white/70">像筷子一样把产品、场景、模特、口播和数字人放在同一个素材生产入口。</p>
+                </div>
+                <div className="rounded-md bg-white/15 p-2">
+                  <div className="h-16 rounded bg-white/30" />
+                  <div className="mt-2 h-2 w-3/4 rounded bg-white/60" />
+                </div>
+              </div>
+            </div>
+            <div className="mt-5 grid min-h-[286px] place-items-center rounded-lg bg-[#f3f5ff] p-5 text-center ring-1 ring-slate-200">
+              <div>
+                <div className="mx-auto grid size-12 place-items-center rounded-full bg-white text-xl font-black text-[#315cff] shadow-sm ring-1 ring-slate-200">+</div>
+                <h4 className="mt-4 text-base font-black text-slate-900">上传产品/场景图</h4>
+                <p className="mx-auto mt-2 max-w-xs text-xs font-bold leading-5 text-slate-500">支持9张，jpg、png、jpeg，不超过10M。不能包含敏感内容、人脸版权IP或不健康内容。</p>
+              </div>
+            </div>
+            <div className="mt-5 flex flex-wrap items-center justify-between gap-3">
+              <div className="flex flex-wrap gap-2">
+                {['5s', '720p', '竖屏 9:16', '商品优先'].map(item => (
+                  <button className="rounded-md border border-slate-200 bg-white px-4 py-2 text-sm font-black text-slate-600" key={item} type="button">{item}</button>
+                ))}
+              </div>
+              <button className="min-h-11 rounded-md bg-[linear-gradient(90deg,#8b5cf6,#ff5c8a)] px-6 text-sm font-black text-white shadow-sm" type="button">立即生成 +15</button>
+            </div>
+          </aside>
+          <div className="min-w-0 bg-white p-5">
+            <div className="flex flex-wrap items-center justify-between gap-3">
+              <div className="flex flex-wrap gap-2">
+                {['类型：全部', '功能：全部', '内容由AI生成'].map(item => (
+                  <button className="rounded-md border border-slate-200 bg-white px-3 py-2 text-xs font-black text-slate-600" key={item} type="button">{item}</button>
+                ))}
+              </div>
+              <div className="flex gap-2 text-xs font-black text-slate-400">
+                <span className="rounded bg-slate-100 px-2 py-1">宫格</span>
+                <span className="rounded bg-slate-100 px-2 py-1">列表</span>
+              </div>
+            </div>
+            <div className="mt-5 grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
+              {studioResults.map(([time, title, desc, gradient], index) => (
+                <article className="min-w-0 rounded-lg border border-slate-200 bg-slate-50 p-3 shadow-sm" key={title}>
+                  <div className={`relative aspect-[9/14] overflow-hidden rounded-md bg-gradient-to-br ${gradient}`}>
+                    <div className="absolute bottom-2 right-2 rounded bg-slate-900/55 px-2 py-1 text-[11px] font-black text-white">{time}</div>
+                    <div className="absolute left-3 top-3 h-14 w-14 rounded bg-white/70" />
+                    <div className="absolute bottom-8 left-3 h-3 w-2/3 rounded bg-white/80" />
+                    <div className="absolute bottom-14 left-3 h-3 w-1/2 rounded bg-white/70" />
+                  </div>
+                  <h4 className="mt-3 truncate text-sm font-black text-slate-900">{title}</h4>
+                  <p className="mt-1 line-clamp-2 text-xs font-bold leading-5 text-slate-500">{desc}</p>
+                  <div className="mt-3 grid grid-cols-2 gap-2">
+                    {['保存', '下载', '再次编辑', '删除'].map((action, actionIndex) => (
+                      <button className={`min-h-8 rounded-md text-xs font-black ${actionIndex < 2 ? 'border border-[#315cff] bg-white text-[#315cff]' : 'border border-slate-200 bg-white text-slate-500'}`} key={`${title}-${action}`} type="button">
+                        {action}
+                      </button>
+                    ))}
+                  </div>
+                  <p className="mt-2 text-[11px] font-bold text-slate-400">2026-04-{17 + index} 17:47:48</p>
+                </article>
+              ))}
+            </div>
+            <div className="mt-5 rounded-md border border-blue-100 bg-blue-50 p-3 text-xs font-bold leading-5 text-blue-700">
+              生成结果会同时进入下方筷子云盘：可保存到素材库、下载给客户、再次编辑成新版本，或删除不合格素材。
+            </div>
+          </div>
+        </div>
+      </section>
+
       <section className="mt-5 overflow-hidden rounded-lg border border-[#dbe6ff] bg-white shadow-sm">
         <div className="grid min-h-[620px] lg:grid-cols-[250px_minmax(0,1fr)_292px]">
           <aside className="border-b border-slate-200 bg-[#f6f8ff] p-4 lg:border-b-0 lg:border-r">
@@ -541,6 +629,7 @@ function KuaiziModuleWorkbench({
           </aside>
         </div>
       </section>
+      </>
     );
   }
 
@@ -1098,6 +1187,16 @@ export function KuaiziWorkflowConsole({
             </div>
           </header>
 
+          {active === 'create' ? (
+            <KuaiziModuleWorkbench
+              active={active}
+              audienceGoal={audienceGoal}
+              platform={platform}
+              productName={productName}
+              withTaskContext={withTaskContext}
+            />
+          ) : null}
+
           <section className="mt-5 overflow-hidden rounded-lg border border-[#dbe6ff] bg-white shadow-sm">
             <div className="relative min-h-[520px] bg-[linear-gradient(135deg,#fbfdff_0%,#f1f6ff_52%,#ffffff_100%)] px-5 py-10">
               <div className="absolute inset-0 bg-[linear-gradient(90deg,rgba(30,64,175,0.06)_1px,transparent_1px),linear-gradient(180deg,rgba(30,64,175,0.05)_1px,transparent_1px)] bg-[size:32px_32px]" />
@@ -1357,13 +1456,15 @@ export function KuaiziWorkflowConsole({
             </div>
           </section>
 
-          <KuaiziModuleWorkbench
-            active={active}
-            audienceGoal={audienceGoal}
-            platform={platform}
-            productName={productName}
-            withTaskContext={withTaskContext}
-          />
+          {active !== 'create' ? (
+            <KuaiziModuleWorkbench
+              active={active}
+              audienceGoal={audienceGoal}
+              platform={platform}
+              productName={productName}
+              withTaskContext={withTaskContext}
+            />
+          ) : null}
 
           <section className="hidden">
             <div className="flex flex-col gap-3 xl:flex-row xl:items-start xl:justify-between">

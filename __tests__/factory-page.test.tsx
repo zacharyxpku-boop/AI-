@@ -1,14 +1,7 @@
 import { renderToStaticMarkup } from 'react-dom/server';
-import { describe, expect, it, vi } from 'vitest';
-
-vi.mock('next/navigation', () => ({
-  redirect: vi.fn((href: string) => {
-    throw new Error(`redirect:${href}`);
-  }),
-}));
+import { describe, expect, it } from 'vitest';
 
 import FactoryPage from '@/app/factory/page';
-import { redirect } from 'next/navigation';
 
 describe('factory page', () => {
   it('defaults the customer entry to the friend trial workbench', async () => {
@@ -88,13 +81,20 @@ describe('factory page', () => {
     }
   });
 
-  it('redirects non-customer variants away from the old dark factory shell', async () => {
-    await expect(
-      FactoryPage({
-        searchParams: Promise.resolve({ variant: 'operator' }),
-      }),
-    ).rejects.toThrow('redirect:/factory?variant=friend_trial');
+  it('keeps operator and partner variants available without falling back to the old dark shell', async () => {
+    const page = await FactoryPage({
+      searchParams: Promise.resolve({ variant: 'operator' }),
+    });
+    const html = renderToStaticMarkup(page);
 
-    expect(redirect).toHaveBeenCalledWith('/factory?variant=friend_trial');
+    expect(html).toContain('运营工作台版');
+    expect(html).toContain('合作者/投资人版');
+    expect(html).toContain('内容工厂能力地图');
+    expect(html).toContain('移动端介绍要讲清楚的六个能力');
+    expect(html).toContain('/factory/create?variant=friend_trial');
+    expect(html).toContain('进入浅色客户可用页');
+    expect(html).not.toContain('bg-slate-950 px-6 py-8 text-white');
+    expect(html).not.toContain('bg-slate-900');
+    expect(html).not.toContain('bg-black/20');
   });
 });
