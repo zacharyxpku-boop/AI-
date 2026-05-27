@@ -684,31 +684,60 @@ function KuaiziModuleWorkbench({
           </div>
           <button className="rounded-full bg-[#315cff] px-4 py-2 text-sm font-black text-white" type="button">搜索视频</button>
         </div>
-        <div className="mt-5 flex gap-5 overflow-x-auto pb-2">
+        <div className="mt-5 flex flex-col gap-3 rounded-full border border-slate-200 bg-slate-50 px-4 py-3 md:flex-row md:items-center">
+          <span className="text-xs font-black text-slate-400">搜索</span>
+          <input
+            className="min-h-9 min-w-0 flex-1 bg-transparent text-sm font-bold text-slate-800 outline-none placeholder:text-slate-400"
+            readOnly
+            value={`${product} / ${platform} / ${goal}`}
+          />
+          <span className="rounded-full bg-white px-3 py-1.5 text-xs font-black text-slate-500 ring-1 ring-slate-200">产品 / 服务名 / 带货视频</span>
+        </div>
+        <div className="mt-4 flex flex-wrap gap-6 border-b border-slate-100 text-sm font-black text-slate-500">
+          {['榜单', '账号', '收藏'].map((tab, index) => (
+            <button className={`pb-3 ${index === 1 ? 'border-b-2 border-[#315cff] text-slate-950' : ''}`} key={tab} type="button">{tab}</button>
+          ))}
+        </div>
+        <div className="mt-5 grid grid-cols-3 gap-4 pb-2 sm:flex sm:gap-5 sm:overflow-x-auto">
           {['添加对标账号', '全部', '维生素B源头工厂', '晨光官方旗舰店', '刀刻梅Yao', '好物推荐'].map((item, index) => (
-            <div className="w-24 shrink-0 text-center" key={item}>
+            <div className="min-w-0 text-center sm:w-24 sm:shrink-0" key={item}>
               <div className={`mx-auto grid size-16 place-items-center rounded-full border-4 ${index === 0 ? 'border-rose-300 bg-[#14233f] text-white' : 'border-slate-200 bg-[linear-gradient(135deg,#fef3c7,#bfdbfe)]'} text-xs font-black`}>{index === 0 ? '+' : item.slice(0, 2)}</div>
               <p className="mt-2 truncate text-xs font-bold text-slate-700">{item}</p>
             </div>
           ))}
         </div>
         <div className="mt-5 overflow-hidden rounded-lg border border-slate-200">
-          <div className="grid grid-cols-[minmax(280px,1.4fr)_160px_120px_repeat(4,90px)_120px] bg-slate-100 px-3 py-3 text-xs font-black text-slate-500">
+          <div className="hidden grid-cols-[minmax(240px,1.4fr)_128px_96px_repeat(4,64px)_88px] gap-2 bg-slate-100 px-3 py-3 text-xs font-black text-slate-500 md:grid">
             {['视频', '账号', '发布时间', '点赞', '转发', '评论', '收藏', '操作'].map(item => <span key={item}>{item}</span>)}
           </div>
           {rows.map((row, index) => (
-            <div className="grid min-h-24 grid-cols-[minmax(280px,1.4fr)_160px_120px_repeat(4,90px)_120px] items-center border-t border-slate-100 px-3 py-3 text-sm font-bold text-slate-800" key={row[0]}>
+            <div className="grid gap-3 border-t border-slate-100 px-3 py-3 text-sm font-bold text-slate-800 md:min-h-24 md:grid-cols-[minmax(240px,1.4fr)_128px_96px_repeat(4,64px)_88px] md:items-center md:gap-2" key={row[0]}>
               <div className="flex min-w-0 items-center gap-3">
                 <div className="grid size-16 shrink-0 place-items-end rounded-md bg-[linear-gradient(135deg,#fde68a,#c7d2fe)] p-1 text-xs font-black text-slate-700">{index + 1}</div>
                 <div className="min-w-0">
-                  <p className="truncate font-black">{row[0]}</p>
+                  <p className="break-words font-black md:truncate">{row[0]}</p>
                   <p className="mt-1 text-xs text-slate-500">00:{index + 21}</p>
                 </div>
               </div>
-              {row.slice(1).map((cell, cellIndex) => <span key={`${row[0]}-${cellIndex}`}>{cell}</span>)}
+              <div className="grid grid-cols-2 gap-2 text-xs md:contents">
+                {row.slice(1).map((cell, cellIndex) => (
+                  <span className="rounded bg-slate-50 px-2 py-1.5 md:bg-transparent md:px-0 md:py-0" key={`${row[0]}-${cellIndex}`}>
+                    <span className="mr-1 text-slate-400 md:hidden">{['账号', '发布', '赞', '转', '评', '藏'][cellIndex]}:</span>{cell}
+                  </span>
+                ))}
+              </div>
               <div className="flex gap-2 text-blue-600"><button className="font-black" type="button">解析</button><button className="font-black" type="button">收藏</button></div>
             </div>
           ))}
+          <div className="flex flex-col gap-3 border-t border-slate-100 px-3 py-3 text-xs font-bold text-slate-500 md:flex-row md:items-center md:justify-between">
+            <span>共 3828 条</span>
+            <div className="flex flex-wrap items-center gap-2">
+              <button className="rounded-md bg-slate-50 px-3 py-1.5 ring-1 ring-slate-200" type="button">10条/页</button>
+              {['1', '2', '3', '4', '5', '6', '...', '383'].map((item, index) => (
+                <button className={`min-w-7 rounded px-2 py-1.5 ${index === 0 ? 'bg-[#315cff] text-white' : 'bg-white text-slate-600 ring-1 ring-slate-200'}`} key={item} type="button">{item}</button>
+              ))}
+            </div>
+          </div>
         </div>
       </div>
     </section>

@@ -40,7 +40,7 @@ const pages = [
     name: 'manage',
     page: ManageFactoryPage,
     expected: '把链接、截图、CSV、云盘和客服问题变成下一轮动作',
-    markers: ['创意洞察', '视频表现', '解析', '收藏'],
+    markers: ['创意洞察', '视频表现', '榜单', '账号', '共 3828 条', '解析', '收藏'],
     next: '/factory?variant=friend_trial',
   },
 ];
