@@ -19,7 +19,7 @@ const pages = [
     name: 'create',
     page: CreateFactoryPage,
     expected: '把商品图、模特图、证明图和客服素材整理成货架',
-    markers: ['筷子云盘', '全部文件', '团队存储空间', '进入合成量产'],
+    markers: ['筷子云盘', '全部文件', '团队文件夹', '团队存储空间', '输入关键词', '协作状态', '进入合成量产'],
     next: '/factory/video?variant=friend_trial',
   },
   {

@@ -425,27 +425,54 @@ function KuaiziModuleWorkbench({
   }
 
   if (active === 'create') {
-    const folders = ['全部文件', '我创建的', '回收站', '立泽', '二手车', '旅居', 'Kuaizi总部案例', 'AI视频'];
+    const folders = [
+      ['全部文件', '5116', 'active'],
+      ['我创建的', '3685', 'normal'],
+      ['回收站', '5', 'normal'],
+      ['立泽', '1', 'child'],
+      ['二手车', '14', 'child'],
+      ['旅居', '5', 'child'],
+      ['Kuaizi总部案例', '9', 'child'],
+      ['0410-米诺测试', '64', 'child'],
+      ['AI视频', '2', 'child'],
+    ] as const;
     const assets = [
-      ['mp4', '口播素材 27', '00:17'],
-      ['mp4', '场景切片 26', '00:46'],
-      ['jpg', '白底主图', '今天更新'],
-      ['jpg', '卖点长图', '今天更新'],
-      ['工程', '0410-3', '混剪工程'],
-      ['音频', '多语配音', '100+ 音色'],
-    ];
+      ['mp4', '口播素材 27', '00:17', '脚本口播片段', 'from-[#c7d2fe] via-[#fbcfe8] to-[#fde68a]'],
+      ['mp4', '场景切片 26', '00:46', '场景展示切片', 'from-[#bfdbfe] via-[#ddd6fe] to-[#fecaca]'],
+      ['mp4', '产品演示 25', '01:01', '使用步骤素材', 'from-[#bbf7d0] via-[#bae6fd] to-[#fef3c7]'],
+      ['jpg', '白底主图', '今天更新', '可进商品图', 'from-[#e0f2fe] via-[#f8fafc] to-[#fee2e2]'],
+      ['jpg', '卖点长图', '今天更新', '图文详情页', 'from-[#fef3c7] via-[#dbeafe] to-[#fce7f3]'],
+      ['工程', '0410-3', '混剪工程', '可继续编辑', 'from-[#ede9fe] via-[#cffafe] to-[#dcfce7]'],
+      ['文件夹', '导出发布包', '32 个文件', '标题封面素材', 'from-[#dbeafe] via-[#f1f5f9] to-[#e0e7ff]'],
+      ['音频', '多语配音', '100+ 音色', '口播音色库', 'from-[#fce7f3] via-[#e0e7ff] to-[#ccfbf1]'],
+      ['表格', '发布回填表', '链接 / 截图 / CSV', '复盘证据', 'from-[#e2e8f0] via-[#fef9c3] to-[#dbeafe]'],
+    ] as const;
     return (
       <section className="mt-5 overflow-hidden rounded-lg border border-[#dbe6ff] bg-white shadow-sm">
-        <div className="grid min-h-[560px] lg:grid-cols-[230px_minmax(0,1fr)_280px]">
+        <div className="grid min-h-[620px] lg:grid-cols-[250px_minmax(0,1fr)_292px]">
           <aside className="border-b border-slate-200 bg-[#f6f8ff] p-4 lg:border-b-0 lg:border-r">
-            <p className="text-xs font-black text-blue-600">筷子云盘</p>
+            <div className="flex items-center justify-between gap-2">
+              <p className="text-xs font-black text-blue-600">筷子云盘</p>
+              <button className="rounded bg-white px-2 py-1 text-[11px] font-black text-slate-500 ring-1 ring-slate-200" type="button">新建</button>
+            </div>
             <div className="mt-4 grid gap-1">
-              {folders.map((item, index) => (
-                <button className={`flex min-h-9 items-center justify-between rounded-md px-3 text-left text-sm font-bold ${index === 0 ? 'bg-white text-blue-700 ring-1 ring-blue-100' : 'text-slate-600 hover:bg-white'}`} key={item} type="button">
-                  <span>{item}</span>
-                  <span className="text-xs text-slate-400">{index === 0 ? '5116' : index * 7 + 1}</span>
+              {folders.map(([item, count, type]) => (
+                <button className={`flex min-h-9 items-center justify-between rounded-md px-3 text-left text-sm font-bold ${type === 'active' ? 'bg-white text-blue-700 ring-1 ring-blue-100' : type === 'child' ? 'pl-5 text-slate-600 hover:bg-white' : 'text-slate-600 hover:bg-white'}`} key={item} type="button">
+                  <span className="min-w-0 truncate">{type === 'child' ? '› ' : ''}{item}</span>
+                  <span className="shrink-0 text-xs text-slate-400">{count}</span>
                 </button>
               ))}
+            </div>
+            <div className="mt-4 rounded-md bg-white p-3 ring-1 ring-slate-200">
+              <p className="text-xs font-black text-slate-400">团队文件夹</p>
+              <div className="mt-2 grid gap-1 text-xs font-bold text-slate-600">
+                {['商品素材', '混剪工程', '发布包', '回填证据'].map(item => (
+                  <div className="flex items-center justify-between rounded bg-slate-50 px-2 py-1.5" key={item}>
+                    <span>{item}</span>
+                    <span className="text-slate-400">同步</span>
+                  </div>
+                ))}
+              </div>
             </div>
             <div className="mt-5 rounded-md bg-white p-3 ring-1 ring-slate-200">
               <p className="text-xs font-black text-slate-400">团队存储空间</p>
@@ -461,20 +488,28 @@ function KuaiziModuleWorkbench({
                 ))}
               </div>
               <div className="flex flex-wrap gap-2">
-                {['上传素材', '新建文件夹', '新建工程', '素材采集'].map(item => (
+                {['列表', '开始日期', '结束日期', '输入关键词'].map(item => (
+                  <button className="rounded-md border border-slate-200 bg-white px-3 py-2 text-xs font-black text-slate-500" key={item} type="button">{item}</button>
+                ))}
+                {['上传素材', '新建工程'].map(item => (
                   <button className="rounded-md border border-slate-200 bg-white px-3 py-2 text-xs font-black text-slate-700" key={item} type="button">{item}</button>
                 ))}
               </div>
             </div>
             <p className="mt-6 text-sm font-black text-slate-950">今天</p>
             <div className="mt-3 grid gap-4 sm:grid-cols-2 xl:grid-cols-3">
-              {assets.map(([kind, title, meta], index) => (
+              {assets.map(([kind, title, meta, note, gradient], index) => (
                 <Link className="group min-w-0 rounded-lg border border-slate-200 bg-slate-50 p-3 transition hover:bg-white hover:shadow-md" href={withTaskContext(index < 4 ? '/factory/video?variant=friend_trial' : '/factory/cast?variant=friend_trial')} key={title}>
-                  <div className="aspect-video rounded-md bg-[linear-gradient(135deg,#e0edff,#f8fafc_45%,#ffe4f1)] p-2">
+                  <div className={`aspect-video rounded-md bg-gradient-to-br ${gradient} p-2`}>
                     <span className="rounded bg-slate-700 px-2 py-1 text-[11px] font-black text-white">{kind}</span>
+                    <div className="mt-10 h-3 w-2/3 rounded bg-white/80" />
+                    <div className="mt-2 h-3 w-1/2 rounded bg-white/70" />
                   </div>
                   <h4 className="mt-2 truncate text-sm font-black text-slate-950">{title}</h4>
-                  <p className="mt-1 text-xs font-bold text-slate-500">{meta}</p>
+                  <div className="mt-1 flex items-start justify-between gap-2 text-xs font-bold text-slate-500">
+                    <span className="min-w-0 break-words leading-4">{note}</span>
+                    <span className="shrink-0">{meta}</span>
+                  </div>
                 </Link>
               ))}
             </div>
@@ -483,9 +518,24 @@ function KuaiziModuleWorkbench({
             <p className="text-xs font-black uppercase tracking-[0.16em] text-slate-400">权限与质检</p>
             <h3 className="mt-2 text-lg font-black text-slate-950">当前素材包</h3>
             <div className="mt-4 grid gap-2">
-              {['主图已归档', '场景图待补 2 张', 'FAQ 已生成', '授权说明待确认'].map(item => (
+              {['主图已归档', '场景图待补 2 张', 'FAQ 已生成', '授权说明待确认', '发布包可导出'].map(item => (
                 <div className="rounded-md bg-slate-50 px-3 py-2 text-sm font-bold text-slate-700 ring-1 ring-slate-100" key={item}>{item}</div>
               ))}
+            </div>
+            <div className="mt-4 rounded-md border border-indigo-100 bg-indigo-50 p-3">
+              <p className="text-xs font-black text-indigo-700">协作状态</p>
+              <div className="mt-2 grid gap-2">
+                {[
+                  ['客户', '已确认主图'],
+                  ['运营', '待补授权'],
+                  ['系统', '可进入合成'],
+                ].map(([role, state]) => (
+                  <div className="flex items-center justify-between rounded bg-white px-2 py-1.5 text-xs font-bold text-slate-700 ring-1 ring-indigo-100" key={role}>
+                    <span>{role}</span>
+                    <span>{state}</span>
+                  </div>
+                ))}
+              </div>
             </div>
             <Link className="mt-4 flex min-h-10 items-center justify-center rounded-md bg-[#315cff] px-4 text-sm font-black text-white" href={withTaskContext('/factory/video?variant=friend_trial')}>进入合成量产</Link>
           </aside>
