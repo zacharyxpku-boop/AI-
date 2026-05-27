@@ -137,7 +137,7 @@ const flowSteps: FlowStep[] = [
     title: '把发布结果和客户反馈变成下一轮动作',
     body: '记录链接、截图、表现数据和客户反馈，判断继续放大、换角度，还是补素材。',
     output: '输出：复盘建议 + 下一步',
-    accent: 'from-slate-700 via-blue-600 to-cyan-500',
+    accent: 'from-blue-500 via-sky-500 to-cyan-500',
   },
 ];
 
@@ -284,7 +284,7 @@ const kuaiziDenseModules = [
     title: '评论、客服和售后素材',
     body: '把评论问题、FAQ、差评解释和售后话术接到复盘页面，形成下一轮内容任务。',
     href: '/factory/manage?variant=friend_trial',
-    tone: 'from-slate-700 via-blue-600 to-cyan-500',
+    tone: 'from-blue-500 via-sky-500 to-cyan-500',
     chips: ['评论', 'FAQ', '差评', '售后'],
     state: '可生成',
     metric: '客服卡',
@@ -408,7 +408,7 @@ function MiniIllustration({ step, large = false }: { step: FlowStep; large?: boo
             <span className="h-2 w-16 rounded-full bg-slate-200" />
           </div>
           <div className="space-y-2">
-            <span className="block h-2 w-4/5 rounded-full bg-slate-900/80" />
+            <span className="block h-2 w-4/5 rounded-full bg-blue-700/75" />
             <span className="block h-2 w-3/5 rounded-full bg-slate-400/70" />
             {large ? <span className="block h-2 w-2/5 rounded-full bg-slate-300/80" /> : null}
           </div>
@@ -422,7 +422,7 @@ function MiniIllustration({ step, large = false }: { step: FlowStep; large?: boo
         </div>
         <div className="relative min-w-0 rounded-md bg-white/70 p-2 ring-1 ring-white/60">
           <div className={`absolute left-3 top-3 rounded-md bg-white/85 ${large ? 'h-12 w-20' : 'h-8 w-14'}`} />
-          <div className={`absolute bottom-4 left-3 rounded-md bg-slate-950/75 ${large ? 'h-20 w-12' : 'h-10 w-7'}`} />
+          <div className={`absolute bottom-4 left-3 rounded-md bg-blue-700/72 ${large ? 'h-20 w-12' : 'h-10 w-7'}`} />
           <div className={`absolute bottom-5 right-4 rounded-md bg-white/80 ${large ? 'h-24 w-16' : 'h-12 w-10'}`} />
           <div className="absolute right-3 top-3 grid gap-1">
             <span className="block h-1.5 w-12 rounded bg-white/80" />
@@ -445,10 +445,10 @@ function CommerceHeroPreview() {
         <span className="shrink-0 rounded bg-emerald-50 px-2 py-1 text-[11px] font-black text-emerald-700 ring-1 ring-emerald-100">可交付</span>
       </div>
       <div className="mt-3 grid gap-3 sm:grid-cols-[0.9fr_1.1fr]">
-        <div className="min-w-0 rounded-md bg-slate-950 p-3 text-white">
+        <div className="min-w-0 rounded-md bg-[#315cff] p-3 text-white">
           <div className="grid aspect-[4/5] place-items-end rounded bg-[linear-gradient(135deg,#dbeafe,#fef3c7_48%,#fecdd3)] p-3">
             <div className="w-full rounded bg-white/88 p-2 text-slate-950">
-              <div className="h-2 w-16 rounded bg-slate-900" />
+              <div className="h-2 w-16 rounded bg-blue-700" />
               <div className="mt-2 h-1.5 w-24 rounded bg-slate-300" />
               <div className="mt-2 grid grid-cols-3 gap-1">
                 <span className="h-6 rounded bg-indigo-100" />
@@ -665,7 +665,7 @@ export function KuaiziStyleWorkbench() {
                         ].map(card => (
                           <Link className="min-w-0 rounded-md border border-white/80 bg-white/88 p-3 text-left shadow-sm transition hover:bg-white" href={card.href} key={card.label}>
                             <div className="flex items-center gap-2">
-                              <span className="grid size-6 shrink-0 place-items-center rounded bg-[#14213d] text-[11px] font-black text-white">
+                              <span className="grid size-6 shrink-0 place-items-center rounded bg-[#315cff] text-[11px] font-black text-white">
                                 {card.label.slice(0, 1)}
                               </span>
                               <h3 className="min-w-0 truncate text-xs font-black text-slate-950">{card.label.replace(/^\d+\s*/, '')}</h3>
@@ -711,7 +711,7 @@ export function KuaiziStyleWorkbench() {
                           </label>
                         </div>
                         <div className="mt-3 flex flex-wrap items-center gap-2">
-                          <button className="min-h-10 rounded-md bg-slate-950 px-4 text-sm font-black text-white shadow-sm" type="submit">
+                          <button className="min-h-10 rounded-md bg-[#315cff] px-4 text-sm font-black text-white shadow-sm" type="submit">
                             用这个商品开始：{selectedStep.short}
                           </button>
                           <p className="text-xs font-bold leading-5 text-slate-500">提交后直接进入对应子页面，并带着你的商品、平台和目标生成产出。</p>
@@ -800,7 +800,7 @@ export function KuaiziStyleWorkbench() {
                           <div className="p-3">
                             <div className="mb-2 flex flex-wrap items-center gap-1.5">
                               <span className="rounded bg-emerald-50 px-2 py-1 text-[11px] font-black text-emerald-700 ring-1 ring-emerald-100">{module.state}</span>
-                              <span className="rounded bg-slate-900 px-2 py-1 text-[11px] font-black text-white">{module.metric}</span>
+                              <span className="rounded bg-[#315cff] px-2 py-1 text-[11px] font-black text-white">{module.metric}</span>
                             </div>
                             <h4 className="break-words text-sm font-black leading-5 text-slate-950">{module.title}</h4>
                             <p className="mt-2 line-clamp-3 text-xs font-bold leading-5 text-slate-500">{module.body}</p>
@@ -849,7 +849,7 @@ export function KuaiziStyleWorkbench() {
                         ['回流', '客户回填链接、截图、CSV 后复盘'],
                       ].map(([label, value], index) => (
                         <div className="grid grid-cols-[28px_64px_minmax(0,1fr)] items-start gap-2 rounded-md bg-slate-50 p-2 ring-1 ring-slate-100" key={label}>
-                          <span className="grid size-7 place-items-center rounded bg-slate-950 text-[11px] font-black text-white">{index + 1}</span>
+                          <span className="grid size-7 place-items-center rounded bg-[#315cff] text-[11px] font-black text-white">{index + 1}</span>
                           <span className="text-xs font-black text-slate-500">{label}</span>
                           <span className="text-xs font-bold leading-5 text-slate-700">{value}</span>
                         </div>
@@ -973,7 +973,7 @@ export function KuaiziStyleWorkbench() {
                     <h3 className="mt-1 text-lg font-black leading-6 text-slate-950">{customerNextStepCommandCenter.headline}</h3>
                     <p className="mt-2 max-w-5xl text-sm leading-6 text-slate-500">{customerNextStepCommandCenter.promise}</p>
                   </div>
-                  <Link className="inline-flex min-h-11 w-fit shrink-0 items-center rounded-md bg-[#14213d] px-4 py-2 text-sm font-black text-white shadow-sm" href={customerNextStepCommandCenter.primaryAction.href}>
+                  <Link className="inline-flex min-h-11 w-fit shrink-0 items-center rounded-md bg-[#315cff] px-4 py-2 text-sm font-black text-white shadow-sm" href={customerNextStepCommandCenter.primaryAction.href}>
                     {customerNextStepCommandCenter.primaryAction.label}
                   </Link>
                 </div>

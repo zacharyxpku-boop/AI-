@@ -33,7 +33,7 @@ const pages = [
     name: 'cast',
     page: CastFactoryPage,
     expected: '把内容变成客户自己能发布的多平台发布包',
-    markers: ['矩阵宝发布', 'AI智能分发', '发布渠道', 'AI生成标题'],
+    markers: ['矩阵宝', '分发运营台', 'AI智能分发', 'KOC视频任务', '手机协同', '发布日历', '标题包', '回填表字段'],
     next: '/factory/manage?variant=friend_trial',
   },
   {
@@ -46,6 +46,18 @@ const pages = [
 ];
 
 describe('factory friend trial workflow pages', () => {
+  it.each(pages)('defaults bare $name route to the light friend trial shell', async ({ page }) => {
+    const element = await page({
+      searchParams: Promise.resolve({}),
+    });
+    const html = renderToStaticMarkup(element);
+
+    expect(html).toContain('/factory?variant=friend_trial');
+    expect(html).not.toContain('min-h-screen bg-[#0d1014]');
+    expect(html).not.toContain('border-b border-white/10 pb-6');
+    expect(html).not.toContain('bg-black/20');
+  });
+
   it.each(pages)('renders Kuaizi-style workflow shell for $name', async ({ page, expected, markers, next }) => {
     const element = await page({
       searchParams: Promise.resolve({ projectId: 'friend-demo', variant: 'friend_trial' }),

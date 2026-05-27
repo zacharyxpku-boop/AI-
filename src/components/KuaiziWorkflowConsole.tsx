@@ -309,7 +309,7 @@ function WorkflowIllustration({ config }: { config: WorkflowConfig }) {
   return (
     <div className={`relative min-h-[300px] overflow-hidden rounded-xl bg-gradient-to-br ${config.accent} p-5 shadow-sm ring-1 ring-white/70`}>
       <div className="absolute right-0 top-0 size-36 -translate-y-1/4 rounded-full bg-white/25 blur-3xl" />
-      <div className="absolute -bottom-12 left-10 size-44 rounded-full bg-slate-950/20 blur-3xl" />
+      <div className="absolute -bottom-12 left-10 size-44 rounded-full bg-blue-500/15 blur-3xl" />
       <div className="relative grid h-full gap-4 md:grid-cols-[1fr_0.82fr]">
         <div className="flex min-w-0 flex-col justify-between rounded-xl bg-white/88 p-4 shadow-sm ring-1 ring-white/80">
           <div className="flex items-center justify-between gap-3">
@@ -333,7 +333,7 @@ function WorkflowIllustration({ config }: { config: WorkflowConfig }) {
         </div>
         <div className="relative min-h-[210px] rounded-xl bg-white/55 p-4 ring-1 ring-white/80">
           <div className="absolute left-6 top-6 size-24 rounded-2xl bg-white/55" />
-          <div className="absolute bottom-8 left-8 size-28 rounded-full bg-slate-950/72" />
+          <div className="absolute bottom-8 left-8 size-28 rounded-full bg-blue-700/70" />
           <div className="absolute bottom-8 right-8 h-36 w-16 rounded-2xl bg-white/75" />
           <div className="absolute right-9 top-10 grid gap-2">
             <span className="h-3 w-20 rounded-full bg-white/80" />
@@ -378,7 +378,7 @@ function KuaiziModuleWorkbench({
             <h2 className="mt-2 text-xl font-black text-[#17223d]">商品内容起稿台</h2>
             <div className="mt-4 grid gap-2">
               {['商品 brief', '竞品拆解', '评论区钩子', '平台脚本', '禁用词检查'].map((item, index) => (
-                <button className={`min-h-10 rounded-md px-3 text-left text-sm font-black ${index === 0 ? 'bg-[#14233f] text-white' : 'bg-white text-slate-700 ring-1 ring-slate-200'}`} key={item} type="button">
+                <button className={`min-h-10 rounded-md px-3 text-left text-sm font-black ${index === 0 ? 'bg-[#315cff] text-white' : 'bg-white text-slate-700 ring-1 ring-slate-200'}`} key={item} type="button">
                   {item}
                 </button>
               ))}
@@ -573,12 +573,12 @@ function KuaiziModuleWorkbench({
                   <button className={`rounded-md px-3 py-2 text-sm font-black ${index === 1 ? 'bg-[#315cff] text-white' : 'bg-white text-slate-600 ring-1 ring-slate-200'}`} key={tab} type="button">{tab}</button>
                 ))}
               </div>
-              <Link className="rounded-md bg-slate-950 px-3 py-2 text-xs font-black text-white" href={withTaskContext('/factory/cast?variant=friend_trial')}>保存草稿</Link>
+              <Link className="rounded-md bg-[#315cff] px-3 py-2 text-xs font-black text-white" href={withTaskContext('/factory/cast?variant=friend_trial')}>保存草稿</Link>
             </div>
             <div className="mt-4 grid gap-4 xl:grid-cols-[minmax(0,1fr)_220px]">
               <div className="grid min-h-[270px] place-items-center rounded-lg border border-slate-200 bg-white shadow-inner">
                 <div className="aspect-[9/16] h-[260px] rounded-lg bg-[linear-gradient(180deg,#1e293b,#f472b6_55%,#fef3c7)] p-3">
-                  <div className="mt-36 rounded bg-black/65 p-2 text-center text-xs font-black">Demo Product 15s 预览</div>
+                  <div className="mt-36 rounded bg-blue-700/75 p-2 text-center text-xs font-black">Demo Product 15s 预览</div>
                 </div>
               </div>
               <div className="rounded-lg border border-slate-200 bg-white p-3 shadow-sm">
@@ -622,44 +622,159 @@ function KuaiziModuleWorkbench({
   }
 
   if (active === 'cast') {
-    const channels = ['抖音', '快手', '视频号', '快手+', '逛逛', '小红书', 'TikTok', 'Meta'];
+    const modes = ['发布渠道', '矩阵宝', 'KOC流量包', '手机协同', '回填表'];
+    const channelRows = [
+      ['小红书主号', '标题已生成', '今天 20:30', '封面 / 正文 / 标签', '待客户发布'],
+      ['TikTok Shop', '英文包已生成', '明天 09:00', '视频 / 标题 / Hashtag', '可复制'],
+      ['视频号', '口播版已生成', '明天 12:15', '封面 / 首评 / 商品入口', '待回填'],
+      ['Meta Reels', '广告素材包', '周五 18:00', '短视频 / 文案 / UTM', '可导出'],
+    ];
+    const calendar = ['今天', '明天', '周五', '周六', '下周一'];
+    const titlePacks = [
+      ['痛点标题', product + ' 解决一个真实使用痛点', '小红书 / 视频号'],
+      ['结果标题', '先看 ' + goal + ' 的结果，再看商品', 'TikTok / Reels'],
+      ['对比标题', '旧方案 vs 新方案，一眼看懂差异', '独立站 / Meta'],
+    ];
+
     return (
       <section className="mt-5 overflow-hidden rounded-lg border border-[#dbe6ff] bg-white shadow-sm">
-        <div className="grid min-h-[540px] lg:grid-cols-[minmax(0,1fr)_320px]">
-          <div className="min-w-0 p-5">
-            <p className="text-xs font-black uppercase tracking-[0.16em] text-indigo-600">矩阵宝发布</p>
-            <h2 className="mt-2 text-2xl font-black text-slate-950">把发布模式、渠道、标题和回填放在一个发布台</h2>
-            <div className="mt-5 grid gap-3 md:grid-cols-3">
+        <div className="grid min-h-[680px] lg:grid-cols-[230px_minmax(0,1fr)_330px]">
+          <aside className="border-b border-slate-200 bg-[#f3f7ff] p-4 lg:border-b-0 lg:border-r">
+            <p className="text-xs font-black text-blue-600">矩阵宝</p>
+            <h2 className="mt-2 text-xl font-black text-slate-950">分发运营台</h2>
+            <div className="mt-4 grid gap-2">
+              {modes.map((item, index) => (
+                <button
+                  className={'flex min-h-10 items-center justify-between rounded-md px-3 text-left text-sm font-black ' + (index === 1 ? 'bg-[#315cff] text-white shadow-sm' : 'bg-white text-slate-700 ring-1 ring-slate-200')}
+                  key={item}
+                  type="button"
+                >
+                  <span className="truncate">{item}</span>
+                  <span className={'rounded px-1.5 py-0.5 text-[10px] ' + (index === 2 ? 'bg-rose-500 text-white' : index === 1 ? 'bg-white/15 text-white' : 'bg-slate-50 text-slate-400 ring-1 ring-slate-200')}>
+                    {index === 2 ? '5点/条' : index === 3 ? '移动端' : '可用'}
+                  </span>
+                </button>
+              ))}
+            </div>
+            <div className="mt-5 rounded-md bg-white p-3 ring-1 ring-slate-200">
+              <p className="text-xs font-black text-slate-400">发布包进度</p>
               {[
-                ['AI智能分发', '按平台尺寸、标题和发布时间生成发布包'],
-                ['KOC视频任务', '把成片拆成达人可执行任务'],
-                ['授权转发', '客户自己发布或授权后再自动化'],
+                ['标题包', '3/3'],
+                ['封面素材', '4/5'],
+                ['正文标签', '5/5'],
+                ['回填字段', '已建表'],
+              ].map(([label, value]) => (
+                <div className="mt-2 flex items-center justify-between rounded bg-slate-50 px-2 py-1.5 text-xs font-bold text-slate-700" key={label}>
+                  <span>{label}</span>
+                  <span className="text-blue-700">{value}</span>
+                </div>
+              ))}
+            </div>
+            <Link className="mt-4 flex min-h-10 items-center justify-center rounded-md bg-white text-sm font-black text-blue-700 ring-1 ring-blue-100" href={withTaskContext('/factory/manage?variant=friend_trial')}>查看回填结果</Link>
+          </aside>
+          <div className="min-w-0 p-5">
+            <div className="flex flex-col gap-3 border-b border-slate-100 pb-4 xl:flex-row xl:items-start xl:justify-between">
+              <div className="min-w-0">
+                <p className="text-xs font-black uppercase text-indigo-600">投放分发 / 矩阵发布</p>
+                <h2 className="mt-2 text-2xl font-black leading-8 text-slate-950">把账号、标题包、发布时间和证据回填放在同一张运营表</h2>
+                <p className="mt-2 max-w-3xl text-sm font-bold leading-6 text-slate-500">不把能力收缩成一个发布按钮。客户拿到的是渠道矩阵、KOC 任务、手机协同清单、发布日历和可回填表。</p>
+              </div>
+              <div className="grid grid-cols-3 gap-2 text-center text-xs font-black text-slate-600">
+                {[
+                  ['渠道', '8'],
+                  ['标题包', '12'],
+                  ['待回填', '4'],
+                ].map(([label, value]) => (
+                  <div className="rounded-md bg-slate-50 px-3 py-2 ring-1 ring-slate-200" key={label}>
+                    <div className="text-lg text-slate-950">{value}</div>
+                    <div>{label}</div>
+                  </div>
+                ))}
+              </div>
+            </div>
+            <div className="mt-4 grid gap-3 md:grid-cols-3">
+              {[
+                ['AI智能分发', '按平台尺寸、发布时间、标题语气生成可复制发布包。'],
+                ['KOC视频任务', '把成片拆成达人任务：素材、口播点、禁用词、交付截图。'],
+                ['手机协同', '客户手机端照着清单发布，回填链接和截图即可复盘。'],
               ].map(([title, body], index) => (
-                <button className={`min-h-[116px] rounded-lg border p-4 text-left ${index === 0 ? 'border-blue-300 bg-blue-50' : 'border-slate-200 bg-slate-50'}`} key={title} type="button">
+                <button className={'min-h-[116px] rounded-lg border p-4 text-left ' + (index === 0 ? 'border-blue-300 bg-blue-50' : 'border-slate-200 bg-slate-50')} key={title} type="button">
                   <h3 className="text-base font-black text-slate-950">{title}</h3>
                   <p className="mt-2 text-xs font-bold leading-5 text-slate-500">{body}</p>
                 </button>
               ))}
             </div>
-            <p className="mt-6 text-sm font-black text-slate-950">发布渠道</p>
-            <div className="mt-3 grid gap-3 sm:grid-cols-2 xl:grid-cols-4">
-              {channels.map((item, index) => (
-                <button className="min-h-20 rounded-lg border border-slate-200 bg-slate-50 p-3 text-left transition hover:bg-white hover:shadow-sm" key={item} type="button">
-                  <span className="grid size-8 place-items-center rounded-full bg-white text-xs font-black text-blue-700 ring-1 ring-slate-200">{index + 1}</span>
-                  <h4 className="mt-2 text-sm font-black text-slate-950">{item}</h4>
-                  <p className="text-[11px] font-bold text-slate-500">标题 / 正文 / 封面 / 标签</p>
-                </button>
+            <section className="mt-5 overflow-hidden rounded-lg border border-slate-200">
+              <div className="hidden grid-cols-[minmax(150px,1fr)_112px_104px_minmax(160px,1fr)_92px] gap-2 bg-slate-100 px-3 py-3 text-xs font-black text-slate-500 md:grid">
+                {['账号 / 渠道', '状态', '发布时间', '交付物', '动作'].map(item => <span key={item}>{item}</span>)}
+              </div>
+              {channelRows.map(row => (
+                <div className="grid gap-3 border-t border-slate-100 px-3 py-3 text-sm font-bold text-slate-800 md:grid-cols-[minmax(150px,1fr)_112px_104px_minmax(160px,1fr)_92px] md:items-center md:gap-2" key={row[0]}>
+                  <div className="flex min-w-0 items-center gap-3">
+                    <span className="grid size-9 shrink-0 place-items-center rounded-full bg-[linear-gradient(135deg,#dbeafe,#fce7f3)] text-xs font-black text-blue-700">{row[0].slice(0, 2)}</span>
+                    <span className="min-w-0 break-words font-black md:truncate">{row[0]}</span>
+                  </div>
+                  <span className="w-fit rounded bg-blue-50 px-2 py-1 text-xs text-blue-700 ring-1 ring-blue-100">{row[1]}</span>
+                  <span className="text-xs text-slate-600">{row[2]}</span>
+                  <span className="break-words text-xs leading-5 text-slate-600">{row[3]}</span>
+                  <button className="min-h-8 rounded-md bg-white px-3 text-xs font-black text-blue-700 ring-1 ring-slate-200" type="button">{row[4]}</button>
+                </div>
               ))}
+            </section>
+            <div className="mt-5 grid gap-4 xl:grid-cols-[0.95fr_1.05fr]">
+              <section className="rounded-lg border border-slate-200 bg-slate-50 p-4">
+                <div className="flex items-center justify-between gap-3">
+                  <h3 className="text-base font-black text-slate-950">发布日历</h3>
+                  <span className="rounded bg-white px-2 py-1 text-xs font-black text-slate-500 ring-1 ring-slate-200">可拖拽排期</span>
+                </div>
+                <div className="mt-3 grid grid-cols-5 gap-2">
+                  {calendar.map((day, index) => (
+                    <div className="min-h-[92px] rounded-md bg-white p-2 ring-1 ring-slate-200" key={day}>
+                      <p className="text-xs font-black text-slate-500">{day}</p>
+                      <div className={'mt-3 rounded px-2 py-1.5 text-[11px] font-black ' + (index === 0 ? 'bg-blue-50 text-blue-700' : 'bg-slate-50 text-slate-600')}>{index + 1} 条待发</div>
+                    </div>
+                  ))}
+                </div>
+              </section>
+              <section className="rounded-lg border border-slate-200 bg-white p-4">
+                <div className="flex items-center justify-between gap-3">
+                  <h3 className="text-base font-black text-slate-950">标题包</h3>
+                  <button className="rounded-md bg-[#315cff] px-3 py-2 text-xs font-black text-white" type="button">生成 12 条</button>
+                </div>
+                <div className="mt-3 grid gap-2">
+                  {titlePacks.map(([type, title, fit]) => (
+                    <div className="rounded-md bg-slate-50 p-3 ring-1 ring-slate-100" key={type}>
+                      <div className="flex flex-wrap items-center justify-between gap-2">
+                        <span className="text-xs font-black text-blue-700">{type}</span>
+                        <span className="text-[11px] font-bold text-slate-400">{fit}</span>
+                      </div>
+                      <p className="mt-1 break-words text-sm font-bold leading-5 text-slate-800">{title}</p>
+                    </div>
+                  ))}
+                </div>
+              </section>
             </div>
           </div>
           <aside className="border-t border-slate-200 bg-[#f8faff] p-4 lg:border-l lg:border-t-0">
-            <p className="text-xs font-black text-slate-400">标题与发布包</p>
-            <h3 className="mt-2 text-lg font-black text-slate-950">{platform} 发布内容</h3>
-            <textarea className="mt-4 min-h-36 w-full resize-none rounded-md border border-slate-200 bg-white p-3 text-sm font-bold leading-6 text-slate-800" readOnly value={`${product}｜${goal}\n#新品 #好物推荐 #真实使用\n封面：痛点 + 商品图 + 结果承诺`} />
+            <p className="text-xs font-black text-slate-400">手机协同与回填</p>
+            <h3 className="mt-2 text-lg font-black text-slate-950">{platform} 发布包</h3>
+            <textarea className="mt-4 min-h-36 w-full resize-none rounded-md border border-slate-200 bg-white p-3 text-sm font-bold leading-6 text-slate-800" readOnly value={product + '｜' + goal + '\n#新品 #好物推荐 #真实使用\n封面：痛点 + 商品图 + 结果承诺'} />
             <div className="mt-3 grid grid-cols-2 gap-2">
-              {['AI生成标题', '批量导入', '发布历史', '回填表'].map(item => (
+              {['复制标题', '复制正文', '导出回填表', '发给手机'].map(item => (
                 <button className="min-h-10 rounded-md bg-white px-3 text-xs font-black text-slate-700 ring-1 ring-slate-200" key={item} type="button">{item}</button>
               ))}
+            </div>
+            <div className="mt-4 rounded-md border border-blue-100 bg-blue-50 p-3">
+              <p className="text-xs font-black text-blue-700">KOC流量包</p>
+              <div className="mt-2 grid gap-2">
+                {['达人口播点', '素材下载清单', '禁用表达', '截图回传字段'].map(item => (
+                  <div className="rounded bg-white px-2 py-1.5 text-xs font-bold text-slate-700 ring-1 ring-blue-100" key={item}>{item}</div>
+                ))}
+              </div>
+            </div>
+            <div className="mt-4 rounded-md border border-emerald-100 bg-emerald-50 p-3">
+              <p className="text-xs font-black text-emerald-700">回填表字段</p>
+              <p className="mt-2 text-xs font-bold leading-5 text-slate-600">发布链接、发布时间、截图、首小时互动、备注、下轮动作。</p>
             </div>
             <Link className="mt-4 flex min-h-11 items-center justify-center rounded-md bg-[#315cff] text-sm font-black text-white" href={withTaskContext('/factory/manage?variant=friend_trial')}>进入创意洞察</Link>
           </aside>
@@ -701,7 +816,7 @@ function KuaiziModuleWorkbench({
         <div className="mt-5 grid grid-cols-3 gap-4 pb-2 sm:flex sm:gap-5 sm:overflow-x-auto">
           {['添加对标账号', '全部', '维生素B源头工厂', '晨光官方旗舰店', '刀刻梅Yao', '好物推荐'].map((item, index) => (
             <div className="min-w-0 text-center sm:w-24 sm:shrink-0" key={item}>
-              <div className={`mx-auto grid size-16 place-items-center rounded-full border-4 ${index === 0 ? 'border-rose-300 bg-[#14233f] text-white' : 'border-slate-200 bg-[linear-gradient(135deg,#fef3c7,#bfdbfe)]'} text-xs font-black`}>{index === 0 ? '+' : item.slice(0, 2)}</div>
+              <div className={`mx-auto grid size-16 place-items-center rounded-full border-4 ${index === 0 ? 'border-rose-300 bg-[#315cff] text-white' : 'border-slate-200 bg-[linear-gradient(135deg,#fef3c7,#bfdbfe)]'} text-xs font-black`}>{index === 0 ? '+' : item.slice(0, 2)}</div>
               <p className="mt-2 truncate text-xs font-bold text-slate-700">{item}</p>
             </div>
           ))}
@@ -934,7 +1049,7 @@ export function KuaiziWorkflowConsole({
                 <Link
                   key={item.id}
                   href={withTaskContext(item.href)}
-                  className={`flex min-h-10 items-center gap-2 rounded-md px-3 text-sm font-bold transition ${isActive ? 'bg-[#14233f] text-white shadow-sm' : 'text-slate-600 hover:bg-white/75 hover:text-slate-950'}`}
+                  className={`flex min-h-10 items-center gap-2 rounded-md px-3 text-sm font-bold transition ${isActive ? 'bg-[#315cff] text-white shadow-sm' : 'text-slate-600 hover:bg-white/75 hover:text-slate-950'}`}
                 >
                   <span className="min-w-0 flex-1 truncate">{item.label}</span>
                   <span className={`shrink-0 rounded px-1.5 py-0.5 text-[10px] font-black ${isActive ? 'bg-white/15 text-white' : 'bg-white text-slate-400 ring-1 ring-slate-200'}`}>{item.state}</span>
@@ -942,7 +1057,7 @@ export function KuaiziWorkflowConsole({
               );
             })}
           </nav>
-          <div className="mt-5 border-t border-slate-200 pt-4">
+          <div className="mt-5 hidden border-t border-slate-200 pt-4 lg:block">
             <p className="px-3 text-xs font-black text-slate-400">服务</p>
             <div className="mt-2 grid gap-1">
               {kuaiziServiceNav.map((item, index) => {
@@ -960,7 +1075,7 @@ export function KuaiziWorkflowConsole({
               })}
             </div>
           </div>
-          <div className="mt-5 rounded-md border border-slate-200 bg-slate-50 p-3 text-xs leading-5 text-slate-600">
+          <div className="mt-5 hidden rounded-md border border-slate-200 bg-slate-50 p-3 text-xs leading-5 text-slate-600 lg:block">
             当前策略：先交付图片、视频、文案、发布包和回填入口；后续生成能力增强时，不改变客户操作路径。
           </div>
         </aside>
@@ -991,7 +1106,7 @@ export function KuaiziWorkflowConsole({
                 <h2 className="mx-auto mt-3 max-w-3xl text-3xl font-black leading-tight tracking-tight text-[#15213f] md:text-5xl">{config.title}</h2>
                 <p className="mx-auto mt-4 max-w-2xl text-sm font-bold leading-7 text-slate-600">{config.subtitle}</p>
                 <div className="mx-auto mt-6 inline-flex rounded-full bg-white p-1 shadow-sm ring-1 ring-slate-200">
-                  <span className="rounded-full bg-slate-950 px-6 py-2 text-sm font-black text-white">AI 工具</span>
+                  <span className="rounded-full bg-[#315cff] px-6 py-2 text-sm font-black text-white">AI 工具</span>
                   <span className="rounded-full px-6 py-2 text-sm font-black text-slate-500">小 W</span>
                 </div>
               </div>
@@ -1075,7 +1190,7 @@ export function KuaiziWorkflowConsole({
                         素材已齐
                       </label>
                       <button
-                        className="h-11 rounded-md bg-slate-950 px-5 text-sm font-black text-white shadow-sm transition hover:bg-slate-800"
+                        className="h-11 rounded-md bg-[#315cff] px-5 text-sm font-black text-white shadow-sm transition hover:bg-[#234ee8]"
                         onClick={() => setGenerated(true)}
                         type="submit"
                       >
@@ -1166,7 +1281,7 @@ export function KuaiziWorkflowConsole({
                       ))}
                     </div>
                     <div className="mt-3 flex flex-wrap gap-2">
-                      <Link className="flex min-h-10 items-center justify-center rounded-md bg-slate-950 px-4 text-sm font-black text-white" href={generated ? withTaskContext(nextHref) : '#task-form'}>
+                      <Link className="flex min-h-10 items-center justify-center rounded-md bg-[#315cff] px-4 text-sm font-black text-white" href={generated ? withTaskContext(nextHref) : '#task-form'}>
                         {generated ? nextLabel : '先生成本页产出'}
                       </Link>
                       <Link className="flex min-h-10 items-center justify-center rounded-md border border-slate-200 bg-white px-4 text-sm font-black text-slate-700" href="/factory?variant=friend_trial">
@@ -1202,7 +1317,7 @@ export function KuaiziWorkflowConsole({
                           <Link
                             className={`grid min-h-9 grid-cols-[26px_minmax(0,1fr)_64px] items-center gap-2 rounded-md px-2 text-xs font-black ${
                               item.id === active
-                                ? 'bg-slate-950 text-white'
+                                ? 'bg-[#315cff] text-white'
                                 : index < activeIndex
                                   ? 'bg-emerald-50 text-emerald-800 ring-1 ring-emerald-100'
                                   : 'bg-white text-slate-600 ring-1 ring-slate-100'
@@ -1230,7 +1345,7 @@ export function KuaiziWorkflowConsole({
                     </div>
                   </div>
                   <div className="mt-4 grid grid-cols-2 gap-2">
-                    <Link className="flex min-h-10 items-center justify-center rounded-md bg-slate-950 px-3 text-sm font-black text-white" href={withTaskContext(config.primaryHref)}>
+                    <Link className="flex min-h-10 items-center justify-center rounded-md bg-[#315cff] px-3 text-sm font-black text-white" href={withTaskContext(config.primaryHref)}>
                       {config.primaryLabel}
                     </Link>
                     <Link className="flex min-h-10 items-center justify-center rounded-md border border-slate-200 bg-white px-3 text-sm font-black text-slate-700" href="/factory?variant=friend_trial">
@@ -1267,7 +1382,7 @@ export function KuaiziWorkflowConsole({
               {customerNextActions.map((item, index) => (
                 <Link className="min-w-0 rounded-md border border-slate-200 bg-slate-50 p-3 transition hover:border-indigo-200 hover:bg-indigo-50" href={withTaskContext(item.href)} key={item.label}>
                   <div className="flex items-center gap-2">
-                    <span className="grid size-7 shrink-0 place-items-center rounded-md bg-slate-950 text-[11px] font-black text-white">{index + 1}</span>
+                    <span className="grid size-7 shrink-0 place-items-center rounded-md bg-[#315cff] text-[11px] font-black text-white">{index + 1}</span>
                     <span className="rounded bg-white px-2 py-1 text-[11px] font-black text-slate-600 ring-1 ring-slate-200">{item.label}</span>
                   </div>
                   <h3 className="mt-2 truncate text-sm font-black text-slate-950">{item.title}</h3>
@@ -1306,7 +1421,7 @@ export function KuaiziWorkflowConsole({
                     <h2 className="mt-2 break-words text-2xl font-black md:text-3xl">{config.toolMeta}</h2>
                     <p className="mt-3 text-sm leading-6 text-slate-500">{config.outcome}</p>
                     <div className={`mt-4 h-2 w-full max-w-[360px] rounded-full bg-gradient-to-r ${config.accent}`} />
-                    <Link className="mt-5 inline-flex min-h-11 max-w-full items-center justify-center rounded-md bg-slate-950 px-4 text-sm font-black text-white" href={withTaskContext(config.primaryHref)}>
+                    <Link className="mt-5 inline-flex min-h-11 max-w-full items-center justify-center rounded-md bg-[#315cff] px-4 text-sm font-black text-white" href={withTaskContext(config.primaryHref)}>
                       <span className="truncate">{config.primaryLabel}</span>
                     </Link>
                   </div>
@@ -1390,7 +1505,7 @@ export function KuaiziWorkflowConsole({
               <p className="mt-2 text-sm leading-6 text-slate-500">子界面和主界面使用同一套导航与视觉语言，点击进去不会像进入另一个产品。</p>
               <div className="mt-4 space-y-2 text-sm text-slate-600">
                 {workflowNav.map(item => (
-                  <Link key={item.id} href={withTaskContext(item.href)} className={`flex min-h-10 items-center justify-between rounded-md px-3 font-bold ${item.id === active ? 'bg-slate-950 text-white' : 'bg-slate-50 hover:bg-slate-100'}`}>
+                  <Link key={item.id} href={withTaskContext(item.href)} className={`flex min-h-10 items-center justify-between rounded-md px-3 font-bold ${item.id === active ? 'bg-[#315cff] text-white' : 'bg-slate-50 hover:bg-slate-100'}`}>
                     <span className="min-w-0 truncate">{item.label}</span>
                     <span className="shrink-0">›</span>
                   </Link>

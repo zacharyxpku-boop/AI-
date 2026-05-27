@@ -136,7 +136,7 @@ const WORKBENCH_TOOLS = [
   { title: 'AI 复刻', desc: '参考结构，生成自有版本', href: '/factory/video?variant=friend_trial', badge: '02', accent: 'from-fuchsia-400 to-purple-500' },
   { title: '批量合成', desc: '替换商品、画面和标题', href: '/factory/video?variant=friend_trial', badge: '03', accent: 'from-amber-400 to-orange-500' },
   { title: '多语配音', desc: '面向跨境渠道的脚本', href: '/factory/video?variant=friend_trial', badge: '04', accent: 'from-teal-400 to-emerald-500' },
-  { title: '投放分发', desc: '排期、证据、负责人', href: '/factory/cast?variant=friend_trial', badge: '05', accent: 'from-slate-700 to-slate-950' },
+  { title: '投放分发', desc: '排期、证据、负责人', href: '/factory/cast?variant=friend_trial', badge: '05', accent: 'from-blue-500 to-cyan-500' },
   { title: '创意洞察', desc: '只记录真实反馈', href: '/factory/manage?variant=friend_trial', badge: '06', accent: 'from-rose-400 to-pink-500' },
 ];
 
@@ -206,7 +206,7 @@ export function FactoryFriendTrialExperience({
 
           <nav className="flex-1 px-3 pb-4">
             <Link href="/factory?variant=friend_trial" className={`mb-5 flex items-center gap-3 rounded-lg px-3 py-3 text-sm font-black shadow-sm ${active === 'overview' ? 'bg-white text-slate-950' : 'text-slate-700 hover:bg-white/70'}`}>
-              <span className="flex size-8 items-center justify-center rounded-md bg-slate-950 text-white">01</span>
+              <span className="flex size-8 items-center justify-center rounded-md bg-[#315cff] text-white">01</span>
               开始工作
             </Link>
 
@@ -237,7 +237,7 @@ export function FactoryFriendTrialExperience({
           </nav>
 
           <div className="space-y-3 p-4">
-            <Link href="/settings/kuaizi" className="block rounded-lg bg-slate-950 px-4 py-3 text-sm font-black text-white shadow-sm">
+            <Link href="/settings/kuaizi" className="block rounded-lg bg-[#315cff] px-4 py-3 text-sm font-black text-white shadow-sm">
               生产 Agent
             </Link>
             <div className="rounded-lg bg-white px-4 py-3 shadow-sm ring-1 ring-slate-200">
@@ -278,7 +278,7 @@ export function FactoryFriendTrialExperience({
               {NAV.map((item, index) => (
                 <Link
                   aria-current={item.id === active ? 'page' : undefined}
-                  className={`flex min-w-[136px] items-center gap-2 rounded-lg border px-3 py-2 text-sm ${item.id === active ? 'border-slate-950 bg-slate-950 text-white' : 'border-slate-200 bg-white text-slate-700'}`}
+                  className={`flex min-w-[136px] items-center gap-2 rounded-lg border px-3 py-2 text-sm ${item.id === active ? 'border-[#315cff] bg-[#315cff] text-white' : 'border-slate-200 bg-white text-slate-700'}`}
                   href={item.href}
                   key={item.id}
                 >
@@ -357,7 +357,7 @@ export function FactoryFriendTrialExperience({
                       const current = item.id === active;
                       return (
                         <Link className={`grid grid-cols-[32px_minmax(0,1fr)_auto] items-center gap-3 rounded-lg border px-3 py-2.5 transition ${current ? 'border-indigo-200 bg-indigo-50' : done ? 'border-slate-200 bg-slate-50' : 'border-slate-200 bg-white hover:bg-slate-50'}`} href={item.href} key={item.id}>
-                          <span className={`flex size-8 items-center justify-center rounded-md text-xs font-black ${current ? 'bg-indigo-600 text-white' : done ? 'bg-slate-950 text-white' : 'bg-slate-100 text-slate-500'}`}>{index + 1}</span>
+                          <span className={`flex size-8 items-center justify-center rounded-md text-xs font-black ${current || done ? 'bg-[#315cff] text-white' : 'bg-slate-100 text-slate-500'}`}>{index + 1}</span>
                           <span className="min-w-0">
                             <span className="block truncate text-sm font-black text-slate-950">{item.label}</span>
                             <span className="block truncate text-xs text-slate-500">{item.hint}</span>
