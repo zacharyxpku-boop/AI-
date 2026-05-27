@@ -142,14 +142,20 @@ const flowSteps: FlowStep[] = [
 ];
 
 const serviceNav = [
-  { label: '商品资料', href: '/factory/creative?variant=friend_trial' },
-  { label: '图片生成', href: '/factory/create?variant=friend_trial' },
-  { label: '模特生图', href: '/factory/create?variant=friend_trial' },
-  { label: '视频混剪', href: '/factory/video?variant=friend_trial' },
-  { label: '数字人口播', href: '/factory/video?variant=friend_trial' },
-  { label: '发布包', href: '/factory/cast?variant=friend_trial' },
-  { label: '客服素材', href: '/factory/manage?variant=friend_trial' },
-  { label: '复盘跟进', href: '/factory/manage?variant=friend_trial' },
+  { group: '总览', label: '开始工作', href: '/factory?variant=friend_trial', state: '首页' },
+  { group: '工作流', label: '编导灵感', href: '/factory/creative?variant=friend_trial', state: '可生成' },
+  { group: '工作流', label: '素材生产', href: '/factory/create?variant=friend_trial', state: '可生产' },
+  { group: '工作流', label: '合成量产', href: '/factory/video?variant=friend_trial', state: '可排队' },
+  { group: '工作流', label: '投放分发', href: '/factory/cast?variant=friend_trial', state: '可导出' },
+  { group: '服务', label: '筷子云盘', href: '/factory/create?variant=friend_trial', state: '素材库' },
+  { group: '服务', label: '手机协同', href: '/factory/cast?variant=friend_trial', state: '移动端' },
+  { group: '服务', label: '直播切片', href: '/factory/video?variant=friend_trial', state: '切片' },
+  { group: '服务', label: '创意洞察', href: '/factory/manage?variant=friend_trial', state: '解析' },
+  { group: '服务', label: '视频翻译', href: '/factory/video?variant=friend_trial', state: '多语' },
+  { group: '服务', label: '矩阵宝', href: '/factory/cast?variant=friend_trial', state: '矩阵' },
+  { group: '服务', label: 'KOC流量包', href: '/factory/cast?variant=friend_trial', state: '种草' },
+  { group: '服务', label: '评论管理', href: '/factory/manage?variant=friend_trial', state: '客服' },
+  { group: 'Agent', label: '生机 Agent', href: '/factory/manage?variant=friend_trial', state: '建议' },
 ];
 
 const kuaiziDenseModules = [
@@ -160,6 +166,18 @@ const kuaiziDenseModules = [
     href: '/factory/creative?variant=friend_trial',
     tone: 'from-violet-500 via-fuchsia-500 to-rose-400',
     chips: ['写脚本', 'AI影棚', 'AI复刻', '元素替换'],
+    state: '8 个入口',
+    metric: '今日 03 步',
+  },
+  {
+    label: '编导灵感',
+    title: '卖点、脚本、分镜和评论区话题',
+    body: '把商品资料变成开场钩子、痛点脚本、场景分镜和平台语气，用户一眼知道先拍什么。',
+    href: '/factory/creative?variant=friend_trial',
+    tone: 'from-fuchsia-500 via-pink-500 to-rose-400',
+    chips: ['卖点脚本', '分镜', '标题', '禁用词'],
+    state: '可直接生成',
+    metric: '3 套脚本',
   },
   {
     label: '筷子云盘',
@@ -168,6 +186,8 @@ const kuaiziDenseModules = [
     href: '/factory/create?variant=friend_trial',
     tone: 'from-sky-500 via-blue-500 to-indigo-500',
     chips: ['全部文件', '素材', '工程', '成片'],
+    state: '资产已归档',
+    metric: '32 个文件',
   },
   {
     label: '素材生产',
@@ -176,14 +196,18 @@ const kuaiziDenseModules = [
     href: '/factory/create?variant=friend_trial',
     tone: 'from-emerald-500 via-cyan-500 to-blue-500',
     chips: ['商品图', '模特图', '场景图', 'FAQ'],
+    state: '可生产',
+    metric: '6 类素材',
   },
   {
     label: '合成量产',
-    title: '深色剪辑台和组合优化',
-    body: '对齐筷子 Video Pro：左侧素材组，中间预览，右侧字幕/滤镜/装饰层，底部时间线和生成按钮。',
+    title: '浅色剪辑台和组合优化',
+    body: '对齐筷子 Video Pro 的结构：左侧素材组，中间预览，右侧字幕/滤镜/装饰层，底部时间线和生成按钮。',
     href: '/factory/video?variant=friend_trial',
-    tone: 'from-slate-800 via-indigo-700 to-fuchsia-600',
+    tone: 'from-indigo-500 via-purple-500 to-pink-500',
     chips: ['素材调试', '极速裂变', '组合优化', '时间线'],
+    state: '可排队',
+    metric: '132 镜头',
   },
   {
     label: '投放分发',
@@ -192,6 +216,28 @@ const kuaiziDenseModules = [
     href: '/factory/cast?variant=friend_trial',
     tone: 'from-blue-500 via-cyan-500 to-sky-400',
     chips: ['抖音', '快手', '视频号', '小红书'],
+    state: '可导出',
+    metric: '5 渠道',
+  },
+  {
+    label: '手机协同',
+    title: '发布包推到手机侧执行',
+    body: '客户用自己的手机和账号发布，Wenai 交付标题、封面、素材、发布时间和回填清单。',
+    href: '/factory/cast?variant=friend_trial',
+    tone: 'from-cyan-500 via-sky-500 to-blue-500',
+    chips: ['扫码领取', '复制标题', '保存素材', '回填链接'],
+    state: '可执行',
+    metric: '4 步发布',
+  },
+  {
+    label: '直播切片',
+    title: '长视频切成短视频素材',
+    body: '把直播回放、产品讲解和测评长片切成可混剪的片段，并进入合成量产时间线。',
+    href: '/factory/video?variant=friend_trial',
+    tone: 'from-rose-500 via-orange-400 to-amber-300',
+    chips: ['切片', '字幕', '高光', '片段库'],
+    state: '可进入剪辑',
+    metric: '27 段',
   },
   {
     label: '创意洞察',
@@ -200,6 +246,48 @@ const kuaiziDenseModules = [
     href: '/factory/manage?variant=friend_trial',
     tone: 'from-orange-400 via-rose-500 to-pink-500',
     chips: ['账号', '榜单', '解析', '收藏'],
+    state: '可解析',
+    metric: '6 条样例',
+  },
+  {
+    label: '视频翻译',
+    title: '多语言字幕和口播版本',
+    body: '面向跨境场景准备字幕、标题、口播语气和多语言版本，后续接入生成服务即可增强。',
+    href: '/factory/video?variant=friend_trial',
+    tone: 'from-teal-500 via-emerald-500 to-lime-400',
+    chips: ['英文', '日文', '字幕', '口播'],
+    state: '可排版',
+    metric: '多语包',
+  },
+  {
+    label: '矩阵宝',
+    title: '账号矩阵分发包',
+    body: '把不同账号、不同平台、不同标题和发布时间组织成矩阵发布清单，客户可按表执行。',
+    href: '/factory/cast?variant=friend_trial',
+    tone: 'from-blue-600 via-indigo-500 to-violet-500',
+    chips: ['账号', '渠道', '标题', '日历'],
+    state: '可安排',
+    metric: '12 格计划',
+  },
+  {
+    label: 'KOC流量包',
+    title: '达人种草素材和协作清单',
+    body: '沉淀 KOC 话术、寄样素材、合作备注和回收证据，先交付可执行包，不把外部平台当阻塞。',
+    href: '/factory/cast?variant=friend_trial',
+    tone: 'from-amber-400 via-orange-400 to-red-400',
+    chips: ['寄样', '话术', '素材包', '回收'],
+    state: '可交付',
+    metric: '种草包',
+  },
+  {
+    label: '评论管理',
+    title: '评论、客服和售后素材',
+    body: '把评论问题、FAQ、差评解释和售后话术接到复盘页面，形成下一轮内容任务。',
+    href: '/factory/manage?variant=friend_trial',
+    tone: 'from-slate-700 via-blue-600 to-cyan-500',
+    chips: ['评论', 'FAQ', '差评', '售后'],
+    state: '可生成',
+    metric: '客服卡',
   },
 ] as const;
 
@@ -485,7 +573,7 @@ export function KuaiziStyleWorkbench() {
   return (
     <main className="min-h-screen overflow-x-hidden bg-[#f7f9ff] text-slate-950" style={{ backgroundColor: '#f7f9ff' }}>
       <div className="flex min-h-screen min-w-0 overflow-x-hidden">
-        <aside className="hidden w-[224px] shrink-0 flex-col border-r border-[#dbe4f3] bg-[#eef4ff] xl:flex">
+        <aside className="hidden w-[252px] shrink-0 flex-col border-r border-[#dbe4f3] bg-[#eef4ff] xl:flex">
           <div className="px-5 pb-5 pt-7">
             <div className="flex items-center gap-2">
               <div className="grid size-8 place-items-center rounded-md bg-gradient-to-br from-[#5a55ff] via-[#d92dfb] to-[#23d7ff] text-sm font-black text-white">W</div>
@@ -502,7 +590,7 @@ export function KuaiziStyleWorkbench() {
               <span className="truncate">工作台总览</span>
             </Link>
 
-            <div className="px-3 pb-2 text-xs font-bold text-slate-400">商品内容流程</div>
+            <div className="px-3 pb-2 text-xs font-bold text-slate-400">工作流</div>
             <div className="space-y-1">
               {flowSteps.slice(0, 5).map((item, index) => (
                 <Link className="flex items-center gap-3 rounded-md px-3 py-2.5 text-sm font-bold text-slate-600 hover:bg-white/75 hover:text-slate-950" href={item.href} key={item.id}>
@@ -512,14 +600,21 @@ export function KuaiziStyleWorkbench() {
               ))}
             </div>
 
-            <div className="px-3 pb-2 pt-5 text-xs font-bold text-slate-400">可交付能力</div>
+            <div className="px-3 pb-2 pt-5 text-xs font-bold text-slate-400">服务</div>
             <div className="space-y-1">
-              {serviceNav.map((item, index) => (
-                <Link className="flex items-center gap-3 rounded-md px-3 py-2.5 text-sm font-bold text-slate-600 hover:bg-white/75 hover:text-slate-950" href={item.href} key={`${item.label}-${item.href}`}>
-                  <IconMark>{String(index + 1)}</IconMark>
-                  <span className="min-w-0 flex-1 truncate">{item.label}</span>
-                </Link>
-              ))}
+              {serviceNav.map((item, index) => {
+                const showGroup = index === 0 || serviceNav[index - 1].group !== item.group;
+
+                return (
+                  <div key={`${item.group}-${item.label}`}>
+                    {showGroup ? <div className="px-3 pb-1 pt-2 text-[10px] font-black uppercase text-slate-400">{item.group}</div> : null}
+                    <Link className="flex min-h-9 items-center gap-2 rounded-md px-3 py-2 text-sm font-bold text-slate-600 hover:bg-white/75 hover:text-slate-950" href={item.href}>
+                      <span className="min-w-0 flex-1 truncate">{item.label}</span>
+                      <span className="shrink-0 rounded bg-white px-1.5 py-0.5 text-[10px] font-black text-slate-400 ring-1 ring-slate-200">{item.state}</span>
+                    </Link>
+                  </div>
+                );
+              })}
             </div>
           </nav>
         </aside>
@@ -703,6 +798,10 @@ export function KuaiziStyleWorkbench() {
                             </div>
                           </div>
                           <div className="p-3">
+                            <div className="mb-2 flex flex-wrap items-center gap-1.5">
+                              <span className="rounded bg-emerald-50 px-2 py-1 text-[11px] font-black text-emerald-700 ring-1 ring-emerald-100">{module.state}</span>
+                              <span className="rounded bg-slate-900 px-2 py-1 text-[11px] font-black text-white">{module.metric}</span>
+                            </div>
                             <h4 className="break-words text-sm font-black leading-5 text-slate-950">{module.title}</h4>
                             <p className="mt-2 line-clamp-3 text-xs font-bold leading-5 text-slate-500">{module.body}</p>
                             <div className="mt-3 flex flex-wrap gap-1.5">
