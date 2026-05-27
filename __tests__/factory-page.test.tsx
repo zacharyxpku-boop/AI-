@@ -1,7 +1,14 @@
 import { renderToStaticMarkup } from 'react-dom/server';
-import { describe, expect, it } from 'vitest';
+import { describe, expect, it, vi } from 'vitest';
+
+vi.mock('next/navigation', () => ({
+  redirect: vi.fn((href: string) => {
+    throw new Error(`redirect:${href}`);
+  }),
+}));
 
 import FactoryPage from '@/app/factory/page';
+import { redirect } from 'next/navigation';
 
 describe('factory page', () => {
   it('defaults the customer entry to the friend trial workbench', async () => {
@@ -79,5 +86,15 @@ describe('factory page', () => {
     for (const term of customerHiddenTerms) {
       expect(html).not.toContain(term);
     }
+  });
+
+  it('redirects non-customer variants away from the old dark factory shell', async () => {
+    await expect(
+      FactoryPage({
+        searchParams: Promise.resolve({ variant: 'operator' }),
+      }),
+    ).rejects.toThrow('redirect:/factory?variant=friend_trial');
+
+    expect(redirect).toHaveBeenCalledWith('/factory?variant=friend_trial');
   });
 });
