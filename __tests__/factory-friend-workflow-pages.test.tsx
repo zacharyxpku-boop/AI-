@@ -53,12 +53,26 @@ describe('factory friend trial workflow pages', () => {
     const html = renderToStaticMarkup(element);
 
     expect(html).toContain('Wenai 商品增长工作台');
+    expect(html).toContain('工作流');
     expect(html).toContain('服务');
+    expect(html).toContain('开始工作');
+    expect(html).toContain('编导灵感');
     expect(html).toContain('素材生产');
     expect(html).toContain('合成量产');
     expect(html).toContain('投放分发');
+    expect(html).toContain('筷子云盘');
+    expect(html).toContain('手机协同');
+    expect(html).toContain('直播切片');
+    expect(html).toContain('创意洞察');
+    expect(html).toContain('视频翻译');
     expect(html).toContain('矩阵宝');
+    expect(html).toContain('KOC流量包');
+    expect(html).toContain('评论管理');
+    expect(html).toContain('生机 Agent');
     expect(html).toContain('客户下一步');
+    expect(html).not.toContain('写卖点脚本');
+    expect(html).not.toContain('整理素材 / 图片');
+    expect(html).not.toContain('视频 / 数字人');
     expect(html).not.toContain('Customer Next Step');
     expect(html).toContain('每个子页面都按同一条电商交付链路推进');
     expect(html).toContain('最后一公里');

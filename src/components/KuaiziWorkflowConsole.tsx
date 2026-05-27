@@ -36,12 +36,12 @@ type StepInteraction = {
   stepChecklist: string[];
 };
 
-const workflowNav: Array<{ id: WorkflowStep; label: string; href: string }> = [
-  { id: 'creative', label: '写卖点脚本', href: '/factory/creative?variant=friend_trial' },
-  { id: 'create', label: '整理素材 / 图片', href: '/factory/create?variant=friend_trial' },
-  { id: 'video', label: '视频 / 数字人', href: '/factory/video?variant=friend_trial' },
-  { id: 'cast', label: '发布包 / 分发', href: '/factory/cast?variant=friend_trial' },
-  { id: 'manage', label: '复盘跟进', href: '/factory/manage?variant=friend_trial' },
+const workflowNav: Array<{ id: WorkflowStep; label: string; href: string; state: string }> = [
+  { id: 'creative', label: '编导灵感', href: '/factory/creative?variant=friend_trial', state: '可生成' },
+  { id: 'create', label: '素材生产', href: '/factory/create?variant=friend_trial', state: '可生产' },
+  { id: 'video', label: '合成量产', href: '/factory/video?variant=friend_trial', state: '可排队' },
+  { id: 'cast', label: '投放分发', href: '/factory/cast?variant=friend_trial', state: '可导出' },
+  { id: 'manage', label: '创意洞察', href: '/factory/manage?variant=friend_trial', state: '可解析' },
 ];
 
 const workflowStepOrder: WorkflowStep[] = ['creative', 'create', 'video', 'cast', 'manage'];
@@ -126,18 +126,20 @@ const lastMileCards = [
 ] as const;
 
 const kuaiziServiceNav = [
-  ['编导灵感', '/factory/creative?variant=friend_trial'],
-  ['素材生产', '/factory/create?variant=friend_trial'],
-  ['合成量产', '/factory/video?variant=friend_trial'],
-  ['投放分发', '/factory/cast?variant=friend_trial'],
-  ['筷子云盘', '/factory/create?variant=friend_trial'],
-  ['手机协同', '/factory/cast?variant=friend_trial'],
-  ['直播切片', '/factory/video?variant=friend_trial'],
-  ['创意洞察', '/factory/manage?variant=friend_trial'],
-  ['视频翻译', '/factory/video?variant=friend_trial'],
-  ['矩阵宝', '/factory/cast?variant=friend_trial'],
-  ['KOC流量包', '/factory/cast?variant=friend_trial'],
-  ['评论管理', '/factory/manage?variant=friend_trial'],
+  { group: '总览', label: '开始工作', href: '/factory?variant=friend_trial', state: '首页', activeSteps: [] as WorkflowStep[] },
+  { group: '工作流', label: '编导灵感', href: '/factory/creative?variant=friend_trial', state: '可生成', activeSteps: ['creative'] as WorkflowStep[] },
+  { group: '工作流', label: '素材生产', href: '/factory/create?variant=friend_trial', state: '可生产', activeSteps: ['create'] as WorkflowStep[] },
+  { group: '工作流', label: '合成量产', href: '/factory/video?variant=friend_trial', state: '可排队', activeSteps: ['video'] as WorkflowStep[] },
+  { group: '工作流', label: '投放分发', href: '/factory/cast?variant=friend_trial', state: '可导出', activeSteps: ['cast'] as WorkflowStep[] },
+  { group: '服务', label: '筷子云盘', href: '/factory/create?variant=friend_trial', state: '素材库', activeSteps: ['create'] as WorkflowStep[] },
+  { group: '服务', label: '手机协同', href: '/factory/cast?variant=friend_trial', state: '移动端', activeSteps: ['cast'] as WorkflowStep[] },
+  { group: '服务', label: '直播切片', href: '/factory/video?variant=friend_trial', state: '切片', activeSteps: ['video'] as WorkflowStep[] },
+  { group: '服务', label: '创意洞察', href: '/factory/manage?variant=friend_trial', state: '解析', activeSteps: ['manage'] as WorkflowStep[] },
+  { group: '服务', label: '视频翻译', href: '/factory/video?variant=friend_trial', state: '多语', activeSteps: ['video'] as WorkflowStep[] },
+  { group: '服务', label: '矩阵宝', href: '/factory/cast?variant=friend_trial', state: '矩阵', activeSteps: ['cast'] as WorkflowStep[] },
+  { group: '服务', label: 'KOC流量包', href: '/factory/cast?variant=friend_trial', state: '5点/条', activeSteps: ['cast'] as WorkflowStep[] },
+  { group: '服务', label: '评论管理', href: '/factory/manage?variant=friend_trial', state: '客服', activeSteps: ['manage'] as WorkflowStep[] },
+  { group: 'Agent', label: '生机 Agent', href: '/factory/manage?variant=friend_trial', state: '建议', activeSteps: ['manage'] as WorkflowStep[] },
 ] as const;
 
 const configs: Record<WorkflowStep, WorkflowConfig> = {
@@ -212,7 +214,7 @@ const configs: Record<WorkflowStep, WorkflowConfig> = {
     primaryLabel: '去生成发布包',
     primaryHref: '/factory/cast?variant=friend_trial',
     toolName: '视频与数字人生产',
-    toolMeta: '短视频 / 数字人口播 / 多语配音',
+    toolMeta: '短视频合成 · 数字人口播 · 多语配音',
     status: 'API / 本地混剪双路径',
     accent: 'from-indigo-500 via-purple-500 to-pink-500',
     outcome: '目标不是炫酷剪辑台，而是让同一组素材稳定产出多平台短视频、数字人口播和多语版本。',
@@ -840,22 +842,23 @@ export function KuaiziWorkflowConsole({
   return (
     <main className="min-h-screen bg-[#f4f6fb] text-[#15213f]" style={{ backgroundColor: '#f4f6fb' }}>
       <div className="mx-auto flex min-h-screen w-full max-w-[1440px] flex-col lg:flex-row">
-        <aside className="border-b border-slate-200 bg-white/95 px-4 py-4 lg:sticky lg:top-0 lg:h-screen lg:w-[248px] lg:border-b-0 lg:border-r">
+        <aside className="border-b border-slate-200 bg-[#eef4ff]/95 px-4 py-4 lg:sticky lg:top-0 lg:h-screen lg:w-[252px] lg:border-b-0 lg:border-r">
           <Link href="/factory?variant=friend_trial" className="flex min-h-11 items-center gap-3 rounded-md bg-[#dfe7f8] px-3 text-sm font-black text-[#17223d]">
             <span className="grid size-8 shrink-0 place-items-center rounded-md bg-gradient-to-br from-[#5a55ff] via-[#d92dfb] to-[#23d7ff] text-white">W</span>
             <span className="min-w-0 truncate">Wenai 商品增长工作台</span>
           </Link>
           <nav className="mt-5 grid gap-1">
+            <p className="px-3 pb-1 text-xs font-black text-slate-400">工作流</p>
             {workflowNav.map(item => {
               const isActive = item.id === active;
               return (
                 <Link
                   key={item.id}
                   href={withTaskContext(item.href)}
-                  className={`flex min-h-10 items-center justify-between rounded-md px-3 text-sm font-bold transition ${isActive ? 'bg-[#14233f] text-white' : 'text-slate-600 hover:bg-slate-100 hover:text-slate-950'}`}
+                  className={`flex min-h-10 items-center gap-2 rounded-md px-3 text-sm font-bold transition ${isActive ? 'bg-[#14233f] text-white shadow-sm' : 'text-slate-600 hover:bg-white/75 hover:text-slate-950'}`}
                 >
-                  <span className="min-w-0 truncate">{item.label}</span>
-                  <span className="shrink-0 text-xs opacity-70">›</span>
+                  <span className="min-w-0 flex-1 truncate">{item.label}</span>
+                  <span className={`shrink-0 rounded px-1.5 py-0.5 text-[10px] font-black ${isActive ? 'bg-white/15 text-white' : 'bg-white text-slate-400 ring-1 ring-slate-200'}`}>{item.state}</span>
                 </Link>
               );
             })}
@@ -863,18 +866,17 @@ export function KuaiziWorkflowConsole({
           <div className="mt-5 border-t border-slate-200 pt-4">
             <p className="px-3 text-xs font-black text-slate-400">服务</p>
             <div className="mt-2 grid gap-1">
-              {kuaiziServiceNav.map(([label, href]) => {
-                const isActiveService =
-                  (active === 'creative' && label === '编导灵感') ||
-                  (active === 'create' && (label === '素材生产' || label === '筷子云盘')) ||
-                  (active === 'video' && (label === '合成量产' || label === '直播切片' || label === '视频翻译')) ||
-                  (active === 'cast' && (label === '投放分发' || label === '矩阵宝' || label === 'KOC流量包')) ||
-                  (active === 'manage' && (label === '创意洞察' || label === '评论管理'));
+              {kuaiziServiceNav.map((item, index) => {
+                const showGroup = index === 0 || kuaiziServiceNav[index - 1].group !== item.group;
+                const isActiveService = item.activeSteps.includes(active);
                 return (
-                  <Link className={`flex min-h-9 items-center justify-between rounded-md px-3 text-sm font-bold ${isActiveService ? 'bg-[#e6ebfb] text-[#17223d]' : 'text-slate-600 hover:bg-slate-100'}`} href={withTaskContext(href)} key={label}>
-                    <span className="min-w-0 truncate">{label}</span>
-                    {label === 'KOC流量包' ? <span className="rounded bg-rose-500 px-1.5 py-0.5 text-[10px] font-black text-white">5点/条</span> : null}
-                  </Link>
+                  <div key={`${item.group}-${item.label}`}>
+                    {showGroup ? <div className="px-3 pb-1 pt-2 text-[10px] font-black uppercase text-slate-400">{item.group}</div> : null}
+                    <Link className={`flex min-h-9 items-center gap-2 rounded-md px-3 text-sm font-bold ${isActiveService ? 'bg-[#e6ebfb] text-[#17223d]' : 'text-slate-600 hover:bg-white/75'}`} href={withTaskContext(item.href)}>
+                      <span className="min-w-0 flex-1 truncate">{item.label}</span>
+                      <span className={`shrink-0 rounded px-1.5 py-0.5 text-[10px] font-black ${item.label === 'KOC流量包' ? 'bg-rose-500 text-white' : 'bg-white text-slate-400 ring-1 ring-slate-200'}`}>{item.state}</span>
+                    </Link>
+                  </div>
                 );
               })}
             </div>
@@ -1314,6 +1316,25 @@ export function KuaiziWorkflowConsole({
                     <span className="shrink-0">›</span>
                   </Link>
                 ))}
+              </div>
+              <div className="mt-5 border-t border-slate-200 pt-4">
+                <p className="text-xs font-black uppercase tracking-[0.18em] text-indigo-600">同屏服务入口</p>
+                <div className="mt-3 grid grid-cols-2 gap-2">
+                  {kuaiziServiceNav.filter(item => item.group !== '总览').map(item => (
+                    <Link
+                      className={`min-h-16 rounded-md border p-2 text-left transition ${
+                        item.activeSteps.includes(active)
+                          ? 'border-indigo-200 bg-indigo-50 text-indigo-900'
+                          : 'border-slate-200 bg-slate-50 text-slate-700 hover:border-indigo-200 hover:bg-white'
+                      }`}
+                      href={withTaskContext(item.href)}
+                      key={`side-service-${item.label}`}
+                    >
+                      <span className="block truncate text-xs font-black">{item.label}</span>
+                      <span className="mt-1 inline-flex rounded bg-white px-1.5 py-0.5 text-[10px] font-black text-slate-500 ring-1 ring-slate-200">{item.state}</span>
+                    </Link>
+                  ))}
+                </div>
               </div>
             </aside>
           </div>
