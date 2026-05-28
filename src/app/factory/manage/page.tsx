@@ -22,13 +22,14 @@ export default async function ManageFactoryPage({
     productName?: string;
     projectId?: string;
     variant?: string;
+    mode?: string;
   }>;
 }) {
   const params = searchParams ? await searchParams : {};
   const projectId = params.projectId || 'default-project';
   const selectedVariantId = params.variant ? normalizeFactoryUiVariantId(params.variant) : 'friend_trial';
 
-  if (selectedVariantId === 'friend_trial') {
+  if (selectedVariantId === 'friend_trial' || params.mode !== 'internal') {
     return (
       <KuaiziWorkflowConsole
         active="manage"

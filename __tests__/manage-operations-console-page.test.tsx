@@ -82,7 +82,7 @@ function permission(overrides: Partial<AssetPermissionSnapshot> = {}): AssetPerm
 describe('manage operations console page', () => {
   it('renders the Manage variant UI and links all role variants', async () => {
     const page = await ManageFactoryPage({
-      searchParams: Promise.resolve({ projectId: 'launch-manage', variant: 'operator' }),
+      searchParams: Promise.resolve({ projectId: 'launch-manage', variant: 'operator', mode: 'internal' }),
     });
     const html = renderToStaticMarkup(page);
 

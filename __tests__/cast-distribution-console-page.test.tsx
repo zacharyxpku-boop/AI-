@@ -43,7 +43,7 @@ function snapshot(overrides: Partial<ChannelAccountSnapshot> = {}): ChannelAccou
 describe('cast distribution console page', () => {
   it('renders the Cast variant UI and links all role variants', async () => {
     const page = await CastFactoryPage({
-      searchParams: Promise.resolve({ projectId: 'launch-cast', variant: 'operator' }),
+      searchParams: Promise.resolve({ projectId: 'launch-cast', variant: 'operator', mode: 'internal' }),
     });
     const html = renderToStaticMarkup(page);
 

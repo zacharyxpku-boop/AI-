@@ -14,7 +14,7 @@ import type { OneClickVideoOperationResult, VideoProductionQueue } from '@/lib/i
 describe('video production queue page', () => {
   it('renders the video factory page as a Chinese operator queue surface', async () => {
     const page = await VideoFactoryPage({
-      searchParams: Promise.resolve({ projectId: 'launch-video', variant: 'operator' }),
+      searchParams: Promise.resolve({ projectId: 'launch-video', variant: 'operator', mode: 'internal' }),
     });
     const html = renderToStaticMarkup(page);
 

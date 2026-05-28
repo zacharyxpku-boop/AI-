@@ -58,6 +58,19 @@ describe('factory friend trial workflow pages', () => {
     expect(html).not.toContain('bg-black/20');
   });
 
+  it.each(pages)('keeps direct operator $name route on the light Kuaizi shell unless internal mode is requested', async ({ page }) => {
+    const element = await page({
+      searchParams: Promise.resolve({ projectId: 'operator-direct', variant: 'operator' }),
+    });
+    const html = renderToStaticMarkup(element);
+
+    expect(html).toContain('/factory?variant=friend_trial');
+    expect(html).toContain('Wenai 商品增长工作台');
+    expect(html).not.toContain('min-h-screen bg-[#0d1014]');
+    expect(html).not.toContain('bg-black/20');
+    expect(html).not.toContain('border-b border-white/10 pb-6');
+  });
+
   it.each(pages)('renders Kuaizi-style workflow shell for $name', async ({ page, expected, markers, next }) => {
     const element = await page({
       searchParams: Promise.resolve({ projectId: 'friend-demo', variant: 'friend_trial' }),

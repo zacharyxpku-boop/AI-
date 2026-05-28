@@ -30,7 +30,7 @@ describe('creative monitoring console page', () => {
 
   it('renders the creative factory as a Chinese operator console', async () => {
     const page = await CreativeFactoryPage({
-      searchParams: Promise.resolve({ projectId: 'creative-launch', variant: 'operator' }),
+      searchParams: Promise.resolve({ projectId: 'creative-launch', variant: 'operator', mode: 'internal' }),
     });
     const html = renderToStaticMarkup(page);
 

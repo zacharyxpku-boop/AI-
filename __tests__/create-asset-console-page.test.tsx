@@ -46,7 +46,7 @@ function snapshot(overrides: Partial<IndustrializationSnapshot> = {}): Industria
 describe('create asset console page', () => {
   it('renders the Create variant UI and links all role variants', async () => {
     const page = await CreateFactoryPage({
-      searchParams: Promise.resolve({ projectId: 'launch-create', variant: 'operator' }),
+      searchParams: Promise.resolve({ projectId: 'launch-create', variant: 'operator', mode: 'internal' }),
     });
     const html = renderToStaticMarkup(page);
 
